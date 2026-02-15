@@ -1,3 +1,30 @@
+## Codebase Patterns
+- ESLintはFlat Config (`eslint.config.mjs`) を使用、eslint v9+
+- `@luma-dev/luma-ts` プラグインで厳格なTSルール: `no-as-unknown-as`, `no-date`, `no-explicit-return-is`, `prefer-immutable`, `require-satisfies-in-tls`
+- テンプレートリテラル内の式には `satisfies` が必要（例: `${value satisfies string}`）
+- 明示的な `is` 型述語は禁止 → `find()` パターンで型ナローイングする
+- プロパティには `readonly` を付ける
+- Prettierフォーマット: `npm run lint-fix` で適用
+- テスト: Vitest + jsdom (unit), Storybook + Playwright (browser)
+- カバレッジ: v8プロバイダ、`npx vitest run --coverage --project unit`
+
 # Ralph Progress Log
 Started: Sun Feb 15 21:34:16 JST 2026
+---
+
+## 2026-02-15 - US-000
+- 実装した内容:
+  - `.trash/`ディレクトリをESLint対象外に追加
+  - `require-satisfies-in-tls` エラー修正: テンプレートリテラル式に `satisfies` 追加 (layout.tsx, request.ts, Button.tsx)
+  - `no-explicit-return-is` エラー修正: `isValidLocale` を `findLocale` パターンに変更 (request.ts)
+  - `prefer-immutable` エラー修正: User型に `readonly` 追加 (Header.tsx, Page.tsx)
+  - `react/no-unescaped-entities` エラー修正: HTMLエンティティに置換 (Page.tsx)
+  - Prettierフォーマットを全体に適用
+- 変更したファイル: eslint.config.mjs, src/app/layout.tsx, src/i18n/request.ts, src/stories/Button.tsx, src/stories/Header.tsx, src/stories/Page.tsx + prettierによる24ファイル
+- ベースラインカバレッジ: Statements 6.66% → 完了後: Statements 6.25% (微減はrequest.tsリファクタリングによる行数変化、実質変更なし)
+- **今後のイテレーションへの学び:**
+  - `@luma-dev/luma-ts/require-satisfies-in-tls` はテンプレートリテラル `${}` 内のすべての式に `satisfies <type>` が必要
+  - `no-explicit-return-is` は明示的な型述語 `locale is Locale` を禁止 → `Array.find()` で型を返すパターンに変更する
+  - prettierが多くのファイルを変更するので、初回は `npm run lint-fix` でまとめてフォーマットしておくとよい
+  - Storybookブラウザテストは `npx playwright install` が必要（未実行の場合エラーになる）
 ---
