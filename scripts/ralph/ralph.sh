@@ -35,6 +35,7 @@ if [[ "$TOOL" != "amp" && "$TOOL" != "claude" ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Validate tool and required files exist
 if [[ "$TOOL" == "amp" ]]; then
@@ -111,15 +112,15 @@ run_tests_with_coverage() {
   echo "--- [$phase] テスト・カバレッジ確認 ---"
 
   # CI=true prevents watch mode and browser opening
-  # Try common test commands (adjust as needed for your project)
-  if [ -f "package.json" ]; then
-    if CI=true npm run test -- --coverage 2>/dev/null; then
+  # Run tests from project root (relative to script directory)
+  if [ -f "$PROJECT_ROOT/package.json" ]; then
+    if (cd "$PROJECT_ROOT" && CI=true npm run test -- --coverage 2>/dev/null); then
       echo "✅ テスト通過"
     else
       echo "⚠️  テストコマンドが見つからないか、失敗しました"
     fi
-  elif [ -f "Makefile" ] && grep -q "test" Makefile; then
-    CI=true make test || echo "⚠️  テスト失敗"
+  elif [ -f "$PROJECT_ROOT/Makefile" ] && grep -q "test" "$PROJECT_ROOT/Makefile"; then
+    (cd "$PROJECT_ROOT" && CI=true make test) || echo "⚠️  テスト失敗"
   else
     echo "ℹ️  テストコマンドが検出できませんでした"
   fi
