@@ -128,63 +128,57 @@ run_tests_with_coverage() {
   echo ""
 }
 
-for i in $(seq 1 $MAX_ITERATIONS); do
+# Main loop: commit count is the fuel. No new commit = stop.
+ITERATION=0
+COMMIT_BEFORE=$(git -C "$PROJECT_ROOT" rev-list --count HEAD)
+
+while [[ $ITERATION -lt $MAX_ITERATIONS ]]; do
+  ITERATION=$((ITERATION + 1))
   echo ""
   echo "==============================================================="
-  echo "  Ralph Iteration $i of $MAX_ITERATIONS ($TOOL)"
+  echo "  Ralph Iteration $ITERATION of $MAX_ITERATIONS ($TOOL)"
+  echo "  Commits so far: $COMMIT_BEFORE"
   echo "==============================================================="
 
-  # 開始前: テスト・カバレッジのベースラインを確認
   run_tests_with_coverage "開始前"
 
-  # Run the selected tool with the ralph prompt
+  # Run the agent
   if [[ "$TOOL" == "amp" ]]; then
-    OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all 2>&1 | tee /dev/stderr) || true
+    cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all 2>&1 | tee /dev/stderr || true
   else
-    # Claude Code: -p for print mode (non-interactive), pass CLAUDE.md content as query
-    # stream-json outputs NDJSON; tee to jq to extract thinking to stderr
-    CLAUDE_EXIT=0
-    OUTPUT=$(claude --verbose -p --output-format stream-json --dangerously-skip-permissions "$(cat "$SCRIPT_DIR/CLAUDE.md")" 2>&1 | tee >(jq -r 'select(.type == "thinking") | .thinking // empty' >&2)) || CLAUDE_EXIT=$?
+    claude -p --verbose --dangerously-skip-permissions "$(cat "$SCRIPT_DIR/CLAUDE.md")" 2>&1 | tee /dev/stderr || true
   fi
 
-  # Check if claude produced any output
-  if [[ -z "$OUTPUT" || ${#OUTPUT} -lt 50 ]]; then
+  run_tests_with_coverage "完了後"
+
+  # The only meaningful progress indicator: did a new commit appear?
+  COMMIT_AFTER=$(git -C "$PROJECT_ROOT" rev-list --count HEAD)
+
+  if [[ "$COMMIT_AFTER" -le "$COMMIT_BEFORE" ]]; then
     echo ""
-    echo "⚠️  Claude produced no/minimal output (exit=$CLAUDE_EXIT). Stopping to avoid empty loop."
-    echo "Output length: ${#OUTPUT}"
-    echo "Check logs above for errors."
+    echo "No new commit after iteration $ITERATION. Stopping."
+    echo "Commits before: $COMMIT_BEFORE, after: $COMMIT_AFTER"
     exit 1
   fi
 
-  # 完了後: テスト・カバレッジを再確認
-  run_tests_with_coverage "完了後"
+  echo "New commits: $((COMMIT_AFTER - COMMIT_BEFORE))"
+  COMMIT_BEFORE="$COMMIT_AFTER"
 
-  # Check for completion signal
-  # For stream-json: search within JSON content fields
-  COMPLETE_FOUND=false
-  if [[ "$TOOL" == "amp" ]]; then
-    echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>" && COMPLETE_FOUND=true
-  else
-    # Extract text content from stream-json and search
-    echo "$OUTPUT" | jq -r 'select(.type == "content_block_delta" or .type == "result" or .type == "message") | .. | strings' 2>/dev/null | grep -q "<promise>COMPLETE</promise>" && COMPLETE_FOUND=true
-    # Fallback: raw grep in case format differs
-    if [[ "$COMPLETE_FOUND" == "false" ]]; then
-      echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>" && COMPLETE_FOUND=true
+  # Check if all stories are done (prd.json has no passes:false)
+  if [ -f "$PRD_FILE" ]; then
+    REMAINING=$(jq '[.stories[] | select(.passes == false)] | length' "$PRD_FILE" 2>/dev/null || echo "unknown")
+    echo "Remaining stories: $REMAINING"
+    if [[ "$REMAINING" == "0" ]]; then
+      echo ""
+      echo "Ralph completed all tasks! (iteration $ITERATION)"
+      exit 0
     fi
   fi
 
-  if [[ "$COMPLETE_FOUND" == "true" ]]; then
-    echo ""
-    echo "Ralph completed all tasks!"
-    echo "Completed at iteration $i of $MAX_ITERATIONS"
-    exit 0
-  fi
-
-  echo "Iteration $i complete. Continuing..."
   sleep 2
 done
 
 echo ""
-echo "Ralph reached max iterations ($MAX_ITERATIONS) without completing all tasks."
+echo "Ralph reached max iterations ($MAX_ITERATIONS)."
 echo "Check $PROGRESS_FILE for status."
 exit 1
