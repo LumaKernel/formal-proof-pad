@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
-import { hasLocale } from "next-intl";
-import { routing } from "@/i18n/routing";
-import "../globals.css";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,12 +16,10 @@ const geistMono = Geist_Mono({
 
 interface Props {
   readonly children: React.ReactNode;
-  readonly params: Promise<{ readonly locale: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "metadata" });
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata");
 
   return {
     title: t("title"),
@@ -32,17 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
-
-export default async function LocaleLayout({ children, params }: Props) {
-  const { locale } = await params;
-
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-
+export default async function RootLayout({ children }: Props) {
+  const locale = await getLocale();
   const messages = await getMessages();
 
   return (
