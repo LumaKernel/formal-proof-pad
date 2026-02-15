@@ -29,6 +29,9 @@
     "ghcr.io/devcontainers/features/github-cli"
   ],
   "postCreateCommand": "curl -fsSL https://claude.ai/install.sh | bash && bash -c \"$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)\" --unattended && npm ci",
+  "mounts": [
+    "source=formal-logic-pad-claude-config,target=/home/vscode/.claude,type=volume"
+  ],
   "containerEnv": {
     "NODE_OPTIONS": "--max-old-space-size=4096"
   },
