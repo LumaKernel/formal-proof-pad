@@ -10,9 +10,15 @@
 ## Architecture Pattern
 
 - Pure functions (coordinate transforms, math, path computation) in separate `.ts` files
-- React hooks (`usePan.ts`, `useZoom.ts`, `useDragItem.ts`) bridge pure logic to React
-- Components (`InfiniteCanvas.tsx`, `CanvasItem.tsx`, `Connection.tsx`) combine hooks and pure functions
+- React hooks (`usePan.ts`, `useZoom.ts`, `useDragItem.ts`, `useContextMenu.ts`) bridge pure logic to React
+- Components (`InfiniteCanvas.tsx`, `CanvasItem.tsx`, `Connection.tsx`, `ContextMenuComponent.tsx`) combine hooks and pure functions
 - All exports go through `index.ts` barrel file
+
+## Event Propagation
+
+- CanvasItem uses `stopPropagation()` on pointer events to prevent InfiniteCanvas pan when dragging items
+- ContextMenuComponent **must** stopPropagation on `onPointerDown/Move/Up/onClick` to prevent InfiniteCanvas pan interference — without this, menu clicks won't register
+- Components rendered as children of InfiniteCanvas inherit its pointer event handlers unless explicitly stopped
 
 ## Testing
 

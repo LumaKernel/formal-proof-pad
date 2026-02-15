@@ -148,4 +148,29 @@ Started: Sun Feb 15 21:34:16 JST 2026
   - ベジェ曲線のコントロールポイントは水平方向にオフセット（距離の30%または最小50px * scale）で自然なカーブを実現
   - SVGの点線(strokeDasharray) + 半透明(opacity: 0.8) + 背景白線(opacity: 0.6)の組み合わせで、要素の後ろを通っても視認性を確保
   - ConnectionのSVGは `pointerEvents: "none"` + `overflow: "visible"` で、クリックを透過させつつキャンバス外にはみ出す曲線も描画
+- コンテキストメニュー: 純粋ロジック(contextMenu.ts) + フック(useContextMenu.ts) + コンポーネント(ContextMenuComponent.tsx)の分離パターン
+- コンテキストメニューのstopPropagation: メニューコンテナで`onPointerDown/Move/Up/onClick`の`stopPropagation`が必須（InfiniteCanvasのパンイベントと干渉するため）
+- CanvasItemのオプション機能パターン: NOOP/EMPTY定数との参照等価性で機能有効/無効を切り替え（`onPositionChange !== NOOP`, `contextMenuItems !== EMPTY_ITEMS`）
+---
+
+## 2026-02-16 - US-007
+- 実装した内容:
+  - コンテキストメニューの純粋ロジック (`contextMenu.ts`): `ContextMenuItem`/`ContextMenuState`型、`openContextMenu`/`closeContextMenu`/`clampMenuPosition`
+  - Reactフック (`useContextMenu.ts`): `useContextMenu`（右クリック/プログラマティック開閉、outside-click-to-close）、`useLongPress`（タッチデバイス向けロングタップ検出、500ms閾値、10px移動でキャンセル）
+  - `<ContextMenuComponent>` コンポーネント (`ContextMenuComponent.tsx`): fixed位置メニュー描画、disabled項目対応、hover highlight、stopPropagationでキャンバスイベントと分離
+  - `<CanvasItem>` 拡張: `contextMenuItems`/`onContextMenuSelect` props追加、右クリック＋ロングタップ対応、ドラッグとの共存
+  - ユニットテスト追加: `contextMenu.test.ts` 10件、`useContextMenu.test.tsx` 12件、`ContextMenuComponent.test.tsx` 11件、`CanvasItem.test.tsx` に7件追加（計172ユニットテスト全パス、全体193テスト全パス）
+  - Storybookストーリー (`ContextMenuDemo.stories.tsx`): 3ノードに異なるメニュー項目、disabled項目含む、play関数付きインタラクションテスト
+  - バレルエクスポート更新 (`index.ts`): ContextMenuComponent, contextMenu系型/関数, useContextMenu, useLongPress を追加
+- 変更したファイル: src/lib/infinite-canvas/ (contextMenu.ts, contextMenu.test.ts, useContextMenu.ts, useContextMenu.test.tsx, ContextMenuComponent.tsx, ContextMenuComponent.test.tsx, ContextMenuDemo.stories.tsx 新規、CanvasItem.tsx, CanvasItem.test.tsx, index.ts, AGENTS.md 変更)
+- ベースラインカバレッジ (infinite-canvas): Stmts 99.48%, Branch 92.3%, Funcs 97.29%, Lines 100% → 完了後: Stmts 99%, Branch 90.27%, Funcs 98.5%, Lines 100%
+  - Branch微減はCanvasItemの新条件分岐（hasContextMenu）とContextMenuComponentのviewportクランプ（jsdomでoffsetWidth=0のため）による
+- スクリーンショット: .screenshots/US-007-context-menu-initial.png, .screenshots/US-007-context-menu-open.png, .screenshots/US-007-context-menu-after-delete.png
+- **今後のイテレーションへの学び:**
+  - ContextMenuComponentは`stopPropagation`が必須 — `onPointerDown/Move/Up/onClick`すべてでstopしないと、InfiniteCanvasのパンイベントが発火してメニュークリックが機能しない
+  - コンテキストメニューのoutsideクリック検出は`requestAnimationFrame`でリスナ登録を遅延させる（同一クリックで即閉じを防止）
+  - `useLongPress`はtouchのみ（`pointerType === "touch"`）で動作。mouseでは右クリック（contextmenu）が使えるため不要
+  - jsdomでは`offsetWidth`/`offsetHeight`が常に0のため、`clampMenuPosition`のビューポートクランプロジックはStorybookブラウザテストでのみ確認可能
+  - macOS(大文字小文字非区別FS)では`ContextMenu.tsx`は`contextMenu.ts`と衝突するため`ContextMenuComponent.tsx`とした
+  - CanvasItemに新機能を追加する際は、NOOP/EMPTY定数パターンで`hasXxx`フラグを作り、条件付きでイベントハンドラやコンポーネントを有効化する
 ---
