@@ -174,3 +174,21 @@ Started: Sun Feb 15 21:34:16 JST 2026
   - macOS(大文字小文字非区別FS)では`ContextMenu.tsx`は`contextMenu.ts`と衝突するため`ContextMenuComponent.tsx`とした
   - CanvasItemに新機能を追加する際は、NOOP/EMPTY定数パターンで`hasXxx`フラグを作り、条件付きでイベントハンドラやコンポーネントを有効化する
 ---
+
+## 2026-02-16 - US-008
+- 実装した内容:
+  - 複合的な使用例ストーリー (`FullDemo.stories.tsx`): 4ノード(Input/Process/Validate/Output) + 4本の接続線 + コンテキストメニュー + ドラッグ + パン/ズーム を統合した包括的なデモ
+  - play関数付きインタラクションテスト: ノード描画確認、接続線確認、ドラッグ可能確認、コンテキストメニュー開閉＋選択動作、disabled項目の確認、ステータスバー確認（16アサーション）
+  - 既存ストーリーのplay関数追加:
+    - `PannableCanvas.stories.tsx`: キャンバス描画＋grabカーソル確認
+    - `ZoomableCanvas.stories.tsx`: キャンバス描画＋grabカーソル確認
+    - `InfiniteCanvas.stories.ts`: Default（背景色＋カーソル確認）、CustomColors（カスタム背景色確認）
+- 変更したファイル: src/lib/infinite-canvas/ (FullDemo.stories.tsx 新規、PannableCanvas.stories.tsx, ZoomableCanvas.stories.tsx, InfiniteCanvas.stories.ts 変更), scripts/ralph/prd.json, scripts/ralph/progress.txt
+- ベースラインカバレッジ (infinite-canvas): Stmts 99.2%, Branch 90.19%, Funcs 90.76%, Lines 100% → 完了後: Stmts 99.2%, Branch 90.19%, Funcs 90.76%, Lines 100% (変化なし)
+- 全体テスト: 26ファイル、194テスト全パス
+- スクリーンショット: .screenshots/US-008-full-demo.png
+- **今後のイテレーションへの学び:**
+  - FullDemoストーリーのように複合デモを作る際は、すべてのコンポーネント（InfiniteCanvas, CanvasItem, Connection, ContextMenuComponent）の連携を1つのストーリーで示すことでAPI使用例として機能する
+  - Storybookのplay関数で`userEvent.pointer({ keys: "[MouseRight]", target })`で右クリックを模倣できる
+  - 既存のstoriesファイルにplay関数を後付けする場合、`.ts`ファイルでも`storybook/test`からimportしてplay関数を追加可能（JSX不要）
+---

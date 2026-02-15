@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, within } from "storybook/test";
 import { useState } from "react";
 import { InfiniteCanvas } from "./InfiniteCanvas";
 import type { ViewportState } from "./types";
@@ -45,4 +46,13 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Interactive: Story = {};
+export const Interactive: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Verify the infinite canvas is rendered with grab cursor
+    const infiniteCanvas = canvas.getByTestId("infinite-canvas");
+    await expect(infiniteCanvas).toBeInTheDocument();
+    await expect(infiniteCanvas).toHaveStyle({ cursor: "grab" });
+  },
+};

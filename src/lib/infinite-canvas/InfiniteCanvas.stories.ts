@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, within } from "storybook/test";
 import { InfiniteCanvas } from "./InfiniteCanvas";
 
 const meta = {
@@ -20,6 +21,15 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const infiniteCanvas = canvas.getByTestId("infinite-canvas");
+    await expect(infiniteCanvas).toBeInTheDocument();
+    await expect(infiniteCanvas).toHaveStyle({
+      backgroundColor: "#ffffff",
+      cursor: "grab",
+    });
+  },
 };
 
 export const ZoomedIn: Story = {
@@ -44,6 +54,14 @@ export const CustomColors: Story = {
   args: {
     dotColor: "#4a90d9",
     backgroundColor: "#1a1a2e",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const infiniteCanvas = canvas.getByTestId("infinite-canvas");
+    await expect(infiniteCanvas).toBeInTheDocument();
+    await expect(infiniteCanvas).toHaveStyle({
+      backgroundColor: "#1a1a2e",
+    });
   },
 };
 

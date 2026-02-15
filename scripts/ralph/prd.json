@@ -139,7 +139,7 @@
         "型チェック/lintが通る"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": ""
     }
   ]
