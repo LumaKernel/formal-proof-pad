@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InfiniteCanvas } from "./InfiniteCanvas";
 
 describe("InfiniteCanvas", () => {
@@ -74,5 +74,190 @@ describe("InfiniteCanvas", () => {
     const canvas = screen.getByTestId("infinite-canvas");
     const svg = canvas.querySelector("svg");
     expect(svg?.getAttribute("aria-hidden")).toBe("true");
+  });
+});
+
+describe("InfiniteCanvas panning", () => {
+  beforeEach(() => {
+    // jsdom does not implement pointer capture methods
+    Element.prototype.setPointerCapture = vi.fn();
+    Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  it("shows grab cursor by default", () => {
+    render(<InfiniteCanvas />);
+    const canvas = screen.getByTestId("infinite-canvas");
+    expect(canvas.style.cursor).toBe("grab");
+  });
+
+  it("has touch-action none for pointer event handling", () => {
+    render(<InfiniteCanvas />);
+    const canvas = screen.getByTestId("infinite-canvas");
+    expect(canvas.style.touchAction).toBe("none");
+  });
+
+  it("calls onViewportChange when dragging", () => {
+    const onViewportChange = vi.fn();
+    render(
+      <InfiniteCanvas
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onViewportChange={onViewportChange}
+      />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(canvas, {
+      clientX: 150,
+      clientY: 120,
+      pointerId: 1,
+    });
+
+    expect(onViewportChange).toHaveBeenCalledWith({
+      offsetX: 50,
+      offsetY: 20,
+      scale: 1,
+    });
+  });
+
+  it("does not pan on right-click", () => {
+    const onViewportChange = vi.fn();
+    render(
+      <InfiniteCanvas
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onViewportChange={onViewportChange}
+      />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerDown(canvas, {
+      button: 2,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(canvas, {
+      clientX: 150,
+      clientY: 120,
+      pointerId: 1,
+    });
+
+    expect(onViewportChange).not.toHaveBeenCalled();
+  });
+
+  it("stops panning on pointerUp", () => {
+    const onViewportChange = vi.fn();
+    render(
+      <InfiniteCanvas
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onViewportChange={onViewportChange}
+      />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(canvas, {
+      clientX: 150,
+      clientY: 120,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(canvas, {
+      clientX: 200,
+      clientY: 200,
+      pointerId: 1,
+    });
+
+    // Should not be called after pointerUp (only before)
+    expect(onViewportChange).not.toHaveBeenCalled();
+  });
+
+  it("does not call onViewportChange when moving without pressing", () => {
+    const onViewportChange = vi.fn();
+    render(
+      <InfiniteCanvas
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onViewportChange={onViewportChange}
+      />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerMove(canvas, {
+      clientX: 150,
+      clientY: 120,
+      pointerId: 1,
+    });
+
+    expect(onViewportChange).not.toHaveBeenCalled();
+  });
+
+  it("registers pointer events on the container", () => {
+    render(<InfiniteCanvas />);
+    const canvas = screen.getByTestId("infinite-canvas");
+    // The container should be interactive (has pointer event handlers attached via React)
+    // We verify by confirming pointer events work (no crash)
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      clientX: 0,
+      clientY: 0,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(canvas, { clientX: 10, clientY: 10, pointerId: 1 });
+    fireEvent.pointerUp(canvas, { clientX: 10, clientY: 10, pointerId: 1 });
+  });
+
+  it("captures and releases pointer on drag", () => {
+    render(
+      <InfiniteCanvas
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onViewportChange={vi.fn()}
+      />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 42,
+    });
+
+    expect(Element.prototype.setPointerCapture).toHaveBeenCalledWith(42);
+
+    fireEvent.pointerUp(canvas, {
+      clientX: 100,
+      clientY: 100,
+      pointerId: 42,
+    });
+
+    expect(Element.prototype.releasePointerCapture).toHaveBeenCalledWith(42);
+  });
+
+  it("does not release pointer capture when not dragging", () => {
+    render(
+      <InfiniteCanvas
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onViewportChange={vi.fn()}
+      />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    // pointerUp without prior pointerDown should not call releasePointerCapture
+    fireEvent.pointerUp(canvas, {
+      clientX: 100,
+      clientY: 100,
+      pointerId: 42,
+    });
+
+    expect(Element.prototype.releasePointerCapture).not.toHaveBeenCalled();
   });
 });

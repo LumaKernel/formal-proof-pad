@@ -24,6 +24,7 @@ export default defineConfig({
         "src/**/*.{test,spec}.{ts,tsx}",
         "src/**/*.stories.{ts,tsx}",
         "src/**/index.ts",
+        "src/**/types.ts",
       ],
       reporter: ["text", "html", "lcov"],
     },
