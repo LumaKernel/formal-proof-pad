@@ -105,27 +105,15 @@ fi
 
 echo "Starting Ralph - Tool: $TOOL - Max iterations: $MAX_ITERATIONS"
 
-# Function to run tests and capture coverage
-run_tests_with_coverage() {
-  local phase="$1"
-  echo ""
-  echo "--- [$phase] テスト・カバレッジ確認 ---"
-
-  # CI=true prevents watch mode and browser opening
-  # Run tests from project root (relative to script directory)
+# Capture coverage report, returning output as string
+capture_coverage() {
   if [ -f "$PROJECT_ROOT/package.json" ]; then
-    if (cd "$PROJECT_ROOT" && CI=true npm run test -- --coverage 2>/dev/null); then
-      echo "✅ テスト通過"
-    else
-      echo "⚠️  テストコマンドが見つからないか、失敗しました"
-    fi
+    (cd "$PROJECT_ROOT" && CI=true npm run test -- --coverage 2>&1) || true
   elif [ -f "$PROJECT_ROOT/Makefile" ] && grep -q "test" "$PROJECT_ROOT/Makefile"; then
-    (cd "$PROJECT_ROOT" && CI=true make test) || echo "⚠️  テスト失敗"
+    (cd "$PROJECT_ROOT" && CI=true make test 2>&1) || true
   else
-    echo "ℹ️  テストコマンドが検出できませんでした"
+    echo "(no test command found)"
   fi
-  echo "--- [$phase] 確認完了 ---"
-  echo ""
 }
 
 # Main loop: commit count is the fuel. No new commit = stop.
@@ -140,16 +128,42 @@ while [[ $ITERATION -lt $MAX_ITERATIONS ]]; do
   echo "  Commits so far: $COMMIT_BEFORE"
   echo "==============================================================="
 
-  run_tests_with_coverage "開始前"
+  # Capture coverage baseline and feed it to the agent as context
+  echo "Running coverage baseline..."
+  COVERAGE_REPORT=$(capture_coverage)
+  echo "$COVERAGE_REPORT"
+
+  # Build the prompt: CLAUDE.md instructions + live coverage data
+  if [[ "$TOOL" == "claude" ]]; then
+    PROMPT="$(cat "$SCRIPT_DIR/CLAUDE.md")
+
+---
+## 現在のカバレッジ（ベースライン）
+
+以下はこのイテレーション開始時点のテスト結果とカバレッジレポートです。
+カバレッジが100%でないファイルがあれば、ストーリー実装の前にまずカバレッジ改善を優先してください。
+
+\`\`\`
+$COVERAGE_REPORT
+\`\`\`"
+  fi
 
   # Run the agent
   if [[ "$TOOL" == "amp" ]]; then
     cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all 2>&1 | tee /dev/stderr || true
   else
-    claude -p --verbose --dangerously-skip-permissions "$(cat "$SCRIPT_DIR/CLAUDE.md")" 2>&1 | tee /dev/stderr || true
+    # stream-json requires --verbose; pipe through jq to show thinking on stderr
+    claude -p --verbose --output-format stream-json --dangerously-skip-permissions "$PROMPT" 2>&1 \
+      | tee >(jq -r 'select(.type == "thinking") | .thinking // empty' >&2) \
+      | jq -r 'select(.type == "assistant") | .message.content[]? | select(.type == "text") | .text' \
+      || true
   fi
 
-  run_tests_with_coverage "完了後"
+  # Post-iteration coverage for human visibility
+  echo ""
+  echo "--- Post-iteration coverage ---"
+  capture_coverage
+  echo "---"
 
   # The only meaningful progress indicator: did a new commit appear?
   COMMIT_AFTER=$(git -C "$PROJECT_ROOT" rev-list --count HEAD)
