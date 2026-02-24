@@ -522,3 +522,42 @@
   - `matchFormulaPattern.matchTerm` のConstant/FunctionApplication/BinaryOperation/Predicate分岐は現テンプレートでは到達不能だが、E4/E5（シグネチャ依存公理）実装時に必要になる
   - カバレッジ低下の主因は `satisfies never` デッドコードと未使用パターンマッチ分岐。進捗ログの既存方針通り、Functions/Branch 100%であれば問題なし
 ---
+
+## 2026-02-24 - Logic Core US-014: 証明図の表現と検証
+- `proofTree.ts` を新規実装: 証明図の木構造表現・検証・可視化データ出力
+  - 型定義: `AxiomNode`, `ModusPonensNode`, `GeneralizationNode`, `ProofNode`（discriminated union）
+  - ファクトリ関数: `axiomNode`, `modusPonensNode`, `generalizationNode`
+  - ユーティリティ: `getConclusion`, `countNodes`, `proofDepth`, `collectAxiomNodes`
+  - `validateProof(proof, system)`: 証明図全体の正当性を再帰的に検証
+    - AxiomNode: `identifyAxiom` で体系内有効公理のインスタンスかチェック
+    - ModusPonensNode: 子ノード再帰検証 + `applyModusPonens` 整合性チェック + 結論一致チェック
+    - GeneralizationNode: 子ノード再帰検証 + `applyGeneralization` 整合性チェック + 結論一致チェック
+  - `ProofValidationError`: `InvalidAxiom`, `ModusPonensFailure`, `ConclusionMismatch`, `GeneralizationFailure` の4種 + パス情報
+  - `toVisualizationData(proof, system)`: フラットなリストでUI用データを出力（ノードID、ラベル、子ID、公理ID）
+- `index.ts` にエクスポート追加
+- テスト: 48テスト追加
+  - ファクトリ関数: 3テスト
+  - getConclusion: 2テスト
+  - countNodes: 4テスト
+  - proofDepth: 4テスト
+  - collectAxiomNodes: 4テスト
+  - validateProof AxiomNode: 5テスト（A1/A2/A3正例、非公理負例、連言負例）
+  - validateProof MP: 5テスト（正例、前提不一致、非含意、結論不一致、子エラー）
+  - validateProof Gen: 4テスト（述語論理正例、命題論理負例、結論不一致、子エラー）
+  - φ→φ統合テスト: 7テスト（基本、¬ψ→¬ψ、複合式、結論確認、ノード数、公理数、深さ）
+  - エラーパス追跡: 2テスト（深層エラー、Conditional側パス）
+  - 複数エラー: 1テスト
+  - toVisualizationData: 6テスト（単一公理、φ→φ、一意ID、子参照、Gen、不明公理）
+  - exhaustive switch: 1テスト
+- 全テスト: 797 → 845（+48）
+- カバレッジ: Statements 90.74% → 90.68%（差分は `satisfies never` デッドコード行のみ。proofTree.ts: Branch 100%, Functions 100%）
+- 変更ファイル: `proofTree.ts`, `proofTree.test.ts`（全新規）, `index.ts`, `tasks/prd-formal-logic-pad.md`
+- スクリーンショット: `.screenshots/us014-storybook-main.png`, `.screenshots/us014-prooftree-story.png`
+- **今後のイテレーションへの学び:**
+  - 証明図は `ProofNode` discriminated union で表現。葉は `AxiomNode`（公理インスタンス）、内部ノードは `ModusPonensNode` / `GeneralizationNode`
+  - 検証は再帰的にすべてのノードを走査し、エラーはパス情報付きで全収集（最初のエラーで打ち切らない）
+  - `PathSegment` でエラー位置を追跡: `Antecedent`, `Conditional`, `Premise` の3種
+  - φ→φの証明構築はヘルパー関数 `buildPhiImpliesPhiProof` で再利用可能にした。A2(φ:=φ, ψ:=φ→φ, χ:=φ) → A1(a) → MP₁ → A1(b) → MP₂
+  - `toVisualizationData` はDFS順でフラットリストを返す。UIレイヤーは子IDの参照でツリーを再構築できる
+  - フェーズ2Aのピュアロジック（US-009〜014）がすべて完了。次はフェーズ2B（Logic Lang: Lexer/Parser/Formatter）
+---

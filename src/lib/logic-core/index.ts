@@ -143,3 +143,26 @@ export type {
   AxiomMatchResult,
   AxiomIdentificationResult,
 } from "./inferenceRule";
+
+// ── Proof Tree ──────────────────────────────────────────────
+export {
+  axiomNode,
+  modusPonensNode,
+  generalizationNode,
+  getConclusion,
+  countNodes,
+  proofDepth,
+  collectAxiomNodes,
+  validateProof,
+  toVisualizationData,
+} from "./proofTree";
+export type {
+  AxiomNode,
+  ModusPonensNode,
+  GeneralizationNode,
+  ProofNode,
+  PathSegment,
+  ProofValidationError,
+  ProofValidationResult,
+  ProofNodeVisualization,
+} from "./proofTree";
