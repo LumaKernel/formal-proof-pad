@@ -32,8 +32,10 @@ export const freeVariablesInTerm = (t: Term): ReadonlySet<string> => {
       return result;
     }
   }
+  /* v8 ignore start */
   t satisfies never;
   return new Set();
+  /* v8 ignore stop */
 };
 
 /**
@@ -86,8 +88,10 @@ export const freeVariablesInFormula = (f: Formula): ReadonlySet<string> => {
       return result;
     }
   }
+  /* v8 ignore start */
   f satisfies never;
   return new Set();
+  /* v8 ignore stop */
 };
 
 /**
@@ -152,8 +156,10 @@ export const allVariableNamesInFormula = (f: Formula): ReadonlySet<string> => {
       return result;
     }
   }
+  /* v8 ignore start */
   f satisfies never;
   return new Set();
+  /* v8 ignore stop */
 };
 
 /**
@@ -186,6 +192,8 @@ export const allVariableNamesInTerm = (t: Term): ReadonlySet<string> => {
       return result;
     }
   }
+  /* v8 ignore start */
   t satisfies never;
   return new Set();
+  /* v8 ignore stop */
 };

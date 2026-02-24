@@ -117,8 +117,10 @@ export const countNodes = (node: ProofNode): number => {
     case "GeneralizationNode":
       return 1 + countNodes(node.premise);
   }
+  /* v8 ignore start */
   node satisfies never;
   return 0;
+  /* v8 ignore stop */
 };
 
 /**
@@ -135,8 +137,10 @@ export const proofDepth = (node: ProofNode): number => {
     case "GeneralizationNode":
       return 1 + proofDepth(node.premise);
   }
+  /* v8 ignore start */
   node satisfies never;
   return 0;
+  /* v8 ignore stop */
 };
 
 /**
@@ -154,8 +158,10 @@ export const collectAxiomNodes = (node: ProofNode): readonly AxiomNode[] => {
     case "GeneralizationNode":
       return collectAxiomNodes(node.premise);
   }
+  /* v8 ignore start */
   node satisfies never;
   return [];
+  /* v8 ignore stop */
 };
 
 // ── 検証結果の型 ────────────────────────────────────────────
@@ -251,7 +257,9 @@ const validateNode = (
       validateGeneralizationNode(node, system, path, errors);
       return;
   }
+  /* v8 ignore start */
   node satisfies never;
+  /* v8 ignore stop */
 };
 
 const validateAxiomNode = (
@@ -441,8 +449,10 @@ export const toVisualizationData = (
         return id;
       }
     }
+    /* v8 ignore start */
     node satisfies never;
     return id;
+    /* v8 ignore stop */
   };
 
   visit(proof);

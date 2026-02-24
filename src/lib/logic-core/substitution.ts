@@ -143,8 +143,10 @@ const substituteFormulaMetaVariablesRec = (
       // 等号の項には論理式メタ変数がない
       return f;
   }
+  /* v8 ignore start */
   f satisfies never;
   return f;
+  /* v8 ignore stop */
 };
 
 // ── 2. 項メタ変数代入 ──────────────────────────────────────
@@ -190,8 +192,10 @@ const substituteTermMetaVariablesInTermRec = (
         right: substituteTermMetaVariablesInTermRec(t.right, subst),
       });
   }
+  /* v8 ignore start */
   t satisfies never;
   return t;
+  /* v8 ignore stop */
 };
 
 /**
@@ -260,8 +264,10 @@ const substituteTermMetaVariablesInFormulaRec = (
         right: substituteTermMetaVariablesInTermRec(f.right, subst),
       });
   }
+  /* v8 ignore start */
   f satisfies never;
   return f;
+  /* v8 ignore stop */
 };
 
 // ── 3. 代入可能性チェック ─────────────────────────────────────
@@ -308,8 +314,10 @@ const isFreeForRec = (t: Term, x: TermVariable, f: Formula): boolean => {
       return isFreeForRec(t, x, f.formula);
     }
   }
+  /* v8 ignore start */
   f satisfies never;
   return true;
+  /* v8 ignore stop */
 };
 
 // ── 4. 項変数代入 ──────────────────────────────────────────
@@ -382,8 +390,10 @@ const substituteTermVariableInTermRec = (
         right: substituteTermVariableInTermRec(t.right, x, s),
       });
   }
+  /* v8 ignore start */
   t satisfies never;
   return t;
+  /* v8 ignore stop */
 };
 
 /**
@@ -507,8 +517,10 @@ const substituteTermVariableInFormulaRec = (
         right: substituteTermVariableInTermRec(f.right, x, s),
       });
   }
+  /* v8 ignore start */
   f satisfies never;
   return f;
+  /* v8 ignore stop */
 };
 
 // ── 5. 代入の合成 ─────────────────────────────────────────────

@@ -117,8 +117,10 @@ const occursInFormula = (mvKey: string, f: Formula): boolean => {
     case "Equality":
       return false;
   }
+  /* v8 ignore start */
   f satisfies never;
   return false;
+  /* v8 ignore stop */
 };
 
 /**
@@ -136,8 +138,10 @@ const occursInTerm = (tmvKey: string, t: Term): boolean => {
     case "BinaryOperation":
       return occursInTerm(tmvKey, t.left) || occursInTerm(tmvKey, t.right);
   }
+  /* v8 ignore start */
   t satisfies never;
   return false;
+  /* v8 ignore stop */
 };
 
 // ── 代入適用（方程式リスト全体に適用） ─────────────────────
@@ -233,8 +237,10 @@ const decomposeFormula = (
       return [termEquation(a.left, bEq.left), termEquation(a.right, bEq.right)];
     }
   }
+  /* v8 ignore start */
   a satisfies never;
   return null;
+  /* v8 ignore stop */
 };
 
 /**
@@ -270,8 +276,10 @@ const decomposeTerm = (a: Term, b: Term): readonly Equation[] | null => {
       ];
     }
   }
+  /* v8 ignore start */
   a satisfies never;
   return null;
+  /* v8 ignore stop */
 };
 
 // ── メインアルゴリズム ─────────────────────────────────────

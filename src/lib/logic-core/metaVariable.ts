@@ -89,8 +89,10 @@ export const collectFormulaMetaVariables = (
       // Term にはFormulaのMetaVariableは含まれない
       return [];
   }
+  /* v8 ignore start */
   f satisfies never;
   return [];
+  /* v8 ignore stop */
 };
 
 /**
@@ -113,8 +115,10 @@ export const collectTermMetaVariables = (
         ...collectTermMetaVariables(t.right),
       ];
   }
+  /* v8 ignore start */
   t satisfies never;
   return [];
+  /* v8 ignore stop */
 };
 
 /**
@@ -147,8 +151,10 @@ export const collectTermMetaVariablesInFormula = (
         ...collectTermMetaVariables(f.right),
       ];
   }
+  /* v8 ignore start */
   f satisfies never;
   return [];
+  /* v8 ignore stop */
 };
 
 /**

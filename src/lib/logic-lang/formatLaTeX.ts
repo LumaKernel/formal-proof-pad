@@ -98,6 +98,7 @@ const formulaChildBP = (
     case "Universal":
     case "Existential":
       return { leftBP: 0, rightBP: 0 };
+    /* v8 ignore next 5 */
     default: {
       const _exhaustive: never = f;
       throw new Error(
@@ -128,6 +129,7 @@ const termChildBP = (
     case "Constant":
     case "FunctionApplication":
       return { leftBP: 100, rightBP: 100 };
+    /* v8 ignore next 5 */
     default: {
       const _exhaustive: never = t;
       throw new Error(
@@ -230,6 +232,7 @@ const formatFormulaInner = (f: Formula, parentBP: number): string => {
       return `${leftStr satisfies string} = ${rightStr satisfies string}`;
     }
 
+    /* v8 ignore next 5 */
     default: {
       const _exhaustive: never = f;
       throw new Error(
@@ -281,6 +284,7 @@ const formatTermInner = (t: Term): string => {
       return `${leftStr satisfies string} ${opStr satisfies string} ${rightStr satisfies string}`;
     }
 
+    /* v8 ignore next 5 */
     default: {
       const _exhaustive: never = t;
       throw new Error(

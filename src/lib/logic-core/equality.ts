@@ -34,8 +34,10 @@ export const equalTerm = (a: Term, b: Term): boolean => {
       );
     }
   }
+  /* v8 ignore start */
   a satisfies never;
   return false;
+  /* v8 ignore stop */
 };
 
 /**
@@ -82,6 +84,8 @@ export const equalFormula = (a: Formula, b: Formula): boolean => {
       return equalTerm(a.left, bEq.left) && equalTerm(a.right, bEq.right);
     }
   }
+  /* v8 ignore start */
   a satisfies never;
   return false;
+  /* v8 ignore stop */
 };

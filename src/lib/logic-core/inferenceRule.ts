@@ -337,8 +337,10 @@ const matchFormulaPattern = (
         return matchTerm(t.left, cEq.left) && matchTerm(t.right, cEq.right);
       }
     }
+    /* v8 ignore start */
     t satisfies never;
     return false;
+    /* v8 ignore stop */
   };
 
   const matchTerm = (t: Term, c: Term): boolean => {
@@ -372,8 +374,10 @@ const matchFormulaPattern = (
         return matchTerm(t.left, cBin.left) && matchTerm(t.right, cBin.right);
       }
     }
+    /* v8 ignore start */
     t satisfies never;
     return false;
+    /* v8 ignore stop */
   };
 
   if (matchFormula(template, candidate)) {
@@ -438,8 +442,10 @@ const getPropositionalAxiomTemplate = (
     case "A3":
       return axiomA3Template;
   }
+  /* v8 ignore start */
   axiomId satisfies never;
   return axiomA1Template;
+  /* v8 ignore stop */
 };
 
 /**
@@ -633,8 +639,10 @@ const getEqualityAxiomTemplate = (axiomId: "E1" | "E2" | "E3"): Formula => {
     case "E3":
       return axiomE3Template;
   }
+  /* v8 ignore start */
   axiomId satisfies never;
   return axiomE1Template;
+  /* v8 ignore stop */
 };
 
 // ── 代入の適用 ────────────────────────────────────────────
@@ -794,8 +802,10 @@ const inferTermReplacement = (
         return matchTerm(b.left, tEq.left) && matchTerm(b.right, tEq.right);
       }
     }
+    /* v8 ignore start */
     b satisfies never;
     return false;
+    /* v8 ignore stop */
   };
 
   const matchTerm = (b: Term, t: Term): boolean => {
@@ -825,8 +835,10 @@ const inferTermReplacement = (
         return matchTerm(b.left, t.left) && matchTerm(b.right, t.right);
       }
     }
+    /* v8 ignore start */
     b satisfies never;
     return false;
+    /* v8 ignore stop */
   };
 
   if (matchFormula(body, target)) {
