@@ -16,6 +16,9 @@ export interface CanvasItemProps {
   readonly children: ReactNode;
   /** Callback when item position changes (enables drag) */
   readonly onPositionChange?: (position: Point) => void;
+  /** Explicitly control drag enabled state (default: true when onPositionChange is provided).
+   *  Set to false to temporarily disable drag, e.g. during inline editing. */
+  readonly dragEnabled?: boolean;
   /** Context menu items (enables context menu when provided) */
   readonly contextMenuItems?: readonly ContextMenuItem[];
   /** Callback when a context menu item is selected */
@@ -36,12 +39,14 @@ export function CanvasItem({
   viewport,
   children,
   onPositionChange = NOOP,
+  dragEnabled,
   contextMenuItems = EMPTY_ITEMS,
   onContextMenuSelect = NOOP,
   onClick,
 }: CanvasItemProps) {
   const screenPos = worldToScreen(viewport, position);
-  const draggable = onPositionChange !== NOOP;
+  const hasDragCallback = onPositionChange !== NOOP;
+  const draggable = hasDragCallback && (dragEnabled ?? true);
   const hasContextMenu = contextMenuItems !== EMPTY_ITEMS;
   const clickStartRef = useRef<Point | null>(null);
   const { isDragging, onPointerDown, onPointerMove, onPointerUp } = useDragItem(
@@ -115,7 +120,7 @@ export function CanvasItem({
     [hasContextMenu, longPress, draggable, onPointerUp, onClick],
   );
 
-  const hasInteraction = draggable || hasContextMenu || onClick !== undefined;
+  const hasInteraction = hasDragCallback || hasContextMenu || onClick !== undefined;
 
   return (
     <>

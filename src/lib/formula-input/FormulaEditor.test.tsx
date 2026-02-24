@@ -4,18 +4,21 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { Formula } from "../logic-core/formula";
 import { FormulaEditor } from "./FormulaEditor";
+import type { EditorMode } from "./editorLogic";
 
 // --- ヘルパー: 制御コンポーネントラッパー ---
 
 function EditorWrapper({
   initialValue = "",
   onParsed,
+  onModeChange,
   testId = "editor",
   displayRenderer,
   placeholder,
 }: {
   readonly initialValue?: string;
   readonly onParsed?: (formula: Formula) => void;
+  readonly onModeChange?: (mode: EditorMode) => void;
   readonly testId?: string;
   readonly displayRenderer?: "unicode" | "katex";
   readonly placeholder?: string;
@@ -26,6 +29,7 @@ function EditorWrapper({
       value={value}
       onChange={setValue}
       onParsed={onParsed}
+      onModeChange={onModeChange}
       testId={testId}
       displayRenderer={displayRenderer}
       placeholder={placeholder}
@@ -288,5 +292,61 @@ describe("FormulaEditor - 初期表示", () => {
     // パースエラーのためFormulaはnull、プレースホルダーが表示される
     const placeholder = screen.getByTestId("editor-placeholder");
     expect(placeholder).toBeInTheDocument();
+  });
+});
+
+// --- onModeChangeコールバックのテスト ---
+
+describe("FormulaEditor - onModeChange", () => {
+  it("編集モードに入るとonModeChangeがeditingで呼ばれる", () => {
+    const onModeChange = vi.fn();
+    render(
+      <EditorWrapper initialValue="φ → ψ" onModeChange={onModeChange} />,
+    );
+
+    fireEvent.click(screen.getByTestId("editor-display"));
+    expect(onModeChange).toHaveBeenCalledWith("editing");
+  });
+
+  it("表示モードに戻るとonModeChangeがdisplayで呼ばれる", async () => {
+    const onModeChange = vi.fn();
+    render(
+      <EditorWrapper initialValue="φ → ψ" onModeChange={onModeChange} />,
+    );
+
+    // 編集モードに入る
+    fireEvent.click(screen.getByTestId("editor-display"));
+    expect(onModeChange).toHaveBeenCalledWith("editing");
+
+    // blurで表示モードに戻る
+    const input = screen.getByTestId("editor-input-input");
+    fireEvent.blur(input);
+
+    await waitFor(() => {
+      expect(onModeChange).toHaveBeenCalledWith("display");
+    });
+  });
+
+  it("パースエラー時はblurしてもonModeChangeがdisplayで呼ばれない", async () => {
+    const onModeChange = vi.fn();
+    render(
+      <EditorWrapper initialValue="→" onModeChange={onModeChange} />,
+    );
+
+    // 編集モードに入る
+    fireEvent.click(screen.getByTestId("editor-display"));
+    expect(onModeChange).toHaveBeenCalledWith("editing");
+    onModeChange.mockClear();
+
+    // テキストを変更してエラー状態にする
+    const input = screen.getByTestId("editor-input-input");
+    await userEvent.clear(input);
+    await userEvent.type(input, "→");
+
+    // blurで戻ろうとする
+    fireEvent.blur(input);
+
+    // パースエラーなのでdisplayには遷移しない
+    expect(onModeChange).not.toHaveBeenCalledWith("display");
   });
 });

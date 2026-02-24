@@ -250,6 +250,87 @@ describe("CanvasItem dragging", () => {
   });
 });
 
+describe("CanvasItem dragEnabled", () => {
+  beforeEach(() => {
+    Element.prototype.setPointerCapture = vi.fn();
+    Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  it("does not show grab cursor when dragEnabled is false", () => {
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={vi.fn()}
+        dragEnabled={false}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+    const item = screen.getByTestId("canvas-item");
+    expect(item.style.cursor).toBe("");
+  });
+
+  it("does not call onPositionChange when dragEnabled is false", () => {
+    const onPositionChange = vi.fn();
+    render(
+      <CanvasItem
+        position={{ x: 100, y: 200 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={onPositionChange}
+        dragEnabled={false}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+    const item = screen.getByTestId("canvas-item");
+
+    fireEvent.pointerDown(item, {
+      button: 0,
+      clientX: 50,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(item, {
+      clientX: 70,
+      clientY: 80,
+      pointerId: 1,
+    });
+
+    expect(onPositionChange).not.toHaveBeenCalled();
+  });
+
+  it("shows grab cursor when dragEnabled is true (explicit)", () => {
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={vi.fn()}
+        dragEnabled={true}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+    const item = screen.getByTestId("canvas-item");
+    expect(item.style.cursor).toBe("grab");
+  });
+
+  it("still has touchAction none when dragEnabled is false (hasDragCallback)", () => {
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={vi.fn()}
+        dragEnabled={false}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+    const item = screen.getByTestId("canvas-item");
+    expect(item.style.touchAction).toBe("none");
+  });
+});
+
 const MENU_ITEMS: readonly ContextMenuItem[] = [
   { id: "edit", label: "Edit" },
   { id: "delete", label: "Delete" },

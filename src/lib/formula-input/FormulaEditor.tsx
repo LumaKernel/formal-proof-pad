@@ -35,6 +35,8 @@ export interface FormulaEditorProps {
   readonly onChange: (value: string) => void;
   /** パース成功時にFormula ASTを通知するコールバック */
   readonly onParsed?: (formula: Formula) => void;
+  /** モード変更時のコールバック（CanvasItem統合時にドラッグ制御に使用） */
+  readonly onModeChange?: (mode: EditorMode) => void;
   /** 表示レンダラーの種類 */
   readonly displayRenderer?: DisplayRenderer;
   /** プレースホルダーテキスト（空の場合の表示モード表示と入力欄） */
@@ -89,6 +91,7 @@ export function FormulaEditor({
   value,
   onChange,
   onParsed,
+  onModeChange,
   displayRenderer = "unicode",
   placeholder = "クリックして論理式を入力...",
   fontSize,
@@ -96,7 +99,15 @@ export function FormulaEditor({
   style,
   testId,
 }: FormulaEditorProps) {
-  const [mode, setMode] = useState<EditorMode>("display");
+  const [mode, setModeInternal] = useState<EditorMode>("display");
+
+  const setMode = useCallback(
+    (nextMode: EditorMode) => {
+      setModeInternal(nextMode);
+      onModeChange?.(nextMode);
+    },
+    [onModeChange],
+  );
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +122,7 @@ export function FormulaEditor({
 
   const enterEditMode = useCallback(() => {
     setMode("editing");
-  }, []);
+  }, [setMode]);
 
   const tryExitEditMode = useCallback(() => {
     const currentParseState = computeParseState(value);
@@ -120,7 +131,7 @@ export function FormulaEditor({
       setMode(result);
     }
     // パースエラーの場合は何もしない（編集モードに留まる）
-  }, [value]);
+  }, [value, setMode]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -134,6 +145,12 @@ export function FormulaEditor({
   const handleDisplayClick = useCallback(() => {
     enterEditMode();
   }, [enterEditMode]);
+
+  // CanvasItem内配置時: PointerCaptureによるclickイベント干渉を防ぐため
+  // FormulaEditorコンテナでpointerDownの伝播を停止する
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    e.stopPropagation();
+  }, []);
 
   const handleDisplayKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -179,6 +196,7 @@ export function FormulaEditor({
       style={mergedContainerStyle}
       data-testid={testId}
       onKeyDown={mode === "editing" ? handleKeyDown : undefined}
+      onPointerDown={handlePointerDown}
     >
       {mode === "display" ? (
         <div

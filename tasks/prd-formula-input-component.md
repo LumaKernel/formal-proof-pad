@@ -134,7 +134,7 @@
 - [x] play関数でモード切替フローを検証
 - [x] 型チェック/lintが通る
 
-#### FI-008: InfiniteCanvasノード内統合
+#### FI-008: InfiniteCanvasノード内統合 [-]
 
 **説明:** ユーザーとして、InfiniteCanvas上のノード内で論理式を編集したい。
 
