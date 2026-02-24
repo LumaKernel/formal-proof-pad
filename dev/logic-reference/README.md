@@ -6,31 +6,32 @@
 
 ## 目次
 
-| #   | ファイル                                                                   | 概要                                                                                                                                |
-| --- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 01  | [01-notation.md](./01-notation.md)                                         | **記法・記号の一覧** — 論理結合子、量化子、等号、二項演算子の表記法と優先順位。メタ変数の命名規則。AST型との対応表                  |
-| 02  | [02-propositional-logic.md](./02-propositional-logic.md)                   | **命題論理の基礎（Hilbert 系）** — Łukasiewicz の 3 公理（K, S, 対偶）、Modus Ponens、φ→φ の証明例、演繹定理、健全性・完全性        |
-| 03  | [03-predicate-logic.md](./03-predicate-logic.md)                           | **述語論理の基礎（一階述語論理）** — 項・述語・量化子の定義、自由変数・束縛変数、代入可能性、追加公理 A4・A5、汎化規則              |
-| 04  | [04-substitution-and-unification.md](./04-substitution-and-unification.md) | **代入とユニフィケーション** — メタ変数代入 vs 項変数代入の 2 レベル、変数捕獲、α 変換、代入の合成、Martelli-Montanari アルゴリズム |
-| 05  | [05-equality-logic.md](./05-equality-logic.md)                             | **等号付き論理** — 等号公理 E1〜E5（反射・対称・推移・関数合同・述語合同）、代入律、オプション機能としての設計指針                  |
-| 06  | [06-dsl-specification.md](./06-dsl-specification.md)                       | **DSL 言語仕様（Logic Schema Language）** — EBNF 文法、トークン一覧、演算子優先順位、入力例と AST 対応、Unicode/LaTeX 出力仕様      |
+| #   | ファイル                                                                   | 概要                                                                                                                                                                       |
+| --- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 01  | [01-notation.md](./01-notation.md)                                         | **記法・記号の一覧** — 論理結合子、量化子、等号、二項演算子の表記法と優先順位。メタ変数の命名規則。AST型との対応表                                                         |
+| 02  | [02-propositional-logic.md](./02-propositional-logic.md)                   | **命題論理の基礎（Hilbert 系）** — Łukasiewicz の 3 公理（K, S, 対偶）、Modus Ponens、φ→φ の証明例、演繹定理、健全性・完全性                                               |
+| 03  | [03-predicate-logic.md](./03-predicate-logic.md)                           | **述語論理の基礎（一階述語論理）** — 項・述語・量化子の定義、自由変数・束縛変数、代入可能性、追加公理 A4・A5、汎化規則                                                     |
+| 04  | [04-substitution-and-unification.md](./04-substitution-and-unification.md) | **代入とユニフィケーション** — メタ変数代入 vs 項変数代入の 2 レベル、変数捕獲、α 変換、代入の合成、Martelli-Montanari アルゴリズム                                        |
+| 05  | [05-equality-logic.md](./05-equality-logic.md)                             | **等号付き論理** — 等号公理 E1〜E5（反射・対称・推移・関数合同・述語合同）、代入律、オプション機能としての設計指針                                                         |
+| 06  | [06-dsl-specification.md](./06-dsl-specification.md)                       | **DSL 言語仕様（Logic Schema Language）** — EBNF 文法、トークン一覧、演算子優先順位、入力例と AST 対応、Unicode/LaTeX 出力仕様                                             |
+| 07  | [07-axiom-systems-survey.md](./07-axiom-systems-survey.md)                 | **公理体系の比較と柔軟な設計** — 否定の扱いの流儀比較、主要体系（Łukasiewicz/Mendelson/Church/Hilbert-Ackermann）の詳細、最小/直観主義/古典論理の階層、LogicSystem設計指針 |
 
 ## PRD との対応表
 
 本リファレンスのどのドキュメントが、`tasks/prd-formal-logic-pad.md` のどのユーザーストーリーの実装時に参照されるべきかを示します。
 
-| PRD ユーザーストーリー                     | 参照すべきドキュメント                                                                                                                                                                 |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **US-009**: 論理式スキーマ AST の定義      | [01-notation](./01-notation.md), [02-propositional-logic](./02-propositional-logic.md), [03-predicate-logic](./03-predicate-logic.md), [05-equality-logic](./05-equality-logic.md)     |
-| **US-010**: メタ変数の定義                 | [01-notation](./01-notation.md)（メタ変数命名規則セクション）                                                                                                                          |
-| **US-011**: メタ変数への代入操作           | [04-substitution-and-unification](./04-substitution-and-unification.md)（メタ変数代入・変数捕獲セクション）                                                                            |
-| **US-012**: スキーマ間のユニフィケーション | [04-substitution-and-unification](./04-substitution-and-unification.md)（ユニフィケーションセクション）                                                                                |
-| **US-013**: 推論規則の定義                 | [02-propositional-logic](./02-propositional-logic.md)（公理・MP）, [03-predicate-logic](./03-predicate-logic.md)（A4, A5, Gen）, [05-equality-logic](./05-equality-logic.md)（E1〜E5） |
-| **US-014**: 証明図の表現と検証             | [02-propositional-logic](./02-propositional-logic.md)（証明図の表記法・φ→φ の証明）                                                                                                    |
-| **US-015**: 言語のトークン定義と Lexer     | [06-dsl-specification](./06-dsl-specification.md)（トークン一覧・Lexer 実装指針）                                                                                                      |
-| **US-016**: 言語のパーサー                 | [06-dsl-specification](./06-dsl-specification.md)（EBNF 文法・Parser 実装指針・入力例）                                                                                                |
-| **US-017**: Unicode フォーマッター         | [06-dsl-specification](./06-dsl-specification.md)（Unicode 出力フォーマット仕様）, [01-notation](./01-notation.md)（記号の表記法）                                                     |
-| **US-018**: LaTeX フォーマッター           | [06-dsl-specification](./06-dsl-specification.md)（LaTeX 出力フォーマット仕様）, [01-notation](./01-notation.md)（LaTeX 表記対応表）                                                   |
+| PRD ユーザーストーリー                     | 参照すべきドキュメント                                                                                                                                                                                                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **US-009**: 論理式スキーマ AST の定義      | [01-notation](./01-notation.md), [02-propositional-logic](./02-propositional-logic.md), [03-predicate-logic](./03-predicate-logic.md), [05-equality-logic](./05-equality-logic.md), [07-axiom-systems-survey](./07-axiom-systems-survey.md)                                     |
+| **US-010**: メタ変数の定義                 | [01-notation](./01-notation.md)（メタ変数命名規則セクション）                                                                                                                                                                                                                   |
+| **US-011**: メタ変数への代入操作           | [04-substitution-and-unification](./04-substitution-and-unification.md)（メタ変数代入・変数捕獲セクション）                                                                                                                                                                     |
+| **US-012**: スキーマ間のユニフィケーション | [04-substitution-and-unification](./04-substitution-and-unification.md)（ユニフィケーションセクション）                                                                                                                                                                         |
+| **US-013**: 推論規則の定義                 | [02-propositional-logic](./02-propositional-logic.md)（公理・MP）, [03-predicate-logic](./03-predicate-logic.md)（A4, A5, Gen）, [05-equality-logic](./05-equality-logic.md)（E1〜E5）, [07-axiom-systems-survey](./07-axiom-systems-survey.md)（公理体系の柔軟な切り替え設計） |
+| **US-014**: 証明図の表現と検証             | [02-propositional-logic](./02-propositional-logic.md)（証明図の表記法・φ→φ の証明）                                                                                                                                                                                             |
+| **US-015**: 言語のトークン定義と Lexer     | [06-dsl-specification](./06-dsl-specification.md)（トークン一覧・Lexer 実装指針）                                                                                                                                                                                               |
+| **US-016**: 言語のパーサー                 | [06-dsl-specification](./06-dsl-specification.md)（EBNF 文法・Parser 実装指針・入力例）                                                                                                                                                                                         |
+| **US-017**: Unicode フォーマッター         | [06-dsl-specification](./06-dsl-specification.md)（Unicode 出力フォーマット仕様）, [01-notation](./01-notation.md)（記号の表記法）                                                                                                                                              |
+| **US-018**: LaTeX フォーマッター           | [06-dsl-specification](./06-dsl-specification.md)（LaTeX 出力フォーマット仕様）, [01-notation](./01-notation.md)（LaTeX 表記対応表）                                                                                                                                            |
 
 ## 参考文献一覧
 
@@ -54,7 +55,23 @@
 
 - **Łukasiewicz, J. & Tarski, A.** "Untersuchungen über den Aussagenkalkül" (1930)
   - 本プロジェクトで採用した 3 公理体系（K, S, 対偶）の原典
-  - 参照箇所: 02
+  - 参照箇所: 02, 07
+
+- **Church, A.** _Introduction to Mathematical Logic_ (Princeton University Press, 1956)
+  - ⊥ベース公理体系（C1, C2, C3）の出典
+  - 参照箇所: 07
+
+- **Hilbert, D. & Ackermann, W.** _Grundzüge der theoretischen Logik_ (Springer, 1928)
+  - 5 公理体系（H1〜H5）の出典
+  - 参照箇所: 07
+
+- **Frege, G.** _Begriffsschrift_ (1879)
+  - 最初の形式的証明体系（6 公理）
+  - 参照箇所: 07
+
+- **Johansson, I.** "Der Minimalkalkül, ein reduzierter intuitionistischer Formalismus" (1937)
+  - 最小論理の原典
+  - 参照箇所: 07
 
 - **Martelli, A. & Montanari, U.** "An Efficient Unification Algorithm" _ACM TOPLAS_ 4(2), 1982
   - 本プロジェクトで採用したユニフィケーションアルゴリズムの原典
@@ -169,6 +186,21 @@
 | LaTeX 出力     | LaTeX formatting           | 06       |
 | 添字           | subscript                  | 01, 06   |
 
+### 公理体系・論理の種類
+
+| 日本語         | 英語                              | 記載箇所 |
+| -------------- | --------------------------------- | -------- |
+| 対偶公理       | contraposition axiom              | 02, 07   |
+| 背理法公理     | reductio axiom                    | 07       |
+| 二重否定除去   | double negation elimination (DNE) | 07       |
+| 排中律         | law of excluded middle (LEM)      | 07       |
+| Peirce の法則  | Peirce's law                      | 07       |
+| 爆発原理       | ex falso quodlibet                | 07       |
+| 最小論理       | minimal logic                     | 07       |
+| 直観主義論理   | intuitionistic logic (IPC)        | 07       |
+| 古典論理       | classical logic (CPC)             | 02, 07   |
+| falsum（矛盾） | falsum / bottom (⊥)               | 07       |
+
 ### 証明論
 
 | 日本語       | 英語                       | 記載箇所 |
@@ -177,5 +209,5 @@
 | 演繹定理     | deduction theorem          | 02       |
 | 健全性       | soundness                  | 02       |
 | 完全性       | completeness               | 02       |
-| 公理スキーマ | axiom schema               | 02       |
+| 公理スキーマ | axiom schema               | 02, 07   |
 | 推論規則     | inference rule             | 02, 03   |
