@@ -3,6 +3,7 @@
  *
  * InfiniteCanvas上に証明ノードを配置し、接続線で結ぶ証明構築画面。
  * 論理体系（LogicSystem）を設定でき、公理パレットから公理をキャンバスに追加できる。
+ * MPボタンで2つのノードを選択し、Modus Ponensを適用して新しいノードを生成する。
  *
  * 変更時は ProofWorkspace.test.tsx, ProofWorkspace.stories.tsx, workspaceState.ts, index.ts も同期すること。
  */
@@ -20,6 +21,7 @@ import { EditableProofNode } from "./EditableProofNode";
 import { getProofNodePorts, getProofEdgeColor } from "./proofNodeUI";
 import { AxiomPalette } from "./AxiomPalette";
 import { getAvailableAxioms, type AxiomPaletteItem } from "./axiomPaletteLogic";
+import { validateMPApplication, getMPErrorMessage } from "./mpApplicationLogic";
 import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
 import {
   createEmptyWorkspace,
@@ -27,6 +29,7 @@ import {
   updateNodePosition,
   updateNodeFormulaText,
   findNode,
+  applyMPAndConnect,
 } from "./workspaceState";
 
 // --- Props ---
@@ -43,6 +46,13 @@ export interface ProofWorkspaceProps {
   /** data-testid */
   readonly testId?: string;
 }
+
+// --- MP選択モードの状態 ---
+
+type MPSelectionState =
+  | { readonly phase: "idle" }
+  | { readonly phase: "selecting-left" }
+  | { readonly phase: "selecting-right"; readonly leftNodeId: string };
 
 // --- デフォルトノードサイズ（ポート位置計算に必要） ---
 
@@ -73,6 +83,55 @@ const systemBadgeStyle = {
   borderRadius: 4,
   fontWeight: 600 as const,
   fontSize: 12,
+};
+
+const mpButtonStyle = {
+  padding: "4px 12px",
+  background: "#d9944a",
+  color: "#fff",
+  border: "1px solid rgba(255,255,255,0.3)",
+  borderRadius: 6,
+  cursor: "pointer",
+  fontWeight: 600 as const,
+  fontSize: 12,
+  fontFamily: "sans-serif",
+};
+
+const mpButtonActiveStyle = {
+  ...mpButtonStyle,
+  background: "#b5752e",
+  boxShadow: "0 0 0 2px rgba(217,148,74,0.5)",
+};
+
+const mpSelectionBannerStyle = {
+  position: "absolute" as const,
+  top: 50,
+  left: "50%" as const,
+  transform: "translateX(-50%)",
+  zIndex: 20,
+  padding: "8px 16px",
+  background: "rgba(217,148,74,0.95)",
+  color: "#fff",
+  borderRadius: 8,
+  fontSize: 13,
+  fontFamily: "sans-serif",
+  fontWeight: 500 as const,
+  boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+  pointerEvents: "auto" as const,
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+};
+
+const cancelButtonStyle = {
+  padding: "2px 8px",
+  background: "rgba(255,255,255,0.2)",
+  color: "#fff",
+  border: "1px solid rgba(255,255,255,0.3)",
+  borderRadius: 4,
+  cursor: "pointer",
+  fontSize: 11,
+  fontFamily: "sans-serif",
 };
 
 // --- コンポーネント ---
@@ -118,6 +177,11 @@ export function ProofWorkspace({
     () => new Set(),
   );
 
+  // MP選択モード
+  const [mpSelection, setMPSelection] = useState<MPSelectionState>({
+    phase: "idle",
+  });
+
   // --- 公理パレット ---
 
   const availableAxioms = useMemo(
@@ -145,6 +209,68 @@ export function ProofWorkspace({
     },
     [workspace, setWorkspace, computeNewNodePosition],
   );
+
+  // --- MP選択モードハンドラ ---
+
+  const handleStartMPSelection = useCallback(() => {
+    setMPSelection({ phase: "selecting-left" });
+  }, []);
+
+  const handleCancelMPSelection = useCallback(() => {
+    setMPSelection({ phase: "idle" });
+  }, []);
+
+  const handleNodeClickForMP = useCallback(
+    (nodeId: string) => {
+      if (mpSelection.phase === "selecting-left") {
+        setMPSelection({ phase: "selecting-right", leftNodeId: nodeId });
+      } else if (mpSelection.phase === "selecting-right") {
+        // Both nodes selected, apply MP
+        const leftNode = findNode(workspace, mpSelection.leftNodeId);
+        const rightNode = findNode(workspace, nodeId);
+        if (!leftNode || !rightNode) return;
+
+        // Compute position: midpoint below the two nodes
+        const mpPosition: Point = {
+          x: (leftNode.position.x + rightNode.position.x) / 2,
+          y: Math.max(leftNode.position.y, rightNode.position.y) + 150,
+        };
+
+        const result = applyMPAndConnect(
+          workspace,
+          mpSelection.leftNodeId,
+          nodeId,
+          mpPosition,
+        );
+
+        setWorkspace(result.workspace);
+        setMPSelection({ phase: "idle" });
+      }
+    },
+    [mpSelection, workspace, setWorkspace],
+  );
+
+  // --- MPノードの検証状態を計算 ---
+
+  const mpValidations = useMemo(() => {
+    const validations = new Map<
+      string,
+      { readonly message: string; readonly type: "error" | "success" }
+    >();
+    for (const node of workspace.nodes) {
+      if (node.kind !== "mp") continue;
+      const result = validateMPApplication(workspace, node.id);
+      if (result._tag === "Success") {
+        validations.set(node.id, { message: "MP applied", type: "success" });
+      } else if (result._tag !== "BothPremisesMissing") {
+        validations.set(node.id, {
+          message: getMPErrorMessage(result),
+          type: "error",
+        });
+      }
+    }
+    return validations;
+  }, [workspace]);
 
   // --- コールバック ---
 
@@ -228,6 +354,14 @@ export function ProofWorkspace({
         const toPort = findPort(toPorts, conn.toPortId);
         if (!fromPort || !toPort) return null;
 
+        // MPノードへの接続: 検証状態に応じて色を変える
+        const mpValidation = mpValidations.get(conn.toNodeId);
+        const color = mpValidation
+          ? mpValidation.type === "error"
+            ? "#e06060"
+            : "#60c060"
+          : getProofEdgeColor(fromNode.kind);
+
         return (
           <PortConnection
             key={conn.id}
@@ -244,19 +378,28 @@ export function ProofWorkspace({
               itemHeight: toSize.height,
             }}
             viewport={viewport}
-            color={getProofEdgeColor(fromNode.kind)}
+            color={color}
             strokeWidth={2}
           />
         );
       }),
-    [workspace, nodeSizes, viewport],
+    [workspace, nodeSizes, viewport, mpValidations],
   );
 
   // --- ノードのレンダリング ---
 
   const renderNode = useCallback(
     (node: WorkspaceNode) => {
-      const isDragEnabled = !editingNodeIds.has(node.id);
+      const isDragEnabled =
+        !editingNodeIds.has(node.id) && mpSelection.phase === "idle";
+      const isSelecting = mpSelection.phase !== "idle";
+      const isSelectedLeft =
+        mpSelection.phase === "selecting-right" &&
+        mpSelection.leftNodeId === node.id;
+
+      // MPノードの検証状態
+      const mpValidation = mpValidations.get(node.id);
+
       return (
         <CanvasItem
           key={node.id}
@@ -265,7 +408,27 @@ export function ProofWorkspace({
           onPositionChange={handlePositionChange(node.id)}
           dragEnabled={isDragEnabled}
         >
-          <div ref={getNodeSizeRef(node.id)}>
+          <div
+            ref={getNodeSizeRef(node.id)}
+            onClick={
+              isSelecting
+                ? (e) => {
+                    e.stopPropagation();
+                    handleNodeClickForMP(node.id);
+                  }
+                : undefined
+            }
+            style={{
+              cursor: isSelecting ? "pointer" : undefined,
+              outline: isSelectedLeft
+                ? "3px solid #d9944a"
+                : isSelecting
+                  ? "2px dashed rgba(217,148,74,0.6)"
+                  : undefined,
+              outlineOffset: 2,
+              borderRadius: 10,
+            }}
+          >
             <EditableProofNode
               id={node.id}
               kind={node.kind}
@@ -274,6 +437,9 @@ export function ProofWorkspace({
               onFormulaTextChange={handleFormulaTextChange}
               onFormulaParsed={handleFormulaParsed}
               onModeChange={handleModeChange}
+              editable={node.kind !== "mp"}
+              statusMessage={mpValidation?.message}
+              statusType={mpValidation?.type}
               testId={`proof-node-${node.id satisfies string}`}
             />
           </div>
@@ -283,10 +449,13 @@ export function ProofWorkspace({
     [
       viewport,
       editingNodeIds,
+      mpSelection,
+      mpValidations,
       handlePositionChange,
       handleFormulaTextChange,
       handleFormulaParsed,
       handleModeChange,
+      handleNodeClickForMP,
       getNodeSizeRef,
     ],
   );
@@ -308,7 +477,46 @@ export function ProofWorkspace({
         >
           {workspace.system.name}
         </span>
+        <button
+          type="button"
+          style={
+            mpSelection.phase !== "idle" ? mpButtonActiveStyle : mpButtonStyle
+          }
+          onClick={
+            mpSelection.phase !== "idle"
+              ? handleCancelMPSelection
+              : handleStartMPSelection
+          }
+          data-testid={
+            testId ? `${testId satisfies string}-mp-button` : undefined
+          }
+        >
+          {mpSelection.phase !== "idle" ? "Cancel MP" : "Apply MP"}
+        </button>
       </div>
+
+      {/* MP選択バナー */}
+      {mpSelection.phase !== "idle" ? (
+        <div
+          style={mpSelectionBannerStyle}
+          data-testid={
+            testId ? `${testId satisfies string}-mp-banner` : undefined
+          }
+        >
+          <span>
+            {mpSelection.phase === "selecting-left"
+              ? "Click the left premise (φ)"
+              : "Click the right premise (φ→ψ)"}
+          </span>
+          <button
+            type="button"
+            style={cancelButtonStyle}
+            onClick={handleCancelMPSelection}
+          >
+            Cancel
+          </button>
+        </div>
+      ) : null}
 
       {/* 公理パレット */}
       <AxiomPalette

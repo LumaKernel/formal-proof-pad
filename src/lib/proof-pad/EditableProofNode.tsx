@@ -34,6 +34,10 @@ export interface EditableProofNodeProps {
   readonly onModeChange?: (id: string, mode: EditorMode) => void;
   /** 編集を許可するか（デフォルト: true） */
   readonly editable?: boolean;
+  /** ノード下部に表示するステータスメッセージ */
+  readonly statusMessage?: string;
+  /** ステータスメッセージの種類（エラー/成功） */
+  readonly statusType?: "error" | "success";
   /** data-testid */
   readonly testId?: string;
 }
@@ -57,6 +61,28 @@ const formulaContainerReadonlyStyle: CSSProperties = {
   fontSize: 13,
 };
 
+const statusErrorStyle: CSSProperties = {
+  fontSize: 10,
+  fontFamily: "sans-serif",
+  fontStyle: "normal",
+  marginTop: 4,
+  padding: "2px 6px",
+  background: "rgba(255,60,60,0.25)",
+  borderRadius: 4,
+  color: "#fff",
+};
+
+const statusSuccessStyle: CSSProperties = {
+  fontSize: 10,
+  fontFamily: "sans-serif",
+  fontStyle: "normal",
+  marginTop: 4,
+  padding: "2px 6px",
+  background: "rgba(60,255,60,0.25)",
+  borderRadius: 4,
+  color: "#fff",
+};
+
 // --- コンポーネント ---
 
 export function EditableProofNode({
@@ -68,6 +94,8 @@ export function EditableProofNode({
   onFormulaParsed,
   onModeChange,
   editable = true,
+  statusMessage,
+  statusType,
   testId,
 }: EditableProofNodeProps) {
   const nodeStyle = useMemo(() => getProofNodeStyle(kind), [kind]);
@@ -136,6 +164,14 @@ export function EditableProofNode({
           {formulaText}
         </div>
       )}
+      {statusMessage ? (
+        <div
+          style={statusType === "error" ? statusErrorStyle : statusSuccessStyle}
+          data-testid={testId ? `${testId satisfies string}-status` : undefined}
+        >
+          {statusMessage}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -197,4 +197,38 @@ describe("EditableProofNode", () => {
       expect(screen.getByText("φ→φ")).toBeInTheDocument();
     });
   });
+
+  describe("statusMessage", () => {
+    it("エラーステータスが表示される", () => {
+      renderNode({
+        statusMessage: "Premise mismatch",
+        statusType: "error",
+      });
+      expect(screen.getByTestId("test-node-status")).toBeInTheDocument();
+      expect(screen.getByTestId("test-node-status")).toHaveTextContent(
+        "Premise mismatch",
+      );
+    });
+
+    it("成功ステータスが表示される", () => {
+      renderNode({
+        statusMessage: "MP applied",
+        statusType: "success",
+      });
+      expect(screen.getByTestId("test-node-status")).toBeInTheDocument();
+      expect(screen.getByTestId("test-node-status")).toHaveTextContent(
+        "MP applied",
+      );
+    });
+
+    it("ステータスがない場合は表示されない", () => {
+      renderNode();
+      expect(screen.queryByTestId("test-node-status")).not.toBeInTheDocument();
+    });
+
+    it("空文字のステータスでも表示されない", () => {
+      renderNode({ statusMessage: "" });
+      expect(screen.queryByTestId("test-node-status")).not.toBeInTheDocument();
+    });
+  });
 });

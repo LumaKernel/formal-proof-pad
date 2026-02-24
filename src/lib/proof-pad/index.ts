@@ -16,12 +16,26 @@ export {
   addConnection,
   removeConnection,
   changeSystem,
+  applyMPAndConnect,
 } from "./workspaceState";
 export type {
   WorkspaceNode,
   WorkspaceConnection,
   WorkspaceState,
+  ApplyMPResult,
 } from "./workspaceState";
+export {
+  getMPPremises,
+  parseNodeFormula,
+  validateMPApplication,
+  getMPErrorMessage,
+} from "./mpApplicationLogic";
+export type {
+  MPPremiseState,
+  MPApplicationSuccess,
+  MPApplicationError,
+  MPApplicationResult,
+} from "./mpApplicationLogic";
 export {
   PROOF_NODE_KINDS,
   AXIOM_PORTS,

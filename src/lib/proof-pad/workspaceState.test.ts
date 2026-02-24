@@ -14,6 +14,7 @@ import {
   addConnection,
   removeConnection,
   changeSystem,
+  applyMPAndConnect,
 } from "./workspaceState";
 
 describe("proofWorkspace", () => {
@@ -267,6 +268,107 @@ describe("proofWorkspace", () => {
       expect(result.nodes).toHaveLength(2);
       expect(result.connections).toHaveLength(1);
       expect(result.system).toBe(equalityLogicSystem);
+    });
+  });
+
+  describe("applyMPAndConnect", () => {
+    it("creates MP node with connections and validates successfully", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+
+      const result = applyMPAndConnect(ws, "node-1", "node-2", {
+        x: 100,
+        y: 150,
+      });
+
+      expect(result.mpNodeId).toBe("node-3");
+      expect(result.validation._tag).toBe("Success");
+      expect(result.workspace.nodes).toHaveLength(3);
+      expect(result.workspace.connections).toHaveLength(2);
+
+      // MP node should have conclusion formula text set
+      const mpNode = findNode(result.workspace, "node-3");
+      expect(mpNode).toBeDefined();
+      expect(mpNode!.kind).toBe("mp");
+      expect(mpNode!.label).toBe("MP");
+      expect(mpNode!.formulaText).toBe("ψ");
+    });
+
+    it("creates connections from source nodes to MP node", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+
+      const result = applyMPAndConnect(ws, "node-1", "node-2", {
+        x: 100,
+        y: 150,
+      });
+
+      const leftConn = result.workspace.connections.find(
+        (c) => c.toPortId === "premise-left",
+      );
+      const rightConn = result.workspace.connections.find(
+        (c) => c.toPortId === "premise-right",
+      );
+      expect(leftConn).toBeDefined();
+      expect(leftConn!.fromNodeId).toBe("node-1");
+      expect(rightConn).toBeDefined();
+      expect(rightConn!.fromNodeId).toBe("node-2");
+    });
+
+    it("returns error when right premise is not an implication", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "psi");
+
+      const result = applyMPAndConnect(ws, "node-1", "node-2", {
+        x: 100,
+        y: 150,
+      });
+
+      expect(result.validation._tag).toBe("RuleError");
+      // Node should still be created but formula text should be empty
+      const mpNode = findNode(result.workspace, "node-3");
+      expect(mpNode).toBeDefined();
+      expect(mpNode!.formulaText).toBe("");
+    });
+
+    it("returns error when premises do not match", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "psi -> chi");
+
+      const result = applyMPAndConnect(ws, "node-1", "node-2", {
+        x: 100,
+        y: 150,
+      });
+
+      expect(result.validation._tag).toBe("RuleError");
+    });
+
+    it("returns error when left formula is empty", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+
+      const result = applyMPAndConnect(ws, "node-1", "node-2", {
+        x: 100,
+        y: 150,
+      });
+
+      expect(result.validation._tag).toBe("LeftParseError");
+    });
+
+    it("does not mutate original state", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+
+      applyMPAndConnect(ws, "node-1", "node-2", { x: 100, y: 150 });
+
+      expect(ws.nodes).toHaveLength(2);
+      expect(ws.connections).toHaveLength(0);
     });
   });
 });

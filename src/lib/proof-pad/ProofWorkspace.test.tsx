@@ -366,4 +366,265 @@ describe("ProofWorkspace", () => {
       expect(screen.getByTestId("infinite-canvas")).toBeInTheDocument();
     });
   });
+
+  describe("MP button and selection", () => {
+    it("renders Apply MP button in header", () => {
+      render(<ProofWorkspace system={lukasiewiczSystem} testId="workspace" />);
+      expect(screen.getByTestId("workspace-mp-button")).toBeInTheDocument();
+      expect(screen.getByTestId("workspace-mp-button")).toHaveTextContent(
+        "Apply MP",
+      );
+    });
+
+    it("enters selection mode when MP button is clicked", async () => {
+      const user = userEvent.setup();
+      render(<ProofWorkspace system={lukasiewiczSystem} testId="workspace" />);
+
+      await user.click(screen.getByTestId("workspace-mp-button"));
+
+      // Banner should appear
+      expect(screen.getByTestId("workspace-mp-banner")).toBeInTheDocument();
+      expect(screen.getByTestId("workspace-mp-banner")).toHaveTextContent(
+        "Click the left premise",
+      );
+
+      // Button should say "Cancel MP"
+      expect(screen.getByTestId("workspace-mp-button")).toHaveTextContent(
+        "Cancel MP",
+      );
+    });
+
+    it("cancels selection mode when Cancel MP is clicked", async () => {
+      const user = userEvent.setup();
+      render(<ProofWorkspace system={lukasiewiczSystem} testId="workspace" />);
+
+      await user.click(screen.getByTestId("workspace-mp-button"));
+      expect(screen.getByTestId("workspace-mp-banner")).toBeInTheDocument();
+
+      // Click Cancel MP
+      await user.click(screen.getByTestId("workspace-mp-button"));
+      expect(
+        screen.queryByTestId("workspace-mp-banner"),
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("workspace-mp-button")).toHaveTextContent(
+        "Apply MP",
+      );
+    });
+
+    it("creates MP node when two nodes are selected in sequence", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <StatefulWorkspace
+          initialWorkspace={(() => {
+            let ws = createEmptyWorkspace(lukasiewiczSystem);
+            ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+            ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+            return ws;
+          })()}
+        />,
+      );
+
+      // Enter MP selection mode
+      await user.click(screen.getByTestId("workspace-mp-button"));
+      expect(screen.getByTestId("workspace-mp-banner")).toHaveTextContent(
+        "Click the left premise",
+      );
+
+      // Click left premise
+      await user.click(screen.getByTestId("proof-node-node-1"));
+      expect(screen.getByTestId("workspace-mp-banner")).toHaveTextContent(
+        "Click the right premise",
+      );
+
+      // Click right premise
+      await user.click(screen.getByTestId("proof-node-node-2"));
+
+      // Banner should disappear
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId("workspace-mp-banner"),
+        ).not.toBeInTheDocument();
+      });
+
+      // MP node should be created
+      await waitFor(() => {
+        expect(screen.getByTestId("proof-node-node-3")).toBeInTheDocument();
+      });
+    });
+
+    it("shows success status on valid MP application", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <StatefulWorkspace
+          initialWorkspace={(() => {
+            let ws = createEmptyWorkspace(lukasiewiczSystem);
+            ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+            ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+            return ws;
+          })()}
+        />,
+      );
+
+      // Apply MP
+      await user.click(screen.getByTestId("workspace-mp-button"));
+      await user.click(screen.getByTestId("proof-node-node-1"));
+      await user.click(screen.getByTestId("proof-node-node-2"));
+
+      // MP node should show success status
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("proof-node-node-3-status"),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId("proof-node-node-3-status"),
+        ).toHaveTextContent("MP applied");
+      });
+    });
+
+    it("shows error status on invalid MP application", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <StatefulWorkspace
+          initialWorkspace={(() => {
+            let ws = createEmptyWorkspace(lukasiewiczSystem);
+            ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+            ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "psi");
+            return ws;
+          })()}
+        />,
+      );
+
+      // Apply MP (will fail - right premise is not an implication)
+      await user.click(screen.getByTestId("workspace-mp-button"));
+      await user.click(screen.getByTestId("proof-node-node-1"));
+      await user.click(screen.getByTestId("proof-node-node-2"));
+
+      // MP node should show error status
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("proof-node-node-3-status"),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId("proof-node-node-3-status"),
+        ).toHaveTextContent("Right premise must be an implication");
+      });
+    });
+
+    it("applies MP via onWorkspaceChange (external state)", async () => {
+      const user = userEvent.setup();
+      const onWorkspaceChange = vi.fn();
+
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          onWorkspaceChange={onWorkspaceChange}
+          testId="workspace"
+        />,
+      );
+
+      // Apply MP
+      await user.click(screen.getByTestId("workspace-mp-button"));
+      await user.click(screen.getByTestId("proof-node-node-1"));
+      await user.click(screen.getByTestId("proof-node-node-2"));
+
+      expect(onWorkspaceChange).toHaveBeenCalled();
+      const newState = onWorkspaceChange.mock.calls[0][0] as WorkspaceState;
+      expect(newState.nodes).toHaveLength(3);
+      expect(newState.nodes[2].kind).toBe("mp");
+      expect(newState.nodes[2].formulaText).toBe("ψ");
+      expect(newState.connections).toHaveLength(2);
+    });
+  });
+
+  describe("MP validation display", () => {
+    it("shows error status for MP node with premise mismatch", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "psi -> chi");
+      ws = addNode(ws, "mp", "MP", { x: 100, y: 150 });
+      ws = addConnection(ws, "node-1", "out", "node-3", "premise-left");
+      ws = addConnection(ws, "node-2", "out", "node-3", "premise-right");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.getByTestId("proof-node-node-3-status"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("proof-node-node-3-status")).toHaveTextContent(
+        "Left premise does not match",
+      );
+    });
+
+    it("shows success status for valid MP node", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+      ws = addNode(ws, "mp", "MP", { x: 100, y: 150 }, "psi");
+      ws = addConnection(ws, "node-1", "out", "node-3", "premise-left");
+      ws = addConnection(ws, "node-2", "out", "node-3", "premise-right");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.getByTestId("proof-node-node-3-status"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("proof-node-node-3-status")).toHaveTextContent(
+        "MP applied",
+      );
+    });
+
+    it("does not show status for MP node without connections", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "mp", "MP", { x: 100, y: 150 });
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.queryByTestId("proof-node-node-1-status"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("does not show status for axiom nodes", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.queryByTestId("proof-node-node-1-status"),
+      ).not.toBeInTheDocument();
+    });
+  });
 });

@@ -3,6 +3,7 @@
  *
  * 証明ワークスペース（InfiniteCanvas + 証明ノード）のデモ。
  * 各論理体系での空のワークスペースとノード付きワークスペースを表示。
+ * MP適用のインタラクションテスト含む。
  */
 
 import { useState, useCallback } from "react";
@@ -14,7 +15,12 @@ import {
   equalityLogicSystem,
 } from "../logic-core/inferenceRule";
 import { ProofWorkspace } from "./ProofWorkspace";
-import { createEmptyWorkspace, addNode, addConnection } from "./workspaceState";
+import {
+  createEmptyWorkspace,
+  addNode,
+  addConnection,
+  applyMPAndConnect,
+} from "./workspaceState";
 import type { WorkspaceState } from "./workspaceState";
 
 // --- ステートフルラッパー ---
@@ -77,6 +83,64 @@ function WorkspaceWithNodes() {
   );
 }
 
+function WorkspaceWithValidMP() {
+  const initial = (() => {
+    let ws = createEmptyWorkspace(lukasiewiczSystem);
+    ws = addNode(ws, "axiom", "A1", { x: 50, y: 50 }, "phi");
+    ws = addNode(ws, "axiom", "A2", { x: 350, y: 50 }, "phi -> psi");
+    const result = applyMPAndConnect(ws, "node-1", "node-2", {
+      x: 200,
+      y: 250,
+    });
+    return result.workspace;
+  })();
+
+  const [workspace, setWorkspace] = useState<WorkspaceState>(initial);
+  const handleChange = useCallback((ws: WorkspaceState) => {
+    setWorkspace(ws);
+  }, []);
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <ProofWorkspace
+        system={lukasiewiczSystem}
+        workspace={workspace}
+        onWorkspaceChange={handleChange}
+        testId="workspace"
+      />
+    </div>
+  );
+}
+
+function WorkspaceWithInvalidMP() {
+  const initial = (() => {
+    let ws = createEmptyWorkspace(lukasiewiczSystem);
+    ws = addNode(ws, "axiom", "A1", { x: 50, y: 50 }, "phi");
+    ws = addNode(ws, "axiom", "A2", { x: 350, y: 50 }, "psi -> chi");
+    const result = applyMPAndConnect(ws, "node-1", "node-2", {
+      x: 200,
+      y: 250,
+    });
+    return result.workspace;
+  })();
+
+  const [workspace, setWorkspace] = useState<WorkspaceState>(initial);
+  const handleChange = useCallback((ws: WorkspaceState) => {
+    setWorkspace(ws);
+  }, []);
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <ProofWorkspace
+        system={lukasiewiczSystem}
+        workspace={workspace}
+        onWorkspaceChange={handleChange}
+        testId="workspace"
+      />
+    </div>
+  );
+}
+
 // --- Meta ---
 
 const meta = {
@@ -106,6 +170,8 @@ export const EmptyLukasiewicz: Story = {
     await expect(
       canvas.getByTestId("workspace-axiom-palette-item-A1"),
     ).toBeInTheDocument();
+    // MP button should be visible
+    await expect(canvas.getByTestId("workspace-mp-button")).toBeInTheDocument();
   },
 };
 
@@ -165,6 +231,75 @@ export const WithNodes: Story = {
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
     await expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
     await expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument();
+    await expect(canvas.getByTestId("proof-node-node-3")).toBeInTheDocument();
+  },
+};
+
+/** 有効なMP適用（φとφ→ψからψを導出） */
+export const ValidMPApplication: Story = {
+  render: () => <WorkspaceWithValidMP />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+    // Axiom nodes
+    await expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    await expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument();
+    // MP node with success status
+    await expect(canvas.getByTestId("proof-node-node-3")).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("proof-node-node-3-status"),
+    ).toHaveTextContent("MP applied");
+  },
+};
+
+/** 無効なMP適用（前提不一致） */
+export const InvalidMPApplication: Story = {
+  render: () => <WorkspaceWithInvalidMP />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+    // MP node with error status
+    await expect(canvas.getByTestId("proof-node-node-3")).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("proof-node-node-3-status"),
+    ).toHaveTextContent("Left premise does not match");
+  },
+};
+
+/** MP選択モードのインタラクション */
+export const MPSelectionFlow: Story = {
+  render: () => <LukasiewiczWorkspace />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Add two axioms
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A1"),
+    );
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A2"),
+    );
+
+    // Both nodes should be on canvas
+    await expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    await expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument();
+
+    // Start MP selection
+    await userEvent.click(canvas.getByTestId("workspace-mp-button"));
+    await expect(canvas.getByTestId("workspace-mp-banner")).toHaveTextContent(
+      "Click the left premise",
+    );
+
+    // Select left premise
+    await userEvent.click(canvas.getByTestId("proof-node-node-1"));
+    await expect(canvas.getByTestId("workspace-mp-banner")).toHaveTextContent(
+      "Click the right premise",
+    );
+
+    // Select right premise
+    await userEvent.click(canvas.getByTestId("proof-node-node-2"));
+
+    // MP node should be created
     await expect(canvas.getByTestId("proof-node-node-3")).toBeInTheDocument();
   },
 };

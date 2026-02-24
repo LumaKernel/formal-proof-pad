@@ -10,6 +10,10 @@
 import type { LogicSystem } from "../logic-core/inferenceRule";
 import type { Point } from "../infinite-canvas/types";
 import type { ProofNodeKind } from "./proofNodeUI";
+import {
+  validateMPApplication,
+  type MPApplicationResult,
+} from "./mpApplicationLogic";
 
 // --- ワークスペースノード ---
 
@@ -172,4 +176,47 @@ export function changeSystem(
     ...state,
     system,
   };
+}
+
+// --- MP適用（ノード作成 + 接続 + 結論自動生成） ---
+
+/** MP適用結果 */
+export type ApplyMPResult = {
+  readonly workspace: WorkspaceState;
+  readonly mpNodeId: string;
+  readonly validation: MPApplicationResult;
+};
+
+/**
+ * 2つのソースノードを接続してMPノードを作成し、MP適用を検証する。
+ *
+ * @param state 現在のワークスペース状態
+ * @param leftNodeId antecedent（φ）ノードのID
+ * @param rightNodeId conditional（φ→ψ）ノードのID
+ * @param position MPノードの配置位置
+ * @returns 新しいワークスペース状態、MPノードID、検証結果
+ */
+export function applyMPAndConnect(
+  state: WorkspaceState,
+  leftNodeId: string,
+  rightNodeId: string,
+  position: Point,
+): ApplyMPResult {
+  // MPノードを追加
+  let ws = addNode(state, "mp", "MP", position);
+  const mpNodeId = `node-${String(state.nextNodeId) satisfies string}`;
+
+  // 接続を追加（left → premise-left, right → premise-right）
+  ws = addConnection(ws, leftNodeId, "out", mpNodeId, "premise-left");
+  ws = addConnection(ws, rightNodeId, "out", mpNodeId, "premise-right");
+
+  // MP適用を検証
+  const validation = validateMPApplication(ws, mpNodeId);
+
+  // 成功時は結論テキストをMPノードに設定
+  if (validation._tag === "Success") {
+    ws = updateNodeFormulaText(ws, mpNodeId, validation.conclusionText);
+  }
+
+  return { workspace: ws, mpNodeId, validation };
 }
