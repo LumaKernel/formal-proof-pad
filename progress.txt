@@ -255,3 +255,30 @@
   - `stateRef.current = ...` のレンダー中の直接代入は `react-hooks/refs` ESLint ルールに違反する。`useEffect` 内で更新すること
   - テストでネイティブ `addEventListener` で登録したハンドラをテストするには、`fireEvent.wheel` でもOK（内部で `dispatchEvent` を使うため）。ただし `useZoom.test.tsx` では `dispatchEvent` を明示的に使うヘルパーを作成
 ---
+
+## 2026-02-24 - InfiniteCanvas 接続線ラベル・パラメータパネル
+- `connectionLabel.ts` を新規作成: ラベル配置のピュアロジック（`computeConnectionLabelPlacement`, `computeLabelScreenPosition`）
+- `connectionPath.ts` に `cubicBezierPoint()` を追加: 3次ベジェ曲線上の任意の点を計算
+- `ConnectionPathData` に `midpoint` プロパティを追加: ベジェ曲線の中点（t=0.5）をスクリーン座標で返す
+- `Connection.tsx` に `label` / `labelOffsetY` prop を追加: ReactNodeを接続線の中点に配置
+- `PortConnection.tsx` に同様の `label` / `labelOffsetY` prop を追加
+- `ConnectionLabelDemo.stories.tsx` を新規作成: 規則適用パラメータパネルのデモ
+  - 3ノード（前提A: S公理、前提B: K公理、結論: MP結果）
+  - 2接続線それぞれにSubstitutionPanel（代入パラメータ入力フィールド付き）を配置
+  - play関数で全ノード・パネル・入力フィールドの存在確認、入力操作のテスト
+- テスト: 312 → 336（+24テスト）
+  - `connectionLabel.test.ts`: 11テスト（cubicBezierPoint 5, placement 3, screenPosition 3）
+  - `connectionPath.test.ts`: +2テスト（midpointの検証）
+  - `Connection.test.tsx`: +5テスト（label表示、非表示、位置、操作、複合コンテンツ）
+  - `PortConnection.test.tsx`: +5テスト（同上）
+  - storybookテスト: +1テスト（ConnectionLabelDemo）
+- カバレッジ: Statements 93.44% → 93.60% ✅ 向上
+- 変更ファイル: `connectionLabel.ts`, `connectionLabel.test.ts`, `connectionPath.ts`, `connectionPath.test.ts`, `Connection.tsx`, `Connection.test.tsx`, `PortConnection.tsx`, `PortConnection.test.tsx`, `ConnectionLabelDemo.stories.tsx`, `index.ts`, `tasks/prd-inserted-tasks.md`, `task-processing.md`
+- スクリーンショット: `screenshots.local/connection-label-demo.png`, `screenshots.local/connection-label-fulldemo-check.png`
+- **今後のイテレーションへの学び:**
+  - ベジェ曲線の中点は `cubicBezierPoint(p0, p1, p2, p3, 0.5)` で計算。`ConnectionPathData.midpoint` として公開
+  - 接続線上のラベルはSVG外のDIV要素（`position: absolute` + `transform: translate(-50%, -50%)`）で配置。SVG `foreignObject` よりも柔軟
+  - `label` propは `ReactNode` を受け取るため、テキストラベル、入力フォーム、パネルなど任意のUIを配置可能
+  - `labelOffsetY` でラベルの垂直オフセットを調整可能（デフォルト-20px、線の上に配置）
+  - `pointerEvents: "auto"` をラベルに設定することで、SVGの `pointerEvents: "none"` をオーバーライドしてインタラクション可能に
+---
