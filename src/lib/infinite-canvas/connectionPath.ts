@@ -1,3 +1,5 @@
+import type { ConnectorPortOnItem } from "./connector";
+import { computePortEndpoint } from "./connector";
 import { worldToScreen } from "./coordinate";
 import type { Point, ViewportState } from "./types";
 
@@ -312,6 +314,124 @@ export function computeSmartConnectionPath(
           };
         }
         break; // Handle one obstacle at a time for simplicity
+      }
+    }
+  }
+
+  const d = [
+    `M ${String(start.x) satisfies string} ${String(start.y) satisfies string}`,
+    `C ${String(cp1.x) satisfies string} ${String(cp1.y) satisfies string},`,
+    `${String(cp2.x) satisfies string} ${String(cp2.y) satisfies string},`,
+    `${String(end.x) satisfies string} ${String(end.y) satisfies string}`,
+  ].join(" ");
+
+  return { d, start, end };
+}
+
+/**
+ * Compute a connection path between two connector ports.
+ * Unlike computeSmartConnectionPath which auto-determines directions,
+ * this uses the explicit port positions and edge directions.
+ * Obstacle avoidance still applies.
+ */
+export function computePortConnectionPath(
+  fromPort: ConnectorPortOnItem,
+  toPort: ConnectorPortOnItem,
+  viewport: ViewportState,
+  obstacles: readonly Obstacle[] = [],
+): ConnectionPathData {
+  const fromEndpoint = computePortEndpoint(fromPort);
+  const toEndpoint = computePortEndpoint(toPort);
+
+  const startWorld = fromEndpoint.position;
+  const endWorld = toEndpoint.position;
+
+  const start = worldToScreen(viewport, startWorld);
+  const end = worldToScreen(viewport, endWorld);
+
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const baseOffset = Math.max(40 * viewport.scale, dist * 0.3);
+
+  const fromVec = directionVector(fromEndpoint.direction);
+  const toVec = directionVector(toEndpoint.direction);
+
+  let cp1: Point = {
+    x: start.x + fromVec.x * baseOffset,
+    y: start.y + fromVec.y * baseOffset,
+  };
+  let cp2: Point = {
+    x: end.x + toVec.x * baseOffset,
+    y: end.y + toVec.y * baseOffset,
+  };
+
+  // Build from/to as ConnectionEndpoint for obstacle filtering
+  const fromRect: ConnectionEndpoint = {
+    position: fromPort.itemPosition,
+    width: fromPort.itemWidth,
+    height: fromPort.itemHeight,
+  };
+  const toRect: ConnectionEndpoint = {
+    position: toPort.itemPosition,
+    width: toPort.itemWidth,
+    height: toPort.itemHeight,
+  };
+
+  const relevantObstacles = obstacles.filter(
+    (obs) =>
+      !(
+        obs.position.x === fromRect.position.x &&
+        obs.position.y === fromRect.position.y &&
+        obs.width === fromRect.width &&
+        obs.height === fromRect.height
+      ) &&
+      !(
+        obs.position.x === toRect.position.x &&
+        obs.position.y === toRect.position.y &&
+        obs.width === toRect.width &&
+        obs.height === toRect.height
+      ),
+  );
+
+  if (relevantObstacles.length > 0) {
+    const midWorld: Point = {
+      x: (startWorld.x + endWorld.x) / 2,
+      y: (startWorld.y + endWorld.y) / 2,
+    };
+
+    for (const obs of relevantObstacles) {
+      if (segmentIntersectsRect(startWorld, endWorld, obs)) {
+        const obsCenter: Point = {
+          x: obs.position.x + obs.width / 2,
+          y: obs.position.y + obs.height / 2,
+        };
+        const toMidDx = midWorld.x - obsCenter.x;
+        const toMidDy = midWorld.y - obsCenter.y;
+
+        const deflection =
+          (Math.max(obs.width, obs.height) / 2 + 30) * viewport.scale;
+
+        const connLen = Math.sqrt(
+          (endWorld.x - startWorld.x) ** 2 + (endWorld.y - startWorld.y) ** 2,
+        );
+        if (connLen > 0) {
+          const perpX = -(endWorld.y - startWorld.y) / connLen;
+          const perpY = (endWorld.x - startWorld.x) / connLen;
+
+          const dot = toMidDx * perpX + toMidDy * perpY;
+          const sign = dot >= 0 ? 1 : -1;
+
+          cp1 = {
+            x: cp1.x + sign * perpX * deflection,
+            y: cp1.y + sign * perpY * deflection,
+          };
+          cp2 = {
+            x: cp2.x + sign * perpX * deflection,
+            y: cp2.y + sign * perpY * deflection,
+          };
+        }
+        break;
       }
     }
   }

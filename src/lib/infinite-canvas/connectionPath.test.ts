@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import type { ConnectorPortOnItem } from "./connector";
 import {
   computeConnectionPath,
   computeEdgePoint,
+  computePortConnectionPath,
   computeSmartConnectionPath,
   determineConnectionDirections,
   edgeMidpoint,
@@ -535,6 +537,131 @@ describe("computeSmartConnectionPath", () => {
     const result = computeSmartConnectionPath(ep, ep, viewport);
     expect(result.d).toMatch(/^M\s/);
     expect(result.d).toContain("C ");
+  });
+});
+
+describe("computePortConnectionPath", () => {
+  const viewport: ViewportState = { offsetX: 0, offsetY: 0, scale: 1 };
+
+  const fromPort: ConnectorPortOnItem = {
+    port: { id: "right", edge: "right", position: 0.5 },
+    itemPosition: { x: 0, y: 0 },
+    itemWidth: 100,
+    itemHeight: 50,
+  };
+
+  const toPort: ConnectorPortOnItem = {
+    port: { id: "left", edge: "left", position: 0.5 },
+    itemPosition: { x: 300, y: 0 },
+    itemWidth: 100,
+    itemHeight: 50,
+  };
+
+  it("returns a valid SVG path string", () => {
+    const result = computePortConnectionPath(fromPort, toPort, viewport);
+    expect(result.d).toMatch(/^M\s/);
+    expect(result.d).toContain("C ");
+  });
+
+  it("start point is at the from port position", () => {
+    const result = computePortConnectionPath(fromPort, toPort, viewport);
+    // Right edge center of item at (0,0) w=100, h=50: (100, 25)
+    expect(result.start).toEqual({ x: 100, y: 25 });
+  });
+
+  it("end point is at the to port position", () => {
+    const result = computePortConnectionPath(fromPort, toPort, viewport);
+    // Left edge center of item at (300,0) w=100, h=50: (300, 25)
+    expect(result.end).toEqual({ x: 300, y: 25 });
+  });
+
+  it("uses explicit port directions, not auto-determined", () => {
+    // Force bottom-to-top connection even though nodes are side by side
+    const bottomPort: ConnectorPortOnItem = {
+      port: { id: "bottom", edge: "bottom", position: 0.5 },
+      itemPosition: { x: 0, y: 0 },
+      itemWidth: 100,
+      itemHeight: 50,
+    };
+    const topPort: ConnectorPortOnItem = {
+      port: { id: "top", edge: "top", position: 0.5 },
+      itemPosition: { x: 300, y: 0 },
+      itemWidth: 100,
+      itemHeight: 50,
+    };
+    const result = computePortConnectionPath(bottomPort, topPort, viewport);
+    // Start at bottom center: (50, 50)
+    expect(result.start).toEqual({ x: 50, y: 50 });
+    // End at top center: (350, 0)
+    expect(result.end).toEqual({ x: 350, y: 0 });
+  });
+
+  it("applies viewport offset", () => {
+    const vpOffset: ViewportState = { offsetX: 100, offsetY: 50, scale: 1 };
+    const result = computePortConnectionPath(fromPort, toPort, vpOffset);
+    // Right edge center: (100, 25) -> screen: (200, 75)
+    expect(result.start).toEqual({ x: 200, y: 75 });
+  });
+
+  it("applies viewport scale", () => {
+    const vpScale: ViewportState = { offsetX: 0, offsetY: 0, scale: 2 };
+    const result = computePortConnectionPath(fromPort, toPort, vpScale);
+    // (100, 25) * 2 = (200, 50)
+    expect(result.start).toEqual({ x: 200, y: 50 });
+    // (300, 25) * 2 = (600, 50)
+    expect(result.end).toEqual({ x: 600, y: 50 });
+  });
+
+  it("deflects path when obstacle is in the way", () => {
+    const obstacle: Obstacle = {
+      position: { x: 180, y: 0 },
+      width: 40,
+      height: 50,
+    };
+    const without = computePortConnectionPath(fromPort, toPort, viewport);
+    const with_ = computePortConnectionPath(fromPort, toPort, viewport, [
+      obstacle,
+    ]);
+    expect(with_.d).not.toBe(without.d);
+  });
+
+  it("excludes source and target items from obstacles", () => {
+    const selfObstacles: readonly Obstacle[] = [
+      { position: { x: 0, y: 0 }, width: 100, height: 50 },
+      { position: { x: 300, y: 0 }, width: 100, height: 50 },
+    ];
+    const withSelf = computePortConnectionPath(
+      fromPort,
+      toPort,
+      viewport,
+      selfObstacles,
+    );
+    const without = computePortConnectionPath(fromPort, toPort, viewport);
+    expect(withSelf.d).toBe(without.d);
+  });
+
+  it("handles custom port positions along edges", () => {
+    const rightTopPort: ConnectorPortOnItem = {
+      port: { id: "right-top", edge: "right", position: 0.25 },
+      itemPosition: { x: 0, y: 0 },
+      itemWidth: 100,
+      itemHeight: 80,
+    };
+    const leftBottomPort: ConnectorPortOnItem = {
+      port: { id: "left-bottom", edge: "left", position: 0.75 },
+      itemPosition: { x: 300, y: 0 },
+      itemWidth: 100,
+      itemHeight: 80,
+    };
+    const result = computePortConnectionPath(
+      rightTopPort,
+      leftBottomPort,
+      viewport,
+    );
+    // right edge at position 0.25: (100, 20)
+    expect(result.start).toEqual({ x: 100, y: 20 });
+    // left edge at position 0.75: (300, 60)
+    expect(result.end).toEqual({ x: 300, y: 60 });
   });
 });
 

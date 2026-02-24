@@ -1,9 +1,20 @@
 export { CanvasItem } from "./CanvasItem";
 export type { CanvasItemProps } from "./CanvasItem";
+export {
+  computePortPosition,
+  computePortEndpoint,
+  findPort,
+  DEFAULT_PORTS,
+} from "./connector";
+export type { ConnectorPort, ConnectorPortOnItem } from "./connector";
+export { ConnectorPortComponent } from "./ConnectorPortComponent";
+export type { ConnectorPortComponentProps } from "./ConnectorPortComponent";
 export { ContextMenuComponent } from "./ContextMenuComponent";
 export type { ContextMenuProps } from "./ContextMenuComponent";
 export { Connection } from "./Connection";
 export type { ConnectionProps } from "./Connection";
+export { PortConnection } from "./PortConnection";
+export type { PortConnectionProps } from "./PortConnection";
 export {
   CONTEXT_MENU_CLOSED,
   clampMenuPosition,
@@ -14,6 +25,7 @@ export type { ContextMenuItem, ContextMenuState } from "./contextMenu";
 export {
   computeConnectionPath,
   computeEdgePoint,
+  computePortConnectionPath,
   endpointCenter,
 } from "./connectionPath";
 export type { ConnectionEndpoint, ConnectionPathData } from "./connectionPath";

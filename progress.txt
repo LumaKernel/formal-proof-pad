@@ -7,6 +7,9 @@
 - CI: Storybook browser テストに Playwright chromium が必要。`npx playwright install --with-deps chromium` をCI workflowに含める
 - コミットメッセージは日本語
 - フェーズ1 (InfiniteCanvas) US-000〜US-008 は完了済み
+- コネクタ(ポート)は `connector.ts` にピュアロジック、`ConnectorPortComponent.tsx` にUI、`PortConnection.tsx` にポートベース接続を配置
+- `computePortConnectionPath` はポート指定で接続方向を明示的に決定（auto-determine不要）
+- `ConnectorPort` 型は `edge` (top/right/bottom/left) + `position` (0.0〜1.0) でエッジ上の位置を指定
 
 ---
 
@@ -146,4 +149,27 @@
   - 障害物回避は1つ目の交差障害物のみ処理（パフォーマンス考慮）。複数障害物の完全回避は将来課題
   - `Connection` は既存のシンプルなインターフェースを維持しつつ、オプションの `obstacles` で拡張可能
   - `computeConnectionPath`（旧）は @deprecated として残し後方互換を維持
+---
+
+## 2026-02-24 - InfiniteCanvas コネクタポート抽象化
+- コネクタ（ポート）の抽象化を実装: ノードのエッジ上に接続ポイントを定義できるように
+- 新規ファイル:
+  - `connector.ts`: `ConnectorPort`, `ConnectorPortOnItem` 型定義、`computePortPosition`, `computePortEndpoint`, `findPort`, `DEFAULT_PORTS`
+  - `ConnectorPortComponent.tsx`: コネクタの視覚コンポーネント（白丸、hover時ハイライト、クリック対応）
+  - `PortConnection.tsx`: ポートベース接続線コンポーネント
+  - `connector.test.ts`: 16テスト
+  - `ConnectorPortComponent.test.tsx`: 10テスト
+  - `PortConnection.test.tsx`: 9テスト
+  - `ConnectorPorts.stories.tsx`: play関数付きデモストーリー（Axiom K → Modus Ponens → Result の接続例）
+- `connectionPath.ts` に `computePortConnectionPath` を追加: ポート指定で方向を明示的に決定
+- `connectionPath.test.ts` に8テスト追加
+- `index.ts` に新しいエクスポートを追加
+- テスト: 227 → 272 (+45)、カバレッジ: Statements 91.93% → 92.89% (+0.96%) ✅ 向上
+- スクリーンショット: `screenshots.local/connector-ports-storybook.png`, `screenshots.local/connector-ports-fullscreen.png`
+- **今後のイテレーションへの学び:**
+  - `ConnectorPort` は `edge` (方向) + `position` (0.0〜1.0) でエッジ上の任意の位置を指定可能
+  - `DEFAULT_PORTS` で上下左右中央の4ポートを簡単に提供できる
+  - `computePortConnectionPath` は `computeSmartConnectionPath` と異なり、方向を自動決定せずポートのedgeを使用
+  - ストーリーで複数ノードに同じポートID（例: "top"）があると `getByTestId` が衝突する。`getAllByTestId` を使うこと
+  - 既存の `Connection` コンポーネントはそのまま互換維持。ポートベースの接続は新しい `PortConnection` コンポーネントで分離
 ---
