@@ -1,0 +1,985 @@
+import { describe, expect, test } from "vitest";
+import {
+  substituteFormulaMetaVariables,
+  substituteTermMetaVariablesInTerm,
+  substituteTermMetaVariablesInFormula,
+  substituteTermVariableInTerm,
+  substituteTermVariableInFormula,
+  substituteTermVariableChecked,
+  isFreeFor,
+  composeFormulaSubstitution,
+  composeTermMetaSubstitution,
+  buildFormulaSubstitutionMap,
+  buildTermMetaSubstitutionMap,
+  freshVariableName,
+} from "./substitution";
+import { equalFormula, equalTerm } from "./equality";
+import {
+  metaVariable,
+  negation,
+  implication,
+  conjunction,
+  disjunction,
+  biconditional,
+  universal,
+  existential,
+  predicate,
+  equality,
+} from "./formula";
+import {
+  termVariable,
+  termMetaVariable,
+  constant,
+  functionApplication,
+  binaryOperation,
+} from "./term";
+
+// ── freshVariableName ────────────────────────────────────────
+
+describe("freshVariableName", () => {
+  test("generates prime-suffixed name", () => {
+    expect(freshVariableName("x", new Set(["x"]))).toBe("x'");
+  });
+
+  test("adds multiple primes if needed", () => {
+    expect(freshVariableName("x", new Set(["x", "x'"]))).toBe("x''");
+  });
+
+  test("works with unused base", () => {
+    // base + ' が使われていなければそれを返す
+    expect(freshVariableName("y", new Set(["x"]))).toBe("y'");
+  });
+});
+
+// ── 1. 論理式メタ変数代入 ──────────────────────────────────────
+
+describe("substituteFormulaMetaVariables", () => {
+  const phi = metaVariable("φ");
+  const psi = metaVariable("ψ");
+  const chi = metaVariable("χ");
+  const px = predicate("P", [termVariable("x")]);
+  const qxy = predicate("Q", [termVariable("x"), termVariable("y")]);
+
+  test("empty substitution returns same formula", () => {
+    const result = substituteFormulaMetaVariables(phi, new Map());
+    expect(equalFormula(result, phi)).toBe(true);
+  });
+
+  test("substitute single MetaVariable", () => {
+    const subst = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = substituteFormulaMetaVariables(phi, subst);
+    expect(equalFormula(result, px)).toBe(true);
+  });
+
+  test("non-matching MetaVariable is unchanged", () => {
+    const subst = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = substituteFormulaMetaVariables(psi, subst);
+    expect(equalFormula(result, psi)).toBe(true);
+  });
+
+  test("substitute in Negation", () => {
+    const f = negation(phi);
+    const subst = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, negation(px))).toBe(true);
+  });
+
+  test("substitute in Implication", () => {
+    const f = implication(phi, psi);
+    const subst = buildFormulaSubstitutionMap([
+      [phi, px],
+      [psi, qxy],
+    ]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, implication(px, qxy))).toBe(true);
+  });
+
+  test("substitute in Conjunction", () => {
+    const f = conjunction(phi, psi);
+    const subst = buildFormulaSubstitutionMap([
+      [phi, px],
+      [psi, qxy],
+    ]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, conjunction(px, qxy))).toBe(true);
+  });
+
+  test("substitute in Disjunction", () => {
+    const f = disjunction(phi, psi);
+    const subst = buildFormulaSubstitutionMap([
+      [phi, px],
+      [psi, qxy],
+    ]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, disjunction(px, qxy))).toBe(true);
+  });
+
+  test("substitute in Biconditional", () => {
+    const f = biconditional(phi, psi);
+    const subst = buildFormulaSubstitutionMap([
+      [phi, px],
+      [psi, qxy],
+    ]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, biconditional(px, qxy))).toBe(true);
+  });
+
+  test("substitute passes through Universal quantifier", () => {
+    // ∀x. φ [φ ↦ P(x)] = ∀x. P(x)
+    const f = universal(termVariable("x"), phi);
+    const subst = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, universal(termVariable("x"), px))).toBe(true);
+  });
+
+  test("substitute passes through Existential quantifier", () => {
+    // ∃x. φ [φ ↦ P(x)] = ∃x. P(x)
+    const f = existential(termVariable("x"), phi);
+    const subst = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, existential(termVariable("x"), px))).toBe(true);
+  });
+
+  test("Predicate is unchanged by formula meta substitution", () => {
+    const f = predicate("P", [termVariable("x")]);
+    const subst = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, f)).toBe(true);
+  });
+
+  test("Equality is unchanged by formula meta substitution", () => {
+    const f = equality(termVariable("x"), termVariable("y"));
+    const subst = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, f)).toBe(true);
+  });
+
+  test("A1 axiom instantiation: φ→(ψ→φ)", () => {
+    // {φ ↦ P(x), ψ ↦ Q(x,y)}
+    const a1 = implication(phi, implication(psi, phi));
+    const subst = buildFormulaSubstitutionMap([
+      [phi, px],
+      [psi, qxy],
+    ]);
+    const result = substituteFormulaMetaVariables(a1, subst);
+    expect(equalFormula(result, implication(px, implication(qxy, px)))).toBe(
+      true,
+    );
+  });
+
+  test("simultaneous substitution (not sequential)", () => {
+    // {φ ↦ ψ, ψ ↦ P(x)} applied to φ→ψ
+    // Should give ψ→P(x), NOT P(x)→P(x) (which sequential would give)
+    const f = implication(phi, psi);
+    const subst = buildFormulaSubstitutionMap([
+      [phi, psi],
+      [psi, px],
+    ]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, implication(psi, px))).toBe(true);
+  });
+
+  test("MetaVariable with subscript", () => {
+    const phi1 = metaVariable("φ", "1");
+    const phi01 = metaVariable("φ", "01");
+    const f = implication(phi1, phi01);
+    const subst = buildFormulaSubstitutionMap([[phi1, px]]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(equalFormula(result, implication(px, phi01))).toBe(true);
+  });
+
+  test("deeply nested substitution", () => {
+    // ¬(φ ∧ (ψ ∨ χ)) with all three substituted
+    const f = negation(conjunction(phi, disjunction(psi, chi)));
+    const rz = predicate("R", [termVariable("z")]);
+    const subst = buildFormulaSubstitutionMap([
+      [phi, px],
+      [psi, qxy],
+      [chi, rz],
+    ]);
+    const result = substituteFormulaMetaVariables(f, subst);
+    expect(
+      equalFormula(result, negation(conjunction(px, disjunction(qxy, rz)))),
+    ).toBe(true);
+  });
+});
+
+// ── 2. 項メタ変数代入 ──────────────────────────────────────────
+
+describe("substituteTermMetaVariablesInTerm", () => {
+  const tau = termMetaVariable("τ");
+  const sigma = termMetaVariable("σ");
+  const fx0 = functionApplication("f", [termVariable("x"), constant("0")]);
+
+  test("empty substitution returns same term", () => {
+    const result = substituteTermMetaVariablesInTerm(tau, new Map());
+    expect(equalTerm(result, tau)).toBe(true);
+  });
+
+  test("substitute single TermMetaVariable", () => {
+    const subst = buildTermMetaSubstitutionMap([[tau, fx0]]);
+    const result = substituteTermMetaVariablesInTerm(tau, subst);
+    expect(equalTerm(result, fx0)).toBe(true);
+  });
+
+  test("non-matching TermMetaVariable unchanged", () => {
+    const subst = buildTermMetaSubstitutionMap([[tau, fx0]]);
+    const result = substituteTermMetaVariablesInTerm(sigma, subst);
+    expect(equalTerm(result, sigma)).toBe(true);
+  });
+
+  test("TermVariable unchanged", () => {
+    const subst = buildTermMetaSubstitutionMap([[tau, fx0]]);
+    const result = substituteTermMetaVariablesInTerm(termVariable("x"), subst);
+    expect(equalTerm(result, termVariable("x"))).toBe(true);
+  });
+
+  test("Constant unchanged", () => {
+    const subst = buildTermMetaSubstitutionMap([[tau, fx0]]);
+    const result = substituteTermMetaVariablesInTerm(constant("0"), subst);
+    expect(equalTerm(result, constant("0"))).toBe(true);
+  });
+
+  test("substitute in FunctionApplication", () => {
+    const t = functionApplication("g", [tau, termVariable("y")]);
+    const subst = buildTermMetaSubstitutionMap([[tau, fx0]]);
+    const result = substituteTermMetaVariablesInTerm(t, subst);
+    expect(
+      equalTerm(result, functionApplication("g", [fx0, termVariable("y")])),
+    ).toBe(true);
+  });
+
+  test("substitute in BinaryOperation", () => {
+    const t = binaryOperation("+", tau, termVariable("y"));
+    const subst = buildTermMetaSubstitutionMap([[tau, fx0]]);
+    const result = substituteTermMetaVariablesInTerm(t, subst);
+    expect(
+      equalTerm(result, binaryOperation("+", fx0, termVariable("y"))),
+    ).toBe(true);
+  });
+});
+
+describe("substituteTermMetaVariablesInFormula", () => {
+  const tau = termMetaVariable("τ");
+  const fx0 = functionApplication("f", [termVariable("x"), constant("0")]);
+  const subst = buildTermMetaSubstitutionMap([[tau, fx0]]);
+
+  test("empty substitution", () => {
+    const f = predicate("P", [tau]);
+    const result = substituteTermMetaVariablesInFormula(f, new Map());
+    expect(equalFormula(result, f)).toBe(true);
+  });
+
+  test("MetaVariable unchanged", () => {
+    const f = metaVariable("φ");
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(equalFormula(result, f)).toBe(true);
+  });
+
+  test("Predicate: substitutes in args", () => {
+    const f = predicate("P", [tau]);
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(equalFormula(result, predicate("P", [fx0]))).toBe(true);
+  });
+
+  test("Equality: substitutes in both sides", () => {
+    const f = equality(tau, termVariable("y"));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(equalFormula(result, equality(fx0, termVariable("y")))).toBe(true);
+  });
+
+  test("Negation: recurses into body", () => {
+    const f = negation(predicate("P", [tau]));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(equalFormula(result, negation(predicate("P", [fx0])))).toBe(true);
+  });
+
+  test("Implication: recurses into both sides", () => {
+    const f = implication(predicate("P", [tau]), predicate("Q", [tau]));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(
+      equalFormula(
+        result,
+        implication(predicate("P", [fx0]), predicate("Q", [fx0])),
+      ),
+    ).toBe(true);
+  });
+
+  test("Conjunction: recurses", () => {
+    const f = conjunction(predicate("P", [tau]), predicate("Q", [tau]));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(
+      equalFormula(
+        result,
+        conjunction(predicate("P", [fx0]), predicate("Q", [fx0])),
+      ),
+    ).toBe(true);
+  });
+
+  test("Disjunction: recurses", () => {
+    const f = disjunction(predicate("P", [tau]), predicate("Q", [tau]));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(
+      equalFormula(
+        result,
+        disjunction(predicate("P", [fx0]), predicate("Q", [fx0])),
+      ),
+    ).toBe(true);
+  });
+
+  test("Biconditional: recurses", () => {
+    const f = biconditional(predicate("P", [tau]), predicate("Q", [tau]));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(
+      equalFormula(
+        result,
+        biconditional(predicate("P", [fx0]), predicate("Q", [fx0])),
+      ),
+    ).toBe(true);
+  });
+
+  test("Universal: recurses into body, variable unchanged", () => {
+    const f = universal(termVariable("x"), predicate("P", [tau]));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(
+      equalFormula(result, universal(termVariable("x"), predicate("P", [fx0]))),
+    ).toBe(true);
+  });
+
+  test("Existential: recurses into body", () => {
+    const f = existential(termVariable("x"), predicate("P", [tau]));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(
+      equalFormula(
+        result,
+        existential(termVariable("x"), predicate("P", [fx0])),
+      ),
+    ).toBe(true);
+  });
+
+  test("P(τ) → P(τ) with τ ↦ f(x,0)", () => {
+    const f = implication(predicate("P", [tau]), predicate("P", [tau]));
+    const result = substituteTermMetaVariablesInFormula(f, subst);
+    expect(
+      equalFormula(
+        result,
+        implication(predicate("P", [fx0]), predicate("P", [fx0])),
+      ),
+    ).toBe(true);
+  });
+});
+
+// ── 3. 代入可能性チェック (isFreeFor) ──────────────────────────
+
+describe("isFreeFor", () => {
+  test("atomic formula: always free for", () => {
+    const f = predicate("P", [termVariable("x"), termVariable("y")]);
+    expect(isFreeFor(termVariable("z"), termVariable("x"), f)).toBe(true);
+  });
+
+  test("MetaVariable: always free for", () => {
+    const f = metaVariable("φ");
+    expect(isFreeFor(termVariable("z"), termVariable("x"), f)).toBe(true);
+  });
+
+  test("Equality: always free for", () => {
+    const f = equality(termVariable("x"), termVariable("y"));
+    expect(isFreeFor(termVariable("z"), termVariable("x"), f)).toBe(true);
+  });
+
+  test("no quantifiers → always free for", () => {
+    const f = implication(
+      predicate("P", [termVariable("x")]),
+      predicate("Q", [termVariable("x")]),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(true);
+  });
+
+  test("∀y.Q(x,y) with [z/x] → free for (z ∉ {y})", () => {
+    const f = universal(
+      termVariable("y"),
+      predicate("Q", [termVariable("x"), termVariable("y")]),
+    );
+    expect(isFreeFor(termVariable("z"), termVariable("x"), f)).toBe(true);
+  });
+
+  test("∀y.Q(x,y) with [y/x] → NOT free for (y ∈ FV(y) ∩ bound vars)", () => {
+    const f = universal(
+      termVariable("y"),
+      predicate("Q", [termVariable("x"), termVariable("y")]),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(false);
+  });
+
+  test("∀y.Q(x,y) with [f(y)/x] → NOT free for (y ∈ FV(f(y)))", () => {
+    const f = universal(
+      termVariable("y"),
+      predicate("Q", [termVariable("x"), termVariable("y")]),
+    );
+    const fy = functionApplication("f", [termVariable("y")]);
+    expect(isFreeFor(fy, termVariable("x"), f)).toBe(false);
+  });
+
+  test("∀y.∃z.R(x,y,z) with [g(y,z)/x] → NOT free for", () => {
+    const f = universal(
+      termVariable("y"),
+      existential(
+        termVariable("z"),
+        predicate("R", [
+          termVariable("x"),
+          termVariable("y"),
+          termVariable("z"),
+        ]),
+      ),
+    );
+    const gyz = functionApplication("g", [
+      termVariable("y"),
+      termVariable("z"),
+    ]);
+    expect(isFreeFor(gyz, termVariable("x"), f)).toBe(false);
+  });
+
+  test("(∀y.P(y))→Q(x) with [y/x] → free for (x ∉ FV(∀y.P(y)))", () => {
+    const f = implication(
+      universal(termVariable("y"), predicate("P", [termVariable("y")])),
+      predicate("Q", [termVariable("x")]),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(true);
+  });
+
+  test("∀y.(P(y)→Q(x)) with [y/x] → NOT free for (x ∈ FV, y bound)", () => {
+    const f = universal(
+      termVariable("y"),
+      implication(
+        predicate("P", [termVariable("y")]),
+        predicate("Q", [termVariable("x")]),
+      ),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(false);
+  });
+
+  test("x not free in formula → always free for", () => {
+    // ∀y.P(y) has no free x, so [anything/x] is always free for
+    const f = universal(termVariable("y"), predicate("P", [termVariable("y")]));
+    const t = functionApplication("f", [termVariable("y")]);
+    expect(isFreeFor(t, termVariable("x"), f)).toBe(true);
+  });
+
+  test("Negation: recurses into body", () => {
+    const f = negation(
+      universal(
+        termVariable("y"),
+        predicate("Q", [termVariable("x"), termVariable("y")]),
+      ),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(false);
+  });
+
+  test("Conjunction: checks both sides", () => {
+    const f = conjunction(
+      predicate("P", [termVariable("x")]),
+      universal(
+        termVariable("y"),
+        predicate("Q", [termVariable("x"), termVariable("y")]),
+      ),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(false);
+  });
+
+  test("Disjunction: checks both sides", () => {
+    const f = disjunction(
+      predicate("P", [termVariable("x")]),
+      universal(
+        termVariable("y"),
+        predicate("Q", [termVariable("x"), termVariable("y")]),
+      ),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(false);
+  });
+
+  test("Biconditional: checks both sides", () => {
+    const f = biconditional(
+      predicate("P", [termVariable("x")]),
+      universal(
+        termVariable("y"),
+        predicate("Q", [termVariable("x"), termVariable("y")]),
+      ),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(false);
+  });
+
+  test("Existential: same logic as Universal", () => {
+    const f = existential(
+      termVariable("y"),
+      predicate("Q", [termVariable("x"), termVariable("y")]),
+    );
+    expect(isFreeFor(termVariable("y"), termVariable("x"), f)).toBe(false);
+  });
+});
+
+// ── 4. 項変数代入（項内） ──────────────────────────────────────
+
+describe("substituteTermVariableInTerm", () => {
+  const x = termVariable("x");
+  const y = termVariable("y");
+  const z = termVariable("z");
+  const s = functionApplication("f", [y, constant("0")]);
+
+  test("substitute matching variable", () => {
+    const result = substituteTermVariableInTerm(x, x, s);
+    expect(equalTerm(result, s)).toBe(true);
+  });
+
+  test("non-matching variable unchanged", () => {
+    const result = substituteTermVariableInTerm(y, x, s);
+    expect(equalTerm(result, y)).toBe(true);
+  });
+
+  test("TermMetaVariable unchanged", () => {
+    const tau = termMetaVariable("τ");
+    const result = substituteTermVariableInTerm(tau, x, s);
+    expect(equalTerm(result, tau)).toBe(true);
+  });
+
+  test("Constant unchanged", () => {
+    const c = constant("0");
+    const result = substituteTermVariableInTerm(c, x, s);
+    expect(equalTerm(result, c)).toBe(true);
+  });
+
+  test("FunctionApplication: recursive substitution", () => {
+    const t = functionApplication("g", [x, z]);
+    const result = substituteTermVariableInTerm(t, x, s);
+    expect(equalTerm(result, functionApplication("g", [s, z]))).toBe(true);
+  });
+
+  test("BinaryOperation: recursive substitution", () => {
+    const t = binaryOperation("+", x, y);
+    const result = substituteTermVariableInTerm(t, x, s);
+    expect(equalTerm(result, binaryOperation("+", s, y))).toBe(true);
+  });
+});
+
+// ── 5. 項変数代入（論理式内） ──────────────────────────────────
+
+describe("substituteTermVariableInFormula", () => {
+  const x = termVariable("x");
+  const y = termVariable("y");
+  const z = termVariable("z");
+
+  test("MetaVariable unchanged", () => {
+    const f = metaVariable("φ");
+    const result = substituteTermVariableInFormula(f, x, y);
+    expect(equalFormula(result, f)).toBe(true);
+  });
+
+  test("Predicate: substitutes in args", () => {
+    const f = predicate("P", [x, y]);
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(equalFormula(result, predicate("P", [z, y]))).toBe(true);
+  });
+
+  test("Equality: substitutes in both sides", () => {
+    const f = equality(x, y);
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(equalFormula(result, equality(z, y))).toBe(true);
+  });
+
+  test("Negation: recurses", () => {
+    const f = negation(predicate("P", [x]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(equalFormula(result, negation(predicate("P", [z])))).toBe(true);
+  });
+
+  test("Implication: recurses", () => {
+    const f = implication(predicate("P", [x]), predicate("Q", [x]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(
+      equalFormula(
+        result,
+        implication(predicate("P", [z]), predicate("Q", [z])),
+      ),
+    ).toBe(true);
+  });
+
+  test("Conjunction: recurses", () => {
+    const f = conjunction(predicate("P", [x]), predicate("Q", [x]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(
+      equalFormula(
+        result,
+        conjunction(predicate("P", [z]), predicate("Q", [z])),
+      ),
+    ).toBe(true);
+  });
+
+  test("Disjunction: recurses", () => {
+    const f = disjunction(predicate("P", [x]), predicate("Q", [x]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(
+      equalFormula(
+        result,
+        disjunction(predicate("P", [z]), predicate("Q", [z])),
+      ),
+    ).toBe(true);
+  });
+
+  test("Biconditional: recurses", () => {
+    const f = biconditional(predicate("P", [x]), predicate("Q", [x]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(
+      equalFormula(
+        result,
+        biconditional(predicate("P", [z]), predicate("Q", [z])),
+      ),
+    ).toBe(true);
+  });
+
+  test("Universal: bound variable = x → no substitution", () => {
+    // ∀x. P(x) [z/x] = ∀x. P(x) (x is bound)
+    const f = universal(x, predicate("P", [x]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(equalFormula(result, f)).toBe(true);
+  });
+
+  test("Existential: bound variable = x → no substitution", () => {
+    const f = existential(x, predicate("P", [x]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(equalFormula(result, f)).toBe(true);
+  });
+
+  test("Universal: different bound variable, no capture", () => {
+    // ∀y. P(x, y) [z/x] = ∀y. P(z, y)
+    const f = universal(y, predicate("P", [x, y]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(equalFormula(result, universal(y, predicate("P", [z, y])))).toBe(
+      true,
+    );
+  });
+
+  test("Existential: different bound variable, no capture", () => {
+    const f = existential(y, predicate("P", [x, y]));
+    const result = substituteTermVariableInFormula(f, x, z);
+    expect(equalFormula(result, existential(y, predicate("P", [z, y])))).toBe(
+      true,
+    );
+  });
+
+  test("Universal: α-conversion to avoid capture", () => {
+    // ∀y. (x = y) [y/x] → need α-conversion
+    // ∀y. (x = y) → ∀y'. (x = y') → ∀y'. (y = y')
+    const f = universal(y, equality(x, y));
+    const result = substituteTermVariableInFormula(f, x, y);
+    // The bound variable should be renamed (y')
+    expect(result._tag).toBe("Universal");
+    if (result._tag === "Universal") {
+      expect(result.variable.name).not.toBe("y");
+      expect(result.variable.name).not.toBe("x");
+      // The body should have y substituted for x, and bound var renamed
+      expect(result.formula._tag).toBe("Equality");
+      if (result.formula._tag === "Equality") {
+        expect(equalTerm(result.formula.left, y)).toBe(true);
+        expect(equalTerm(result.formula.right, result.variable)).toBe(true);
+      }
+    }
+  });
+
+  test("Existential: α-conversion to avoid capture", () => {
+    // ∃y. (x = y) [y/x]
+    const f = existential(y, equality(x, y));
+    const result = substituteTermVariableInFormula(f, x, y);
+    expect(result._tag).toBe("Existential");
+    if (result._tag === "Existential") {
+      expect(result.variable.name).not.toBe("y");
+      expect(result.variable.name).not.toBe("x");
+    }
+  });
+
+  test("α-conversion with complex replacement term", () => {
+    // ∀y. Q(x, y) [f(y)/x] → α-convert y
+    const fy = functionApplication("f", [y]);
+    const f = universal(y, predicate("Q", [x, y]));
+    const result = substituteTermVariableInFormula(f, x, fy);
+    expect(result._tag).toBe("Universal");
+    if (result._tag === "Universal") {
+      // Bound variable renamed to avoid y
+      expect(result.variable.name).not.toBe("y");
+      expect(result.variable.name).not.toBe("x");
+    }
+  });
+
+  test("nested quantifiers with capture", () => {
+    // ∀y. ∃z. R(x, y, z) [g(y,z)/x]
+    const gyz = functionApplication("g", [y, z]);
+    const f = universal(y, existential(z, predicate("R", [x, y, z])));
+    const result = substituteTermVariableInFormula(f, x, gyz);
+    // Both y and z need α-conversion
+    expect(result._tag).toBe("Universal");
+    if (result._tag === "Universal") {
+      expect(result.variable.name).not.toBe("y");
+    }
+  });
+
+  test("variable rename: [y/x] with no capture", () => {
+    // P(x) [y/x] = P(y)
+    const f = predicate("P", [x]);
+    const result = substituteTermVariableInFormula(f, x, y);
+    expect(equalFormula(result, predicate("P", [y]))).toBe(true);
+  });
+
+  test("reference example: (∀y.P(y))→Q(x) with [y/x]", () => {
+    // x ∉ FV(∀y.P(y)), so ∀y part stays. Q(x) → Q(y)
+    const f = implication(
+      universal(y, predicate("P", [y])),
+      predicate("Q", [x]),
+    );
+    const result = substituteTermVariableInFormula(f, x, y);
+    expect(
+      equalFormula(
+        result,
+        implication(universal(y, predicate("P", [y])), predicate("Q", [y])),
+      ),
+    ).toBe(true);
+  });
+});
+
+// ── 6. 検証付き項変数代入 ───────────────────────────────────────
+
+describe("substituteTermVariableChecked", () => {
+  const x = termVariable("x");
+  const y = termVariable("y");
+  const z = termVariable("z");
+
+  test("successful substitution returns Ok", () => {
+    const f = predicate("P", [x]);
+    const result = substituteTermVariableChecked(f, x, z);
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(equalFormula(result.value, predicate("P", [z]))).toBe(true);
+    }
+  });
+
+  test("capture returns Error with NotFreeFor", () => {
+    const f = universal(y, predicate("Q", [x, y]));
+    const result = substituteTermVariableChecked(f, x, y);
+    expect(result._tag).toBe("Error");
+    if (result._tag === "Error") {
+      expect(result.error._tag).toBe("NotFreeFor");
+    }
+  });
+
+  test("no capture with bound same variable", () => {
+    // ∀x. P(x) [y/x] → x is bound, no substitution happens
+    const f = universal(x, predicate("P", [x]));
+    const result = substituteTermVariableChecked(f, x, y);
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(equalFormula(result.value, f)).toBe(true);
+    }
+  });
+});
+
+// ── 7. 代入の合成 ──────────────────────────────────────────────
+
+describe("composeFormulaSubstitution", () => {
+  const phi = metaVariable("φ");
+  const psi = metaVariable("ψ");
+  const px = predicate("P", [termVariable("x")]);
+
+  test("σ1 ∘ ε = σ1", () => {
+    const sigma1 = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = composeFormulaSubstitution(sigma1, new Map());
+    expect(result.size).toBe(1);
+    expect(result.has("φ")).toBe(true);
+  });
+
+  test("ε ∘ σ2 = σ2", () => {
+    const sigma2 = buildFormulaSubstitutionMap([[phi, px]]);
+    const result = composeFormulaSubstitution(new Map(), sigma2);
+    expect(result.size).toBe(1);
+    expect(result.has("φ")).toBe(true);
+  });
+
+  test("basic composition: σ1={φ↦P(x)}, σ2={ψ↦φ→φ}", () => {
+    // σ1 ∘ σ2 = {ψ ↦ P(x)→P(x), φ ↦ P(x)}
+    const sigma1 = buildFormulaSubstitutionMap([[phi, px]]);
+    const sigma2 = buildFormulaSubstitutionMap([[psi, implication(phi, phi)]]);
+    const composed = composeFormulaSubstitution(sigma1, sigma2);
+
+    // Check {ψ ↦ P(x)→P(x)}
+    const psiResult = composed.get("ψ");
+    expect(psiResult).toBeDefined();
+    expect(equalFormula(psiResult!, implication(px, px))).toBe(true);
+
+    // Check {φ ↦ P(x)} (from σ1, not in σ2 domain)
+    const phiResult = composed.get("φ");
+    expect(phiResult).toBeDefined();
+    expect(equalFormula(phiResult!, px)).toBe(true);
+  });
+
+  test("overlapping domains: σ1 variable overridden by σ2", () => {
+    // σ1 = {φ ↦ P(x)}, σ2 = {φ ↦ ψ}
+    // σ1 ∘ σ2 = {φ ↦ σ1(ψ) = ψ}  (because φ is in σ2's domain)
+    // But φ ∈ dom(σ2), so σ1's φ entry is not included separately
+    const sigma1 = buildFormulaSubstitutionMap([[phi, px]]);
+    const sigma2 = buildFormulaSubstitutionMap([[phi, psi]]);
+    const composed = composeFormulaSubstitution(sigma1, sigma2);
+
+    // {φ ↦ ψ} (σ2's φ entry with σ1 applied to ψ → ψ unchanged since ψ∉dom(σ1))
+    const phiResult = composed.get("φ");
+    expect(phiResult).toBeDefined();
+    expect(equalFormula(phiResult!, psi)).toBe(true);
+  });
+
+  test("identity mapping removed: σ2 maps φ→φ after σ1 application", () => {
+    // σ1 = {}, σ2 = {φ ↦ φ}
+    // σ1(φ) = φ, which equals φ itself → should be removed
+    const sigma1 = new Map<string, typeof phi>();
+    const sigma2 = buildFormulaSubstitutionMap([[phi, phi]]);
+    const composed = composeFormulaSubstitution(sigma1, sigma2);
+    expect(composed.size).toBe(0);
+  });
+
+  test("composition with applied formula: verify correctness", () => {
+    // σ1 = {φ ↦ P(x)}, σ2 = {ψ ↦ φ→φ}
+    // Test: (φ→ψ) with σ2 → (φ→(φ→φ)), then σ1 → (P(x)→(P(x)→P(x)))
+    // Composed: should give same result when applied to (φ→ψ)
+    const sigma1 = buildFormulaSubstitutionMap([[phi, px]]);
+    const sigma2 = buildFormulaSubstitutionMap([[psi, implication(phi, phi)]]);
+    const composed = composeFormulaSubstitution(sigma1, sigma2);
+
+    const formula = implication(phi, psi);
+
+    // Sequential application: σ2 then σ1
+    const step1 = substituteFormulaMetaVariables(formula, sigma2);
+    const sequential = substituteFormulaMetaVariables(step1, sigma1);
+
+    // Composed application
+    const composedResult = substituteFormulaMetaVariables(formula, composed);
+
+    expect(equalFormula(sequential, composedResult)).toBe(true);
+  });
+});
+
+describe("composeTermMetaSubstitution", () => {
+  const tau = termMetaVariable("τ");
+  const sigma = termMetaVariable("σ");
+  const fx = functionApplication("f", [termVariable("x")]);
+
+  test("basic composition", () => {
+    const sigma1 = buildTermMetaSubstitutionMap([[tau, fx]]);
+    const sigma2 = buildTermMetaSubstitutionMap([
+      [sigma, binaryOperation("+", tau, constant("0"))],
+    ]);
+    const composed = composeTermMetaSubstitution(sigma1, sigma2);
+
+    // {σ ↦ f(x)+0, τ ↦ f(x)}
+    const sigmaResult = composed.get("σ");
+    expect(sigmaResult).toBeDefined();
+    expect(
+      equalTerm(sigmaResult!, binaryOperation("+", fx, constant("0"))),
+    ).toBe(true);
+
+    const tauResult = composed.get("τ");
+    expect(tauResult).toBeDefined();
+    expect(equalTerm(tauResult!, fx)).toBe(true);
+  });
+
+  test("identity mapping removed", () => {
+    const sigma1 = new Map<string, typeof tau>();
+    const sigma2 = buildTermMetaSubstitutionMap([[tau, tau]]);
+    const composed = composeTermMetaSubstitution(sigma1, sigma2);
+    expect(composed.size).toBe(0);
+  });
+});
+
+// ── 8. 統合テスト ──────────────────────────────────────────────
+
+describe("integration: A1 axiom instantiation", () => {
+  test("A1: φ→(ψ→φ) with {φ↦P(x), ψ↦Q(x,y)}", () => {
+    const phi = metaVariable("φ");
+    const psi = metaVariable("ψ");
+    const px = predicate("P", [termVariable("x")]);
+    const qxy = predicate("Q", [termVariable("x"), termVariable("y")]);
+
+    const a1 = implication(phi, implication(psi, phi));
+    const subst = buildFormulaSubstitutionMap([
+      [phi, px],
+      [psi, qxy],
+    ]);
+    const result = substituteFormulaMetaVariables(a1, subst);
+
+    expect(equalFormula(result, implication(px, implication(qxy, px)))).toBe(
+      true,
+    );
+  });
+});
+
+describe("integration: A2 axiom instantiation", () => {
+  test("A2: (φ→(ψ→χ))→((φ→ψ)→(φ→χ)) S公理", () => {
+    const phi = metaVariable("φ");
+    const psi = metaVariable("ψ");
+    const chi = metaVariable("χ");
+    const px = predicate("P", [termVariable("x")]);
+    const pxpx = implication(px, px);
+
+    const a2 = implication(
+      implication(phi, implication(psi, chi)),
+      implication(implication(phi, psi), implication(phi, chi)),
+    );
+    const subst = buildFormulaSubstitutionMap([
+      [phi, px],
+      [psi, pxpx],
+      [chi, px],
+    ]);
+    const result = substituteFormulaMetaVariables(a2, subst);
+
+    const expected = implication(
+      implication(px, implication(pxpx, px)),
+      implication(implication(px, pxpx), implication(px, px)),
+    );
+    expect(equalFormula(result, expected)).toBe(true);
+  });
+});
+
+describe("integration: A4 universal instantiation", () => {
+  test("∀x. P(x)∧Q(x) with [a/x] → P(a)∧Q(a)", () => {
+    const x = termVariable("x");
+    const a = constant("a");
+    const body = conjunction(predicate("P", [x]), predicate("Q", [x]));
+    const result = substituteTermVariableInFormula(body, x, a);
+    expect(
+      equalFormula(
+        result,
+        conjunction(predicate("P", [a]), predicate("Q", [a])),
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("integration: combined meta + term substitution", () => {
+  test("A4 schema → instance: meta subst then term subst", () => {
+    // A4 schema: ∀x. φ → φ[t/x]
+    // Step 1: meta subst {φ ↦ P(x) ∧ Q(x)} gives ∀x.(P(x)∧Q(x)) → (P(x)∧Q(x))[t/x]
+    // Step 2: term subst [a/x] on the body
+    const phi = metaVariable("φ");
+    const x = termVariable("x");
+    const a = constant("a");
+
+    const body = conjunction(predicate("P", [x]), predicate("Q", [x]));
+
+    // Step 1: φ → P(x)∧Q(x)
+    const metaSubst = buildFormulaSubstitutionMap([[phi, body]]);
+    const phiSubstituted = substituteFormulaMetaVariables(phi, metaSubst);
+
+    // Step 2: [a/x]
+    const result = substituteTermVariableInFormula(phiSubstituted, x, a);
+
+    expect(
+      equalFormula(
+        result,
+        conjunction(predicate("P", [a]), predicate("Q", [a])),
+      ),
+    ).toBe(true);
+  });
+});

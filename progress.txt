@@ -403,3 +403,32 @@
   - CSS `transition: all` は位置プロパティ（left, top）にもかかるため、ドラッグ追従が遅延する。位置変更が頻繁な要素では `transition` を限定的に指定すること
   - コネクタポートのように親ノードの移動に連動する要素では、位置にtransitionをかけてはいけない
 ---
+
+## 2026-02-24 - Logic Core US-011: メタ変数への代入操作
+- `freeVariables.ts`: 自由変数収集関数群を新規実装
+  - `freeVariablesInTerm`, `freeVariablesInFormula`: 自由な項変数の収集
+  - `isFreeInFormula`: 項変数が論理式中で自由かを判定
+  - `allVariableNamesInFormula`, `allVariableNamesInTerm`: 全変数名収集（α変換用）
+- `substitution.ts`: 3種類の代入操作を新規実装
+  - `substituteFormulaMetaVariables`: 論理式メタ変数代入（同時適用、量化子素通り）
+  - `substituteTermMetaVariablesInTerm`, `substituteTermMetaVariablesInFormula`: 項メタ変数代入
+  - `substituteTermVariableInTerm`, `substituteTermVariableInFormula`: 項変数代入（α変換自動実行）
+  - `substituteTermVariableChecked`: 検証付き項変数代入（代入不可能時エラー返却）
+  - `isFreeFor`: 代入可能性チェック（項tが変数xに対して自由に代入可能か）
+  - `composeFormulaSubstitution`, `composeTermMetaSubstitution`: 代入の合成
+  - `buildFormulaSubstitutionMap`, `buildTermMetaSubstitutionMap`: 代入マップ構築ヘルパー
+  - `freshVariableName`: α変換用の新鮮な変数名生成
+- `index.ts` にエクスポート追加
+- テスト: 124テスト追加（freeVariables 31, substitution 93）
+- 全テスト: 510 → 634（+124）
+- logic-core カバレッジ: Branch 97.56%, Functions 100%
+- 全体カバレッジ: Statements 92.64%（ベースライン93.55%からの差分はexhaustive checkデッドコード行のみ）
+- 変更ファイル: `freeVariables.ts`, `freeVariables.test.ts`, `substitution.ts`, `substitution.test.ts`, `index.ts`（全新規）, `tasks/prd-formal-logic-pad.md`
+- スクリーンショット: `screenshots.local/us011-storybook-main.png`
+- **今後のイテレーションへの学び:**
+  - メタ変数代入（φ→Formula）は量化子を素通りし変数捕獲が起きない。項変数代入（x→Term）のみ捕獲チェックが必要
+  - 項変数代入で変数捕獲が起きる場合、α変換を自動実行する設計を採用。isFreeForはチェックのみで、実際の代入はα変換で安全に処理
+  - 代入の同時適用と逐次適用は結果が異なる。composeFormulaSubstitutionは (σ1∘σ2)(φ) = σ1(σ2(φ)) を正しく計算
+  - `freeVariablesInFormula` で量化子スコープ内の自由変数を正しく除外しないと、α変換の判定が狂う（∀y.P(y))→Q(x) のケース）
+  - greekLetters.ts のGreekLetter型はUnicode文字（"φ","ψ"等）。テストでASCII名("phi","psi")を使うとSchema.TaggedClassの検証でエラーになる
+---

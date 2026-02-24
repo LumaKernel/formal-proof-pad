@@ -75,3 +75,35 @@ export {
   collectUniqueFormulaMetaVariables,
   collectUniqueTermMetaVariables,
 } from "./metaVariable";
+
+// ── Free Variables ──────────────────────────────────────────
+export {
+  freeVariablesInTerm,
+  freeVariablesInFormula,
+  isFreeInFormula,
+  allVariableNamesInFormula,
+  allVariableNamesInTerm,
+} from "./freeVariables";
+
+// ── Substitution ────────────────────────────────────────────
+export {
+  substituteFormulaMetaVariables,
+  substituteTermMetaVariablesInTerm,
+  substituteTermMetaVariablesInFormula,
+  substituteTermVariableInTerm,
+  substituteTermVariableInFormula,
+  substituteTermVariableChecked,
+  isFreeFor,
+  composeFormulaSubstitution,
+  composeTermMetaSubstitution,
+  buildFormulaSubstitutionMap,
+  buildTermMetaSubstitutionMap,
+  freshVariableName,
+} from "./substitution";
+export type {
+  FormulaSubstitutionMap,
+  TermMetaSubstitutionMap,
+  TermVariableSubstitutionMap,
+  SubstitutionError,
+  SubstitutionResult,
+} from "./substitution";
