@@ -191,3 +191,22 @@
   - 証明木のレイアウトで凡例とノードが重なる場合、ドラッグ可能なので実用上問題なし
   - ProofNodeKind（axiom/mp/conclusion）でexhaustive switchを使いノード種別ごとのポート定義を分離
 ---
+
+## 2026-02-24 - InfiniteCanvas ノードクリックメニュー
+- `nodeMenu.ts` を新規作成: ノードメニュー状態管理のピュアロジック（NodeMenuState, openNodeMenu, closeNodeMenu, isClick）
+- `CanvasItem.tsx` に `onClick` prop を追加: ドラッグとクリックを区別（CLICK_DISTANCE_THRESHOLD=5px）
+- `NodeMenu.stories.tsx` を新規作成: play関数付きインタラクティブストーリー
+  - 3ノード（Axiom K, Axiom S, MP Result）各々にクリックメニューを設定
+  - クリックでノード固有メニューパネル表示、アクション選択、トグル閉じの動作を確認
+- テスト: 273 → 291（+18テスト）
+  - `nodeMenu.test.ts`: 11テスト（状態管理、isClick判定、閾値境界テスト）
+  - `CanvasItem.test.tsx`: 22 → 28テスト（onClick動作、ドラッグとの区別、cursor、右クリック除外）
+- カバレッジ: Statements 92.89% → 93.09% ✅ 向上
+- 変更ファイル: `nodeMenu.ts`, `nodeMenu.test.ts`, `CanvasItem.tsx`, `CanvasItem.test.tsx`, `NodeMenu.stories.tsx`, `index.ts`, `tasks/prd-inserted-tasks.md`, `task-processing.md`, `progress.txt`
+- スクリーンショット: `screenshots.local/node-menu-initial.png`, `screenshots.local/node-menu-open.png`
+- **今後のイテレーションへの学び:**
+  - ドラッグとクリックの区別は `isClick()` で移動距離を閾値（5px）と比較。pointerDown位置をrefで記録しpointerUpで判定
+  - `CanvasItem` の `hasInteraction` フラグで onClick/draggable/contextMenu の各組み合わせに対応
+  - ノードメニューは `ContextMenuComponent` とは別のUI。ノード固有のヘッダー+アクションリストのパネル形式
+  - `onClick` のみ指定（draggable/contextMenu無し）でも pointer イベントが正しくバインドされるよう条件を修正
+---

@@ -23,6 +23,14 @@ export {
 } from "./contextMenu";
 export type { ContextMenuItem, ContextMenuState } from "./contextMenu";
 export {
+  CLICK_DISTANCE_THRESHOLD,
+  NODE_MENU_CLOSED,
+  closeNodeMenu,
+  isClick,
+  openNodeMenu,
+} from "./nodeMenu";
+export type { NodeMenuState } from "./nodeMenu";
+export {
   computeConnectionPath,
   computeEdgePoint,
   computePortConnectionPath,

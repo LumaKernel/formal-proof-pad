@@ -416,3 +416,133 @@ describe("CanvasItem context menu", () => {
     vi.useRealTimers();
   });
 });
+
+describe("CanvasItem onClick", () => {
+  beforeEach(() => {
+    Element.prototype.setPointerCapture = vi.fn();
+    Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  it("calls onClick when item is clicked without dragging", () => {
+    const onClick = vi.fn();
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onClick={onClick}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+
+    fireEvent.pointerDown(item, {
+      button: 0,
+      clientX: 100,
+      clientY: 200,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(item, { clientX: 100, clientY: 200, pointerId: 1 });
+
+    expect(onClick).toHaveBeenCalledWith(100, 200);
+  });
+
+  it("does not call onClick when pointer moves beyond threshold", () => {
+    const onClick = vi.fn();
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={vi.fn()}
+        onClick={onClick}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+
+    fireEvent.pointerDown(item, {
+      button: 0,
+      clientX: 100,
+      clientY: 200,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(item, { clientX: 120, clientY: 220, pointerId: 1 });
+    fireEvent.pointerUp(item, { clientX: 120, clientY: 220, pointerId: 1 });
+
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("shows pointer cursor when onClick is provided", () => {
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onClick={vi.fn()}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+    expect(item.style.cursor).toBe("pointer");
+  });
+
+  it("prefers grab cursor over pointer cursor when draggable", () => {
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={vi.fn()}
+        onClick={vi.fn()}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+    expect(item.style.cursor).toBe("grab");
+  });
+
+  it("does not call onClick on right-click", () => {
+    const onClick = vi.fn();
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onClick={onClick}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+
+    fireEvent.pointerDown(item, {
+      button: 2,
+      clientX: 100,
+      clientY: 200,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(item, { clientX: 100, clientY: 200, pointerId: 1 });
+
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("has touchAction none when onClick is provided", () => {
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onClick={vi.fn()}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+    expect(item.style.touchAction).toBe("none");
+  });
+});

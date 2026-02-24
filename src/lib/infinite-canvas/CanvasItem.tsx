@@ -1,7 +1,8 @@
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useRef } from "react";
 import type { ContextMenuItem } from "./contextMenu";
 import { ContextMenuComponent } from "./ContextMenuComponent";
 import { worldToScreen } from "./coordinate";
+import { isClick } from "./nodeMenu";
 import type { Point, ViewportState } from "./types";
 import { useContextMenu, useLongPress } from "./useContextMenu";
 import { useDragItem } from "./useDragItem";
@@ -19,6 +20,9 @@ export interface CanvasItemProps {
   readonly contextMenuItems?: readonly ContextMenuItem[];
   /** Callback when a context menu item is selected */
   readonly onContextMenuSelect?: (itemId: string) => void;
+  /** Callback when the item is clicked (not dragged).
+   *  Receives screen coordinates (clientX, clientY). */
+  readonly onClick?: (screenX: number, screenY: number) => void;
 }
 
 const NOOP = () => {};
@@ -34,10 +38,12 @@ export function CanvasItem({
   onPositionChange = NOOP,
   contextMenuItems = EMPTY_ITEMS,
   onContextMenuSelect = NOOP,
+  onClick,
 }: CanvasItemProps) {
   const screenPos = worldToScreen(viewport, position);
   const draggable = onPositionChange !== NOOP;
   const hasContextMenu = contextMenuItems !== EMPTY_ITEMS;
+  const clickStartRef = useRef<Point | null>(null);
   const { isDragging, onPointerDown, onPointerMove, onPointerUp } = useDragItem(
     position,
     viewport.scale,
@@ -65,6 +71,9 @@ export function CanvasItem({
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
+      if (onClick !== undefined && e.button === 0) {
+        clickStartRef.current = { x: e.clientX, y: e.clientY };
+      }
       if (hasContextMenu) {
         longPress.onPointerDown(e);
       }
@@ -72,7 +81,7 @@ export function CanvasItem({
         onPointerDown(e);
       }
     },
-    [hasContextMenu, longPress, draggable, onPointerDown],
+    [hasContextMenu, longPress, draggable, onPointerDown, onClick],
   );
 
   const handlePointerMove = useCallback(
@@ -89,6 +98,13 @@ export function CanvasItem({
 
   const handlePointerUp = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
+      if (onClick !== undefined && clickStartRef.current !== null) {
+        const end: Point = { x: e.clientX, y: e.clientY };
+        if (isClick(clickStartRef.current, end)) {
+          onClick(e.clientX, e.clientY);
+        }
+        clickStartRef.current = null;
+      }
       if (hasContextMenu) {
         longPress.onPointerUp(e);
       }
@@ -96,8 +112,10 @@ export function CanvasItem({
         onPointerUp(e);
       }
     },
-    [hasContextMenu, longPress, draggable, onPointerUp],
+    [hasContextMenu, longPress, draggable, onPointerUp, onClick],
   );
+
+  const hasInteraction = draggable || hasContextMenu || onClick !== undefined;
 
   return (
     <>
@@ -110,17 +128,19 @@ export function CanvasItem({
           transformOrigin: "0 0",
           transform: `scale(${String(viewport.scale) satisfies string})`,
           pointerEvents: "auto",
-          cursor: draggable ? (isDragging ? "grabbing" : "grab") : undefined,
+          cursor: draggable
+            ? isDragging
+              ? "grabbing"
+              : "grab"
+            : onClick !== undefined
+              ? "pointer"
+              : undefined,
           zIndex: isDragging ? 1000 : undefined,
-          touchAction: draggable || hasContextMenu ? "none" : undefined,
+          touchAction: hasInteraction ? "none" : undefined,
         }}
-        onPointerDown={
-          draggable || hasContextMenu ? handlePointerDown : undefined
-        }
-        onPointerMove={
-          draggable || hasContextMenu ? handlePointerMove : undefined
-        }
-        onPointerUp={draggable || hasContextMenu ? handlePointerUp : undefined}
+        onPointerDown={hasInteraction ? handlePointerDown : undefined}
+        onPointerMove={hasInteraction ? handlePointerMove : undefined}
+        onPointerUp={hasInteraction ? handlePointerUp : undefined}
         onContextMenu={hasContextMenu ? onContextMenu : undefined}
       >
         {children}
