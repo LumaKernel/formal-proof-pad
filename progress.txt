@@ -27,6 +27,7 @@
 - CanvasItem + FormulaEditor 統合: `onModeChange` コールバック + `dragEnabled` プロパティで編集中ドラッグ無効化を実現
 - FormulaEditor内 `onPointerDown` で `stopPropagation` し、CanvasItem の PointerCapture によるclick干渉を防止
 - `src/lib/proof-pad/` は ProofPad（証明ワークスペース）のUIコンポーネント群。logic-core, formula-input, infinite-canvas を統合
+- ProofWorkspace: 制御/非制御両モード対応。workspaceState.ts にピュアロジック、ProofWorkspace.tsx にUIを分離
 - EditableProofNode: FormulaEditorを内包した編集可能な証明ノード。proofNodeUI.ts に純粋ロジック（スタイル・ポート定義）を分離
 - FormulaEditorは制御コンポーネントなので、onParsedテストには状態管理ラッパーが必要（useDeferredValueで非同期）
 - `src/lib/history/` は汎用undo/redoライブラリ。純粋ロジック（history.ts）+ React hook（useHistory.ts）。InfiniteCanvasとは独立
@@ -992,4 +993,35 @@
   - logic-lang の `default: { throw ... }` パターンには `/* v8 ignore next 5 */` が動作する（formatLaTeX.ts, formatUnicode.ts で使用中）
   - logic-core の `x satisfies never; return ...;` パターンには `/* v8 ignore start/stop */` を使用
   - 残りのカバレッジ未到達行はテスト不足（allVariableNamesInFormula の Conjunction/Disjunction/Biconditional 分岐など）
+---
+
+## 2026-02-25 - ProofPad / US-019
+- 実装した内容:
+  - 証明ワークスペース (ProofWorkspace) コンポーネントの作成
+  - workspaceState.ts: 純粋な状態管理ロジック（ノードCRUD、接続管理、体系変更）
+  - ProofWorkspace.tsx: InfiniteCanvas + 証明ノード + 接続線 + 体系ヘッダーの統合コンポーネント
+  - 制御/非制御両モード対応（external workspace + onWorkspaceChange / internal state）
+  - 4つのStorybook ストーリー（EmptyLukasiewicz, EmptyPredicateLogic, EmptyEqualityLogic, WithNodes）
+  - play関数付きで全ストーリーがインタラクションテストとして機能
+- 変更したファイル:
+  - src/lib/proof-pad/workspaceState.ts (NEW)
+  - src/lib/proof-pad/workspaceState.test.ts (NEW - 26 tests)
+  - src/lib/proof-pad/ProofWorkspace.tsx (NEW)
+  - src/lib/proof-pad/ProofWorkspace.test.tsx (NEW - 15 tests)
+  - src/lib/proof-pad/ProofWorkspace.stories.tsx (NEW - 4 stories)
+  - src/lib/proof-pad/index.ts (MODIFIED - exports追加)
+  - tasks/prd-formal-logic-pad.md (US-019 完了)
+- カバレッジ: Stmts 99.17% → 99.14%, Lines 99.87% → 99.87% (維持)
+- テスト数: 1601 → 1646 (+45)
+- スクリーンショット:
+  - .screenshots/proof-workspace-empty-lukasiewicz.png
+  - .screenshots/proof-workspace-with-nodes.png
+  - .screenshots/proof-workspace-empty-predicate-logic.png
+  - .screenshots/proof-workspace-empty-equality-logic.png
+- **今後のイテレーションへの学び:**
+  - macOS case-insensitive FS: `proofWorkspace.ts` と `ProofWorkspace.tsx` は衝突する。ピュアロジックは `workspaceState.ts` のように明確に異なる名前にする
+  - FormulaInput の onParsed は `useDeferredValue` + `useEffect` 経由で発火するため、テストでは `waitFor` が必要
+  - テストで `onParsed` を発火させるには ASCII "p" ではなくギリシャ文字 "φ" を使う（パーサーの受け付ける文法に準拠）
+  - ProofWorkspace の testId 命名チェーン: `proof-node-{nodeId}` → `-editor` → `-display`/`-edit`/`-input` → `-input` (actual <input>)
+  - ドラッグハンドラ (handlePositionChange) は jsdom では PointerEvent シミュレーションが必要なため、v8 ignore でカバレッジ除外してブラウザテストで検証する方が合理的
 ---

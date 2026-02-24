@@ -1,5 +1,23 @@
 export { EditableProofNode } from "./EditableProofNode";
 export type { EditableProofNodeProps } from "./EditableProofNode";
+export { ProofWorkspace } from "./ProofWorkspace";
+export type { ProofWorkspaceProps } from "./ProofWorkspace";
+export {
+  createEmptyWorkspace,
+  addNode,
+  updateNodePosition,
+  updateNodeFormulaText,
+  findNode,
+  removeNode,
+  addConnection,
+  removeConnection,
+  changeSystem,
+} from "./workspaceState";
+export type {
+  WorkspaceNode,
+  WorkspaceConnection,
+  WorkspaceState,
+} from "./workspaceState";
 export {
   PROOF_NODE_KINDS,
   AXIOM_PORTS,
