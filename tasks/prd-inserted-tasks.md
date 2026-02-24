@@ -1,5 +1,5 @@
-- [-] http://localhost:13006/?path=/story/infinitecanvas-infinitecanvas--default 周辺のストーリーがすべて真っ白なので、改めてしっかり確認しながらやる。
-- [-] CIが結局通ってないので、確認してまず通す。
+- [x] http://localhost:13006/?path=/story/infinitecanvas-infinitecanvas--default 周辺のストーリーがすべて真っ白なので、改めてしっかり確認しながらやる。
+- [x] CIが結局通ってないので、確認してまず通す。
 
 Infinity Canvasについて。
 

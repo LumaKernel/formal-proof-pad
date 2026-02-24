@@ -3,6 +3,7 @@
 - Vitest + Testing Libraryでテスト。Storybookのplay関数はインタラクションテストとして機能
 - Storybook play関数のimportは `storybook/test` から（`@storybook/test` ではない）
 - ESLint: `@luma-dev/luma-ts/require-satisfies-in-tls` が有効
+- Storybook 10: fullscreenレイアウトでは html/body/\#storybook-root に height:100% が付かない。`.storybook/preview-head.html` で補完が必要
 - コミットメッセージは日本語
 - フェーズ1 (InfiniteCanvas) US-000〜US-008 は完了済み
 
@@ -83,4 +84,42 @@
   - メタ変数代入は変数捕獲が起きない（量化子を素通り）。捕獲は項変数代入のみ
   - Martelli-Montanariアルゴリズムの5規則（Delete, Decompose, Eliminate, Orient, Occurs Check）で完結
   - 代入の同時適用と逐次適用は結果が異なる場合がある。実装時に注意
+---
+
+## 2026-02-24 - 論理リファレンス US-005
+- `dev/logic-reference/05-equality-logic.md` を作成
+- 等号の構文的位置づけ（AST `Equality` ノード、述語との違い）
+- 等号公理 E1〜E5 の厳密な定義:
+  - E1: 反射律 ∀x. x = x
+  - E2: 対称律 ∀x.∀y. x = y → y = x
+  - E3: 推移律 ∀x.∀y.∀z. x = y ∧ y = z → x = z
+  - E4: 関数に関する合同律（各関数記号ごと、二項演算含む）
+  - E5: 述語に関する合同律（各述語記号ごと）
+- 公理一覧表
+- 代入律（Leibnizの法則）の定義とE4/E5との関係、2つのアプローチの比較
+- 等号を含む証明の具体例4つ（対称律の別証明、推移性連鎖、関数適用伝播、算術例）
+- オプション機能としての設計指針（LogicSystem設定、有効/無効の影響一覧、シグネチャとの関係）
+- 理論的背景（完全性定理の拡張、他のアプローチとの比較）
+- 変更ファイル: `dev/logic-reference/05-equality-logic.md` (新規), `tasks/prd-logic-reference.md`, `task-processing.md`, `progress.txt`
+- ベースラインカバレッジ: Statements 90.11%（ドキュメントのみのため変化なし）
+- スクリーンショット: `screenshots.local/us005-storybook-main.png`
+- **今後のイテレーションへの学び:**
+  - 等号公理は個別公理方式（E1〜E5）を採用。代入律は導出可能な定理として扱う
+  - E4, E5 は体系のシグネチャ（関数記号・述語記号の一覧とアリティ）に依存する。実装時に動的生成が必要
+  - 二項演算子（+, -, ×, ÷, ^）はアリティ2の関数記号として合同律の対象
+  - 等号はASTの型定義には常に含めるが、体系設定無効時はバリデーション段階で拒否する設計
+---
+
+## 2026-02-24 - CI修正 + Storybook表示修正
+- CI失敗原因: Prettierフォーマットエラー（CLAUDE.md, task-processing.md, tasks/prd-logic-pad-world.md, tasks/prd-next-tasks.md, tasks/prd-inserted-tasks.md）
+- Storybook真っ白問題: fullscreenレイアウトで html/body/#storybook-root に height が付いていなかった
+  - `.storybook/preview-head.html` を新規作成し、`height: 100%` を設定して解決
+- 全8ストーリー（Default, ZoomedIn, ZoomedOut, Panned, CustomColors, DenseGrid, SparseGrid + 各デモ系）の表示をPlaywright MCPで確認
+- 変更ファイル: `.storybook/preview-head.html` (新規), `CLAUDE.md`, `tasks/prd-inserted-tasks.md`, `tasks/prd-logic-pad-world.md`, `tasks/prd-next-tasks.md`, `task-processing.md`
+- ベースラインカバレッジ: Statements 90.11%（変化なし、CSS追加のみ）
+- スクリーンショット: `screenshots.local/ci-fix-storybook-default.png`, `screenshots.local/ci-fix-fulldemo.png`, `screenshots.local/ci-fix-canvasitemplacement.png`, `screenshots.local/ci-fix-connectionlines.png`, `screenshots.local/ci-fix-contextmenu.png`, `screenshots.local/ci-fix-draggableitems.png`, `screenshots.local/ci-fix-pannablecanvas.png`, `screenshots.local/ci-fix-zoomablecanvas.png`
+- **今後のイテレーションへの学び:**
+  - Storybook 10 の fullscreen レイアウトは `html, body` に `height: 100%` を自動で付けない。`preview-head.html` で設定が必要
+  - Prettierフォーマットは CI の Lint ステップで `prettier . --check` により検証される。ローカルで `npx prettier --write` を実行してからコミットすること
+  - `tasks/prd-inserted-tasks.md` はユーザーが手動で編集するため、Prettierフォーマットが崩れやすい。コミット前に都度チェック
 ---
