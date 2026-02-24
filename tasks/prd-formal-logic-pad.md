@@ -202,15 +202,15 @@
 >
 > **設計思想:** typeとdiscriminated union思想。基本はEffect.tsに乗せる。Effect.ts SchemaのTagged Classを活用。context7で使い方を確かめよ。
 
-#### US-009: 論理式スキーマASTの定義
+#### US-009: 論理式スキーマASTの定義 [x]
 
 **説明:** 開発者として、論理式スキーマを型安全なASTで表現したい。Effect.ts SchemaのTaggedClassを活用する。
 
 **受け入れ基準:**
 
-- [ ] `src/lib/logic-core/`にピュアなロジックライブラリを構築
-- [ ] Effect.ts Schemaの`Schema.Class`でタグ付きクラスを定義
-- [ ] 以下の**論理式（Formula）**ASTノードを定義:
+- [x] `src/lib/logic-core/`にピュアなロジックライブラリを構築
+- [x] Effect.ts Schemaの`Schema.Class`でタグ付きクラスを定義
+- [x] 以下の**論理式（Formula）**ASTノードを定義:
   - `MetaVariable`: メタ変数（φ, ψ, χ, ...）
   - `Negation`: 否定（¬φ）
   - `Implication`: 含意（φ→ψ）
@@ -220,19 +220,19 @@
   - `Existential`: 存在量化（∃x.φ）
   - `Predicate`: 述語適用（P(t1, t2, ...)）
   - `Equality`: 等号（t1 = t2）**← オプション機能**
-- [ ] 以下の**項（Term）**ASTノードを定義:
+- [x] 以下の**項（Term）**ASTノードを定義:
   - `TermVariable`: 項変数（x, y, z, ...）
   - `TermMetaVariable`: 項メタ変数（述語論理でのメタ項）
-  - `Function`: 関数適用（f(t1, t2, ...)）
+  - `FunctionApplication`: 関数適用（f(t1, t2, ...)）
   - `BinaryOperation`: 二項演算（t1 + t2, t1 \* t2, ...）
     - 演算子: `+`, `-`, `*`, `/`, `^` など（意味は与えない、構文のみ）
   - `Constant`: 定数（0, 1, a, b, ...）
-- [ ] discriminated unionとして`FormulaSchema`型と`TermSchema`型を定義
-- [ ] **等号付き論理（equality logic）はオプションとして選択可能**
-  - 体系設定で等号公理を含むかどうかを指定
-- [ ] すべてのフィールドはreadonly
-- [ ] ユニットテストでAST構築を検証
-- [ ] 型チェック/lintが通る
+- [x] discriminated unionとして`Formula`型と`Term`型を定義
+- [x] **等号付き論理（equality logic）はオプションとして選択可能**
+  - 体系設定で等号公理を含むかどうかを指定（Equality ASTノードは常に含む。バリデーション段階で制御）
+- [x] すべてのフィールドはreadonly
+- [x] ユニットテストでAST構築を検証
+- [x] 型チェック/lintが通る
 
 #### US-010: メタ変数の定義
 

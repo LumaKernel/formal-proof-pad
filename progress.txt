@@ -12,6 +12,9 @@
 - `ConnectorPort` 型は `edge` (top/right/bottom/left) + `position` (0.0〜1.0) でエッジ上の位置を指定
 - wheel イベントは `useEffect` + `addEventListener({ passive: false })` で登録（React `onWheel` は Chrome で passive）
 - トラックパッド判定: `ctrlKey: true` → ピンチ(zoom)、`ctrlKey: false` → 2本指スクロール(pan)
+- Logic Core は `src/lib/logic-core/` に配置。Effect.ts `Schema.TaggedClass` でAST定義、ピュアロジック、UIなし
+- AST の再帰型は `Schema.suspend(() => Formula)` で定義。`FunctionApplication`（`Function` はJS予約語と衝突するため改名）
+- `@luma-dev/luma-ts/no-explicit-return-is` があるため type predicate は明示しない
 
 ---
 
@@ -320,4 +323,46 @@
 - **今後のイテレーションへの学び:**
   - 論理リファレンス全体が完成。以後のlogic-core/logic-lang実装ではREADME.mdのPRD対応表を参照して適切なドキュメントを確認すること
   - 用語索引は日英対応+記載箇所でクロスリファレンスとして機能する。新しい概念を追加する際はここも更新すること
+---
+
+## 2026-02-24 - 公理体系の比較調査
+- `dev/logic-reference/07-axiom-systems-survey.md` を作成
+- 否定の扱いの主要な流儀7種類を比較:
+  - Łukasiewicz（対偶）、Mendelson（背理法）、Frege（DNE+対偶+DNI）、Hilbert-Ackermann（爆発+場合分け）、Russell-Whitehead（DNE+自己矛盾+対偶）、Church（⊥経由DNE）、Tarski-Bernays-Wajsberg（Peirce則+爆発）
+- 主要体系の詳細: Łukasiewicz, Mendelson, Frege, Hilbert-Ackermann, Church, TBW, Łukasiewicz代替体系
+- 論理の階層: 正の含意計算 → 正の命題計算 → 最小論理 → 直観主義論理 → 古典論理
+- LogicSystem設計指針: プリセット体系、公理スキーマの表現、証明検証の汎用化
+- 表面表現と内部表現の翻訳層の設計方針を提案
+- README.mdに07への参照、PRD対応表、用語索引、参考文献を追加
+- `tasks/prd-next-tasks.md` の否定の流儀調査タスクを完了
+- ベースラインカバレッジ: Statements 93.60%（ドキュメントのみのため変化なし）
+- スクリーンショット: `screenshots.local/axiom-survey-storybook-main.png`
+- 変更ファイル: `dev/logic-reference/07-axiom-systems-survey.md` (新規), `dev/logic-reference/README.md`, `tasks/prd-next-tasks.md`, `task-processing.md`
+- **今後のイテレーションへの学び:**
+  - DNE, LEM, Peirce, 対偶, 背理法はすべて等価（直観主義論理に1つ追加で古典論理になる）
+  - LogicSystemはプリセット名+公理スキーマリスト+定義展開のバンドルとして設計すべき
+  - ⊥ベース体系では ¬φ := φ→⊥ として統一的に扱える。ASTでは Negation を保持しつつ内部展開する二層構造が有効
+  - 段階的実装: Phase 1 Łukasiewicz → Phase 2 Mendelson追加 → Phase 3 ⊥ベース+直観主義
+---
+
+## 2026-02-24 - Logic Core US-009: 論理式スキーマASTの定義
+- Effect.ts をインストールし、`src/lib/logic-core/` にピュアロジックライブラリを構築
+- `greekLetters.ts`: ギリシャ文字定義（23文字、ο除外）、ASCII名対応表、添字バリデーション
+- `term.ts`: Term AST（TermVariable, TermMetaVariable, Constant, FunctionApplication, BinaryOperation）
+- `formula.ts`: Formula AST（MetaVariable, Negation, Implication, Conjunction, Disjunction, Biconditional, Universal, Existential, Predicate, Equality）
+- 各ノードは `Schema.TaggedClass` で `_tag` による discriminated union を実現
+- ファクトリ関数（`metaVariable()`, `implication()` 等）で構築を簡潔に
+- Biconditional（双条件 ↔）も追加（notation ref に定義があるため）
+- テスト: 65テスト（greekLetters 16, term 20, formula 29）
+- logic-core カバレッジ: 100%（Statements, Branch, Functions, Lines すべて）
+- 全体カバレッジ: Statements 93.6% → 94.1% ✅ 向上
+- 全テスト: 336 → 401（+65）
+- 変更ファイル: `greekLetters.ts`, `term.ts`, `formula.ts`, `index.ts`（全新規）, テスト3ファイル, `package.json`, `tasks/prd-formal-logic-pad.md`
+- スクリーンショット: `screenshots.local/us009-storybook-main.png`
+- **今後のイテレーションへの学び:**
+  - Effect.ts `Schema.TaggedClass` は `_tag` を自動付与。再帰型は `Schema.suspend(() => Term)` で定義
+  - `Schema.optionalWith({ as: "Option" })` はType/Encodedの型が異なるため、同型union (`Schema<T, T>`) には使えない。代わりに `Schema.String.pipe(Schema.optional)` で `string | undefined` を使う
+  - `@luma-dev/luma-ts/no-explicit-return-is` ルールがあるため、type predicate (`s is X`) を明示的に書かない。TypeScript 5.5+ の推論に任せる
+  - Formula/Term の exhaustive switch テストでは、変数宣言ではなく関数パラメータで型を受け取ること（変数宣言だとリテラル型に推論されて全caseが unreachable になる）
+  - AST クラス名の `Function` はJSのグローバル `Function` と衝突するため `FunctionApplication` に改名
 ---
