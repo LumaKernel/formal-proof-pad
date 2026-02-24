@@ -1,3 +1,4 @@
+import "katex/dist/katex.min.css";
 import type { Preview } from "@storybook/nextjs-vite";
 
 const preview: Preview = {

@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "effect": "^3.19.19",
+    "katex": "^0.16.33",
     "next": "16.1.6",
     "next-intl": "^4.8.2",
     "react": "19.2.3",
@@ -35,6 +36,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@types/katex": "^0.16.8",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
