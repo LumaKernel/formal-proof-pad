@@ -37,6 +37,28 @@
 - parserのPratt parserではinfixBPが事前フィルタするため`tokenToBinaryOperator`のdefaultケースは到達不能
 - `matchFormulaPattern` は公開済み。直接テストで一方向パターンマッチのすべてのケースを検証可能
 
+- 公理パレット: `axiomPaletteLogic.ts`（純粋ロジック）+ `AxiomPalette.tsx`（UI）のペア。case-insensitive FS対策で`...Logic.ts`と`...ette.tsx`で名前区別
+
+---
+
+## 2026-02-25 - ProofPad 公理パレット (US-020)
+- `src/lib/proof-pad/` に公理パレット機能を追加
+  - `axiomPaletteLogic.ts`: 論理体系→公理一覧の純粋ロジック（12テスト）
+  - `AxiomPalette.tsx`: サイドパネルUI（8テスト）
+  - `ProofWorkspace.tsx`: パレット統合、公理追加ハンドラ（6テスト追加）
+  - `ProofWorkspace.stories.tsx`: AddAxiomFromPalette ストーリー追加
+  - `index.ts`, `CLAUDE.md`: エクスポートとドキュメント更新
+- カバレッジ: Stmts 99.14% → 99.16%, Lines 99.87% → 99.88%（改善）
+- テスト数: 1646 → 1673（27件追加）
+- スクリーンショット:
+  - `.screenshots/us-020-empty-workspace.png`: 空ワークスペース + 公理パレット
+  - `.screenshots/us-020-axiom-palette.png`: 公理追加後のワークスペース
+  - `.screenshots/us-020-predicate-logic-palette.png`: 述語論理パレット（A1-A5）
+- **今後のイテレーションへの学び:**
+  - macOS case-insensitive FS: `axiomPalette.ts` と `AxiomPalette.tsx` は衝突する。`axiomPaletteLogic.ts` のように名前を変える必要あり
+  - 公理A4/A5はテンプレートが複雑（項代入依存）なため、DSLテキストは空にしてユーザーが具体インスタンスを入力する方式
+  - `getAvailableAxioms()` は `LogicSystem` から直接公理一覧を生成。体系追加時はこの関数も更新が必要
+
 ---
 
 ## 2026-02-25 - Coverage改善（第2弾）

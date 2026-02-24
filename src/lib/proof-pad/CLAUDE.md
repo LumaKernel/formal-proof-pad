@@ -13,8 +13,14 @@ logic-core, logic-lang, formula-input, infinite-canvas を統合する層。
 ## 設計パターン
 
 - `proofNodeUI.ts`: 純粋ロジック（スタイル、ポート定義）— exhaustive switch で網羅性保証
+- `axiomPaletteLogic.ts`: 純粋ロジック（体系→公理一覧）— UIなし、logic-core/logic-lang に依存
 - `EditableProofNode.tsx`: UIコンポーネント — FormulaEditor を内包、CanvasItem内に配置想定
+- `AxiomPalette.tsx`: サイドパネルUI — axiomPaletteLogic の一覧を表示、クリックで公理追加
 - CanvasItem + EditableProofNode 連携: `onModeChange` → `dragEnabled` パターン（FI-008で確立）
+
+## ファイル命名規則
+
+- macOS case-insensitive FS 対策: `axiomPaletteLogic.ts`（ロジック）と `AxiomPalette.tsx`（UI）のように、拡張子だけでなくファイル名自体を明確に異なるものにする
 
 ## ノード種別
 
@@ -25,5 +31,9 @@ logic-core, logic-lang, formula-input, infinite-canvas を統合する層。
 ## テスト
 
 - `proofNodeUI.test.ts`: 純粋関数テスト（スタイル、ポート、エッジカラー）
+- `axiomPaletteLogic.test.ts`: 公理パレットロジックテスト（体系別公理一覧）
+- `AxiomPalette.test.tsx`: コンポーネントテスト（表示/クリック/キーボード操作）
 - `EditableProofNode.test.tsx`: コンポーネントテスト（表示/編集/読み取り専用）
 - `EditableProofNode.stories.tsx`: Storybook ストーリー（インタラクションテスト）
+- `ProofWorkspace.test.tsx`: 統合テスト（公理パレットからの追加を含む）
+- `ProofWorkspace.stories.tsx`: Storybook ストーリー（AddAxiomFromPalette で公理追加デモ）
