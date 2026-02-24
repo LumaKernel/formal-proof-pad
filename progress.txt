@@ -23,6 +23,26 @@
 
 ---
 
+## 2026-02-25 - FormulaInput FI-003
+- Term（項）レンダラーコンポーネント実装
+  - `TermDisplay` (Unicode版): 変数、定数、メタ変数、関数適用、二項演算子を表示
+  - `TermKaTeX` (KaTeX版): 同上をKaTeXで美しくレンダリング
+- 変更ファイル:
+  - `src/lib/formula-input/TermDisplay.tsx` (新規)
+  - `src/lib/formula-input/TermDisplay.test.tsx` (新規: 19テスト)
+  - `src/lib/formula-input/TermDisplay.stories.tsx` (新規: 5ストーリー)
+  - `src/lib/formula-input/TermKaTeX.tsx` (新規)
+  - `src/lib/formula-input/TermKaTeX.test.tsx` (新規: 19テスト)
+  - `src/lib/formula-input/TermKaTeX.stories.tsx` (新規: 6ストーリー)
+  - `src/lib/formula-input/index.ts` (エクスポート追加)
+  - `tasks/prd-formula-input-component.md` (FI-003完了)
+- ベースラインカバレッジ: Statements 91.95%、新規ファイルは全て100%
+- スクリーンショット: `screenshots.local/fi003-term-display-basic.png`, `screenshots.local/fi003-term-katex-basic.png`, `screenshots.local/fi003-term-display-binary.png`
+- **今後のイテレーションへの学び:**
+  - TermDisplay/TermKaTeX は FormulaDisplay/FormulaKaTeX と完全に同じパターン。formatTerm/formatTermLaTeX が既に logic-lang に存在するため、薄いラッパーで済む
+  - Storybookのworker timeoutエラーはカバレッジ実行時に発生することがある（新規コードとは無関係）
+---
+
 ## 2026-02-24 - 論理リファレンス US-001
 - `dev/logic-reference/01-notation.md` を作成
 - 論理結合子、量化子、等号、二項演算子、項の構成要素、メタ変数命名規則、括弧省略規則、AST型一覧を網羅

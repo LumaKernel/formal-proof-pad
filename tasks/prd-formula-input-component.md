@@ -59,17 +59,17 @@
 - [x] play関数でKaTeX出力の存在・内容を検証
 - [x] 型チェック/lintが通る
 
-#### FI-003: Term（項）レンダラー
+#### FI-003: Term（項）レンダラー [x]
 
 **説明:** 開発者として、Term ASTを単独でレンダリングしたい。
 
 **受け入れ基準:**
 
-- [ ] `<TermDisplay term={ast} />` コンポーネント（Unicode版）を作成
-- [ ] `<TermKaTeX term={ast} />` コンポーネント（KaTeX版）を作成
-- [ ] 二項演算子（+, −, ×, ÷, ^）、関数適用、定数、変数を正しく表示
-- [ ] Storybookストーリーを追加
-- [ ] 型チェック/lintが通る
+- [x] `<TermDisplay term={ast} />` コンポーネント（Unicode版）を作成
+- [x] `<TermKaTeX term={ast} />` コンポーネント（KaTeX版）を作成
+- [x] 二項演算子（+, −, ×, ÷, ^）、関数適用、定数、変数を正しく表示
+- [x] Storybookストーリーを追加
+- [x] 型チェック/lintが通る
 
 ### フェーズB: テキスト入力層（Logic Lang Parser完成後）
 

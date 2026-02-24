@@ -2,3 +2,7 @@ export { FormulaDisplay } from "./FormulaDisplay";
 export type { FormulaDisplayProps } from "./FormulaDisplay";
 export { FormulaKaTeX } from "./FormulaKaTeX";
 export type { FormulaKaTeXProps } from "./FormulaKaTeX";
+export { TermDisplay } from "./TermDisplay";
+export type { TermDisplayProps } from "./TermDisplay";
+export { TermKaTeX } from "./TermKaTeX";
+export type { TermKaTeXProps } from "./TermKaTeX";
