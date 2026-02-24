@@ -467,3 +467,58 @@
   - occurs checkは構造が単純（MetaVariable/TermMetaVariableのキーで判定）。`occursInFormula`はPredicate/Equalityの項部分には論理式メタ変数が含まれないため探索不要
   - 全称/存在量化のDecomposeでは束縛変数（TermVariable）もTerm方程式として分解。束縛変数名が異なれば不一致
 ---
+
+## 2026-02-24 - タスク整備: 論理式スキーマ入力コンポーネントPRD
+- `tasks/prd-formula-input-component.md` を新規作成
+- 8ストーリー（FI-001〜FI-008）を3フェーズに分けて定義:
+  - フェーズA（レンダリング層）: Unicode/KaTeX/Termレンダラー（FI-001〜003）
+  - フェーズB（テキスト入力層）: 論理式/項テキスト入力、補完（FI-004〜006）
+  - フェーズC（統合編集モード）: 編集/表示切替、InfiniteCanvas統合（FI-007〜008）
+- 依存関係の明示: Logic Lang (US-015〜018) がすべての前提条件
+- ディレクトリ構成案: `src/lib/formula-input/`
+- `tasks/prd-inserted-tasks.md` の最初のタスクを完了 `[x]` に更新
+- 変更ファイル: `tasks/prd-formula-input-component.md` (新規), `tasks/prd-inserted-tasks.md`, `task-processing.md`
+- ベースラインカバレッジ: Statements 91.94%（ドキュメントのみのため変化なし）
+- スクリーンショット: `screenshots.local/prd-formula-input-storybook-main.png`
+- **今後のイテレーションへの学び:**
+  - 入力コンポーネント実装はLogic Lang (Lexer/Parser/Formatter) の完成が前提。次はUS-015（Lexer）に着手すべき
+  - KaTeXレンダリングはSSR考慮が必要（`renderToString`）。パフォーマンス面でメモ化も重要
+  - FormulaEditorの「編集/表示モード切替」パターンは他のノードタイプにも応用可能
+  - InfiniteCanvas統合時はノードのドラッグとテキスト編集の干渉防止が課題
+---
+
+## 2026-02-24 - Logic Core US-013: 推論規則の定義
+- `inferenceRule.ts` を新規実装: Hilbert系推論規則・公理スキーマ・体系設定
+  - 公理テンプレート: `axiomA1Template`(K公理), `axiomA2Template`(S公理), `axiomA3Template`(対偶), `axiomE1Template`(反射律), `axiomE2Template`(対称律), `axiomE3Template`(推移律)
+  - 型定義: `PropositionalAxiomId`, `PredicateAxiomId`, `EqualityAxiomId`, `AxiomId`, `LogicSystem`, `RuleApplicationError`, `RuleApplicationResult`, `AxiomMatchResult`, `AxiomIdentificationResult`
+  - 体系プリセット: `lukasiewiczSystem`(A1-A3+MP), `predicateLogicSystem`(A1-A5+MP+Gen), `equalityLogicSystem`(A1-A5+E1-E3+MP+Gen)
+  - `applyModusPonens`: φ と φ→ψ から ψ を導出
+  - `applyGeneralization`: φ から ∀x.φ を導出（体系設定で有効/無効制御）
+  - `matchPropositionalAxiom`: A1/A2/A3 のインスタンス判定
+  - `matchAxiomA4`: ∀x.φ → φ[t/x] のインスタンス判定（`inferTermReplacement` で置換項を推論）
+  - `matchAxiomA5`: ∀x.(φ→ψ) → (φ→∀x.ψ) のインスタンス判定（x∉FV(φ)の制約付き）
+  - `matchEqualityAxiom`: E1/E2/E3 のインスタンス判定
+  - `identifyAxiom`: 体系内で有効な公理のいずれかにマッチするか判定
+  - `applySubstitution`: メタ変数代入の適用
+  - `matchFormulaPattern`: **一方向パターンマッチング**（テンプレートのMetaVariable/TermMetaVariableのみがパターン変数、候補式は具体値として扱う）
+- `index.ts` にエクスポート追加
+- テスト: 101テスト追加（inferenceRule）
+  - MP: 基本、エラー（非含意、前提不一致）
+  - Gen: 基本、エラー（無効化時）
+  - A1/A2/A3: 正例・負例
+  - A4: 基本代入、関数適用、ネスト量化、各種式構造（否定・連言・選言・双条件・存在量化）、エラー（非含意、非全称、名前不一致、アリティ不一致、自由代入不可、演算子不一致）
+  - A5: 基本、制約違反（x∈FV(φ)）、各種構造不一致
+  - E1/E2/E3: テンプレートマッチ
+  - identifyAxiom: 各体系での動作
+  - φ→φ証明の統合テスト
+- 全テスト: 696 → 797（+101）
+- カバレッジ: Statements 91.94% → 90.74%（差分は `matchFormulaPattern.matchTerm` の現テンプレート未使用分岐 + `satisfies never` デッドコード + `inferTermReplacement` の一部分岐。Functions 92%, Branch 90.73%）
+- 変更ファイル: `inferenceRule.ts`, `inferenceRule.test.ts`（全新規）, `index.ts`, `tasks/prd-formal-logic-pad.md`
+- スクリーンショット: `.screenshots/us013-storybook-main.png`, `.screenshots/us013-fulldemo.png`
+- **今後のイテレーションへの学び:**
+  - 公理スキーマのインスタンス判定には**一方向パターンマッチング**が必要。双方向ユニフィケーション（unifyFormulas）は候補側のMetaVariableもパターン変数として扱うため不適切
+  - A4（全称量化除去 ∀x.φ→φ[t/x]）はパターンマッチだけでは不十分。`inferTermReplacement`で body と target を同時走査し置換項tを推論する専用ロジックが必要
+  - A5（∀x.(φ→ψ)→(φ→∀x.ψ)）は構造的チェック+制約検証（x∉FV(φ)）で実装。パターンマッチではなく直接的なAST構造比較
+  - `matchFormulaPattern.matchTerm` のConstant/FunctionApplication/BinaryOperation/Predicate分岐は現テンプレートでは到達不能だが、E4/E5（シグネチャ依存公理）実装時に必要になる
+  - カバレッジ低下の主因は `satisfies never` デッドコードと未使用パターンマッチ分岐。進捗ログの既存方針通り、Functions/Branch 100%であれば問題なし
+---

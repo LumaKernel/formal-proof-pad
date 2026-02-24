@@ -111,3 +111,35 @@ export type {
 // ── Unification ─────────────────────────────────────────────
 export { unifyFormulas, unifyTerms } from "./unification";
 export type { UnificationResult, UnificationError } from "./unification";
+
+// ── Inference Rules ─────────────────────────────────────────
+export {
+  applyModusPonens,
+  applyGeneralization,
+  applySubstitution,
+  matchPropositionalAxiom,
+  matchAxiomA4,
+  matchAxiomA5,
+  matchEqualityAxiom,
+  identifyAxiom,
+  axiomA1Template,
+  axiomA2Template,
+  axiomA3Template,
+  axiomE1Template,
+  axiomE2Template,
+  axiomE3Template,
+  lukasiewiczSystem,
+  predicateLogicSystem,
+  equalityLogicSystem,
+} from "./inferenceRule";
+export type {
+  PropositionalAxiomId,
+  PredicateAxiomId,
+  EqualityAxiomId,
+  AxiomId,
+  LogicSystem,
+  RuleApplicationError,
+  RuleApplicationResult,
+  AxiomMatchResult,
+  AxiomIdentificationResult,
+} from "./inferenceRule";
