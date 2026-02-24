@@ -74,8 +74,8 @@ else
     echo "Error: 'claude' command not found."
     exit 1
   fi
-  if [ ! -f "$SCRIPT_DIR/CLAUDE.md" ]; then
-    echo "Error: CLAUDE.md not found at $SCRIPT_DIR/CLAUDE.md"
+  if [ ! -f "CLAUDE.md" ]; then
+    echo "Error: CLAUDE.md not found at CLAUDE.md"
     exit 1
   fi
 fi
@@ -157,7 +157,7 @@ while [[ $ITERATION -lt $MAX_ITERATIONS ]]; do
 
   # Build the prompt: CLAUDE.md instructions + live coverage data
   if [[ "$TOOL" == "claude" ]]; then
-    PROMPT="$(cat "$SCRIPT_DIR/CLAUDE.md")
+    PROMPT="$(cat "CLAUDE.md")
 
 ---
 ## 現在のカバレッジ（ベースライン）
