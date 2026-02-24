@@ -16,6 +16,8 @@
 - AST の再帰型は `Schema.suspend(() => Formula)` で定義。`FunctionApplication`（`Function` はJS予約語と衝突するため改名）
 - `@luma-dev/luma-ts/no-explicit-return-is` があるため type predicate は明示しない
 - フォーマッターの括弧判定: 左辺は `parent.leftBP > child.rightBP`、右辺は `child.leftBP <= parent.rightBP` で判定（Pratt parserの挙動を正確に反映）
+- ストーリーでノードサイズが必要な場合は callback ref + `getBoundingClientRect()` でDOM実測する（手動推定はポート位置がずれる）
+- ポートIDは `${nodeId}-${portId}` 形式でユニーク化し、play関数で `getByTestId` による一意特定を可能にする
 
 ---
 
@@ -689,4 +691,22 @@
   - ギリシャ文字→LaTeXコマンド対応表: εは`\varepsilon`（`\epsilon`ではない）、φは`\varphi`（`\phi`ではない）
   - `\left(` `\right)` は KaTeX でのレンダリング時にサイズ自動調整される。通常の `(` `)` より望ましい
   - フェーズ2B（Logic Lang: Lexer/Parser/Unicode Formatter/LaTeX Formatter）がすべて完了。次はフェーズ3（ノートUI）またはprd-inserted-tasksの残タスク
+---
+
+## 2026-02-24 - InfiniteCanvas コネクタポート位置テストとDOMサイズ実測
+- ConnectorPorts.stories.tsx / ProofTree.stories.tsx に `getBoundingClientRect()` を使ったポート位置検証テストを追加
+- 手動サイズ推定（`itemWidth`/`itemHeight` を定数で設定）をcallback refによるDOM実測に置き換え
+  - `useCallback` で ref callback を作り、マウント時に `getBoundingClientRect()` でサイズ取得
+  - `viewport.scale` でスケーリング補正して world-space サイズを計算
+- ポートIDをノードIDを含むユニーク形式（例: `axiom-right`）に変更し、play関数で特定ノードのポートを一意にテスト可能に
+- play関数でポート中心とノードエッジの距離が15px以内であることを検証（全4辺テスト）
+- テスト実行時にポートが43px浮いていた問題を検出→DOM実測で修正→全テスト通過
+- 変更ファイル: `ConnectorPorts.stories.tsx`, `ProofTree.stories.tsx`, `tasks/prd-inserted-tasks.md`, `task-processing.md`
+- カバレッジ: Statements 91.71%（ベースラインから変化なし、ストーリー修正のみ）
+- スクリーンショット: `screenshots.local/connector-ports-position-test.png`, `screenshots.local/proof-tree-position-test.png`
+- **今後のイテレーションへの学び:**
+  - ストーリーでノードの `itemWidth`/`itemHeight` を手動で推定すると、実際のDOMサイズとずれてポートが浮く。callback ref + `getBoundingClientRect()` でDOM実測するのが正しい
+  - `useEffect` 内の `setState` は `react-hooks/set-state-in-effect` lint ルールに違反する。callback ref 内での `setState` は許容される
+  - ポートIDを `${nodeId}-${portId}` 形式にすると、play関数で `getByTestId` で一意に特定可能。接続線計算には元のポートIDを維持
+  - `filter((o): o is Type => ...)` は `no-explicit-return-is` lint ルールに違反。TypeScript 5.5+では `filter((o) => o !== null)` で型ガード推論される
 ---
