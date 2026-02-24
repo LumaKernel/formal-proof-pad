@@ -598,3 +598,38 @@
   - キーワード判定は完全一致のみ（最長一致で読んだ識別子全体をキーワード表と照合）。部分一致はしないため `existing` は `ex` にならない
   - メタ変数のvalue形式は `"φ"` (添字なし) or `"φ_01"` (添字あり) で統一。パーサーで分解する
 ---
+
+## 2026-02-24 - Logic Lang US-016: Parser（Pratt parser + 再帰下降ハイブリッド）
+- `src/lib/logic-lang/parser.ts` を新規実装: Pratt parser + 再帰下降のハイブリッドパーサー
+- `src/lib/logic-lang/parser.test.ts`: 83テスト
+- `src/lib/logic-lang/index.ts` に parser エクスポートを追加
+- 主要機能:
+  - `parse(tokens)`: Token列からFormula ASTを生成
+  - `parseString(input)`: 文字列から直接パース（lexer + parser）
+  - 論理式の演算子優先順位と結合性: ¬ > ∧ > ∨ > → > ↔（→/↔は右結合、∧/∨は左結合）
+  - 項の演算子優先順位と結合性: ^ > *, / > +, -（^は右結合、他は左結合）
+  - 等号: 項と項を繋いでEquality論理式を生成、連鎖禁止（x = y = zはエラー）
+  - 量化子のスコープ: ドットの右側全体（∀x. P(x) → Q(x) = ∀x.(P(x) → Q(x))）
+  - メタ変数の文脈依存性: 論理式位置→MetaVariable、項位置→TermMetaVariable
+  - 束縛変数の追跡: 量化子で束縛されたギリシャ文字は項位置でTermVariable（TermMetaVariableではなく）
+  - 括弧のバックトラッキング: (x + y) * z = x のような項レベル括弧を正しく処理
+  - DSL仕様の全12例題をパス
+- テスト内容:
+  - DSL仕様例題12種、演算子優先順位・結合性8種、量化子8種（ASCII含む）
+  - 述語4種、等号4種、メタ変数5種、項メタ変数3種
+  - 括弧7種（論理式括弧、項括弧、バックトラックケース）
+  - ASCII入力2種、複合式4種、エラーケース13種、parseString便利関数3種
+  - 項二項演算子全種3種
+- テスト: 952 → 1035（+83）
+- カバレッジ: Statements 91.62% → 91.74% ✅ 向上（+0.12%）
+- parser.ts 単体: Lines 95.66%, Functions 100%, Branch 86.53%
+- 変更ファイル: `src/lib/logic-lang/parser.ts`, `parser.test.ts`（全新規）, `index.ts`, `tasks/prd-formal-logic-pad.md`
+- スクリーンショット: `.screenshots/us-016-storybook-main.png`
+- **今後のイテレーションへの学び:**
+  - Pratt parserの実装: binding powerを数値ペア(leftBP, rightBP)で表現。右結合は leftBP > rightBP、左結合は leftBP < rightBP
+  - メタ変数の文脈依存性: `parseEqualityOrMetaVariable` で項パース→等号チェック→MetaVariable/TermMetaVariableの分岐。バックトラッキング（pos保存/復元）が必要
+  - 束縛変数トラッキング: `Set<string>` で量化子で束縛された変数名を管理。`parseTermAtom` で META_VARIABLE が束縛変数にマッチすれば `termVariable` を生成
+  - 括弧のバックトラッキング: `(` が論理式レベルで出現した場合、まず `parseFormula` を試み、閉じ括弧後に項演算子/等号があればバックトラックして `parseEqualityOrTerm` で再パース
+  - `errors.length = savedErrors` でバックトラック時のエラーメッセージも復元。エラー配列のlengthを縮小するだけで良い
+  - ESLint `require-satisfies-in-tls`: テンプレートリテラル内の三項演算子結果にも `satisfies string` が必要
+---

@@ -1,0 +1,753 @@
+import { describe, expect, it } from "vitest";
+import { parseString } from "./parser";
+import type { Formula } from "../logic-core/formula";
+import { equalFormula } from "../logic-core/equality";
+import {
+  metaVariable,
+  negation,
+  implication,
+  conjunction,
+  disjunction,
+  biconditional,
+  universal,
+  existential,
+  predicate,
+  equality,
+} from "../logic-core/formula";
+import {
+  termVariable,
+  termMetaVariable,
+  constant,
+  functionApplication,
+  binaryOperation,
+} from "../logic-core/term";
+
+// ヘルパー: 成功パース結果を取得
+const parseOk = (input: string): Formula => {
+  const result = parseString(input);
+  if (!result.ok) {
+    throw new Error(
+      `Parse failed: ${result.errors.map((e) => e.message).join("; ") satisfies string}`,
+    );
+  }
+  return result.formula;
+};
+
+// ヘルパー: エラーパース結果を取得
+const parseErr = (input: string) => {
+  const result = parseString(input);
+  expect(result.ok).toBe(false);
+  if (result.ok) throw new Error("Expected error");
+  return result.errors;
+};
+
+// ヘルパー: AST比較
+const assertFormula = (input: string, expected: Formula) => {
+  const actual = parseOk(input);
+  expect(equalFormula(actual, expected)).toBe(true);
+};
+
+describe("Parser", () => {
+  // --- DSL仕様の例題 ---
+
+  describe("spec examples", () => {
+    it("example 1: φ → φ", () => {
+      const φ = metaVariable("φ");
+      assertFormula("φ → φ", implication(φ, φ));
+    });
+
+    it("example 1 (ASCII): phi -> phi", () => {
+      const φ = metaVariable("φ");
+      assertFormula("phi -> phi", implication(φ, φ));
+    });
+
+    it("example 2: ∀ζ. P(ζ) ∧ ∃ξ. Q(ξ)", () => {
+      // 量化子のスコープはドットの右側全体
+      // ∀ζ. (P(ζ) ∧ (∃ξ. Q(ξ)))
+      const ζ = termVariable("ζ");
+      const ξ = termVariable("ξ");
+      assertFormula(
+        "∀ζ. P(ζ) ∧ ∃ξ. Q(ξ)",
+        universal(
+          ζ,
+          conjunction(predicate("P", [ζ]), existential(ξ, predicate("Q", [ξ]))),
+        ),
+      );
+    });
+
+    it("example 3: f(x) + g(y) = h(z)", () => {
+      assertFormula(
+        "f(x) + g(y) = h(z)",
+        equality(
+          binaryOperation(
+            "+",
+            functionApplication("f", [termVariable("x")]),
+            functionApplication("g", [termVariable("y")]),
+          ),
+          functionApplication("h", [termVariable("z")]),
+        ),
+      );
+    });
+
+    it("example 4: ∀x. x + 0 = x", () => {
+      const x = termVariable("x");
+      assertFormula(
+        "∀x. x + 0 = x",
+        universal(x, equality(binaryOperation("+", x, constant("0")), x)),
+      );
+    });
+
+    it("example 5: phi1 -> phi_1 (same meta variable)", () => {
+      const φ1 = metaVariable("φ", "1");
+      assertFormula("phi1 -> phi_1", implication(φ1, φ1));
+    });
+
+    it("example 6: phi1 -> phi01 (different meta variables)", () => {
+      const φ1 = metaVariable("φ", "1");
+      const φ01 = metaVariable("φ", "01");
+      assertFormula("phi1 -> phi01", implication(φ1, φ01));
+    });
+
+    it("example 7: ¬P(x) ∨ Q(x, y)", () => {
+      assertFormula(
+        "¬P(x) ∨ Q(x, y)",
+        disjunction(
+          negation(predicate("P", [termVariable("x")])),
+          predicate("Q", [termVariable("x"), termVariable("y")]),
+        ),
+      );
+    });
+
+    it("example 8: (φ → ψ) → (φ → χ) → (φ → (ψ → χ))", () => {
+      // → は右結合
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula(
+        "(φ → ψ) → (φ → χ) → (φ → (ψ → χ))",
+        implication(
+          implication(φ, ψ),
+          implication(implication(φ, χ), implication(φ, implication(ψ, χ))),
+        ),
+      );
+    });
+
+    it("example 9: x ^ y ^ z (right associative)", () => {
+      // ^ は右結合 → x ^ (y ^ z)
+      const x = termVariable("x");
+      const y = termVariable("y");
+      const z = termVariable("z");
+      assertFormula(
+        "x ^ y ^ z = x",
+        equality(binaryOperation("^", x, binaryOperation("^", y, z)), x),
+      );
+    });
+
+    it("example 10: ∀x. ∃y. x + y = 0", () => {
+      const x = termVariable("x");
+      const y = termVariable("y");
+      assertFormula(
+        "∀x. ∃y. x + y = 0",
+        universal(
+          x,
+          existential(y, equality(binaryOperation("+", x, y), constant("0"))),
+        ),
+      );
+    });
+
+    it("example 11: P(f(x, g(y)), z)", () => {
+      assertFormula(
+        "P(f(x, g(y)), z)",
+        predicate("P", [
+          functionApplication("f", [
+            termVariable("x"),
+            functionApplication("g", [termVariable("y")]),
+          ]),
+          termVariable("z"),
+        ]),
+      );
+    });
+
+    it("example 12: φ ↔ ψ ↔ χ (right associative)", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ ↔ ψ ↔ χ", biconditional(φ, biconditional(ψ, χ)));
+    });
+  });
+
+  // --- 演算子の優先順位と結合性 ---
+
+  describe("operator precedence and associativity", () => {
+    it("¬ binds tighter than ∧", () => {
+      // ¬φ ∧ ψ = (¬φ) ∧ ψ
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      assertFormula("¬φ ∧ ψ", conjunction(negation(φ), ψ));
+    });
+
+    it("∧ binds tighter than ∨", () => {
+      // φ ∨ ψ ∧ χ = φ ∨ (ψ ∧ χ)
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ ∨ ψ ∧ χ", disjunction(φ, conjunction(ψ, χ)));
+    });
+
+    it("∨ binds tighter than →", () => {
+      // φ → ψ ∨ χ = φ → (ψ ∨ χ)
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ → ψ ∨ χ", implication(φ, disjunction(ψ, χ)));
+    });
+
+    it("→ binds tighter than ↔", () => {
+      // φ ↔ ψ → χ = φ ↔ (ψ → χ)
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ ↔ ψ → χ", biconditional(φ, implication(ψ, χ)));
+    });
+
+    it("→ is right associative", () => {
+      // φ → ψ → χ = φ → (ψ → χ)
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ → ψ → χ", implication(φ, implication(ψ, χ)));
+    });
+
+    it("∧ is left associative", () => {
+      // φ ∧ ψ ∧ χ = (φ ∧ ψ) ∧ χ
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ ∧ ψ ∧ χ", conjunction(conjunction(φ, ψ), χ));
+    });
+
+    it("∨ is left associative", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ ∨ ψ ∨ χ", disjunction(disjunction(φ, ψ), χ));
+    });
+
+    it("↔ is right associative", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ ↔ ψ ↔ χ", biconditional(φ, biconditional(ψ, χ)));
+    });
+
+    it("term: + is left associative", () => {
+      const x = termVariable("x");
+      const y = termVariable("y");
+      const z = termVariable("z");
+      assertFormula(
+        "x + y + z = x",
+        equality(binaryOperation("+", binaryOperation("+", x, y), z), x),
+      );
+    });
+
+    it("term: * binds tighter than +", () => {
+      const x = termVariable("x");
+      const y = termVariable("y");
+      const z = termVariable("z");
+      assertFormula(
+        "x + y * z = x",
+        equality(binaryOperation("+", x, binaryOperation("*", y, z)), x),
+      );
+    });
+
+    it("term: ^ binds tighter than *", () => {
+      const x = termVariable("x");
+      const y = termVariable("y");
+      const z = termVariable("z");
+      assertFormula(
+        "x * y ^ z = x",
+        equality(binaryOperation("*", x, binaryOperation("^", y, z)), x),
+      );
+    });
+  });
+
+  // --- 量化子 ---
+
+  describe("quantifiers", () => {
+    it("∀x. φ → ψ parses as ∀x.(φ → ψ)", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      assertFormula(
+        "∀x. φ → ψ",
+        universal(termVariable("x"), implication(φ, ψ)),
+      );
+    });
+
+    it("nested quantifiers", () => {
+      const x = termVariable("x");
+      const y = termVariable("y");
+      assertFormula(
+        "∀x. ∃y. P(x, y)",
+        universal(x, existential(y, predicate("P", [x, y]))),
+      );
+    });
+
+    it("quantifier with ASCII keywords", () => {
+      assertFormula(
+        "all x. P(x)",
+        universal(termVariable("x"), predicate("P", [termVariable("x")])),
+      );
+    });
+
+    it("exists keyword", () => {
+      assertFormula(
+        "exists x. P(x)",
+        existential(termVariable("x"), predicate("P", [termVariable("x")])),
+      );
+    });
+
+    it("ex keyword", () => {
+      assertFormula(
+        "ex x. P(x)",
+        existential(termVariable("x"), predicate("P", [termVariable("x")])),
+      );
+    });
+
+    it("bound Greek letter in equality", () => {
+      // ∀ζ. ζ = x → ζ は項位置でTermVariable
+      const ζ = termVariable("ζ");
+      assertFormula("∀ζ. ζ = x", universal(ζ, equality(ζ, termVariable("x"))));
+    });
+
+    it("bound Greek letter as standalone formula-level meta", () => {
+      // ∀ζ. ζ → P は ∀ζ. (ζ → P) で、ζは論理式位置なのでMetaVariable
+      const ζmeta = metaVariable("ζ");
+      assertFormula(
+        "∀ζ. ζ → P",
+        universal(termVariable("ζ"), implication(ζmeta, predicate("P", []))),
+      );
+    });
+
+    it("forall keyword", () => {
+      assertFormula(
+        "forall x. P(x)",
+        universal(termVariable("x"), predicate("P", [termVariable("x")])),
+      );
+    });
+
+    it("quantifier scope: (∀x.P(x)) → Q has limited scope", () => {
+      assertFormula(
+        "(∀x. P(x)) → Q",
+        implication(
+          universal(termVariable("x"), predicate("P", [termVariable("x")])),
+          predicate("Q", []),
+        ),
+      );
+    });
+  });
+
+  // --- 述語 ---
+
+  describe("predicates", () => {
+    it("zero-arity predicate", () => {
+      assertFormula("P", predicate("P", []));
+    });
+
+    it("unary predicate", () => {
+      assertFormula("P(x)", predicate("P", [termVariable("x")]));
+    });
+
+    it("binary predicate", () => {
+      assertFormula(
+        "Q(x, y)",
+        predicate("Q", [termVariable("x"), termVariable("y")]),
+      );
+    });
+
+    it("predicate with complex arguments", () => {
+      assertFormula(
+        "P(f(x), y + z)",
+        predicate("P", [
+          functionApplication("f", [termVariable("x")]),
+          binaryOperation("+", termVariable("y"), termVariable("z")),
+        ]),
+      );
+    });
+  });
+
+  // --- 等号 ---
+
+  describe("equality", () => {
+    it("simple equality", () => {
+      assertFormula("x = y", equality(termVariable("x"), termVariable("y")));
+    });
+
+    it("equality with arithmetic", () => {
+      assertFormula(
+        "x + y = z",
+        equality(
+          binaryOperation("+", termVariable("x"), termVariable("y")),
+          termVariable("z"),
+        ),
+      );
+    });
+
+    it("equality with functions", () => {
+      assertFormula(
+        "f(x) = g(y)",
+        equality(
+          functionApplication("f", [termVariable("x")]),
+          functionApplication("g", [termVariable("y")]),
+        ),
+      );
+    });
+
+    it("equality with constants", () => {
+      assertFormula("0 = 0", equality(constant("0"), constant("0")));
+    });
+  });
+
+  // --- メタ変数 ---
+
+  describe("meta variables", () => {
+    it("simple meta variable", () => {
+      assertFormula("φ", metaVariable("φ"));
+    });
+
+    it("meta variable with subscript", () => {
+      assertFormula("φ1", metaVariable("φ", "1"));
+    });
+
+    it("meta variable with 2-digit subscript", () => {
+      assertFormula("φ01", metaVariable("φ", "01"));
+    });
+
+    it("negation of meta variable", () => {
+      assertFormula("¬φ", negation(metaVariable("φ")));
+    });
+
+    it("implication of meta variables", () => {
+      assertFormula("φ → ψ", implication(metaVariable("φ"), metaVariable("ψ")));
+    });
+  });
+
+  // --- 項メタ変数 ---
+
+  describe("term meta variables", () => {
+    it("meta variable in term position (equality)", () => {
+      assertFormula(
+        "τ = σ",
+        equality(termMetaVariable("τ"), termMetaVariable("σ")),
+      );
+    });
+
+    it("meta variable in function argument", () => {
+      assertFormula("P(τ)", predicate("P", [termMetaVariable("τ")]));
+    });
+
+    it("meta variable with arithmetic", () => {
+      assertFormula(
+        "τ + σ = τ",
+        equality(
+          binaryOperation("+", termMetaVariable("τ"), termMetaVariable("σ")),
+          termMetaVariable("τ"),
+        ),
+      );
+    });
+  });
+
+  // --- 括弧 ---
+
+  describe("parentheses", () => {
+    it("override precedence with parens", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("φ ∧ (ψ ∨ χ)", conjunction(φ, disjunction(ψ, χ)));
+    });
+
+    it("override associativity with parens", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("(φ → ψ) → χ", implication(implication(φ, ψ), χ));
+    });
+
+    it("nested parens", () => {
+      const φ = metaVariable("φ");
+      assertFormula("((φ))", φ);
+    });
+
+    it("term parens", () => {
+      const x = termVariable("x");
+      const y = termVariable("y");
+      const z = termVariable("z");
+      assertFormula(
+        "(x + y) * z = x",
+        equality(binaryOperation("*", binaryOperation("+", x, y), z), x),
+      );
+    });
+
+    it("term parens on right side of equality", () => {
+      const x = termVariable("x");
+      const y = termVariable("y");
+      const z = termVariable("z");
+      assertFormula("x = (y + z)", equality(x, binaryOperation("+", y, z)));
+    });
+
+    it("formula parens followed by logical operator", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula("(φ ∧ ψ) ∨ χ", disjunction(conjunction(φ, ψ), χ));
+    });
+
+    it("meta variable in parens followed by term operator (backtrack to term)", () => {
+      // (τ) + x = y → τ は括弧内で論理式としてパースされるが、
+      // 閉じ括弧の後に+が続くため項としてバックトラック
+      assertFormula(
+        "(τ) + x = y",
+        equality(
+          binaryOperation("+", termMetaVariable("τ"), termVariable("x")),
+          termVariable("y"),
+        ),
+      );
+    });
+
+    it("meta variable in parens followed by equals (backtrack to term)", () => {
+      // (τ) = x → τ は括弧内で論理式としてパースされるが、
+      // 閉じ括弧の後に=が続くため項としてバックトラック
+      assertFormula(
+        "(τ) = x",
+        equality(termMetaVariable("τ"), termVariable("x")),
+      );
+    });
+  });
+
+  // --- ASCII入力 ---
+
+  describe("ASCII input", () => {
+    it("full ASCII expression", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      assertFormula(
+        "~phi /\\ psi \\/ phi -> psi <-> phi",
+        biconditional(
+          implication(disjunction(conjunction(negation(φ), ψ), φ), ψ),
+          φ,
+        ),
+      );
+    });
+
+    it("all x. P(x) and exists y. Q(y)", () => {
+      assertFormula(
+        "all x. P(x) and exists y. Q(y)",
+        universal(
+          termVariable("x"),
+          conjunction(
+            predicate("P", [termVariable("x")]),
+            existential(termVariable("y"), predicate("Q", [termVariable("y")])),
+          ),
+        ),
+      );
+    });
+  });
+
+  // --- 複合式 ---
+
+  describe("complex expressions", () => {
+    it("K axiom instance", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      assertFormula("φ → (ψ → φ)", implication(φ, implication(ψ, φ)));
+    });
+
+    it("S axiom instance", () => {
+      const φ = metaVariable("φ");
+      const ψ = metaVariable("ψ");
+      const χ = metaVariable("χ");
+      assertFormula(
+        "(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))",
+        implication(
+          implication(φ, implication(ψ, χ)),
+          implication(implication(φ, ψ), implication(φ, χ)),
+        ),
+      );
+    });
+
+    it("equality with nested terms in quantified formula", () => {
+      const x = termVariable("x");
+      const y = termVariable("y");
+      assertFormula(
+        "∀x. ∀y. f(x, y) = f(y, x)",
+        universal(
+          x,
+          universal(
+            y,
+            equality(
+              functionApplication("f", [x, y]),
+              functionApplication("f", [y, x]),
+            ),
+          ),
+        ),
+      );
+    });
+
+    it("mixed logical and term operators", () => {
+      const x = termVariable("x");
+      assertFormula(
+        "∀x. x + 0 = x ∧ 0 + x = x",
+        universal(
+          x,
+          conjunction(
+            equality(binaryOperation("+", x, constant("0")), x),
+            equality(binaryOperation("+", constant("0"), x), x),
+          ),
+        ),
+      );
+    });
+  });
+
+  // --- エラーケース ---
+
+  describe("error cases", () => {
+    it("unexpected EOF after →", () => {
+      const errors = parseErr("φ →");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("unexpected operator at start", () => {
+      const errors = parseErr("→ φ");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0]!.message).toContain("expected formula");
+    });
+
+    it("double operator", () => {
+      const errors = parseErr("φ ∧ ∧ ψ");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("unclosed paren", () => {
+      const errors = parseErr("(φ → ψ");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0]!.message).toContain(")");
+    });
+
+    it("missing variable after quantifier", () => {
+      const errors = parseErr("∀. P(x)");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0]!.message).toContain("variable");
+    });
+
+    it("missing dot after quantifier variable", () => {
+      const errors = parseErr("∀x P(x)");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0]!.message).toContain(".");
+    });
+
+    it("chained equality", () => {
+      const errors = parseErr("x = y = z");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0]!.message).toContain("Chained equality");
+    });
+
+    it("chained equality with meta variable", () => {
+      // τ = σ = ρ → メタ変数パスでの連鎖等号エラー
+      const errors = parseErr("τ = σ = ρ");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0]!.message).toContain("Chained equality");
+    });
+
+    it("empty input", () => {
+      const errors = parseErr("");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("trailing comma in predicate", () => {
+      const errors = parseErr("P(x,)");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("unexpected character in input", () => {
+      const errors = parseErr("φ § ψ");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("trailing tokens after valid formula", () => {
+      // "φ ψ" → φ はパース成功するが、ψ が残る
+      const errors = parseErr("φ ψ");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0]!.message).toContain("expected end of input");
+    });
+
+    it("meta variable with complex term without equals", () => {
+      // "τ + σ" → 項はパースされるが等号がないのでエラー
+      const errors = parseErr("τ + σ");
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("zero-arity function call", () => {
+      // "f() = x" → f() は空引数リストの関数適用
+      assertFormula(
+        "f() = x",
+        equality(functionApplication("f", []), termVariable("x")),
+      );
+    });
+  });
+
+  // --- parseString convenience ---
+
+  describe("parseString", () => {
+    it("should parse valid input", () => {
+      const result = parseString("φ → ψ");
+      expect(result.ok).toBe(true);
+    });
+
+    it("should return errors for invalid input", () => {
+      const result = parseString("→");
+      expect(result.ok).toBe(false);
+    });
+
+    it("should propagate lexer errors", () => {
+      const result = parseString("§");
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.errors[0]!.message).toContain("Unexpected character");
+      }
+    });
+  });
+
+  // --- 項の二項演算子の全種類 ---
+
+  describe("all term binary operators", () => {
+    it("minus operator", () => {
+      assertFormula(
+        "x - y = z",
+        equality(
+          binaryOperation("-", termVariable("x"), termVariable("y")),
+          termVariable("z"),
+        ),
+      );
+    });
+
+    it("divide operator", () => {
+      assertFormula(
+        "x / y = z",
+        equality(
+          binaryOperation("/", termVariable("x"), termVariable("y")),
+          termVariable("z"),
+        ),
+      );
+    });
+
+    it("power operator", () => {
+      assertFormula(
+        "x ^ y = z",
+        equality(
+          binaryOperation("^", termVariable("x"), termVariable("y")),
+          termVariable("z"),
+        ),
+      );
+    });
+  });
+});

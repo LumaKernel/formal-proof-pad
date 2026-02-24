@@ -1,4 +1,6 @@
 export { lex } from "./lexer";
+export { parse, parseString } from "./parser";
+export type { ParseError, ParseResult } from "./parser";
 export type {
   LexResult,
   LexerError,

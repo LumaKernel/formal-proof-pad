@@ -1,0 +1,605 @@
+/**
+ * Logic Schema Language の Parser。
+ *
+ * DSL仕様（dev/logic-reference/06-dsl-specification.md）に準拠。
+ * Pratt parser + 再帰下降のハイブリッド。
+ *
+ * 出力: logic-core の Formula / Term 型。
+ *
+ * 変更時は token.ts, lexer.ts, parser.test.ts も同期すること。
+ */
+
+import type { GreekLetter } from "../logic-core/greekLetters";
+import {
+  metaVariable,
+  negation,
+  implication,
+  conjunction,
+  disjunction,
+  biconditional,
+  universal,
+  existential,
+  predicate,
+  equality,
+} from "../logic-core/formula";
+import type { Formula } from "../logic-core/formula";
+import {
+  termVariable,
+  termMetaVariable,
+  constant,
+  functionApplication,
+  binaryOperation,
+} from "../logic-core/term";
+import type { BinaryOperator, Term } from "../logic-core/term";
+import type { Token, TokenKind, Span, Position } from "./token";
+
+// --- パーサーエラー ---
+
+export interface ParseError {
+  readonly message: string;
+  readonly span: Span;
+}
+
+// --- パース結果 ---
+
+export type ParseResult =
+  | { readonly ok: true; readonly formula: Formula }
+  | { readonly ok: false; readonly errors: readonly ParseError[] };
+
+// --- メタ変数の value パース ---
+
+const parseMetaVariableValue = (
+  value: string,
+): { readonly name: GreekLetter; readonly subscript: string | undefined } => {
+  const underscoreIdx = value.indexOf("_");
+  if (underscoreIdx === -1) {
+    return { name: value as GreekLetter, subscript: undefined };
+  }
+  return {
+    name: value.slice(0, underscoreIdx) as GreekLetter,
+    subscript: value.slice(underscoreIdx + 1),
+  };
+};
+
+// --- 論理式の binding power ---
+
+const formulaInfixBP = (
+  kind: TokenKind,
+): { readonly leftBP: number; readonly rightBP: number } | undefined => {
+  switch (kind) {
+    case "IFF":
+      return { leftBP: 2, rightBP: 1 }; // 右結合
+    case "IMPLIES":
+      return { leftBP: 4, rightBP: 3 }; // 右結合
+    case "OR":
+      return { leftBP: 5, rightBP: 6 }; // 左結合
+    case "AND":
+      return { leftBP: 7, rightBP: 8 }; // 左結合
+    default:
+      return undefined;
+  }
+};
+
+// --- 項の binding power ---
+
+const termInfixBP = (
+  kind: TokenKind,
+): { readonly leftBP: number; readonly rightBP: number } | undefined => {
+  switch (kind) {
+    case "PLUS":
+    case "MINUS":
+      return { leftBP: 1, rightBP: 2 }; // 左結合
+    case "TIMES":
+    case "DIVIDE":
+      return { leftBP: 3, rightBP: 4 }; // 左結合
+    case "POWER":
+      return { leftBP: 6, rightBP: 5 }; // 右結合
+    default:
+      return undefined;
+  }
+};
+
+// --- トークン種別 → 二項演算子 ---
+
+const tokenToBinaryOperator = (kind: TokenKind): BinaryOperator | undefined => {
+  switch (kind) {
+    case "PLUS":
+      return "+";
+    case "MINUS":
+      return "-";
+    case "TIMES":
+      return "*";
+    case "DIVIDE":
+      return "/";
+    case "POWER":
+      return "^";
+    default:
+      return undefined;
+  }
+};
+
+// --- パーサー本体 ---
+
+export const parse = (tokens: readonly Token[]): ParseResult => {
+  const errors: ParseError[] = [];
+  let pos = 0;
+
+  // 束縛変数の追跡（ギリシャ文字が量化子で束縛されている場合にTermVariableとして解釈するため）
+  const boundVariables: Set<string> = new Set();
+
+  const peek = (): Token => tokens[pos] ?? tokens[tokens.length - 1]!;
+
+  const advance = (): Token => {
+    const token = peek();
+    if (pos < tokens.length - 1) pos++;
+    return token;
+  };
+
+  const expect = (kind: TokenKind): Token | undefined => {
+    const token = peek();
+    if (token.kind === kind) {
+      return advance();
+    }
+    addError(
+      `Expected '${kindToString(kind) satisfies string}' at ${posStr(token.span.start) satisfies string}`,
+      token.span,
+    );
+    return undefined;
+  };
+
+  const addError = (message: string, span: Span): void => {
+    errors.push({ message, span });
+  };
+
+  const posStr = (p: Position): string =>
+    `${String(p.line) satisfies string}:${String(p.column) satisfies string}`;
+
+  const kindToString = (kind: TokenKind): string => {
+    switch (kind) {
+      case "RPAREN":
+        return ")";
+      case "LPAREN":
+        return "(";
+      case "DOT":
+        return ".";
+      case "COMMA":
+        return ",";
+      case "EOF":
+        return "end of input";
+      default:
+        return kind;
+    }
+  };
+
+  // --- 論理式パース (Pratt parser) ---
+
+  const parseFormula = (minBP: number): Formula | undefined => {
+    // prefix
+    let lhs = parseFormulaPrefix();
+    if (lhs === undefined) return undefined;
+
+    // infix
+    while (true) {
+      const token = peek();
+
+      // 等号チェック: 論理式レベルでは等号は出現しない（項レベルで処理済み）
+      // ただし atom_formula → equality のパスで処理される
+
+      const bp = formulaInfixBP(token.kind);
+      if (bp === undefined) break;
+      if (bp.leftBP < minBP) break;
+
+      advance();
+
+      const rhs = parseFormula(bp.rightBP);
+      if (rhs === undefined) return undefined;
+
+      switch (token.kind) {
+        case "AND":
+          lhs = conjunction(lhs, rhs);
+          break;
+        case "OR":
+          lhs = disjunction(lhs, rhs);
+          break;
+        case "IMPLIES":
+          lhs = implication(lhs, rhs);
+          break;
+        case "IFF":
+          lhs = biconditional(lhs, rhs);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return lhs;
+  };
+
+  // --- 論理式の prefix パース ---
+
+  const parseFormulaPrefix = (): Formula | undefined => {
+    const token = peek();
+
+    // ¬ (NOT)
+    if (token.kind === "NOT") {
+      advance();
+      const inner = parseFormulaPrefix();
+      if (inner === undefined) return undefined;
+      return negation(inner);
+    }
+
+    // ∀ / ∃
+    if (token.kind === "FORALL" || token.kind === "EXISTS") {
+      return parseQuantified();
+    }
+
+    // atom_formula (メタ変数、述語、括弧) - 等号もここで処理
+    return parseAtomFormula();
+  };
+
+  // --- 量化子 ---
+
+  const parseQuantified = (): Formula | undefined => {
+    const quantToken = advance(); // FORALL or EXISTS
+    const varToken = peek();
+
+    // 量化変数: LOWER_IDENT または META_VARIABLE（ギリシャ文字を変数として使う場合）
+    let varName: string;
+    if (varToken.kind === "LOWER_IDENT") {
+      advance();
+      varName = varToken.value!;
+    } else if (varToken.kind === "META_VARIABLE") {
+      // ギリシャ文字を束縛変数として使う場合（∀ζ.P(ζ)）
+      advance();
+      varName = varToken.value!;
+      // 添字付きの場合はvalue全体を変数名として使う（"ζ_1"等）
+    } else {
+      addError(
+        `Expected variable after '${(quantToken.kind === "FORALL" ? "∀" : "∃") satisfies string}' at ${posStr(varToken.span.start) satisfies string}`,
+        varToken.span,
+      );
+      return undefined;
+    }
+
+    if (expect("DOT") === undefined) return undefined;
+
+    // 束縛変数として登録してからbodyをパース
+    const wasBound = boundVariables.has(varName);
+    boundVariables.add(varName);
+
+    const body = parseFormula(0);
+
+    // 束縛変数を復元
+    if (!wasBound) {
+      boundVariables.delete(varName);
+    }
+
+    if (body === undefined) return undefined;
+
+    const tv = termVariable(varName);
+    return quantToken.kind === "FORALL"
+      ? universal(tv, body)
+      : existential(tv, body);
+  };
+
+  // --- atom_formula ---
+  // メタ変数、述語、括弧、等号（項から始まる場合）
+
+  const parseAtomFormula = (): Formula | undefined => {
+    const token = peek();
+
+    // メタ変数
+    if (token.kind === "META_VARIABLE") {
+      // 先読み: 項の二項演算子や等号が続く場合は等号式の可能性
+      // まず項としてパースを試みる
+      return parseEqualityOrMetaVariable();
+    }
+
+    // 大文字識別子 → 述語
+    if (token.kind === "UPPER_IDENT") {
+      return parsePredicate();
+    }
+
+    // 小文字識別子 or 数字 → 等号式の左辺（項）の可能性
+    if (token.kind === "LOWER_IDENT" || token.kind === "NUMBER") {
+      return parseEqualityOrTerm();
+    }
+
+    // 括弧
+    // 括弧の中身が論理式か項かを判定する必要がある
+    // (x + y) * z = x のような場合、括弧内は項式
+    // (φ → ψ) のような場合、括弧内は論理式
+    // バックトラッキングで対応する
+    if (token.kind === "LPAREN") {
+      const savedPos = pos;
+      const savedErrors = errors.length;
+
+      advance(); // LPAREN を消費
+      const inner = parseFormula(0);
+      if (inner !== undefined && peek().kind === "RPAREN") {
+        advance(); // RPAREN を消費
+
+        // 括弧の後ろに項演算子や等号が続く場合は、項として再パース
+        const afterParen = peek();
+        if (
+          termInfixBP(afterParen.kind) !== undefined ||
+          afterParen.kind === "EQUALS"
+        ) {
+          // バックトラック: 項としてパースし直す
+          pos = savedPos;
+          errors.length = savedErrors;
+          return parseEqualityOrTerm();
+        }
+
+        return inner;
+      }
+
+      // 論理式としてのパースに失敗した場合、項としてのパースを試みる
+      pos = savedPos;
+      errors.length = savedErrors;
+
+      // 項式としてパースを試みる（等号を含む）
+      return parseEqualityOrTerm();
+    }
+
+    // エラー
+    addError(
+      `Unexpected ${kindToString(token.kind) satisfies string} at ${posStr(token.span.start) satisfies string}: expected formula`,
+      token.span,
+    );
+    return undefined;
+  };
+
+  // --- 等号またはメタ変数 ---
+  // メタ変数が出現した位置で、後続に等号や項演算子があれば等号式として扱う
+
+  const parseEqualityOrMetaVariable = (): Formula | undefined => {
+    // メタ変数を項としてパースし、後続に等号があるか確認
+    const savedPos = pos;
+    const term = parseTerm(0);
+    if (term === undefined) {
+      pos = savedPos;
+      // フォールバック: 単純なメタ変数として
+      const token = advance();
+      const { name, subscript } = parseMetaVariableValue(token.value!);
+      return metaVariable(name, subscript);
+    }
+
+    // 等号が続くか？
+    if (peek().kind === "EQUALS") {
+      advance();
+      const rhs = parseTerm(0);
+      if (rhs === undefined) return undefined;
+      // 等号の連鎖チェック
+      if (peek().kind === "EQUALS") {
+        const eqToken = peek();
+        addError(
+          `Chained equality is not allowed at ${posStr(eqToken.span.start) satisfies string}`,
+          eqToken.span,
+        );
+        return undefined;
+      }
+      return equality(term, rhs);
+    }
+
+    // 項演算子が続く場合は既にtermに含まれているはず
+    // 等号がない場合: 項がTermMetaVariableならMetaVariableに変換
+    if (term._tag === "TermMetaVariable") {
+      return metaVariable(term.name, term.subscript);
+    }
+
+    // 束縛変数がTermVariableとして解釈された場合で、元がMETA_VARIABLEだった場合
+    // → 論理式位置ではMetaVariableとして扱う
+    if (term._tag === "TermVariable" && boundVariables.has(term.name)) {
+      const { name, subscript } = parseMetaVariableValue(term.name);
+      return metaVariable(name, subscript);
+    }
+
+    // 項が複合的な場合（TermMetaVariable + 二項演算等）→ 等号が必要だったはず
+    addError(
+      `Expected '=' or logical operator at ${posStr(peek().span.start) satisfies string}`,
+      peek().span,
+    );
+    return undefined;
+  };
+
+  // --- 等号または項（小文字識別子/数字から始まる場合）---
+
+  const parseEqualityOrTerm = (): Formula | undefined => {
+    const term = parseTerm(0);
+    if (term === undefined) return undefined;
+
+    // 等号が続くか？
+    if (peek().kind === "EQUALS") {
+      advance();
+      const rhs = parseTerm(0);
+      if (rhs === undefined) return undefined;
+      // 等号の連鎖チェック
+      if (peek().kind === "EQUALS") {
+        const eqToken = peek();
+        addError(
+          `Chained equality is not allowed at ${posStr(eqToken.span.start) satisfies string}`,
+          eqToken.span,
+        );
+        return undefined;
+      }
+      return equality(term, rhs);
+    }
+
+    // 等号がなければ、単純な項だけでは論理式にならない
+    // TermVariable のみの場合 → エラー
+    addError(
+      `Expected '=' after term at ${posStr(peek().span.start) satisfies string}`,
+      peek().span,
+    );
+    return undefined;
+  };
+
+  // --- 述語パース ---
+
+  const parsePredicate = (): Formula | undefined => {
+    const nameToken = advance();
+    const name = nameToken.value!;
+
+    // 引数リスト（オプション）
+    if (peek().kind === "LPAREN") {
+      advance();
+      const args = parseTermList();
+      if (args === undefined) return undefined;
+      if (expect("RPAREN") === undefined) return undefined;
+      return predicate(name, args);
+    }
+
+    // 引数なし述語
+    return predicate(name, []);
+  };
+
+  // --- 項パース (Pratt parser) ---
+
+  const parseTerm = (minBP: number): Term | undefined => {
+    let lhs = parseTermAtom();
+    if (lhs === undefined) return undefined;
+
+    while (true) {
+      const token = peek();
+      const bp = termInfixBP(token.kind);
+      if (bp === undefined) break;
+      if (bp.leftBP < minBP) break;
+
+      advance();
+      const op = tokenToBinaryOperator(token.kind)!;
+
+      const rhs = parseTerm(bp.rightBP);
+      if (rhs === undefined) return undefined;
+
+      lhs = binaryOperation(op, lhs, rhs);
+    }
+
+    return lhs;
+  };
+
+  // --- 項のアトム ---
+
+  const parseTermAtom = (): Term | undefined => {
+    const token = peek();
+
+    // メタ変数 → 束縛変数ならTermVariable、それ以外はTermMetaVariable
+    if (token.kind === "META_VARIABLE") {
+      advance();
+      if (boundVariables.has(token.value!)) {
+        return termVariable(token.value!);
+      }
+      const { name, subscript } = parseMetaVariableValue(token.value!);
+      return termMetaVariable(name, subscript);
+    }
+
+    // 小文字識別子 → 変数 or 関数
+    if (token.kind === "LOWER_IDENT") {
+      advance();
+      const name = token.value!;
+
+      // 関数適用?
+      if (peek().kind === "LPAREN") {
+        advance();
+        const args = parseTermList();
+        if (args === undefined) return undefined;
+        if (expect("RPAREN") === undefined) return undefined;
+        return functionApplication(name, args);
+      }
+
+      return termVariable(name);
+    }
+
+    // 数字 → 定数
+    if (token.kind === "NUMBER") {
+      advance();
+      return constant(token.value!);
+    }
+
+    // 括弧
+    if (token.kind === "LPAREN") {
+      advance();
+      const inner = parseTerm(0);
+      if (inner === undefined) return undefined;
+      if (expect("RPAREN") === undefined) return undefined;
+      return inner;
+    }
+
+    addError(
+      `Unexpected ${kindToString(token.kind) satisfies string} at ${posStr(token.span.start) satisfies string}: expected term`,
+      token.span,
+    );
+    return undefined;
+  };
+
+  // --- 項リスト（カンマ区切り） ---
+
+  const parseTermList = (): readonly Term[] | undefined => {
+    // 空リスト
+    if (peek().kind === "RPAREN") {
+      return [];
+    }
+
+    const terms: Term[] = [];
+    const first = parseTerm(0);
+    if (first === undefined) return undefined;
+    terms.push(first);
+
+    while (peek().kind === "COMMA") {
+      advance();
+      const next = parseTerm(0);
+      if (next === undefined) return undefined;
+      terms.push(next);
+    }
+
+    return terms;
+  };
+
+  // --- メインのパース ---
+
+  const formula = parseFormula(0);
+  if (formula === undefined) {
+    if (errors.length === 0) {
+      const eof = peek();
+      addError(
+        `Unexpected end of input at ${posStr(eof.span.start) satisfies string}`,
+        eof.span,
+      );
+    }
+    return { ok: false, errors };
+  }
+
+  // 入力の残りチェック
+  if (peek().kind !== "EOF") {
+    const remaining = peek();
+    addError(
+      `Unexpected ${kindToString(remaining.kind) satisfies string} at ${posStr(remaining.span.start) satisfies string}: expected end of input`,
+      remaining.span,
+    );
+    return { ok: false, errors };
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+
+  return { ok: true, formula };
+};
+
+// --- 便利関数: 文字列から直接パース ---
+
+import { lex } from "./lexer";
+
+export const parseString = (input: string): ParseResult => {
+  const lexResult = lex(input);
+  if (!lexResult.ok) {
+    return {
+      ok: false,
+      errors: lexResult.errors.map((e) => ({
+        message: e.message,
+        span: e.span,
+      })),
+    };
+  }
+  return parse(lexResult.tokens);
+};
