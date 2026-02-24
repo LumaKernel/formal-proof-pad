@@ -6,3 +6,5 @@ export { TermDisplay } from "./TermDisplay";
 export type { TermDisplayProps } from "./TermDisplay";
 export { TermKaTeX } from "./TermKaTeX";
 export type { TermKaTeXProps } from "./TermKaTeX";
+export { FormulaInput } from "./FormulaInput";
+export type { FormulaInputProps, FormulaParseState } from "./FormulaInput";

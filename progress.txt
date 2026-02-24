@@ -20,7 +20,31 @@
 - ポートIDは `${nodeId}-${portId}` 形式でユニーク化し、play関数で `getByTestId` による一意特定を可能にする
 - Storybook: `render` を使うストーリーでも required props がある場合は `args` にダミー値が必要（TypeScript型チェック）
 - `src/lib/formula-input/` は FormulaInput コンポーネント群の配置先。logic-lang に依存、InfiniteCanvas とは独立
+- FormulaInput: 制御コンポーネント、`useDeferredValue`でデバウンス、純粋関数（computeParseState等）を分離してテスタブルに
 
+---
+
+## 2026-02-25 - FormulaInput FI-004
+- 論理式テキスト入力コンポーネント（FormulaInput）を実装
+  - DSLテキストで論理式を入力し、リアルタイムにパース結果をプレビュー表示
+  - パース成功時: Unicode表示でプレビュー（FormulaDisplay使用）
+  - パースエラー時: エラー位置（行:列）とメッセージをインライン表示
+  - エラー位置の該当テキストにwavy underlineハイライト
+  - `onParsed` コールバックでFormula ASTを親に通知
+  - `useDeferredValue` によるデバウンス（React組み込み機能）
+  - 純粋関数（computeParseState, computeErrorHighlights, formatErrorMessage）として分離
+- 変更ファイル:
+  - `src/lib/formula-input/FormulaInput.tsx` (新規)
+  - `src/lib/formula-input/FormulaInput.test.tsx` (新規: 42テスト)
+  - `src/lib/formula-input/FormulaInput.stories.tsx` (新規: 7ストーリー)
+  - `src/lib/formula-input/index.ts` (エクスポート追加)
+  - `tasks/prd-formula-input-component.md` (FI-004完了)
+- ベースラインカバレッジ: FormulaInput.tsx Stmts 95.94%, Lines 97.18%
+- **今後のイテレーションへの学び:**
+  - CSSの`border`(shorthand)と`borderColor`(longhand)を混在させるとReactがwarningを出す。`borderWidth`+`borderStyle`+`borderColor`に分解すべき
+  - `useDeferredValue`は外部ライブラリ不要のdebounce代替として有効。React 19+で使える
+  - FormulaInputは制御コンポーネント（`value`+`onChange`）として実装。Storybookでは`useState`ラッパーが必要
+  - ESLint `require-satisfies-in-tls` ルールは制御フローで型が絞り込まれていてもtemplate literal内で明示的な`satisfies`を要求する
 ---
 
 ## 2026-02-25 - FormulaInput FI-003
