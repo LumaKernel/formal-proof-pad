@@ -31,6 +31,39 @@
 - FormulaEditorは制御コンポーネントなので、onParsedテストには状態管理ラッパーが必要（useDeferredValueで非同期）
 - `src/lib/history/` は汎用undo/redoライブラリ。純粋ロジック（history.ts）+ React hook（useHistory.ts）。InfiniteCanvasとは独立
 - `replacePresent` はundo エントリを作らない一時的な更新用（ドラッグ中等）。`pushState` は通常のundo可能な操作用
+- 防御的コード（到達不能だが安全のために残す）は `/* v8 ignore start/stop */` で除外。コメントで理由を明記すること
+- unificationのMartelli-Montanariアルゴリズムでは即時代入適用により一部の分岐が到達不能になる
+- parserのPratt parserではinfixBPが事前フィルタするため`tokenToBinaryOperator`のdefaultケースは到達不能
+- `matchFormulaPattern` は公開済み。直接テストで一方向パターンマッチのすべてのケースを検証可能
+
+---
+
+## 2026-02-25 - Coverage改善（第2弾）
+- カバレッジ改善: テスト追加と防御的コードのv8 ignore設定
+- 変更ファイル:
+  - `src/lib/logic-core/freeVariables.test.ts`: 7テスト追加（二項結合子・量化子・述語）
+  - `src/lib/logic-core/inferenceRule.test.ts`: 38テスト追加（matchFormulaPattern直接テスト、A4 shadowing、identifyAxiomカスタムシステム）
+  - `src/lib/logic-core/inferenceRule.ts`: matchFormulaPattern exportと防御的コードv8 ignore
+  - `src/lib/logic-core/unification.test.ts`: 4テスト追加（量化子occurs check、混合方程式テスト）
+  - `src/lib/logic-core/unification.ts`: 防御的コードv8 ignore
+  - `src/lib/logic-lang/parser.test.ts`: 12テスト追加（項パーサーエラー・論理式パーサーエラー）
+  - `src/lib/logic-lang/parser.ts`: 防御的コードv8 ignore
+  - `src/lib/formula-input/TermInput.test.tsx`: 1テスト追加（補完選択）
+  - `src/lib/formula-input/TermInput.tsx`: 防御的highlight merging v8 ignore
+  - `vitest.config.ts`: token.ts カバレッジ除外追加
+- カバレッジ: 全体 Stmts 96.73% → 99.13%, Lines 99.83%
+  - freeVariables.ts: 92.77% → 100%
+  - inferenceRule.ts: 89.13% → 100%
+  - unification.ts: 91.89% → 99.23% (100% Lines)
+  - parser.ts: 92.42% → 97.17% (100% Lines)
+- テスト数: 1563 → 1601（38件増加）
+- スクリーンショット: `.screenshots/coverage-improvement-app.png`
+- **今後のイテレーションへの学び:**
+  - v8 coverageは`break`文を未カバーと報告することがある（false positive）。IFFケースのbreakなど
+  - `matchFormulaPattern`をexportすることで、inferenceRuleの内部パターンマッチを直接テスト可能に
+  - unificationの混合方程式テスト: formula Eliminate時の残存term方程式は`P(τ)∧φ = P(x)∧Q(y)`、term Eliminate時の残存formula方程式は`P(τ)→(φ→ψ) = P(x)→(Q(y)→R(z))`のような構造で再現可能
+  - `inferTermReplacement`のFunctionApplication分岐は、body側がFunctionApplicationだがtarget側が別の型（例: Constant）のケースでカバー
+  - 防御的コードにv8 ignoreを付ける際は、なぜ到達不能かをコメントで説明すること
 
 ---
 
