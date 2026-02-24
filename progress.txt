@@ -18,3 +18,20 @@
   - PRDの受け入れ基準に沿って各セクションを確実にカバーする
   - CLAUDE.md のPrettier警告は既知の問題（無視してよい）
 ---
+
+## 2026-02-24 - 論理リファレンス US-002
+- `dev/logic-reference/02-propositional-logic.md` を作成
+- Hilbert系命題論理の公理系（A1: K公理、A2: S公理、A3: 対偶公理）を定義
+- 推論規則 Modus Ponens を厳密に定義
+- 論理式と論理式スキーマの区別を説明
+- φ→φ（I combinator）の完全な5ステップ証明を記述
+- ¬¬φ→φ（二重否定除去）の証明戦略と部分証明を記述
+- 証明図（木構造）の表記法を例付きで説明
+- 演繹定理、健全性・完全性の概要を記述
+- 変更ファイル: `dev/logic-reference/02-propositional-logic.md` (新規), `tasks/prd-logic-reference.md`, `task-processing.md`
+- ベースラインカバレッジ: Statements 90.11%（ドキュメントのみのため変化なし）
+- **今後のイテレーションへの学び:**
+  - Łukasiewicz の3公理体系（A1, A2, A3）を採用。PRDの「未解決の質問」にあった否定公理は対偶公理 A3 で決定
+  - Hilbert系の証明は非常に冗長（φ→φでも5ステップ、¬¬φ→φは十数ステップ）。UIでの体験設計で考慮が必要
+  - 高崎研究室のリファレンス（logic6.html）が公理体系の主要な出典
+---
