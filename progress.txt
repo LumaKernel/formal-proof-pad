@@ -47,6 +47,28 @@
   - ESLint `require-satisfies-in-tls` ルールは制御フローで型が絞り込まれていてもtemplate literal内で明示的な`satisfies`を要求する
 ---
 
+## 2026-02-25 - FormulaInput FI-005
+- 項テキスト入力コンポーネント（TermInput）を実装
+  - `parseTermString` を parser.ts に追加（項専用パーサー関数）
+  - `parseTokensAsTerm` をクロージャベースで実装（既存 parse() と同構造だが項のみ対象）
+  - TermInput コンポーネント: FormulaInput と同様のUI/UXで項をリアルタイム入力・プレビュー
+  - computeErrorHighlights, formatErrorMessage は FormulaInput から再利用
+- 変更ファイル:
+  - `src/lib/logic-lang/parser.ts` (parseTokensAsTerm, parseTermString, TermParseResult 追加)
+  - `src/lib/logic-lang/parser.test.ts` (parseTermString テスト 18件追加)
+  - `src/lib/formula-input/TermInput.tsx` (新規)
+  - `src/lib/formula-input/TermInput.test.tsx` (新規: 34テスト)
+  - `src/lib/formula-input/TermInput.stories.tsx` (新規: 7ストーリー)
+  - `src/lib/formula-input/index.ts` (TermInput エクスポート追加)
+  - `tasks/prd-formula-input-component.md` (FI-005完了)
+- カバレッジ: TermInput.tsx Stmts 90.38%, 全体 Stmts 91.05%
+- テスト数: 1311 unit + 67 storybook = 1378 (前回 1270 unit + 60 storybook)
+- **今後のイテレーションへの学び:**
+  - 既存の `parse()` は内部で parseTerm/parseFormula を呼ぶクロージャ構造。項のみパースするには `parseTokensAsTerm` を別途追加する必要があった
+  - TermInput は FormulaInput とほぼ同一構造。DRY化は FI-006 以降で検討可能だが、独立性を維持するため現時点では複製で実装
+  - computeErrorHighlights と formatErrorMessage は FormulaInput からインポートして再利用（重複なし）
+---
+
 ## 2026-02-25 - FormulaInput FI-003
 - Term（項）レンダラーコンポーネント実装
   - `TermDisplay` (Unicode版): 変数、定数、メタ変数、関数適用、二項演算子を表示
