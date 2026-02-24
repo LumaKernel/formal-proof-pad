@@ -15,6 +15,7 @@
 - Logic Core は `src/lib/logic-core/` に配置。Effect.ts `Schema.TaggedClass` でAST定義、ピュアロジック、UIなし
 - AST の再帰型は `Schema.suspend(() => Formula)` で定義。`FunctionApplication`（`Function` はJS予約語と衝突するため改名）
 - `@luma-dev/luma-ts/no-explicit-return-is` があるため type predicate は明示しない
+- フォーマッターの括弧判定: 左辺は `parent.leftBP > child.rightBP`、右辺は `child.leftBP <= parent.rightBP` で判定（Pratt parserの挙動を正確に反映）
 
 ---
 
@@ -632,4 +633,32 @@
   - 括弧のバックトラッキング: `(` が論理式レベルで出現した場合、まず `parseFormula` を試み、閉じ括弧後に項演算子/等号があればバックトラックして `parseEqualityOrTerm` で再パース
   - `errors.length = savedErrors` でバックトラック時のエラーメッセージも復元。エラー配列のlengthを縮小するだけで良い
   - ESLint `require-satisfies-in-tls`: テンプレートリテラル内の三項演算子結果にも `satisfies string` が必要
+---
+
+## 2026-02-24 - LogicLang US-017: Unicodeフォーマッター
+- `src/lib/logic-lang/formatUnicode.ts` を新規作成
+  - `formatFormula(formula: Formula): string` — 論理式ASTをUnicode文字列に変換
+  - `formatTerm(term: Term): string` — 項ASTをUnicode文字列に変換
+  - 最小限の括弧のみ出力（Pratt parserのbinding powerに基づく正確な括弧判定）
+  - 論理記号: →, ↔, ∧, ∨, ¬, ∀, ∃
+  - 等号: =
+  - 項の二項演算: +, − (U+2212), × (U+00D7), ÷ (U+00F7), ^
+  - メタ変数添字: Unicode下付き数字(₀₁₂₃₄₅₆₇₈₉)
+- `src/lib/logic-lang/formatUnicode.test.ts` — 72テスト
+  - メタ変数(添字0〜3桁), 否定(複合式/二重/述語), 二項演算(4種), 優先順位・括弧(10種), 量化子(5種), 述語(3種), 等号(2種), 複合式(4種)
+  - 項フォーマット: 変数, メタ変数, 定数, 関数適用, 5種の二項演算, 優先順位・括弧(7種)
+  - ラウンドトリップ(parse→format→parse): 15テスト
+- `src/lib/logic-lang/index.ts` — `formatFormula`, `formatTerm` のエクスポート追加
+- テスト: 1035 → 1107（+72）
+- カバレッジ: Statements 91.74% → 91.74% ✅ 維持
+- formatUnicode.ts 単体: Statements 90.58%, Functions 100%, Branch 90.27%（未到達はexhaustive checkのdefault分岐のみ）
+- 変更ファイル: `src/lib/logic-lang/formatUnicode.ts`（新規）, `formatUnicode.test.ts`（新規）, `index.ts`, `tasks/prd-formal-logic-pad.md`
+- スクリーンショット: `.screenshots/us-017-storybook-main.png`
+- **今後のイテレーションへの学び:**
+  - フォーマッターの括弧判定: 単に「子のBP vs 親のBP」ではなく、左右で異なる判定が必要
+    - 左辺: `parent.leftBP > child.rightBP` なら括弧が必要（子の右端がparentに奪われる）
+    - 右辺: `child.leftBP <= parent.rightBP` なら括弧が必要（子がparentのコンテキストで消費されない）
+  - この判定はPratt parserの `while (nextBP.leftBP > minBP)` ループの挙動を正確に反映
+  - 量化子(∀,∃)は二項演算子の子になるときのみ括弧が必要（parentBP > 0 で判定）
+  - 否定(¬)の内部は、二項論理演算子・量化子の場合のみ括弧が必要（tag名ベースで判定）
 ---

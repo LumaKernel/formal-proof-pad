@@ -10,3 +10,4 @@ export type {
   TokenKind,
 } from "./token";
 export { TOKEN_KINDS } from "./token";
+export { formatFormula, formatTerm } from "./formatUnicode";
