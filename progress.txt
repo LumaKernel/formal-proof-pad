@@ -62,6 +62,27 @@
 
 ---
 
+## 2026-02-25 - 公理依存関係の追跡・表示機能
+- 導出ノード（MP/Gen適用結果）が、どのルートノード（公理）に依存しているかを追跡・表示する機能を追加
+- **新規ファイル:**
+  - `src/lib/proof-pad/dependencyLogic.ts` - 接続グラフを遡る純粋関数（getNodeDependencies, getAllNodeDependencies）
+  - `src/lib/proof-pad/dependencyLogic.test.ts` - 12テスト（ルート/チェーン/ダイヤモンド/Gen等）
+- **変更ファイル:**
+  - `src/lib/proof-pad/EditableProofNode.tsx` - DependencyInfo型追加、「Depends on:」UI表示
+  - `src/lib/proof-pad/EditableProofNode.test.tsx` - +4テスト（依存関係の表示/非表示）
+  - `src/lib/proof-pad/ProofWorkspace.tsx` - getAllNodeDependencies useMemo統合、getNodeDependencyInfos コールバック
+  - `src/lib/proof-pad/ProofWorkspace.test.tsx` - +1テスト（MP適用後の依存表示確認）
+  - `src/lib/proof-pad/index.ts` - 新関数・型のエクスポート
+  - `tasks/prd-next-tasks.md` - タスク完了マーク
+- カバレッジ: Stmts 99.22%, Branch 94.49%, Lines 100%（Stmts -0.04%, Branch -0.2% - 新コードのProofWorkspace内防御分岐が原因、dependencyLogic自体は100%）
+- テスト: 2137 → 2154（+17テスト）
+- **今後のイテレーションへの学び:**
+  - 依存関係追跡は接続グラフの逆方向BFS/DFS。visited setで循環防止が必要
+  - ルートノードは「自分自身のみに依存」と扱うことで、表示の有無をシンプルに判定できる（size === 1 && has(self) → 非表示）
+  - axiomNamesとnodeDependenciesの組み合わせで、公理の自動判別名を依存表示に流用できる
+  - ProofWorkspace.tsxにロジックを追加するとき、useCallbackの依存配列に新しい値を忘れずに追加すること
+---
+
 ## 2026-02-25 - クエスト問題群ドキュメント作成
 - `dev/quest-problems/` にクエストモード用の練習問題群を体系的にまとめた
 - **6ファイル構成:**
