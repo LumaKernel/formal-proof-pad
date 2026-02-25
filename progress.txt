@@ -2407,3 +2407,17 @@
   - MutationObserver + removeAttribute で dark pane の testid を除去することで、play 関数が light pane のみを対象にする
   - デコレータレベルの修正は全ストーリーに一括適用されるため、個別修正より効率的
 ---
+
+## 2026-02-25 - NotebookCreateForm ダークモード選択カードコントラスト修正
+- NotebookCreateFormComponent.tsx の未定義CSS変数を既存テーマトークンに置き換え
+  - `--color-primary` → `--color-accent` (選択ボーダー、送信ボタン)
+  - `--color-primary-surface` → `--color-surface-selected` (選択カード背景)
+  - `--color-danger` → `--color-error` (エラー表示)
+- 変更ファイル: NotebookCreateFormComponent.tsx
+- ブラウザテスト: side-by-side でダークモード確認
+- スクリーンショット: .screenshots/notebookcreateform-sidebyside-after.png
+- テスト: 2630/2630 pass, typecheck pass
+- **今後のイテレーションへの学び:**
+  - globals.css に定義されていないCSS変数（--color-primary等）を使うと、常にfallback値が使われてダークモード対応にならない
+  - 既存テーマトークン（--color-accent, --color-surface-selected, --color-error等）を使うことでダークモード自動対応
+---

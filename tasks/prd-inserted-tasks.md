@@ -10,7 +10,7 @@
 - [x] http://localhost:13006/?path=/story/notebook-notebooklist--open-action&globals=theme:side-by-side → TestIdStripperデコレータで dark pane の testid 除去
     side by sideで開くと、interactionsが失敗する。抽象化、DI化が足りていなくて干渉してるのではないか?
     check with pw mcp!
-- [ ] http://localhost:13006/?path=/story/notebook-notebookcreateform--default&globals=theme:dark
+- [x] http://localhost:13006/?path=/story/notebook-notebookcreateform--default&globals=theme:dark → --color-surface-selected, --color-accent 等の既存テーマトークンに置き換え
     ダークモードでselectedなやつのタイトル部分がコントラストが悪い。
 - [ ] http://localhost:13006/?path=/story/notebook-notebookcreateform--default
     クエストはあくまでもクエストのマップから選ぶときにクエストモードで自動的に開始されるというだけで、ユーザーがこのような画面で自分で選ぶものではない。

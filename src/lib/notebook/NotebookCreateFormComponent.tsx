@@ -68,12 +68,12 @@ const inputStyle: CSSProperties = {
 
 const inputErrorStyle: CSSProperties = {
   ...inputStyle,
-  border: "1px solid var(--color-danger, #d32f2f)",
+  border: "1px solid var(--color-error, #d32f2f)",
 };
 
 const errorTextStyle: CSSProperties = {
   fontSize: 12,
-  color: "var(--color-danger, #d32f2f)",
+  color: "var(--color-error, #d32f2f)",
 };
 
 const radioGroupStyle: CSSProperties = {
@@ -101,8 +101,8 @@ const systemCardStyle: CSSProperties = {
 
 const systemCardSelectedStyle: CSSProperties = {
   ...systemCardStyle,
-  border: "2px solid var(--color-primary, #1976d2)",
-  background: "var(--color-primary-surface, #e3f2fd)",
+  border: "2px solid var(--color-accent, #555ab9)",
+  background: "var(--color-surface-selected, #ebf8ff)",
 };
 
 const systemCardLabelStyle: CSSProperties = {
@@ -130,7 +130,7 @@ const submitButtonStyle: CSSProperties = {
   fontWeight: 600,
   borderRadius: 6,
   border: "none",
-  background: "var(--color-primary, #1976d2)",
+  background: "var(--color-accent, #555ab9)",
   color: "#fff",
   cursor: "pointer",
 };
