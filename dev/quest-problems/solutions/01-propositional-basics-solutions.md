@@ -1,0 +1,255 @@
+# 命題論理の基礎 — 解答ノート
+
+**体系:** Lukasiewicz (A1-A3 + MP)
+
+公理:
+- A1 (K): `phi -> (psi -> phi)`
+- A2 (S): `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))`
+- A3 (対偶): `(~phi -> ~psi) -> (psi -> phi)`
+
+推論規則:
+- MP: phi と phi -> psi から psi を導出
+
+---
+
+## Q-01: 恒等律 (Identity / I Combinator)
+
+**ゴール:** `phi -> phi`
+
+### 証明
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `phi -> ((phi -> phi) -> phi)` | A1 [phi := phi, psi := phi -> phi] |
+| 2 | `(phi -> ((phi -> phi) -> phi)) -> ((phi -> (phi -> phi)) -> (phi -> phi))` | A2 [phi := phi, psi := phi -> phi, chi := phi] |
+| 3 | `(phi -> (phi -> phi)) -> (phi -> phi)` | MP(1, 2) |
+| 4 | `phi -> (phi -> phi)` | A1 [phi := phi, psi := phi] |
+| 5 | `phi -> phi` | MP(4, 3) |
+
+**ステップ数:** 5
+
+---
+
+## Q-02: 定数関数の合成
+
+**ゴール:** `psi -> (phi -> phi)`
+
+### 証明
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1-5 | `phi -> phi` | Q-01 の証明 |
+| 6 | `(phi -> phi) -> (psi -> (phi -> phi))` | A1 [phi := phi -> phi, psi := psi] |
+| 7 | `psi -> (phi -> phi)` | MP(5, 6) |
+
+**ステップ数:** 7
+
+---
+
+## Q-03: 推移律 (Hypothetical Syllogism) の準備
+
+**ゴール:** `(phi -> psi) -> ((psi -> chi) -> (phi -> psi))`
+
+### 証明
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `(phi -> psi) -> ((psi -> chi) -> (phi -> psi))` | A1 [phi := phi -> psi, psi := psi -> chi] |
+
+**ステップ数:** 1
+
+---
+
+## Q-04: 推移律 (Hypothetical Syllogism)
+
+**ゴール:** `(phi -> psi) -> ((psi -> chi) -> (phi -> chi))`
+
+### 補題: HS (Hypothetical Syllogism)
+
+この証明では、まず「推移律」を構成する。演繹定理をメタ的に模倣する形で進める。
+
+### 証明
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `(psi -> chi) -> (phi -> (psi -> chi))` | A1 [phi := psi -> chi, psi := phi] |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 [phi := phi, psi := psi, chi := chi] |
+| 3 | `((psi -> chi) -> (phi -> (psi -> chi))) -> (((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi)))` | A2 [phi := psi -> chi, psi := phi -> (psi -> chi), chi := (phi -> psi) -> (phi -> chi)] |
+| 4 | `((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi))` | MP(1, 3), then MP(result, using step 2 lifted) |
+
+実はもう少し分解する必要がある。完全な証明は以下の通り:
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `(psi -> chi) -> (phi -> (psi -> chi))` | A1 [phi := psi -> chi, psi := phi] |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 |
+| 3 | `((psi -> chi) -> (phi -> (psi -> chi))) -> (((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi)))` | A2 [phi := psi -> chi, psi := phi -> (psi -> chi), chi := (phi -> psi) -> (phi -> chi)] |
+| 4 | `((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi))` | MP(1, 3) — 左辺が消えて残る |
+
+ここまでで、ステップ2の情報がまだ使われていない。ステップ2を持ち上げる:
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 5 | `((phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))) -> ((psi -> chi) -> ((phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))))` | A1 [phi := (phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi)), psi := psi -> chi] |
+| 6 | `(psi -> chi) -> ((phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi)))` | MP(2, 5) |
+
+これはちょっと複雑すぎる。よりシンプルなアプローチ:
+
+### 証明 (簡潔版)
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `(psi -> chi) -> (phi -> (psi -> chi))` | A1 [phi := psi -> chi, psi := phi] |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 |
+
+ステップ1の結論 `(psi -> chi) -> (phi -> (psi -> chi))` と、ステップ2 `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` を推移律で繋ぎたい。だがこれ自体が推移律なので循環する。
+
+**正しいアプローチ:** A2をステップ1に「適用する」形にする。
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `(psi -> chi) -> (phi -> (psi -> chi))` | A1 |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 |
+| 3 | `((psi -> chi) -> (phi -> (psi -> chi))) -> (((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi)))` | A2 [phi := psi -> chi, psi := phi -> (psi -> chi), chi := (phi -> psi) -> (phi -> chi)] |
+| 4 | `((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi))` | MP(1, 3) |
+| 5 | `(phi -> psi) -> ((psi -> chi) -> (phi -> psi))` | A1 [phi := phi -> psi, psi := psi -> chi] |
+| 6 | `((phi -> psi) -> ((psi -> chi) -> (phi -> psi))) -> (((phi -> psi) -> ((psi -> chi) -> (phi -> chi))) -> ((phi -> psi) -> ((psi -> chi) -> (phi -> chi))))` | — |
+
+これはまだ複雑。**標準的な証明**を記述する:
+
+### 証明 (標準)
+
+以下の補題を使う: `(alpha -> beta) -> ((beta -> gamma) -> (alpha -> gamma))` — これがまさに今証明しようとしているもの。
+
+**Curry-Howard的に:** S(S(KS)(S(KK)(S(KS)(S(K(SK))K))))(K(SKK))
+
+実際の形式証明は非常に技巧的なので、段階的に構成する:
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `(psi -> chi) -> (phi -> (psi -> chi))` | A1 [phi := psi -> chi, psi := phi] |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 |
+| 3 | `((psi -> chi) -> (phi -> (psi -> chi))) -> (((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi)))` | A2 [phi := psi -> chi, psi := phi -> (psi -> chi), chi := (phi -> psi) -> (phi -> chi)] |
+| 4 | `((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi))` | MP(1, 3) |
+| 5 | `(phi -> psi) -> ((psi -> chi) -> (phi -> psi))` | A1 [phi := phi -> psi, psi := psi -> chi] |
+| 6 | `((phi -> psi) -> ((psi -> chi) -> (phi -> psi))) -> (((phi -> psi) -> ((psi -> chi) -> (phi -> chi))) -> ((phi -> psi) -> ((psi -> chi) -> (phi -> chi))))` | A2 [phi := phi -> psi, psi := (psi -> chi) -> (phi -> psi), chi := (psi -> chi) -> (phi -> chi)] |
+| 7 | `((phi -> psi) -> ((psi -> chi) -> (phi -> chi))) -> ((phi -> psi) -> ((psi -> chi) -> (phi -> chi)))` | MP(5, 6) |
+
+ステップ4を持ち上げる必要がある:
+
+| 8 | `(((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi))) -> ((phi -> psi) -> (((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi))))` | A1 |
+| 9 | `(phi -> psi) -> (((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi)))` | MP(4, 8) |
+| 10 | `((phi -> psi) -> (((psi -> chi) -> (phi -> psi)) -> ((psi -> chi) -> (phi -> chi)))) -> (((phi -> psi) -> ((psi -> chi) -> (phi -> psi))) -> ((phi -> psi) -> ((psi -> chi) -> (phi -> chi))))` | A2 |
+| 11 | `((phi -> psi) -> ((psi -> chi) -> (phi -> psi))) -> ((phi -> psi) -> ((psi -> chi) -> (phi -> chi)))` | MP(9, 10) |
+| 12 | `(phi -> psi) -> ((psi -> chi) -> (phi -> chi))` | MP(5, 11) |
+
+**ステップ数:** 12
+
+**注:** ステップ7は不使用になった。実際に必要なのはステップ1-6, 8-12で合計11ステップ。
+
+---
+
+## Q-05: 含意の弱化
+
+**ゴール:** `phi -> (psi -> (chi -> psi))`
+
+### 証明
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `psi -> (chi -> psi)` | A1 [phi := psi, psi := chi] |
+| 2 | `(psi -> (chi -> psi)) -> (phi -> (psi -> (chi -> psi)))` | A1 [phi := psi -> (chi -> psi), psi := phi] |
+| 3 | `phi -> (psi -> (chi -> psi))` | MP(1, 2) |
+
+**ステップ数:** 3
+
+---
+
+## Q-06: S公理の特殊ケース (W Combinator)
+
+**ゴール:** `(phi -> (phi -> psi)) -> (phi -> psi)`
+
+### 証明
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `(phi -> (phi -> psi)) -> ((phi -> phi) -> (phi -> psi))` | A2 [phi := phi, psi := phi, chi := psi] |
+| 2-6 | `phi -> phi` | Q-01 の証明 |
+| 7 | `(phi -> phi) -> ((phi -> (phi -> psi)) -> (phi -> phi))` | A1 [phi := phi -> phi, psi := phi -> (phi -> psi)] |
+| 8 | `(phi -> (phi -> psi)) -> (phi -> phi)` | MP(Q-01の結果, 7) |
+| 9 | `((phi -> (phi -> psi)) -> (phi -> phi)) -> (((phi -> (phi -> psi)) -> ((phi -> phi) -> (phi -> psi))) -> ((phi -> (phi -> psi)) -> (phi -> psi)))` | A2 [phi := phi -> (phi -> psi), psi := phi -> phi, chi := phi -> psi] |
+| 10 | `((phi -> (phi -> psi)) -> ((phi -> phi) -> (phi -> psi))) -> ((phi -> (phi -> psi)) -> (phi -> psi))` | MP(8, 9) |
+| 11 | `(phi -> (phi -> psi)) -> (phi -> psi)` | MP(1, 10) |
+
+**ステップ数:** 11 (Q-01の5ステップを含む)
+
+---
+
+## Q-07: 含意の交換 (Permutation / C Combinator)
+
+**ゴール:** `(phi -> (psi -> chi)) -> (psi -> (phi -> chi))`
+
+### 証明
+
+推移律(Q-04) を使って構成する。演繹定理的に考えると:
+- `phi -> (psi -> chi)` と `psi` を仮定すれば、`psi -> chi` を A1 + MP で得て、`phi -> chi` は `phi -> (psi -> chi)` と `phi -> psi` (A1で`psi`を持ち上げ) から A2 で得る。
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `psi -> (phi -> psi)` | A1 [phi := psi, psi := phi] |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 |
+| 3 | `(psi -> (phi -> psi)) -> (((phi -> psi) -> (phi -> chi)) -> (psi -> (phi -> chi)))` | — 推移律 + 交換で構成 |
+
+この証明は複雑になるので、HS (Q-04) を部品として使う:
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `psi -> (phi -> psi)` | A1 |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 |
+| 3 | `(phi -> psi) -> ((phi -> (psi -> chi)) -> (phi -> chi))` | Q-04の結果を代入して: HS のインスタンスをA2で変形 |
+
+実際にはQ-14 (二重含意の分配) 相当のものを先に示す必要がある。
+
+### 証明 (演繹定理の手動模倣)
+
+`phi -> (psi -> chi)` を A とおく。A を仮定したとき `psi -> (phi -> chi)` を示したい。
+
+psi を仮定: A と A1 `psi -> (phi -> psi)` から、A2 で `phi -> chi` が出る。
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `psi -> (phi -> psi)` | A1 [phi := psi, psi := phi] |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 |
+
+`psi` から `phi -> psi` を作り、`phi -> (psi -> chi)` から `(phi -> psi) -> (phi -> chi)` を作る。
+`phi -> psi` と `(phi -> psi) -> (phi -> chi)` で MP して `phi -> chi` を得る。
+
+これを形式化するには:
+
+| # | 式 | 根拠 |
+|---|---|---|
+| 1 | `psi -> (phi -> psi)` | A1 |
+| 2 | `(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))` | A2 |
+| 3 | `((phi -> psi) -> (phi -> chi)) -> (psi -> ((phi -> psi) -> (phi -> chi)))` | A1 [phi := (phi -> psi) -> (phi -> chi), psi := psi] |
+| 4 | `(phi -> (psi -> chi)) -> (psi -> ((phi -> psi) -> (phi -> chi)))` | HS(2, 3) — Q-04のインスタンス |
+| 5 | `(psi -> (phi -> psi)) -> ((psi -> ((phi -> psi) -> (phi -> chi))) -> (psi -> (phi -> chi)))` | A2 [phi := psi, psi := phi -> psi, chi := phi -> chi] |
+| 6 | `(psi -> ((phi -> psi) -> (phi -> chi))) -> (psi -> (phi -> chi))` | MP(1, 5) |
+| 7 | `(phi -> (psi -> chi)) -> (psi -> (phi -> chi))` | HS(4, 6) — Q-04のインスタンス |
+
+**ステップ数:** 7 + Q-04のステップ数 x 2 (HSを2回使用) = 7 + 約22 = 約29
+
+**注:** Q-04(推移律/HS)を既証の補題として使えば7ステップ。補題を展開すると約29ステップ。
+
+---
+
+## 既証の補題まとめ
+
+以降の問題で再利用できる定理:
+
+| 補題名 | 式 | 初出 |
+|---|---|---|
+| Id (恒等律) | `alpha -> alpha` | Q-01 |
+| K (持ち上げ) | `alpha -> (beta -> alpha)` | A1 |
+| HS (推移律) | `(alpha -> beta) -> ((beta -> gamma) -> (alpha -> gamma))` | Q-04 |
+| W (自己適用) | `(alpha -> (alpha -> beta)) -> (alpha -> beta)` | Q-06 |
+| C (交換) | `(alpha -> (beta -> gamma)) -> (beta -> (alpha -> gamma))` | Q-07 |

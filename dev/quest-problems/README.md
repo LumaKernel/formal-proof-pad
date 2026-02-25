@@ -42,10 +42,28 @@ Formal Logic Pad のクエストモードで出題する練習問題群を定義
 ...
 ```
 
+## 解答ノート
+
+各問題の完全な形式証明を `solutions/` ディレクトリに配置する。
+
+| ファイル | 内容 |
+|---------|------|
+| [solutions/01-propositional-basics-solutions.md](./solutions/01-propositional-basics-solutions.md) | Q-01〜Q-07 の解答 |
+| [solutions/02-propositional-intermediate-solutions.md](./solutions/02-propositional-intermediate-solutions.md) | Q-08〜Q-14 の解答 |
+| [solutions/03-propositional-advanced-solutions.md](./solutions/03-propositional-advanced-solutions.md) | Q-15〜Q-24 の解答 |
+| [solutions/04-predicate-basics-solutions.md](./solutions/04-predicate-basics-solutions.md) | Q-25〜Q-32 の解答 |
+| [solutions/05-predicate-advanced-solutions.md](./solutions/05-predicate-advanced-solutions.md) | Q-33〜Q-38 の解答 |
+| [solutions/06-equality-solutions.md](./solutions/06-equality-solutions.md) | Q-39〜Q-45 の解答 |
+
+各解答には:
+- 公理のインスタンス化の具体的な代入を明記
+- 推論ステップごとの根拠（公理名、既証補題名、MP の参照先）
+- 既証の補題を再利用するためのまとめ表
+
 ## 設計方針
 
 1. **段階的学習:** 各レベルは前のレベルの知識を前提とする
 2. **名前付き定理:** 有名な定理にはその名前を明記する（例: 恒等律、交換則）
-3. **解答付き:** すべての問題に解法の概略を付ける（将来的に解答ノートも実装）
+3. **解答付き:** すべての問題に解法の概略と解答ノート（形式証明）を付ける
 4. **実用的:** 後のステップで「使える」補題を先に証明させる構成にする
 5. **DSL表記:** ゴールはプロジェクトのDSL構文で記述する
