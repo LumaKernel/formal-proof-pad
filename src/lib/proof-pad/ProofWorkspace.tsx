@@ -120,17 +120,19 @@ const headerStyle = {
   alignItems: "center",
   gap: 8,
   padding: "6px 12px",
-  background: "rgba(255, 255, 255, 0.9)",
+  background: "var(--color-surface-translucent, rgba(255, 255, 255, 0.9))",
   borderRadius: 8,
   boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
   fontSize: 13,
   fontFamily: "sans-serif",
   pointerEvents: "auto" as const,
+  color: "var(--color-text-primary, #171717)",
 };
 
 const systemBadgeStyle = {
   padding: "2px 8px",
-  background: "#e8eaf0",
+  background: "var(--color-badge-bg, #e8eaf0)",
+  color: "var(--color-badge-text, #718096)",
   borderRadius: 4,
   fontWeight: 600 as const,
   fontSize: 12,
@@ -224,30 +226,32 @@ const goalContainerStyle = {
   alignItems: "center",
   gap: 8,
   padding: "6px 12px",
-  background: "rgba(255, 255, 255, 0.9)",
+  background: "var(--color-surface-translucent, rgba(255, 255, 255, 0.9))",
   borderRadius: 8,
   boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
   fontSize: 13,
   fontFamily: "sans-serif",
   pointerEvents: "auto" as const,
+  color: "var(--color-text-primary, #171717)",
 };
 
 const goalInputStyle = {
   padding: "3px 8px",
-  border: "1px solid #ccc",
+  border: "1px solid var(--color-border, #ccc)",
   borderRadius: 4,
   fontSize: 13,
   fontFamily: "serif, 'Times New Roman', Times",
   fontStyle: "italic" as const,
   width: 180,
   outline: "none",
-  background: "#fff",
+  background: "var(--color-surface, #fff)",
+  color: "var(--color-text-primary, #171717)",
 };
 
 const goalInputErrorStyle = {
   ...goalInputStyle,
-  border: "1px solid #e06060",
-  background: "rgba(255,96,96,0.05)",
+  border: "1px solid var(--color-error, #e06060)",
+  background: "var(--color-error-bg, rgba(255,96,96,0.05))",
 };
 
 const proofCompleteBannerStyle = {
@@ -271,19 +275,19 @@ const proofCompleteBannerStyle = {
 
 const questModeBadgeStyle = {
   padding: "2px 8px",
-  background: "rgba(255,215,0,0.3)",
+  background: "var(--color-warning-bg, rgba(255,215,0,0.3))",
   borderRadius: 4,
   fontWeight: 600 as const,
   fontSize: 12,
-  color: "#b8860b",
-  border: "1px solid rgba(255,215,0,0.5)",
+  color: "var(--color-warning, #b8860b)",
+  border: "1px solid var(--color-warning-border, rgba(255,215,0,0.5))",
 };
 
 const convertToFreeButtonStyle = {
   padding: "4px 10px",
   background: "transparent",
-  color: "#666",
-  border: "1px solid #ccc",
+  color: "var(--color-text-secondary, #666)",
+  border: "1px solid var(--color-border, #ccc)",
   borderRadius: 4,
   cursor: "pointer",
   fontSize: 11,

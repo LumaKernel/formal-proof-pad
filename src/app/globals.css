@@ -43,6 +43,8 @@
   --color-error-bg: rgba(255, 60, 60, 0.25);
   --color-warning: #d9944a;
   --color-warning-hover: #b5752e;
+  --color-warning-bg: rgba(255, 215, 0, 0.3);
+  --color-warning-border: rgba(255, 215, 0, 0.5);
 
   /* Surface (panels, popups, overlays) */
   --color-surface: #ffffff;
@@ -102,6 +104,8 @@
   --color-error-bg: rgba(255, 60, 60, 0.15);
   --color-warning: #e0a05a;
   --color-warning-hover: #c88a42;
+  --color-warning-bg: rgba(255, 215, 0, 0.15);
+  --color-warning-border: rgba(255, 215, 0, 0.3);
 
   /* Surface (panels, popups, overlays) */
   --color-surface: #1e1e2e;

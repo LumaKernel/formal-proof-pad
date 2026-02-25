@@ -73,6 +73,40 @@
 
 ---
 
+## 2026-02-25 - Storybook: fullscreenレイアウトのテーマラッパー修正
+- `.storybook/preview.ts` のテーマデコレーターを修正: `parameters.layout === "fullscreen"` の場合に `height: "100%"` と `padding: 0` に切り替え
+- 原因: テーマラッパーdivが `minHeight: 100%` のみだったため、子の `height: 100%` が解決されず高さ0になっていた
+- InfiniteCanvas Default ストーリー等のfullscreenストーリーが正常に表示されるようになった
+- side-by-sideモードもfullscreen対応（gap: 0px, height: 100%, ラベル非表示）
+- カバレッジ変化なし: Stmts 99.31%, Branch 94.85%, Funcs 91.22%, Lines 100%
+- テスト: 2630全パス（122ファイル）
+- ブラウザ確認: .screenshots/infinitecanvas-default-after-fix.png, .screenshots/fulldemo-after-fix.png, .screenshots/proofworkspace-after-fix.png
+- 変更ファイル:
+  - `.storybook/preview.ts` (MODIFIED)
+- **今後のイテレーションへの学び:**
+  - CSS `height: 100%` は親の `height` が明示的に設定されている必要がある。`minHeight` は子の `height: 100%` の基準にならない
+  - Storybookの `context.parameters.layout` でfullscreenかどうか判定可能
+  - fullscreenストーリーではテーマラッパーにpadding不要（コンポーネント自体が画面全体を使うため）
+---
+
+## 2026-02-25 - InfiniteCanvas: 既存アプリから学ぶ機能リサーチ＆タスク計画
+- Figma, Miro, tldraw, Excalidraw 等を調査し、証明ワークスペースに有用な infinite canvas 機能をリストアップ
+- `tasks/prd-infinite-canvas-enhancements.md` に Tier 1〜4 の段階的タスク計画を作成
+  - Tier 1（必須）: マルチセレクション、キーボードショートカット、証明ツリー自動レイアウト、サブツリー選択
+  - Tier 2（重要）: スナップ・整列、ビュー操作拡充、接続プレビュー
+  - Tier 3（価値あり）: コマンドパレット、複製/コピペ、LODレンダリング、Viewport Culling、エクスポート
+  - Tier 4（将来）: グルーピング、ビューポート履歴、コラボレーション
+- `tasks/prd-inserted-tasks.md` の該当タスクを完了マーク
+- カバレッジ変化なし（リサーチタスク、コード変更なし）
+- 変更ファイル:
+  - `tasks/prd-infinite-canvas-enhancements.md` (NEW)
+  - `tasks/prd-inserted-tasks.md` (MODIFIED)
+- **今後のイテレーションへの学び:**
+  - 証明ワークスペースで最もインパクトが高いのはマルチセレクション+サブツリー選択。ツリー構造の操作がUXの鍵
+  - auto-layoutにはd3-hierarchyまたはelkjsが候補。証明の慣習は前提が上、結論が下
+  - tldrawのviewport culling手法（display:none + spatial index）がパフォーマンス最適化の参考になる
+---
+
 ## 2026-02-25 - InfiniteCanvas: ズームUIコントロール追加
 - `src/lib/infinite-canvas/zoom.ts` に純粋ロジック関数を追加: `computeZoomInScale`, `computeZoomOutScale`, `computeResetViewport`, `computeFitToContentViewport`, `formatZoomPercent`, `findNearestPreset`, `nextPresetUp`, `nextPresetDown`, `ZOOM_PRESETS`, `ZOOM_STEP_FACTOR`
 - `src/lib/infinite-canvas/zoomControls.ts` にUIコントロール用純粋ロジックを追加: 位置計算、ズームイン/アウト/プリセット/リセット/フィットのViewport計算
@@ -2340,4 +2374,20 @@
   - notebookSerialization.ts の parseLogicSystem は各フィールドを個別にバリデーションしており、欠損フィールドごとのテストが必要
   - JSON.parse経由では NaN/Infinity は null になるため Number.isFinite チェックは到達不能
   - Branch カバレッジ改善の主な手法: (1) テスト追加で到達可能な分岐をカバー (2) 到達不能な防御コードに v8 ignore 適用
+---
+
+## 2026-02-25 - ProofWorkspace/AxiomPalette ダークモードコントラスト修正
+- ProofWorkspace.tsx のハードコードされた色をCSS変数に置き換え
+  - headerStyle, systemBadgeStyle, goalContainerStyle, goalInputStyle, convertToFreeButtonStyle, questModeBadgeStyle
+- AxiomPalette.tsx のハードコードされた色をCSS変数に置き換え
+  - panelStyle, headerStyle, itemLabelStyle, itemFormulaStyle
+- globals.css に --color-warning-bg, --color-warning-border トークンを追加（light/dark両方）
+- 変更ファイル: ProofWorkspace.tsx, AxiomPalette.tsx, globals.css
+- ブラウザテスト: side-by-side, quest modeのスクリーンショット確認
+- スクリーンショット: .screenshots/proofworkspace-darkmode-sidebyside-1.png, .screenshots/proofworkspace-questmode-sidebyside.png
+- テスト: 2630/2630 pass, typecheck pass
+- **今後のイテレーションへの学び:**
+  - ダークモード対応はハードコードされた色をCSS変数に置き換えるパターンで一貫して実施
+  - globals.css の :root/[data-theme="light"] と [data-theme="dark"] の両方に新トークンを追加する必要がある
+  - fallback値付きCSS変数 `var(--color-xxx, fallback)` でダークモード未対応環境でも動作を保証
 ---

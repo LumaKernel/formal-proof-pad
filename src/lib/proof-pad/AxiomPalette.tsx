@@ -28,7 +28,7 @@ const panelStyle: CSSProperties = {
   top: 48,
   left: 12,
   zIndex: 10,
-  background: "rgba(255, 255, 255, 0.95)",
+  background: "var(--color-surface-translucent, rgba(255, 255, 255, 0.95))",
   borderRadius: 8,
   boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
   padding: "8px 0",
@@ -46,8 +46,8 @@ const headerStyle: CSSProperties = {
   fontSize: 11,
   textTransform: "uppercase",
   letterSpacing: 1,
-  color: "#666",
-  borderBottom: "1px solid #eee",
+  color: "var(--color-text-secondary, #666)",
+  borderBottom: "1px solid var(--color-border, #eee)",
   marginBottom: 4,
 };
 
@@ -68,14 +68,14 @@ const itemHoverStyle: CSSProperties = {
 const itemLabelStyle: CSSProperties = {
   fontWeight: 600,
   fontSize: 12,
-  color: "#333",
+  color: "var(--color-text-primary, #333)",
 };
 
 const itemFormulaStyle: CSSProperties = {
   fontFamily: "serif, 'Times New Roman', Times",
   fontStyle: "italic",
   fontSize: 11,
-  color: "#666",
+  color: "var(--color-text-secondary, #666)",
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
