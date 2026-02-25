@@ -1,20 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, userEvent, within } from "storybook/test";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { CanvasItem } from "./CanvasItem";
 import { Connection } from "./Connection";
 import type { ConnectionEndpoint, Obstacle } from "./connectionPath";
 import type { ContextMenuItem } from "./contextMenu";
 import { InfiniteCanvas } from "./InfiniteCanvas";
-import type { Point, ViewportState } from "./types";
+import type { Point, Size, ViewportState } from "./types";
 
 interface ItemData {
   readonly id: string;
   readonly position: Point;
   readonly label: string;
   readonly color: string;
-  readonly width: number;
-  readonly height: number;
   readonly menuItems: readonly ContextMenuItem[];
 }
 
@@ -25,17 +23,12 @@ interface ConnectionData {
   readonly color: string;
 }
 
-const ITEM_PADDING_X = 32;
-const ITEM_PADDING_Y = 24;
-
 const INITIAL_ITEMS: readonly ItemData[] = [
   {
     id: "input",
     position: { x: 50, y: 150 },
     label: "Input",
     color: "#4a90d9",
-    width: 70 + ITEM_PADDING_X,
-    height: 20 + ITEM_PADDING_Y,
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "duplicate", label: "Duplicate" },
@@ -46,8 +39,6 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     position: { x: 300, y: 80 },
     label: "Process",
     color: "#d9944a",
-    width: 90 + ITEM_PADDING_X,
-    height: 20 + ITEM_PADDING_Y,
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "configure", label: "Configure" },
@@ -59,8 +50,6 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     position: { x: 300, y: 230 },
     label: "Validate",
     color: "#9a4ad9",
-    width: 92 + ITEM_PADDING_X,
-    height: 20 + ITEM_PADDING_Y,
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "skip", label: "Skip" },
@@ -71,8 +60,6 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     position: { x: 570, y: 150 },
     label: "Output",
     color: "#4ad94a",
-    width: 82 + ITEM_PADDING_X,
-    height: 20 + ITEM_PADDING_Y,
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "delete", label: "Delete" },
@@ -109,11 +96,14 @@ function findItem(
   return items.find((item) => item.id === id);
 }
 
-function toEndpoint(item: ItemData): ConnectionEndpoint {
+function toEndpoint(
+  item: ItemData,
+  size: Size,
+): ConnectionEndpoint {
   return {
     position: item.position,
-    width: item.width,
-    height: item.height,
+    width: size.width,
+    height: size.height,
   };
 }
 
@@ -125,6 +115,9 @@ function FullDemo() {
   });
   const [items, setItems] = useState<readonly ItemData[]>(INITIAL_ITEMS);
   const [lastAction, setLastAction] = useState<string>("");
+  const [itemSizes, setItemSizes] = useState<
+    Readonly<Record<string, Size>>
+  >({});
 
   const handlePositionChange = (id: string, newPosition: Point) => {
     setItems((prev) =>
@@ -138,11 +131,34 @@ function FullDemo() {
     setLastAction(`${itemId satisfies string}: ${actionId satisfies string}`);
   };
 
-  const obstacles: readonly Obstacle[] = items.map((item) => ({
-    position: item.position,
-    width: item.width,
-    height: item.height,
-  }));
+  const measureRef = useCallback(
+    (id: string) => (el: HTMLDivElement | null) => {
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const width = rect.width / viewport.scale;
+      const height = rect.height / viewport.scale;
+      setItemSizes((prev) => {
+        const existing = prev[id];
+        if (
+          existing &&
+          Math.abs(existing.width - width) < 0.5 &&
+          Math.abs(existing.height - height) < 0.5
+        ) {
+          return prev;
+        }
+        return { ...prev, [id]: { width, height } };
+      });
+    },
+    [viewport.scale],
+  );
+
+  const obstacles: readonly Obstacle[] = items
+    .filter((item) => itemSizes[item.id] != null)
+    .map((item) => ({
+      position: item.position,
+      width: itemSizes[item.id]!.width,
+      height: itemSizes[item.id]!.height,
+    }));
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
@@ -150,12 +166,14 @@ function FullDemo() {
         {INITIAL_CONNECTIONS.map((conn) => {
           const fromItem = findItem(items, conn.fromId);
           const toItem = findItem(items, conn.toId);
-          if (!fromItem || !toItem) return null;
+          const fromSize = fromItem ? itemSizes[fromItem.id] : undefined;
+          const toSize = toItem ? itemSizes[toItem.id] : undefined;
+          if (!fromItem || !toItem || !fromSize || !toSize) return null;
           return (
             <Connection
               key={conn.id}
-              from={toEndpoint(fromItem)}
-              to={toEndpoint(toItem)}
+              from={toEndpoint(fromItem, fromSize)}
+              to={toEndpoint(toItem, toSize)}
               viewport={viewport}
               color={conn.color}
               obstacles={obstacles}
@@ -176,6 +194,7 @@ function FullDemo() {
             }}
           >
             <div
+              ref={measureRef(item.id)}
               data-testid={`item-${item.id satisfies string}`}
               style={{
                 padding: "12px 16px",
