@@ -637,3 +637,194 @@ describe("InfiniteCanvas trackpad two-finger scroll (pan)", () => {
     expect(newViewport.scale).toBe(2);
   });
 });
+
+describe("InfiniteCanvas panEnabled prop", () => {
+  beforeEach(() => {
+    Element.prototype.setPointerCapture = vi.fn();
+    Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  it("disables panning when panEnabled is false", () => {
+    const onViewportChange = vi.fn();
+    render(
+      <InfiniteCanvas
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onViewportChange={onViewportChange}
+        panEnabled={false}
+      />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(canvas, {
+      clientX: 200,
+      clientY: 200,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(canvas, {
+      clientX: 200,
+      clientY: 200,
+      pointerId: 1,
+    });
+
+    // Pan should not happen
+    expect(onViewportChange).not.toHaveBeenCalled();
+  });
+
+  it("shows crosshair cursor when panEnabled is false", () => {
+    render(<InfiniteCanvas panEnabled={false} />);
+    const canvas = screen.getByTestId("infinite-canvas");
+    expect(canvas.style.cursor).toBe("crosshair");
+  });
+
+  it("shows grab cursor when panEnabled is true (default)", () => {
+    render(<InfiniteCanvas />);
+    const canvas = screen.getByTestId("infinite-canvas");
+    expect(canvas.style.cursor).toBe("grab");
+  });
+});
+
+describe("InfiniteCanvas empty area event handlers", () => {
+  beforeEach(() => {
+    Element.prototype.setPointerCapture = vi.fn();
+    Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  it("calls onEmptyAreaPointerDown on pointerDown", () => {
+    const handler = vi.fn();
+    render(
+      <InfiniteCanvas onEmptyAreaPointerDown={handler} panEnabled={false} />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onEmptyAreaPointerMove on pointerMove", () => {
+    const handler = vi.fn();
+    render(
+      <InfiniteCanvas onEmptyAreaPointerMove={handler} panEnabled={false} />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerMove(canvas, {
+      clientX: 200,
+      clientY: 200,
+      pointerId: 1,
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onEmptyAreaPointerUp on pointerUp", () => {
+    const handler = vi.fn();
+    render(
+      <InfiniteCanvas onEmptyAreaPointerUp={handler} panEnabled={false} />,
+    );
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerUp(canvas, {
+      clientX: 200,
+      clientY: 200,
+      pointerId: 1,
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onEmptyAreaClick when click (not drag) on empty area", () => {
+    const handler = vi.fn();
+    render(<InfiniteCanvas onEmptyAreaClick={handler} />);
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(canvas, {
+      button: 0,
+      clientX: 102,
+      clientY: 101,
+      pointerId: 1,
+    });
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not call onEmptyAreaClick when drag (not click)", () => {
+    const handler = vi.fn();
+    render(<InfiniteCanvas onEmptyAreaClick={handler} />);
+    const canvas = screen.getByTestId("infinite-canvas");
+
+    fireEvent.pointerDown(canvas, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(canvas, {
+      button: 0,
+      clientX: 200,
+      clientY: 200,
+      pointerId: 1,
+    });
+
+    expect(handler).not.toHaveBeenCalled();
+  });
+});
+
+describe("InfiniteCanvas marquee rendering", () => {
+  it("renders marquee overlay when marqueeRect is provided", () => {
+    render(
+      <InfiniteCanvas
+        marqueeRect={{ x: 50, y: 60, width: 200, height: 150 }}
+      />,
+    );
+    const overlay = screen.getByTestId("marquee-overlay");
+    expect(overlay).toBeInTheDocument();
+    const rect = overlay.querySelector("rect");
+    expect(rect).not.toBeNull();
+    expect(rect?.getAttribute("x")).toBe("50");
+    expect(rect?.getAttribute("y")).toBe("60");
+    expect(rect?.getAttribute("width")).toBe("200");
+    expect(rect?.getAttribute("height")).toBe("150");
+  });
+
+  it("does not render marquee overlay when marqueeRect is null", () => {
+    render(<InfiniteCanvas marqueeRect={null} />);
+    expect(screen.queryByTestId("marquee-overlay")).toBeNull();
+  });
+
+  it("does not render marquee overlay for tiny rectangles (1px or less)", () => {
+    render(
+      <InfiniteCanvas marqueeRect={{ x: 50, y: 60, width: 1, height: 1 }} />,
+    );
+    expect(screen.queryByTestId("marquee-overlay")).toBeNull();
+  });
+
+  it("renders marquee with custom color", () => {
+    render(
+      <InfiniteCanvas
+        marqueeRect={{ x: 0, y: 0, width: 100, height: 100 }}
+        marqueeColor="#ff0000"
+      />,
+    );
+    const overlay = screen.getByTestId("marquee-overlay");
+    const rect = overlay.querySelector("rect");
+    expect(rect?.getAttribute("stroke")).toBe("#ff0000");
+  });
+});

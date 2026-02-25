@@ -1,8 +1,10 @@
 import { type ReactNode, useCallback, useId, useRef } from "react";
 import { computeGridLinePatternParams, computeGridPatternParams } from "./grid";
-import type { ViewportState } from "./types";
+import type { MarqueeRect } from "./multiSelection";
+import type { Point, ViewportState } from "./types";
 import { usePan } from "./usePan";
 import { useZoom } from "./useZoom";
+import { isClick } from "./nodeMenu";
 import { MAX_SCALE, MIN_SCALE } from "./zoom";
 
 export interface InfiniteCanvasProps {
@@ -26,6 +28,23 @@ export interface InfiniteCanvasProps {
   readonly minScale?: number;
   /** Maximum allowed zoom scale */
   readonly maxScale?: number;
+  /** Enable/disable pan (drag-to-scroll). Default: true.
+   *  Set to false when marquee selection is active. */
+  readonly panEnabled?: boolean;
+  /** Additional pointer event handlers (for marquee selection etc.) */
+  readonly onEmptyAreaPointerDown?: (
+    e: React.PointerEvent<HTMLElement>,
+  ) => void;
+  readonly onEmptyAreaPointerMove?: (
+    e: React.PointerEvent<HTMLElement>,
+  ) => void;
+  readonly onEmptyAreaPointerUp?: (e: React.PointerEvent<HTMLElement>) => void;
+  /** Callback when an empty area of the canvas is clicked (not dragged) */
+  readonly onEmptyAreaClick?: () => void;
+  /** Marquee rectangle to render (screen-space coordinates relative to container) */
+  readonly marqueeRect?: MarqueeRect | null;
+  /** Color of the marquee rectangle border */
+  readonly marqueeColor?: string;
   /** Child elements to render on the canvas */
   readonly children?: ReactNode;
 }
@@ -51,11 +70,19 @@ export function InfiniteCanvas({
   onViewportChange = NOOP,
   minScale = MIN_SCALE,
   maxScale = MAX_SCALE,
+  panEnabled = true,
+  onEmptyAreaPointerDown,
+  onEmptyAreaPointerMove,
+  onEmptyAreaPointerUp,
+  onEmptyAreaClick,
+  marqueeRect,
+  marqueeColor = "var(--color-marquee, #3b82f6)",
   children,
 }: InfiniteCanvasProps) {
   const patternId = useId();
   const gridLinePatternId = `${patternId satisfies string}-gridline`;
   const containerRef = useRef<HTMLDivElement>(null);
+  const clickStartRef = useRef<Point | null>(null);
   const { patternSize, patternOffsetX, patternOffsetY, dotRadius } =
     computeGridPatternParams(viewport, dotSpacing);
 
@@ -80,26 +107,60 @@ export function InfiniteCanvas({
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
       onPinchPointerDown(e);
-      onPointerDown(e);
+      if (e.button === 0) {
+        clickStartRef.current = { x: e.clientX, y: e.clientY };
+      }
+      if (panEnabled) {
+        onPointerDown(e);
+      }
+      onEmptyAreaPointerDown?.(e);
     },
-    [onPinchPointerDown, onPointerDown],
+    [onPinchPointerDown, onPointerDown, panEnabled, onEmptyAreaPointerDown],
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
       onPinchPointerMove(e);
-      onPointerMove(e);
+      if (panEnabled) {
+        onPointerMove(e);
+      }
+      onEmptyAreaPointerMove?.(e);
     },
-    [onPinchPointerMove, onPointerMove],
+    [onPinchPointerMove, onPointerMove, panEnabled, onEmptyAreaPointerMove],
   );
 
   const handlePointerUp = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
       onPinchPointerUp(e);
-      onPointerUp(e);
+      if (panEnabled) {
+        onPointerUp(e);
+      }
+      onEmptyAreaPointerUp?.(e);
+
+      // クリック検出
+      if (
+        onEmptyAreaClick !== undefined &&
+        clickStartRef.current !== null &&
+        e.button === 0
+      ) {
+        const end: Point = { x: e.clientX, y: e.clientY };
+        if (isClick(clickStartRef.current, end)) {
+          onEmptyAreaClick();
+        }
+      }
+      clickStartRef.current = null;
     },
-    [onPinchPointerUp, onPointerUp],
+    [
+      onPinchPointerUp,
+      onPointerUp,
+      panEnabled,
+      onEmptyAreaPointerUp,
+      onEmptyAreaClick,
+    ],
   );
+
+  const showMarquee =
+    marqueeRect != null && (marqueeRect.width > 1 || marqueeRect.height > 1);
 
   return (
     <div
@@ -111,7 +172,7 @@ export function InfiniteCanvas({
         overflow: "hidden",
         position: "relative",
         backgroundColor,
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: isDragging ? "grabbing" : panEnabled ? "grab" : "crosshair",
         touchAction: "none",
         transition:
           "background-color var(--theme-transition-duration, 0s) ease",
@@ -200,6 +261,31 @@ export function InfiniteCanvas({
         )}
       </svg>
       {children}
+      {showMarquee && marqueeRect != null && (
+        <svg
+          data-testid="marquee-overlay"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 9999,
+          }}
+          aria-hidden="true"
+        >
+          <rect
+            x={marqueeRect.x}
+            y={marqueeRect.y}
+            width={marqueeRect.width}
+            height={marqueeRect.height}
+            fill="rgba(59, 130, 246, 0.1)"
+            stroke={marqueeColor}
+            strokeWidth={1}
+            strokeDasharray="4 2"
+          />
+        </svg>
+      )}
     </div>
   );
 }

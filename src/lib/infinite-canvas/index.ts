@@ -114,3 +114,25 @@ export type {
   MinimapTransform,
   ViewportRect,
 } from "./minimap";
+export {
+  MARQUEE_INACTIVE,
+  startMarquee,
+  updateMarquee,
+  endMarquee,
+  computeMarqueeRect,
+  screenToWorld,
+  marqueeRectToWorld,
+  rectsOverlap,
+  findItemsInMarquee,
+  addToSelection,
+  replaceSelection,
+  selectAll,
+  computeMultiDragPositions,
+} from "./multiSelection";
+export type {
+  MarqueeRect,
+  MarqueeState,
+  SelectableItem,
+} from "./multiSelection";
+export { useMarquee } from "./useMarquee";
+export type { UseMarqueeResult } from "./useMarquee";
