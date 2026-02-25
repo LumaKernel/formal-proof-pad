@@ -252,6 +252,7 @@ export function FormulaEditor({
             fontSize={fontSize}
             testId={testId ? `${testId satisfies string}-input` : undefined}
             onBlur={tryExitEditMode}
+            showPreview={false}
           />
         </div>
       )}

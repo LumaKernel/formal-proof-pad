@@ -53,6 +53,8 @@ export interface FormulaInputProps {
   readonly testId?: string;
   /** blur時のコールバック（FormulaEditorからのモード遷移に使用） */
   readonly onBlur?: () => void;
+  /** プレビュー（パース成功時のFormulaDisplay）を表示するか（デフォルト: true） */
+  readonly showPreview?: boolean;
 }
 
 // --- 純粋関数: パース ---
@@ -199,6 +201,7 @@ export function FormulaInput({
   style,
   testId,
   onBlur,
+  showPreview = true,
 }: FormulaInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -335,8 +338,8 @@ export function FormulaInput({
         )}
       </div>
 
-      {/* プレビュー（パース成功時） */}
-      {parseState.status === "success" && (
+      {/* プレビュー（パース成功時、showPreview=trueの場合のみ） */}
+      {showPreview && parseState.status === "success" && (
         <div
           style={previewStyle}
           data-testid={

@@ -245,6 +245,20 @@ describe("FormulaInput", () => {
         "false",
       );
     });
+
+    it("showPreview=falseでプレビューが非表示", () => {
+      render(
+        <FormulaInput
+          value="φ → ψ"
+          onChange={() => {}}
+          testId="fi"
+          showPreview={false}
+        />,
+      );
+      expect(screen.queryByTestId("fi-preview")).not.toBeInTheDocument();
+      // 入力欄は存在する
+      expect(screen.getByTestId("fi-input")).toBeInTheDocument();
+    });
   });
 
   describe("パースエラー時", () => {

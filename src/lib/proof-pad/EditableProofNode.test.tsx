@@ -107,6 +107,18 @@ describe("EditableProofNode", () => {
       expect(lastCall?.[0]).toBe("node-1");
     });
 
+    it("編集モードでFormulaInputのプレビューが表示されない", async () => {
+      const user = userEvent.setup();
+      renderNode();
+      const display = screen.getByTestId("test-node-editor-display");
+      await user.click(display);
+      expect(screen.getByTestId("test-node-editor-edit")).toBeInTheDocument();
+      // FormulaInputのプレビュー（-input-preview）が表示されていないこと
+      expect(
+        screen.queryByTestId("test-node-editor-input-preview"),
+      ).not.toBeInTheDocument();
+    });
+
     it("Escapeで表示モードに戻る", async () => {
       const user = userEvent.setup();
       renderNode();
