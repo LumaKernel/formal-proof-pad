@@ -118,7 +118,10 @@ export function useNotebookCollection(
       setCollection((prev) => {
         const next = createNotebook(prev, { name, system, now });
         const added = next.notebooks[next.notebooks.length - 1];
+        // 防御コード: createNotebookは必ずノートブックを追加するためundefinedにはならない
+        /* v8 ignore start */
         if (added !== undefined) {
+          /* v8 ignore stop */
           newId = added.meta.id;
         }
         return next;
@@ -146,7 +149,10 @@ export function useNotebookCollection(
           questId,
         });
         const added = next.notebooks[next.notebooks.length - 1];
+        // 防御コード: createQuestNotebookは必ずノートブックを追加するためundefinedにはならない
+        /* v8 ignore start */
         if (added !== undefined) {
+          /* v8 ignore stop */
           newId = added.meta.id;
         }
         return next;
@@ -174,7 +180,10 @@ export function useNotebookCollection(
       setCollection((prev) => {
         const next = duplicateNotebook(prev, id, now);
         const added = next.notebooks[next.notebooks.length - 1];
+        // 防御コード: duplicateNotebookは必ずノートブックを追加するためundefinedにはならない
+        /* v8 ignore start */
         if (added !== undefined) {
+          /* v8 ignore stop */
           newId = added.meta.id;
         }
         return next;

@@ -218,4 +218,36 @@ describe("useNotebookCollection hook", () => {
     expect(stored).not.toBeNull();
     expect(stored).toContain("永続化テスト");
   });
+
+  it("createQuestでquestId付きクエストノートブックを作成できる", () => {
+    const { result } = renderHook(() => useNotebookCollection());
+
+    let id: string = "";
+    act(() => {
+      id = result.current.createQuest(
+        "クエスト",
+        lukasiewiczSystem,
+        [{ formulaText: "phi -> phi", position: { x: 0, y: 0 } }],
+        "prop-01",
+      );
+    });
+
+    expect(id).toMatch(/^notebook-/);
+    expect(result.current.notebooks.length).toBe(1);
+    const notebook = result.current.collection.notebooks[0];
+    expect(notebook?.questId).toBe("prop-01");
+    expect(notebook?.workspace.mode).toBe("quest");
+  });
+
+  it("getNowオプションで時刻注入できる", () => {
+    let clock = 5000;
+    const getNow = () => clock++;
+    const { result } = renderHook(() => useNotebookCollection({ getNow }));
+
+    act(() => {
+      result.current.create("カスタム時刻", lukasiewiczSystem);
+    });
+
+    expect(result.current.notebooks[0]?.meta.createdAt).toBe(5000);
+  });
 });

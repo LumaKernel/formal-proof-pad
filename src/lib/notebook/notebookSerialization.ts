@@ -88,7 +88,10 @@ function parseCollection(raw: unknown): NotebookCollection | undefined {
   const obj = raw as Record<string, unknown>;
   if (!Array.isArray(obj["notebooks"])) return undefined;
   if (typeof obj["nextId"] !== "number") return undefined;
+  // 防御コード: JSON.parseでNaN/Infinityにはならないが、将来の入力ソース拡張に備える
+  /* v8 ignore start */
   if (!Number.isFinite(obj["nextId"])) return undefined;
+  /* v8 ignore stop */
 
   const notebooks: Notebook[] = [];
   for (const item of obj["notebooks"] as readonly unknown[]) {

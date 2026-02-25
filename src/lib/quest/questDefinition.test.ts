@@ -188,4 +188,37 @@ describe("sortQuests", () => {
     sortQuests(quests);
     expect(quests).toEqual(original);
   });
+
+  it("未知のカテゴリはフォールバック順序999でソートされる", () => {
+    const quests = [
+      makeQuest({
+        id: "q1",
+        category: "unknown-category" as QuestCategory,
+        order: 1,
+      }),
+      makeQuest({ id: "q2", category: "propositional-basics", order: 1 }),
+    ];
+    const sorted = sortQuests(quests);
+    // propositional-basics (order=1) が先、unknown-category (order=999) が後
+    expect(sorted[0]!.id).toBe("q2");
+    expect(sorted[1]!.id).toBe("q1");
+  });
+
+  it("両方とも未知のカテゴリの場合はorder順でソートされる", () => {
+    const quests = [
+      makeQuest({
+        id: "q2",
+        category: "unknown-b" as QuestCategory,
+        order: 2,
+      }),
+      makeQuest({
+        id: "q1",
+        category: "unknown-b" as QuestCategory,
+        order: 1,
+      }),
+    ];
+    const sorted = sortQuests(quests);
+    expect(sorted[0]!.id).toBe("q1");
+    expect(sorted[1]!.id).toBe("q2");
+  });
 });

@@ -280,6 +280,218 @@ describe("notebookSerialization", () => {
       const result = deserializeCollection(json);
       expect(result.notebooks.length).toBe(0);
     });
+
+    it("predicateLogicがbooleanでない場合は除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "bad-predicate",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: {
+                name: "test",
+                propositionalAxioms: ["A1"],
+                predicateLogic: "not-boolean",
+                equalityLogic: false,
+                generalization: false,
+              },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("equalityLogicがbooleanでない場合は除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "bad-equality",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: {
+                name: "test",
+                propositionalAxioms: ["A1"],
+                predicateLogic: false,
+                equalityLogic: 42,
+                generalization: false,
+              },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("generalizationがbooleanでない場合は除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "bad-gen",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: {
+                name: "test",
+                propositionalAxioms: ["A1"],
+                predicateLogic: false,
+                equalityLogic: false,
+                generalization: "yes",
+              },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("nameがstringでない場合は除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "bad-name",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: {
+                name: 42,
+                propositionalAxioms: ["A1"],
+                predicateLogic: false,
+                equalityLogic: false,
+                generalization: false,
+              },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("systemがnullの場合は除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "null-system",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: null,
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("systemがプリミティブの場合は除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "primitive-system",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: "not-an-object",
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("公理IDにnon-string値がある場合は除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "non-string-axiom",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: {
+                name: "test",
+                propositionalAxioms: [42],
+                predicateLogic: false,
+                equalityLogic: false,
+                generalization: false,
+              },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
   });
 
   describe("serializeCollection の出力形式", () => {
