@@ -4,7 +4,9 @@ import { useCallback, type CSSProperties } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useNotebookCollection, findNotebook } from "../../../lib/notebook";
 import { ProofWorkspace } from "../../../lib/proof-pad";
+import type { GoalAchievedInfo } from "../../../lib/proof-pad";
 import type { WorkspaceState } from "../../../lib/proof-pad/workspaceState";
+import { useQuestProgress } from "../../../lib/quest";
 import { ThemeProvider } from "../../../lib/theme/ThemeProvider";
 import { ThemeToggle } from "../../../components/ThemeToggle/ThemeToggle";
 
@@ -79,6 +81,7 @@ function WorkspaceInner() {
   const params = useParams();
   const router = useRouter();
   const notebookCollection = useNotebookCollection();
+  const questProgress = useQuestProgress();
 
   const notebookId =
     typeof params.id === "string"
@@ -103,6 +106,21 @@ function WorkspaceInner() {
       }
     },
     [notebookId, notebookCollection],
+  );
+
+  const questId = notebook?.questId;
+  const questRecord = questProgress.record;
+  const handleGoalAchieved = useCallback(
+    (info: GoalAchievedInfo) => {
+      if (questId !== undefined) {
+        questRecord(questId, {
+          // eslint-disable-next-line @luma-dev/luma-ts/no-date
+          completedAt: Date.now(),
+          stepCount: info.stepCount,
+        });
+      }
+    },
+    [questId, questRecord],
   );
 
   if (notebook === undefined) {
@@ -135,6 +153,7 @@ function WorkspaceInner() {
           system={notebook.workspace.system}
           workspace={notebook.workspace}
           onWorkspaceChange={handleWorkspaceChange}
+          onGoalAchieved={handleGoalAchieved}
         />
       </div>
     </div>

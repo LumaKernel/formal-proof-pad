@@ -88,4 +88,10 @@ export {
   getNotebookIdsForQuest,
 } from "./questNotebookIntegration";
 
+export {
+  computeStepCount,
+  checkQuestGoals,
+  type QuestGoalCheckResult,
+} from "./questCompletionLogic";
+
 export { QuestCatalog, type QuestCatalogProps } from "./QuestCatalogComponent";

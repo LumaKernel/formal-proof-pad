@@ -8,7 +8,7 @@ export type { AxiomPaletteProps } from "./AxiomPalette";
 export { getAvailableAxioms } from "./axiomPaletteLogic";
 export type { AxiomPaletteItem } from "./axiomPaletteLogic";
 export { ProofWorkspace } from "./ProofWorkspace";
-export type { ProofWorkspaceProps } from "./ProofWorkspace";
+export type { ProofWorkspaceProps, GoalAchievedInfo } from "./ProofWorkspace";
 export {
   createEmptyWorkspace,
   createQuestWorkspace,

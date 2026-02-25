@@ -26,10 +26,15 @@ import {
 function StatefulWorkspace({
   initialWorkspace,
   onFormulaParsed,
+  onGoalAchieved,
   testId = "workspace",
 }: {
   readonly initialWorkspace: WorkspaceState;
   readonly onFormulaParsed?: (nodeId: string, formula: Formula) => void;
+  readonly onGoalAchieved?: (info: {
+    readonly matchingNodeId: string;
+    readonly stepCount: number;
+  }) => void;
   readonly testId?: string;
 }) {
   const [workspace, setWorkspace] = useState(initialWorkspace);
@@ -43,6 +48,7 @@ function StatefulWorkspace({
       workspace={workspace}
       onWorkspaceChange={handleChange}
       onFormulaParsed={onFormulaParsed}
+      onGoalAchieved={onGoalAchieved}
       testId={testId}
     />
   );
@@ -878,6 +884,165 @@ describe("ProofWorkspace", () => {
           screen.getByTestId("workspace-goal-achieved"),
         ).toBeInTheDocument();
       });
+    });
+
+    it("calls onGoalAchieved when goal is achieved (external state)", () => {
+      const onGoalAchieved = vi.fn();
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = updateGoalFormulaText(ws, "phi");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          onGoalAchieved={onGoalAchieved}
+          testId="workspace"
+        />,
+      );
+
+      expect(onGoalAchieved).toHaveBeenCalledTimes(1);
+      expect(onGoalAchieved).toHaveBeenCalledWith({
+        matchingNodeId: "node-1",
+        stepCount: 1,
+      });
+    });
+
+    it("calls onGoalAchieved only once on transition to achieved", async () => {
+      const onGoalAchieved = vi.fn();
+      const user = userEvent.setup();
+
+      render(
+        <StatefulWorkspace
+          initialWorkspace={createEmptyWorkspace(lukasiewiczSystem)}
+          onGoalAchieved={onGoalAchieved}
+          testId="workspace"
+        />,
+      );
+
+      // Not called yet
+      expect(onGoalAchieved).not.toHaveBeenCalled();
+
+      // Add axiom
+      await user.click(screen.getByTestId("workspace-axiom-palette-item-A1"));
+
+      // Type goal that matches
+      const goalInput = screen.getByTestId("workspace-goal-input");
+      await user.type(goalInput, "phi -> (psi -> phi)");
+
+      await waitFor(() => {
+        expect(onGoalAchieved).toHaveBeenCalledTimes(1);
+      });
+
+      expect(onGoalAchieved).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stepCount: 1,
+        }),
+      );
+    });
+
+    it("does not call onGoalAchieved when goal is not set", () => {
+      const onGoalAchieved = vi.fn();
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          onGoalAchieved={onGoalAchieved}
+          testId="workspace"
+        />,
+      );
+      expect(onGoalAchieved).not.toHaveBeenCalled();
+    });
+
+    it("does not call onGoalAchieved when goal is not yet achieved", () => {
+      const onGoalAchieved = vi.fn();
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = updateGoalFormulaText(ws, "phi -> phi");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          onGoalAchieved={onGoalAchieved}
+          testId="workspace"
+        />,
+      );
+      expect(onGoalAchieved).not.toHaveBeenCalled();
+    });
+
+    it("calls onGoalAchieved when quest goal is achieved (quest mode)", () => {
+      const onGoalAchieved = vi.fn();
+      // Create quest workspace with a goal
+      let ws = createQuestWorkspace(lukasiewiczSystem, [
+        {
+          formulaText: "phi -> (psi -> phi)",
+          label: "Goal",
+          position: { x: 0, y: 0 },
+        },
+      ]);
+      // Add an axiom node that matches the goal (A1)
+      ws = addNode(ws, "axiom", "A1", { x: 200, y: 0 }, "phi -> (psi -> phi)");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          onGoalAchieved={onGoalAchieved}
+          testId="workspace"
+        />,
+      );
+
+      expect(onGoalAchieved).toHaveBeenCalledTimes(1);
+      expect(onGoalAchieved).toHaveBeenCalledWith({
+        matchingNodeId: "",
+        stepCount: 1,
+      });
+    });
+
+    it("does not call onGoalAchieved when quest goal is not achieved", () => {
+      const onGoalAchieved = vi.fn();
+      let ws = createQuestWorkspace(lukasiewiczSystem, [
+        {
+          formulaText: "phi -> phi",
+          label: "Goal",
+          position: { x: 0, y: 0 },
+        },
+      ]);
+      // Add an axiom that does NOT match the goal
+      ws = addNode(ws, "axiom", "A1", { x: 200, y: 0 }, "phi -> (psi -> phi)");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          onGoalAchieved={onGoalAchieved}
+          testId="workspace"
+        />,
+      );
+
+      expect(onGoalAchieved).not.toHaveBeenCalled();
+    });
+
+    it("shows proof complete banner when quest goal is achieved", () => {
+      let ws = createQuestWorkspace(lukasiewiczSystem, [
+        {
+          formulaText: "phi -> (psi -> phi)",
+          label: "Goal",
+          position: { x: 0, y: 0 },
+        },
+      ]);
+      ws = addNode(ws, "axiom", "A1", { x: 200, y: 0 }, "phi -> (psi -> phi)");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.getByTestId("workspace-proof-complete-banner"),
+      ).toBeInTheDocument();
     });
   });
 

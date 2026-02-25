@@ -28,6 +28,10 @@ import {
   getGenErrorMessage,
 } from "./genApplicationLogic";
 import { checkGoal } from "./goalCheckLogic";
+import {
+  computeStepCount,
+  checkQuestGoals,
+} from "../quest/questCompletionLogic";
 import { classifyAllNodes } from "./nodeRoleLogic";
 import { identifyAxiomName } from "./axiomNameLogic";
 import { parseNodeFormula } from "./mpApplicationLogic";
@@ -62,6 +66,14 @@ import type { ClipboardData } from "./copyPasteLogic";
 
 // --- Props ---
 
+/** ゴール達成時に通知されるデータ */
+export type GoalAchievedInfo = {
+  /** ゴール式に一致したノードのID */
+  readonly matchingNodeId: string;
+  /** ステップ数（公理+MP+Genノードの合計、ゴールノードを除く） */
+  readonly stepCount: number;
+};
+
 export interface ProofWorkspaceProps {
   /** 論理体系 */
   readonly system: LogicSystem;
@@ -71,6 +83,8 @@ export interface ProofWorkspaceProps {
   readonly onWorkspaceChange?: (workspace: WorkspaceState) => void;
   /** 論理式パース成功時のコールバック */
   readonly onFormulaParsed?: (nodeId: string, formula: Formula) => void;
+  /** ゴール達成時のコールバック（達成へ遷移した瞬間に1回だけ呼ばれる） */
+  readonly onGoalAchieved?: (info: GoalAchievedInfo) => void;
   /** data-testid */
   readonly testId?: string;
 }
@@ -299,6 +313,7 @@ export function ProofWorkspace({
   workspace: externalWorkspace,
   onWorkspaceChange,
   onFormulaParsed,
+  onGoalAchieved,
   testId,
 }: ProofWorkspaceProps) {
   // 内部状態（外部制御がない場合）
@@ -530,14 +545,53 @@ export function ProofWorkspace({
     return validations;
   }, [workspace]);
 
-  // --- ゴールチェック ---
+  // --- ゴールチェック（フリーモード: goalFormulaTextベース） ---
 
   const goalCheckResult = useMemo(
     () => checkGoal(workspace.goalFormulaText, workspace.nodes),
     [workspace.goalFormulaText, workspace.nodes],
   );
 
-  const isGoalAchieved = goalCheckResult._tag === "GoalAchieved";
+  // --- クエストゴールチェック（クエストモード: 保護ノードベース） ---
+
+  const questGoalResult = useMemo(
+    () =>
+      workspace.mode === "quest" ? checkQuestGoals(workspace.nodes) : undefined,
+    [workspace.mode, workspace.nodes],
+  );
+
+  const isGoalAchieved =
+    goalCheckResult._tag === "GoalAchieved" ||
+    questGoalResult?._tag === "AllAchieved";
+
+  // --- ゴール達成コールバック（達成へ遷移した瞬間に1回だけ発火） ---
+
+  const prevGoalAchievedRef = useRef(false);
+
+  useEffect(() => {
+    if (isGoalAchieved && !prevGoalAchievedRef.current) {
+      if (onGoalAchieved) {
+        if (questGoalResult?._tag === "AllAchieved") {
+          onGoalAchieved({
+            matchingNodeId: "",
+            stepCount: questGoalResult.stepCount,
+          });
+        } else if (goalCheckResult._tag === "GoalAchieved") {
+          onGoalAchieved({
+            matchingNodeId: goalCheckResult.matchingNodeId,
+            stepCount: computeStepCount(workspace.nodes),
+          });
+        }
+      }
+    }
+    prevGoalAchievedRef.current = isGoalAchieved;
+  }, [
+    isGoalAchieved,
+    goalCheckResult,
+    questGoalResult,
+    onGoalAchieved,
+    workspace.nodes,
+  ]);
 
   // --- ノード分類 ---
 
