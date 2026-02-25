@@ -59,7 +59,34 @@
 - コピペロジックも3層分離: `copyPasteLogic.ts`(純粋データ変換) → `workspaceState.ts`(状態統合) → `ProofWorkspace.tsx`(UI・クリップボードAPI)
 - UIオーバーレイ（バナー等）のclickにはstopPropagationが必要（コンテナのclick解除を防ぐ）
 - 補完候補の重複排除: `computeCompletions` で同じ `insertText` の候補を `Set` で重複排除する
+- Prettier: 空のmdファイルは0バイトにする（改行のみの1バイトは不正フォーマット扱い）
+- `*.local.*` ファイルは `.gitignore` 済みだが、ESLint configにも `**/*.local.*` で除外が必要
+- 新ファイル作成後は必ず `npx prettier --write` を実行する（特にmdファイル）
+- `src/lib/notebook/` はノートブック管理の純粋ロジック。notebookState.ts にNotebook/NotebookCollection型と操作関数を配置
+- ノートブック管理も3層分離パターン: notebookState.ts(純粋ロジック) → hook → UIコンポーネント
 
+---
+
+## 2026-02-25 - ノートブック管理: 純粋ロジック層の作成
+- `src/lib/notebook/notebookState.ts` を新規作成 - ノートブック管理の純粋ロジック
+- `src/lib/notebook/notebookState.test.ts` を新規作成 - 31テスト、100%カバレッジ
+- `src/lib/notebook/index.ts` を新規作成 - 公開API
+- 型定義: Notebook, NotebookMeta, NotebookCollection, CreateNotebookParams, CreateQuestNotebookParams
+- 操作関数: 作成、クエスト作成、検索、名前変更、ワークスペース更新、削除、複製、自由帳モード変換、ソート(更新日時/作成日時)
+- カバレッジ: Stmts 99.28% (微増), Branch 94.65% (微増), Lines 100% (維持)
+  - notebook モジュール単体: 全指標100%
+- テスト: 2194 全パス（31テスト追加）
+- 変更ファイル:
+  - `src/lib/notebook/notebookState.ts` (NEW) - 純粋ロジック
+  - `src/lib/notebook/notebookState.test.ts` (NEW) - テスト
+  - `src/lib/notebook/index.ts` (NEW) - 公開API
+  - `tasks/prd-logic-pad-world.md` - ノート管理タスク実行中マーク
+  - `task-processing.md` - 現在のタスク記録
+- **今後のイテレーションへの学び:**
+  - ノートブックはWorkspaceStateをラップする形で設計。既存のworkspaceState関数を再利用
+  - convertToFreeMode はworkspaceState.tsから既に提供されているので、それをラップするだけでよい
+  - 次のイテレーションではUI層（ノート一覧コンポーネント、ノート選択画面）に進む
+  - ルーティング設計が必要: ホーム(ノート一覧) → ノート詳細(ProofWorkspace) の遷移
 ---
 
 ## 2026-02-25 - CI修復: Prettierフォーマット修正 + ESLint ignore設定
