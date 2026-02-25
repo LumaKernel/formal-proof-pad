@@ -17,6 +17,7 @@ import {
 import { ProofWorkspace } from "./ProofWorkspace";
 import {
   createEmptyWorkspace,
+  createQuestWorkspace,
   addNode,
   addConnection,
   applyMPAndConnect,
@@ -399,5 +400,62 @@ export const GoalNotAchieved: Story = {
     await expect(
       canvas.queryByTestId("workspace-proof-complete-banner"),
     ).not.toBeInTheDocument();
+  },
+};
+
+// --- クエストモードデモ ---
+
+function QuestModeWorkspace() {
+  const initial = createQuestWorkspace(lukasiewiczSystem, [
+    {
+      formulaText: "phi -> (psi -> phi)",
+      label: "Quest: K axiom",
+      position: { x: 100, y: 300 },
+    },
+    {
+      formulaText: "phi -> phi",
+      label: "Quest: Identity",
+      position: { x: 400, y: 300 },
+    },
+  ]);
+
+  const [workspace, setWorkspace] = useState<WorkspaceState>(initial);
+  const handleChange = useCallback((ws: WorkspaceState) => {
+    setWorkspace(ws);
+  }, []);
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <ProofWorkspace
+        system={lukasiewiczSystem}
+        workspace={workspace}
+        onWorkspaceChange={handleChange}
+        testId="workspace"
+      />
+    </div>
+  );
+}
+
+/** クエストモード: 保護されたゴールノード付きワークスペース */
+export const QuestMode: Story = {
+  render: () => <QuestModeWorkspace />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+    // Quest badge in header
+    await expect(
+      canvas.getByTestId("workspace-quest-badge"),
+    ).toBeInTheDocument();
+    // Convert to Free button
+    await expect(
+      canvas.getByTestId("workspace-convert-free-button"),
+    ).toBeInTheDocument();
+    // Quest goal nodes with QUEST badge
+    await expect(
+      canvas.getByTestId("proof-node-node-1-protected-badge"),
+    ).toHaveTextContent("QUEST");
+    await expect(
+      canvas.getByTestId("proof-node-node-2-protected-badge"),
+    ).toHaveTextContent("QUEST");
   },
 };

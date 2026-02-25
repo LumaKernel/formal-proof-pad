@@ -20,6 +20,24 @@ import {
   type GenApplicationResult,
 } from "./genApplicationLogic";
 
+// --- ワークスペースモード ---
+
+/**
+ * ワークスペースのモード。
+ * - "free": 自由帳モード（すべてのノードが編集・削除可能）
+ * - "quest": クエストモード（保護されたゴールノードが存在し、編集・削除不可）
+ */
+export type WorkspaceMode = "free" | "quest";
+
+// --- ノード保護 ---
+
+/**
+ * ノードの保護状態。
+ * - "quest-goal": クエストモードのゴールノード（編集・削除不可）
+ * - undefined: 保護なし（通常ノード）
+ */
+export type NodeProtection = "quest-goal";
+
 // --- ワークスペースノード ---
 
 /** ワークスペース上の証明ノード */
@@ -33,6 +51,8 @@ export type WorkspaceNode = {
   readonly genVariableName?: string;
   /** ユーザーが明示的に設定した役割（"axiom" | "goal" | undefined） */
   readonly role?: NodeRole;
+  /** ノードの保護状態（クエストモードのゴールノードなど） */
+  readonly protection?: NodeProtection;
 };
 
 /** ワークスペース上の接続（ポートベース） */
@@ -52,6 +72,8 @@ export type WorkspaceState = {
   readonly nextNodeId: number;
   /** 証明目標の論理式テキスト（DSL形式）。空文字列は未設定 */
   readonly goalFormulaText: string;
+  /** ワークスペースのモード（デフォルト: "free"） */
+  readonly mode: WorkspaceMode;
 };
 
 // --- 初期状態 ---
@@ -64,7 +86,84 @@ export function createEmptyWorkspace(system: LogicSystem): WorkspaceState {
     connections: [],
     nextNodeId: 1,
     goalFormulaText: "",
+    mode: "free",
   };
+}
+
+/** クエスト用ゴールノードの定義 */
+export type QuestGoalDefinition = {
+  /** ゴール式のDSLテキスト */
+  readonly formulaText: string;
+  /** 表示ラベル（省略時はデフォルト） */
+  readonly label?: string;
+  /** 配置位置 */
+  readonly position: Point;
+};
+
+/**
+ * クエストモードのワークスペースを作成する。
+ * ゴール定義から保護されたゴールノードを自動生成する。
+ */
+export function createQuestWorkspace(
+  system: LogicSystem,
+  goals: readonly QuestGoalDefinition[],
+): WorkspaceState {
+  let state: WorkspaceState = {
+    system,
+    nodes: [],
+    connections: [],
+    nextNodeId: 1,
+    goalFormulaText: "",
+    mode: "quest",
+  };
+
+  for (const goal of goals) {
+    const id = `node-${String(state.nextNodeId) satisfies string}`;
+    const newNode: WorkspaceNode = {
+      id,
+      kind: "axiom",
+      label: goal.label ?? "Quest Goal",
+      formulaText: goal.formulaText,
+      position: goal.position,
+      role: "goal",
+      protection: "quest-goal",
+    };
+    state = {
+      ...state,
+      nodes: [...state.nodes, newNode],
+      nextNodeId: state.nextNodeId + 1,
+    };
+  }
+
+  return state;
+}
+
+/**
+ * クエストモードから自由帳モードに変換する。
+ * 保護されたノードの保護状態を解除する。
+ */
+export function convertToFreeMode(state: WorkspaceState): WorkspaceState {
+  if (state.mode === "free") return state;
+  return {
+    ...state,
+    mode: "free",
+    nodes: state.nodes.map((node) =>
+      node.protection !== undefined ? { ...node, protection: undefined } : node,
+    ),
+  };
+}
+
+/**
+ * ノードが保護されているかを判定する。
+ * クエストモードで protection が設定されているノードは保護される。
+ */
+export function isNodeProtected(
+  state: WorkspaceState,
+  nodeId: string,
+): boolean {
+  if (state.mode === "free") return false;
+  const node = state.nodes.find((n) => n.id === nodeId);
+  return node?.protection !== undefined;
 }
 
 // --- ノード操作 ---
@@ -106,12 +205,13 @@ export function updateNodePosition(
   };
 }
 
-/** ノードの論理式テキストを更新する */
+/** ノードの論理式テキストを更新する（保護ノードは更新不可） */
 export function updateNodeFormulaText(
   state: WorkspaceState,
   nodeId: string,
   formulaText: string,
 ): WorkspaceState {
+  if (isNodeProtected(state, nodeId)) return state;
   return {
     ...state,
     nodes: state.nodes.map((node) =>
@@ -145,12 +245,13 @@ export function updateNodeGenVariableName(
   };
 }
 
-/** ノードの役割を更新する */
+/** ノードの役割を更新する（保護ノードは更新不可） */
 export function updateNodeRole(
   state: WorkspaceState,
   nodeId: string,
   role: NodeRole | undefined,
 ): WorkspaceState {
+  if (isNodeProtected(state, nodeId)) return state;
   return {
     ...state,
     nodes: state.nodes.map((node) =>
@@ -167,11 +268,12 @@ export function findNode(
   return state.nodes.find((n) => n.id === nodeId);
 }
 
-/** ノードを削除する（関連する接続も削除） */
+/** ノードを削除する（関連する接続も削除）。保護ノードは削除不可。 */
 export function removeNode(
   state: WorkspaceState,
   nodeId: string,
 ): WorkspaceState {
+  if (isNodeProtected(state, nodeId)) return state;
   return {
     ...state,
     nodes: state.nodes.filter((n) => n.id !== nodeId),

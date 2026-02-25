@@ -12,6 +12,7 @@ import { ProofWorkspace } from "./ProofWorkspace";
 import type { WorkspaceState } from "./workspaceState";
 import {
   createEmptyWorkspace,
+  createQuestWorkspace,
   addNode,
   addConnection,
   updateGoalFormulaText,
@@ -1185,6 +1186,120 @@ describe("ProofWorkspace", () => {
         <ProofWorkspace system={lukasiewiczSystem} workspace={ws} />,
       );
       expect(container.textContent).toContain("Proof Complete!");
+    });
+  });
+
+  describe("quest mode", () => {
+    it("displays Quest badge in quest mode", () => {
+      const ws = createQuestWorkspace(lukasiewiczSystem, [
+        { formulaText: "phi -> phi", position: { x: 0, y: 0 } },
+      ]);
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+      expect(screen.getByTestId("workspace-quest-badge")).toBeInTheDocument();
+      expect(screen.getByTestId("workspace-quest-badge")).toHaveTextContent(
+        "Quest",
+      );
+    });
+
+    it("does not display Quest badge in free mode", () => {
+      const ws = createEmptyWorkspace(lukasiewiczSystem);
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+      expect(
+        screen.queryByTestId("workspace-quest-badge"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("displays Convert to Free button in quest mode", () => {
+      const ws = createQuestWorkspace(lukasiewiczSystem, [
+        { formulaText: "phi", position: { x: 0, y: 0 } },
+      ]);
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+      expect(
+        screen.getByTestId("workspace-convert-free-button"),
+      ).toBeInTheDocument();
+    });
+
+    it("quest goal nodes show QUEST badge", () => {
+      const ws = createQuestWorkspace(lukasiewiczSystem, [
+        { formulaText: "phi", position: { x: 0, y: 0 } },
+      ]);
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+      expect(
+        screen.getByTestId("proof-node-node-1-protected-badge"),
+      ).toHaveTextContent("QUEST");
+    });
+
+    it("converts to free mode when Convert to Free button is clicked", async () => {
+      const user = userEvent.setup();
+      const ws = createQuestWorkspace(lukasiewiczSystem, [
+        { formulaText: "phi", position: { x: 0, y: 0 } },
+      ]);
+      const onWorkspaceChange = vi.fn();
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          onWorkspaceChange={onWorkspaceChange}
+          testId="workspace"
+        />,
+      );
+
+      await user.click(screen.getByTestId("workspace-convert-free-button"));
+      expect(onWorkspaceChange).toHaveBeenCalled();
+      const updated = onWorkspaceChange.mock.calls[0]![0] as WorkspaceState;
+      expect(updated.mode).toBe("free");
+      expect(updated.nodes[0]!.protection).toBeUndefined();
+    });
+
+    it("quest mode conversion works with internal state", async () => {
+      const user = userEvent.setup();
+      const ws = createQuestWorkspace(lukasiewiczSystem, [
+        { formulaText: "phi", position: { x: 0, y: 0 } },
+      ]);
+
+      render(<StatefulWorkspace initialWorkspace={ws} />);
+
+      // Quest badge should be visible
+      expect(screen.getByTestId("workspace-quest-badge")).toBeInTheDocument();
+
+      // Click Convert to Free
+      await user.click(screen.getByTestId("workspace-convert-free-button"));
+
+      // Quest badge should disappear
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId("workspace-quest-badge"),
+        ).not.toBeInTheDocument();
+      });
+
+      // Protected badge should also disappear
+      expect(
+        screen.queryByTestId("proof-node-node-1-protected-badge"),
+      ).not.toBeInTheDocument();
     });
   });
 });

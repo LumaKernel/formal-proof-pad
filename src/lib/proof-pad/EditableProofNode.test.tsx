@@ -369,4 +369,69 @@ describe("EditableProofNode", () => {
       expect(container.textContent).toContain("有効");
     });
   });
+
+  describe("保護ノード（isProtected）", () => {
+    it("保護ノードにQUESTバッジが表示される", () => {
+      renderNode({ isProtected: true });
+      expect(screen.getByTestId("test-node-protected-badge")).toHaveTextContent(
+        "QUEST",
+      );
+    });
+
+    it("非保護ノードにQUESTバッジが表示されない", () => {
+      renderNode({ isProtected: false });
+      expect(
+        screen.queryByTestId("test-node-protected-badge"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("保護ノードは編集不可（FormulaEditorが表示されず読み取り専用）", () => {
+      renderNode({
+        isProtected: true,
+        editable: true,
+        formulaText: "phi -> psi",
+      });
+      // FormulaEditor のtestIdが存在しない（readonlyモード）
+      expect(screen.queryByTestId("test-node-editor")).not.toBeInTheDocument();
+      // formulaの読み取り専用表示が存在する
+      expect(screen.getByTestId("test-node-formula")).toHaveTextContent(
+        "phi -> psi",
+      );
+    });
+
+    it("保護ノードのバッジクリックで役割が変わらない", async () => {
+      const user = userEvent.setup();
+      const onRoleChange = vi.fn();
+      renderNode({
+        isProtected: true,
+        classification: "root-goal",
+        onRoleChange,
+      });
+      const badge = screen.getByTestId("test-node-role-badge");
+      await user.click(badge);
+      expect(onRoleChange).not.toHaveBeenCalled();
+    });
+
+    it("保護ノードでもヘッダー行が表示される（QUESTバッジのため）", () => {
+      renderNode({ isProtected: true });
+      expect(screen.getByText("A1")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("test-node-protected-badge"),
+      ).toBeInTheDocument();
+    });
+
+    it("testIdなしの保護ノードでもQUESTバッジが表示される", () => {
+      const { container } = render(
+        <EditableProofNode
+          id="node-1"
+          kind="axiom"
+          label="A1"
+          formulaText="φ"
+          onFormulaTextChange={() => {}}
+          isProtected={true}
+        />,
+      );
+      expect(container.textContent).toContain("QUEST");
+    });
+  });
 });

@@ -33,6 +33,8 @@ import type { NodeRole } from "./nodeRoleLogic";
 import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
 import {
   createEmptyWorkspace,
+  convertToFreeMode,
+  isNodeProtected,
   addNode,
   updateNodePosition,
   updateNodeFormulaText,
@@ -236,6 +238,27 @@ const proofCompleteBannerStyle = {
   pointerEvents: "none" as const,
   textAlign: "center" as const,
   letterSpacing: 1,
+};
+
+const questModeBadgeStyle = {
+  padding: "2px 8px",
+  background: "rgba(255,215,0,0.3)",
+  borderRadius: 4,
+  fontWeight: 600 as const,
+  fontSize: 12,
+  color: "#b8860b",
+  border: "1px solid rgba(255,215,0,0.5)",
+};
+
+const convertToFreeButtonStyle = {
+  padding: "4px 10px",
+  background: "transparent",
+  color: "#666",
+  border: "1px solid #ccc",
+  borderRadius: 4,
+  cursor: "pointer",
+  fontSize: 11,
+  fontFamily: "sans-serif",
 };
 
 // --- コンポーネント ---
@@ -493,6 +516,10 @@ export function ProofWorkspace({
     [workspace, setWorkspace],
   );
 
+  const handleConvertToFreeMode = useCallback(() => {
+    setWorkspace(convertToFreeMode(workspace));
+  }, [workspace, setWorkspace]);
+
   // --- コールバック ---
 
   /* v8 ignore start -- ドラッグ操作: PointerEvent シミュレーションが必要なためブラウザテストで検証 */
@@ -671,6 +698,7 @@ export function ProofWorkspace({
               statusType={nodeValidation?.type}
               classification={nodeClassifications.get(node.id)}
               onRoleChange={handleRoleChange}
+              isProtected={isNodeProtected(workspace, node.id)}
               testId={`proof-node-${node.id satisfies string}`}
             />
           </div>
@@ -678,6 +706,7 @@ export function ProofWorkspace({
       );
     },
     [
+      workspace,
       viewport,
       editingNodeIds,
       isSelectionActive,
@@ -713,6 +742,30 @@ export function ProofWorkspace({
         >
           {workspace.system.name}
         </span>
+        {workspace.mode === "quest" ? (
+          <>
+            <span
+              style={questModeBadgeStyle}
+              data-testid={
+                testId ? `${testId satisfies string}-quest-badge` : undefined
+              }
+            >
+              Quest
+            </span>
+            <button
+              type="button"
+              style={convertToFreeButtonStyle}
+              onClick={handleConvertToFreeMode}
+              data-testid={
+                testId
+                  ? `${testId satisfies string}-convert-free-button`
+                  : undefined
+              }
+            >
+              Convert to Free
+            </button>
+          </>
+        ) : null}
         <button
           type="button"
           style={

@@ -8,6 +8,9 @@ export { ProofWorkspace } from "./ProofWorkspace";
 export type { ProofWorkspaceProps } from "./ProofWorkspace";
 export {
   createEmptyWorkspace,
+  createQuestWorkspace,
+  convertToFreeMode,
+  isNodeProtected,
   addNode,
   updateNodePosition,
   updateNodeFormulaText,
@@ -23,9 +26,12 @@ export {
   applyGenAndConnect,
 } from "./workspaceState";
 export type {
+  WorkspaceMode,
+  NodeProtection,
   WorkspaceNode,
   WorkspaceConnection,
   WorkspaceState,
+  QuestGoalDefinition,
   ApplyMPResult,
   ApplyGenResult,
 } from "./workspaceState";

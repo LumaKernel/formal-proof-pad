@@ -43,6 +43,8 @@ export interface EditableProofNodeProps {
   readonly classification?: NodeClassification;
   /** ノードの役割変更時のコールバック */
   readonly onRoleChange?: (id: string, role: NodeRole | undefined) => void;
+  /** ノードが保護されているか（クエストモードのゴールノードなど） */
+  readonly isProtected?: boolean;
   /** data-testid */
   readonly testId?: string;
 }
@@ -107,6 +109,19 @@ const headerRowStyle: CSSProperties = {
   marginBottom: 2,
 };
 
+const protectedBadgeStyle: CSSProperties = {
+  fontSize: 9,
+  fontFamily: "sans-serif",
+  fontWeight: 600,
+  padding: "1px 6px",
+  borderRadius: 3,
+  userSelect: "none",
+  letterSpacing: 0.5,
+  background: "rgba(255,215,0,0.5)",
+  color: "#fff",
+  border: "1px solid rgba(255,215,0,0.6)",
+};
+
 function getRoleBadgeStyle(classification: NodeClassification): CSSProperties {
   switch (classification) {
     case "root-axiom":
@@ -165,6 +180,7 @@ export function EditableProofNode({
   statusType,
   classification,
   onRoleChange,
+  isProtected = false,
   testId,
 }: EditableProofNodeProps) {
   const nodeStyle = useMemo(() => getProofNodeStyle(kind), [kind]);
@@ -210,6 +226,9 @@ export function EditableProofNode({
   const handleRoleBadgeClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
+      /* v8 ignore start -- 防御コード: isProtected時はonClickがundefinedなので到達不能 */
+      if (isProtected) return;
+      /* v8 ignore stop */
       if (!onRoleChange || !classification) return;
       /* v8 ignore start -- 防御コード: onClick自体がderivedでundefinedなので到達不能 */
       if (classification === "derived") return;
@@ -227,23 +246,41 @@ export function EditableProofNode({
           break;
       }
     },
-    [id, classification, onRoleChange],
+    [id, classification, onRoleChange, isProtected],
   );
+
+  /** 保護ノードかつ編集可能ノードの場合、編集を抑制する */
+  const effectiveEditable = editable && !isProtected;
 
   return (
     <div data-testid={testId} style={containerStyle}>
-      <div style={classification ? headerRowStyle : undefined}>
+      <div style={classification || isProtected ? headerRowStyle : undefined}>
         <div style={labelStyle}>{label}</div>
+        {isProtected ? (
+          <div
+            style={protectedBadgeStyle}
+            title="Protected quest goal (read-only)"
+            data-testid={
+              testId ? `${testId satisfies string}-protected-badge` : undefined
+            }
+          >
+            QUEST
+          </div>
+        ) : null}
         {classification ? (
           <div
             style={getRoleBadgeStyle(classification)}
             onClick={
-              classification !== "derived" ? handleRoleBadgeClick : undefined
+              classification !== "derived" && !isProtected
+                ? handleRoleBadgeClick
+                : undefined
             }
             title={
-              classification !== "derived"
-                ? "Click to cycle role: Root → Axiom → Goal"
-                : "Derived node (role is automatic)"
+              isProtected
+                ? "Protected quest goal (role is locked)"
+                : classification !== "derived"
+                  ? "Click to cycle role: Root → Axiom → Goal"
+                  : "Derived node (role is automatic)"
             }
             data-testid={
               testId ? `${testId satisfies string}-role-badge` : undefined
@@ -253,7 +290,7 @@ export function EditableProofNode({
           </div>
         ) : null}
       </div>
-      {editable ? (
+      {effectiveEditable ? (
         <FormulaEditor
           value={formulaText}
           onChange={handleFormulaChange}
