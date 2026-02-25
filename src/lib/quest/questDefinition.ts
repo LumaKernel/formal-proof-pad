@@ -1,0 +1,152 @@
+/**
+ * クエスト（証明問題）の定義型。
+ *
+ * クエストは「ゴール式を証明せよ」という問題で、
+ * 使用する公理系、ヒント、難易度などのメタデータを持つ。
+ *
+ * 変更時は questDefinition.test.ts, builtinQuests.ts も同期すること。
+ */
+
+import type { QuestGoalDefinition } from "../proof-pad/workspaceState";
+
+// --- クエストID ---
+
+/** クエストの一意識別子（例: "prop-01", "pred-01"） */
+export type QuestId = string;
+
+// --- 難易度 ---
+
+/** クエストの難易度レベル（1-5） */
+export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
+
+// --- カテゴリ ---
+
+/**
+ * クエストのカテゴリ。
+ * - "propositional-basics": 命題論理の基礎（Łukasiewicz体系）
+ * - "propositional-negation": 否定を含む命題論理
+ * - "predicate-basics": 述語論理の基礎
+ * - "equality-basics": 等号付き述語論理の基礎
+ */
+export type QuestCategory =
+  | "propositional-basics"
+  | "propositional-negation"
+  | "predicate-basics"
+  | "equality-basics";
+
+/** カテゴリのメタデータ */
+export type QuestCategoryMeta = {
+  readonly id: QuestCategory;
+  readonly label: string;
+  readonly description: string;
+  /** カテゴリ内の表示順 */
+  readonly order: number;
+};
+
+/** 全カテゴリの定義 */
+export const questCategories: readonly QuestCategoryMeta[] = [
+  {
+    id: "propositional-basics",
+    label: "命題論理の基礎",
+    description: "A1, A2, A3 + MP を使った基本的な証明。",
+    order: 1,
+  },
+  {
+    id: "propositional-negation",
+    label: "否定を含む命題論理",
+    description: "否定公理 A3 を活用する証明。",
+    order: 2,
+  },
+  {
+    id: "predicate-basics",
+    label: "述語論理の基礎",
+    description: "量化子（∀, ∃）と Gen 規則を含む証明。",
+    order: 3,
+  },
+  {
+    id: "equality-basics",
+    label: "等号付き述語論理",
+    description: "等号公理を含む証明。",
+    order: 4,
+  },
+] as const;
+
+/** カテゴリIDからカテゴリメタデータを検索する */
+export function findCategoryById(
+  id: QuestCategory,
+): QuestCategoryMeta | undefined {
+  return questCategories.find((c) => c.id === id);
+}
+
+// --- プリセット公理系ID ---
+
+/**
+ * クエストが使用する公理系のプリセットID。
+ * notebookCreateLogic.ts の systemPresets と一致させる。
+ */
+export type SystemPresetId = "lukasiewicz" | "predicate" | "equality";
+
+// --- クエスト定義 ---
+
+/** クエストの定義（イミュータブル） */
+export type QuestDefinition = {
+  /** クエストの一意識別子 */
+  readonly id: QuestId;
+  /** カテゴリ */
+  readonly category: QuestCategory;
+  /** 表示名 */
+  readonly title: string;
+  /** 問題の説明 */
+  readonly description: string;
+  /** 難易度（1-5） */
+  readonly difficulty: DifficultyLevel;
+  /** 使用する公理系プリセットID */
+  readonly systemPresetId: SystemPresetId;
+  /** ゴール定義（ワークスペースに配置されるゴールノード） */
+  readonly goals: readonly QuestGoalDefinition[];
+  /** ヒントテキスト（段階的に表示可能） */
+  readonly hints: readonly string[];
+  /** 推定ステップ数（目安） */
+  readonly estimatedSteps: number;
+  /** 学習ポイント */
+  readonly learningPoint: string;
+  /** カテゴリ内の表示順 */
+  readonly order: number;
+};
+
+// --- ユーティリティ ---
+
+/** クエスト定義のIDが一意であるかを検証する */
+export function validateUniqueIds(quests: readonly QuestDefinition[]): boolean {
+  const ids = new Set(quests.map((q) => q.id));
+  return ids.size === quests.length;
+}
+
+/** カテゴリでクエストをグループ化する */
+export function groupByCategory(
+  quests: readonly QuestDefinition[],
+): ReadonlyMap<QuestCategory, readonly QuestDefinition[]> {
+  const map = new Map<QuestCategory, QuestDefinition[]>();
+  for (const quest of quests) {
+    const existing = map.get(quest.category);
+    if (existing !== undefined) {
+      existing.push(quest);
+    } else {
+      map.set(quest.category, [quest]);
+    }
+  }
+  return map;
+}
+
+/** クエストをカテゴリ順 → カテゴリ内order順にソートする */
+export function sortQuests(
+  quests: readonly QuestDefinition[],
+): readonly QuestDefinition[] {
+  const categoryOrder = new Map(questCategories.map((c) => [c.id, c.order]));
+  return [...quests].sort((a, b) => {
+    const catA = categoryOrder.get(a.category) ?? 999;
+    const catB = categoryOrder.get(b.category) ?? 999;
+    if (catA !== catB) return catA - catB;
+    return a.order - b.order;
+  });
+}
