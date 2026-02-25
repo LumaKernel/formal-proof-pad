@@ -182,10 +182,13 @@ export function TermInput({
       if (result) {
         onChange(result.text);
         requestAnimationFrame(() => {
+          // inputRef.current may be null if component unmounts before rAF fires
+          /* v8 ignore start */
           inputRef.current?.setSelectionRange(
             result.cursorPos,
             result.cursorPos,
           );
+          /* v8 ignore stop */
         });
       }
     },

@@ -40,12 +40,18 @@ export function saveThemeMode(storage: Storage, mode: ThemeMode): void {
 // --- matchMedia adapter ---
 
 function getSystemPrefersDark(): boolean {
+  // SSR guard: window is always available in browser/jsdom
+  /* v8 ignore start */
   if (typeof window === "undefined") return false;
+  /* v8 ignore stop */
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
 function subscribeSystemPrefersDark(callback: () => void): () => void {
+  // SSR guard: window is always available in browser/jsdom
+  /* v8 ignore start */
   if (typeof window === "undefined") return () => {};
+  /* v8 ignore stop */
   const mql = window.matchMedia("(prefers-color-scheme: dark)");
   mql.addEventListener("change", callback);
   return () => mql.removeEventListener("change", callback);
@@ -91,9 +97,12 @@ export interface UseThemeResult {
 
 export function useTheme(): UseThemeResult {
   const [mode, setModeState] = useState<ThemeMode>(() =>
+    // SSR guard: window is always available in browser/jsdom
+    /* v8 ignore start */
     typeof window === "undefined"
       ? "system"
-      : loadThemeMode(window.localStorage),
+      : /* v8 ignore stop */
+        loadThemeMode(window.localStorage),
   );
 
   const systemPrefersDark = useSyncExternalStore(
@@ -106,14 +115,20 @@ export function useTheme(): UseThemeResult {
 
   // Persist mode to localStorage and sync <html> attribute
   useEffect(() => {
+    // SSR guard: window is always available in browser/jsdom
+    /* v8 ignore start */
     if (typeof window === "undefined") return;
+    /* v8 ignore stop */
     saveThemeMode(window.localStorage, mode);
   }, [mode]);
 
   const themeLoadedRef = useRef(false);
 
   useEffect(() => {
+    // SSR guard: document is always available in browser/jsdom
+    /* v8 ignore start */
     if (typeof document === "undefined") return;
+    /* v8 ignore stop */
     applyThemeToDocument(resolved, document);
 
     // Enable CSS transitions after the initial theme is painted.
