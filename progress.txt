@@ -47,6 +47,17 @@
 
 ---
 
+## 2026-02-25 - CI修復
+- Prettierフォーマッティング修正（23ファイル）: formula-input, infinite-canvas 内の多数のファイル
+- ESLint warning修正: `connectionPath.test.ts` の未使用import `cubicBezierPoint` を削除
+- CI結果: **success** (全ステップグリーン)
+- カバレッジ: Lines 99.88%（ベースライン 99.85% → 微増）
+- **今後のイテレーションへの学び:**
+  - `prettier --write` をまとめて実行する際は、`npm run lint` の出力でファイルリストを確認して一括修正が効率的
+  - CI失敗の主因がPrettierの場合は `npm run lint-fix` で一括修正可能
+
+---
+
 ## 2026-02-25 - Theme CSS変数によるテーマトークンの整備 (US-002)
 - `src/app/globals.css` を全面改修: `prefers-color-scheme` メディアクエリを `[data-theme="light"]` / `[data-theme="dark"]` セレクタに移行
 - CSS変数トークンを一元定義（20+変数）: bg, text, border, canvas, accent, button, success/error/warning, surface, badge
