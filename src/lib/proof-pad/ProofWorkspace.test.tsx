@@ -1792,4 +1792,102 @@ describe("ProofWorkspace", () => {
       expect(screen.getByTestId("proof-node-node-1")).toBeInTheDocument();
     });
   });
+
+  describe("node context menu - select subtree", () => {
+    it("right-click on node opens context menu with Select Subtree", async () => {
+      const user = userEvent.setup();
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi -> phi");
+
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
+
+      const node = screen.getByTestId("proof-node-node-1");
+      await user.pointer({ keys: "[MouseRight]", target: node });
+
+      expect(
+        screen.getByTestId("workspace-select-subtree"),
+      ).toBeInTheDocument();
+    });
+
+    it("Select Subtree selects node and all descendants via connections", async () => {
+      const user = userEvent.setup();
+      // axiom-1(node-1) → mp(node-3) ← axiom-2(node-2)
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+      ws = addNode(ws, "mp", "MP", { x: 100, y: 100 }, "psi");
+      ws = addConnection(ws, "node-1", "out", "node-3", "premise-left");
+      ws = addConnection(ws, "node-2", "out", "node-3", "premise-right");
+
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
+
+      // Right-click on node-1 (axiom with descendant mp node)
+      const node1 = screen.getByTestId("proof-node-node-1");
+      await user.pointer({ keys: "[MouseRight]", target: node1 });
+
+      // Click Select Subtree
+      const selectSubtreeBtn = screen.getByTestId("workspace-select-subtree");
+      await user.click(selectSubtreeBtn);
+
+      // Context menu should be closed
+      expect(
+        screen.queryByTestId("workspace-node-context-menu"),
+      ).not.toBeInTheDocument();
+
+      // Selection banner should show 2 nodes (node-1 and node-3)
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("workspace-selection-banner"),
+        ).toHaveTextContent("2 nodes selected");
+      });
+    });
+
+    it("Select Subtree on leaf node selects only that node", async () => {
+      const user = userEvent.setup();
+      // axiom(node-1) → mp(node-2) (node-2 is leaf in subtree direction)
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "mp", "MP", { x: 100, y: 100 }, "psi");
+      ws = addConnection(ws, "node-1", "out", "node-2", "premise-left");
+
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
+
+      // Right-click on mp node (no further children)
+      const mpNode = screen.getByTestId("proof-node-node-2");
+      await user.pointer({ keys: "[MouseRight]", target: mpNode });
+
+      const selectSubtreeBtn = screen.getByTestId("workspace-select-subtree");
+      await user.click(selectSubtreeBtn);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("workspace-selection-banner"),
+        ).toHaveTextContent("1 node selected");
+      });
+    });
+
+    it("context menu closes when clicking canvas", async () => {
+      const user = userEvent.setup();
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
+
+      // Open context menu
+      const node = screen.getByTestId("proof-node-node-1");
+      await user.pointer({ keys: "[MouseRight]", target: node });
+      expect(
+        screen.getByTestId("workspace-node-context-menu"),
+      ).toBeInTheDocument();
+
+      // Click on the workspace (canvas area)
+      const canvas = screen.getByTestId("workspace");
+      await user.click(canvas);
+
+      // Context menu should be closed
+      expect(
+        screen.queryByTestId("workspace-node-context-menu"),
+      ).not.toBeInTheDocument();
+    });
+  });
 });

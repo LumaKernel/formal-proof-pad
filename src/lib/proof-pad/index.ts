@@ -109,7 +109,11 @@ export type {
   GoalAchieved,
   GoalCheckResult,
 } from "./goalCheckLogic";
-export { getNodeDependencies, getAllNodeDependencies } from "./dependencyLogic";
+export {
+  getNodeDependencies,
+  getAllNodeDependencies,
+  getSubtreeNodeIds,
+} from "./dependencyLogic";
 export {
   computeTreeLayout,
   computeLayoutDiff,

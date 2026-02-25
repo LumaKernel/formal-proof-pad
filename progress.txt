@@ -2529,3 +2529,32 @@
   - `addNode` 引数順序: `addNode(state, kind, label, position, formulaText?)` — positionとformulaTextの順序を間違えやすい
   - ノード追加/削除時の自動再レイアウト(インクリメンタル)は未実装。computeLayoutDiffは用意済み
 ---
+
+## 2026-02-26 - [ProofPad] サブツリー選択
+- 実装した内容:
+  - `getSubtreeNodeIds()` 純粋ロジック関数（dependencyLogic.ts）- 接続グラフを順方向に辿りサブツリーのノードIDを収集
+  - dependencyLogic.test.ts に10件のテスト追加（孤立ノード、単一子、逆方向非辿り、チェーン、分岐、部分サブツリー、ダイヤモンドDAG、共有ノード、存在しないノード、分離確認）
+  - ProofWorkspace.tsx にコンテキストメニュー統合（右クリック→「サブツリーを選択」）
+  - ProofWorkspace.test.tsx に4件のテスト追加（メニュー表示、サブツリー選択、リーフ選択、メニュー閉じる）
+  - ProofWorkspace.stories.tsx にSubtreeSelectionストーリー追加（play関数付き）
+  - index.ts にエクスポート追加
+- 変更したファイル:
+  - src/lib/proof-pad/dependencyLogic.ts
+  - src/lib/proof-pad/dependencyLogic.test.ts
+  - src/lib/proof-pad/index.ts
+  - src/lib/proof-pad/ProofWorkspace.tsx
+  - src/lib/proof-pad/ProofWorkspace.test.tsx
+  - src/lib/proof-pad/ProofWorkspace.stories.tsx
+  - tasks/prd-infinite-canvas-enhancements.md
+- カバレッジ:
+  - ベースライン: Stmts 99.34%, Branch 94.82%, Funcs 90.66%, Lines 99.97%
+  - 実装後:   Stmts 99.32%, Branch 94.70%, Funcs 90.78%, Lines 99.97%
+  - Lines維持、Funcs改善 (+0.12%)、Stmts/Branch微減（許容範囲）
+- スクリーンショット: .screenshots/subtree-selection-story.png, .screenshots/subtree-selection-iframe.png
+- **今後のイテレーションへの学び:**
+  - `getSubtreeNodeIds` は既存の `getNodeDependencies` の逆方向版。依存ロジックは dependencyLogic.ts に集約されている
+  - ProofWorkspace のコンテキストメニューは NodeMenuState 型（nodeMenu.ts）を利用。ContextMenuComponent は汎用だが、ワークスペース固有の操作は ProofWorkspace 内で直接実装した方がシンプル
+  - ProofWorkspace.test.tsx では各 `it()` ブロックで `const user = userEvent.setup()` が必要（共有変数ではない）
+  - Storybook の URL パスは title の "/" を "-" に変換し、大文字小文字はそのまま。例: "ProofPad/ProofWorkspace" → `proofpad-proofworkspace`
+  - `/* v8 ignore start/stop */` ブロック形式は防御的コードパス（到達不能だがTypeScriptで必要なコード）のカバレッジ除外に有効
+---

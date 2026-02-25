@@ -35,10 +35,19 @@ import {
 import { classifyAllNodes } from "./nodeRoleLogic";
 import { identifyAxiomName } from "./axiomNameLogic";
 import { parseNodeFormula } from "./mpApplicationLogic";
-import { getAllNodeDependencies } from "./dependencyLogic";
+import {
+  getAllNodeDependencies,
+  getSubtreeNodeIds,
+} from "./dependencyLogic";
 import type { DependencyInfo } from "./EditableProofNode";
 import type { NodeRole } from "./nodeRoleLogic";
 import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
+import {
+  type NodeMenuState,
+  NODE_MENU_CLOSED,
+  openNodeMenu,
+  closeNodeMenu,
+} from "../infinite-canvas/nodeMenu";
 import {
   createEmptyWorkspace,
   convertToFreeMode,
@@ -372,6 +381,11 @@ export function ProofWorkspace({
     () => new Set(),
   );
 
+  // ノードコンテキストメニュー
+  const [nodeMenuState, setNodeMenuState] =
+    useState<NodeMenuState>(NODE_MENU_CLOSED);
+  const nodeMenuRef = useRef<HTMLDivElement>(null);
+
   // クリップボードデータ（内部保持用、navigator.clipboard フォールバック）
   const clipboardRef = useRef<ClipboardData | null>(null);
 
@@ -694,7 +708,51 @@ export function ProofWorkspace({
     if (selectedNodeIds.size > 0) {
       setSelectedNodeIds(clearSelection());
     }
-  }, [selectedNodeIds]);
+    // コンテキストメニューを閉じる（useEffectのpointerdownが先に閉じるため通常は到達しないが防御的に残す）
+    /* v8 ignore start */
+    if (nodeMenuState.open) {
+      setNodeMenuState(closeNodeMenu());
+    }
+    /* v8 ignore stop */
+  }, [selectedNodeIds, nodeMenuState.open]);
+
+  // --- ノードコンテキストメニュー ---
+
+  const handleNodeContextMenu = useCallback(
+    (nodeId: string, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setNodeMenuState(openNodeMenu(nodeId, e.clientX, e.clientY));
+    },
+    [],
+  );
+
+  const handleSelectSubtree = useCallback(() => {
+    if (!nodeMenuState.open) return;
+    const subtreeIds = getSubtreeNodeIds(
+      nodeMenuState.nodeId,
+      workspace.connections,
+    );
+    setSelectedNodeIds(subtreeIds);
+    setNodeMenuState(closeNodeMenu());
+  }, [nodeMenuState, workspace.connections]);
+
+  // コンテキストメニュー外クリックで閉じる
+  useEffect(() => {
+    if (!nodeMenuState.open) return;
+    const handleClickOutside = (e: PointerEvent) => {
+      if (
+        nodeMenuRef.current !== null &&
+        !nodeMenuRef.current.contains(e.target as Node)
+      ) {
+        setNodeMenuState(closeNodeMenu());
+      }
+    };
+    document.addEventListener("pointerdown", handleClickOutside);
+    return () => {
+      document.removeEventListener("pointerdown", handleClickOutside);
+    };
+  }, [nodeMenuState.open]);
 
   // --- コピー＆ペースト ---
 
@@ -968,6 +1026,9 @@ export function ProofWorkspace({
                 handleNodeSelect(node.id, e);
               }
             }}
+            onContextMenu={(e) => {
+              handleNodeContextMenu(node.id, e);
+            }}
             style={{
               cursor: isSelectionActive ? "pointer" : undefined,
               outline: outlineStyle,
@@ -1017,6 +1078,7 @@ export function ProofWorkspace({
       handleRoleChange,
       handleNodeClickForSelection,
       handleNodeSelect,
+      handleNodeContextMenu,
       getNodeSizeRef,
     ],
   );
@@ -1300,6 +1362,68 @@ export function ProofWorkspace({
         onAddAxiom={handleAddAxiom}
         testId={testId ? `${testId satisfies string}-axiom-palette` : undefined}
       />
+
+      {/* ノードコンテキストメニュー */}
+      {nodeMenuState.open ? (
+        <div
+          ref={nodeMenuRef}
+          data-testid={
+            testId
+              ? `${testId satisfies string}-node-context-menu`
+              : "node-context-menu"
+          }
+          style={{
+            position: "fixed",
+            left: nodeMenuState.screenPosition.x,
+            top: nodeMenuState.screenPosition.y,
+            zIndex: 2000,
+            minWidth: 140,
+            background: "var(--color-surface, #fff)",
+            border: "1px solid var(--color-border, #d0d0d0)",
+            borderRadius: 6,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+            padding: "4px 0",
+            fontFamily: "sans-serif",
+            fontSize: 13,
+            userSelect: "none",
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            data-testid={
+              testId
+                ? `${testId satisfies string}-select-subtree`
+                : "select-subtree"
+            }
+            onClick={handleSelectSubtree}
+            /* v8 ignore start - hover visual effect only */
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background =
+                "var(--color-hover, #f0f0f0)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+            /* v8 ignore stop */
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "6px 16px",
+              border: "none",
+              background: "transparent",
+              textAlign: "left",
+              cursor: "pointer",
+              color: "var(--color-text, #333)",
+              fontSize: 13,
+              lineHeight: "1.4",
+            }}
+          >
+            Select Subtree
+          </button>
+        </div>
+      ) : null}
 
       {/* InfiniteCanvas */}
       <InfiniteCanvas viewport={viewport} onViewportChange={setViewport}>

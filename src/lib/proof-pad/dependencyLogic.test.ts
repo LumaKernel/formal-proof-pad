@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { getNodeDependencies, getAllNodeDependencies } from "./dependencyLogic";
+import {
+  getNodeDependencies,
+  getAllNodeDependencies,
+  getSubtreeNodeIds,
+} from "./dependencyLogic";
 import type { WorkspaceNode, WorkspaceConnection } from "./workspaceState";
 
 // --- ヘルパー ---
@@ -199,6 +203,113 @@ describe("dependencyLogic", () => {
       expect(deps.get("axiom-1")).toEqual(new Set(["axiom-1"]));
       expect(deps.get("axiom-2")).toEqual(new Set(["axiom-2"]));
       expect(deps.get("mp-1")).toEqual(new Set(["axiom-1", "axiom-2"]));
+    });
+  });
+
+  describe("getSubtreeNodeIds", () => {
+    it("接続のないノードは自身のみを返す", () => {
+      const connections: readonly WorkspaceConnection[] = [];
+      const result = getSubtreeNodeIds("node-1", connections);
+      expect(result).toEqual(new Set(["node-1"]));
+    });
+
+    it("1つの子を持つノードは自身と子を返す", () => {
+      // axiom-1 → mp-1
+      const connections = [makeConnection("axiom-1", "mp-1", "premise-left")];
+      const result = getSubtreeNodeIds("axiom-1", connections);
+      expect(result).toEqual(new Set(["axiom-1", "mp-1"]));
+    });
+
+    it("子ノードから開始した場合は自身のみ（親方向には辿らない）", () => {
+      // axiom-1 → mp-1
+      const connections = [makeConnection("axiom-1", "mp-1", "premise-left")];
+      const result = getSubtreeNodeIds("mp-1", connections);
+      expect(result).toEqual(new Set(["mp-1"]));
+    });
+
+    it("チェーン状のサブツリーを正しく返す", () => {
+      // axiom-1 → mp-1 → mp-2 → mp-3
+      const connections = [
+        makeConnection("axiom-1", "mp-1", "premise-left"),
+        makeConnection("mp-1", "mp-2", "premise-left"),
+        makeConnection("mp-2", "mp-3", "premise-left"),
+      ];
+      const result = getSubtreeNodeIds("axiom-1", connections);
+      expect(result).toEqual(
+        new Set(["axiom-1", "mp-1", "mp-2", "mp-3"]),
+      );
+    });
+
+    it("分岐するサブツリーを正しく返す", () => {
+      // axiom-1 → mp-1
+      // axiom-1 → mp-2
+      const connections = [
+        makeConnection("axiom-1", "mp-1", "premise-left"),
+        makeConnection("axiom-1", "mp-2", "premise-left"),
+      ];
+      const result = getSubtreeNodeIds("axiom-1", connections);
+      expect(result).toEqual(new Set(["axiom-1", "mp-1", "mp-2"]));
+    });
+
+    it("途中のノードから開始すると部分サブツリーのみ返す", () => {
+      // axiom-1 → mp-1 → mp-2
+      //                 → mp-3
+      const connections = [
+        makeConnection("axiom-1", "mp-1", "premise-left"),
+        makeConnection("mp-1", "mp-2", "premise-left"),
+        makeConnection("mp-1", "mp-3", "premise-left"),
+      ];
+      const result = getSubtreeNodeIds("mp-1", connections);
+      expect(result).toEqual(new Set(["mp-1", "mp-2", "mp-3"]));
+    });
+
+    it("ダイヤモンド形状のDAGを正しく処理する", () => {
+      // axiom-1 → mp-1 → mp-3
+      // axiom-1 → mp-2 → mp-3
+      const connections = [
+        makeConnection("axiom-1", "mp-1", "premise-left"),
+        makeConnection("axiom-1", "mp-2", "premise-right"),
+        makeConnection("mp-1", "mp-3", "premise-left"),
+        makeConnection("mp-2", "mp-3", "premise-right"),
+      ];
+      const result = getSubtreeNodeIds("axiom-1", connections);
+      expect(result).toEqual(
+        new Set(["axiom-1", "mp-1", "mp-2", "mp-3"]),
+      );
+    });
+
+    it("複雑なグラフで共有ノードを重複なく返す", () => {
+      // axiom-1 → mp-1 → mp-3
+      //         → mp-2 → mp-3
+      //                 → mp-4
+      const connections = [
+        makeConnection("axiom-1", "mp-1", "premise-left"),
+        makeConnection("axiom-1", "mp-2", "premise-right"),
+        makeConnection("mp-1", "mp-3", "premise-left"),
+        makeConnection("mp-2", "mp-3", "premise-right"),
+        makeConnection("mp-2", "mp-4", "premise-left"),
+      ];
+      const result = getSubtreeNodeIds("axiom-1", connections);
+      expect(result).toEqual(
+        new Set(["axiom-1", "mp-1", "mp-2", "mp-3", "mp-4"]),
+      );
+    });
+
+    it("存在しないノードIDでも自身のみを含む集合を返す", () => {
+      const connections = [makeConnection("axiom-1", "mp-1", "premise-left")];
+      const result = getSubtreeNodeIds("nonexistent", connections);
+      expect(result).toEqual(new Set(["nonexistent"]));
+    });
+
+    it("他のノードの子孫は含まない", () => {
+      // axiom-1 → mp-1
+      // axiom-2 → mp-2
+      const connections = [
+        makeConnection("axiom-1", "mp-1", "premise-left"),
+        makeConnection("axiom-2", "mp-2", "premise-left"),
+      ];
+      const result = getSubtreeNodeIds("axiom-1", connections);
+      expect(result).toEqual(new Set(["axiom-1", "mp-1"]));
     });
   });
 });

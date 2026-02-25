@@ -1,8 +1,8 @@
 /**
- * ノードの公理依存関係を追跡する純粋ロジック。
+ * ノードの依存関係・サブツリーを追跡する純粋ロジック。
  *
- * 接続グラフを遡って、各ノードがどのルートノード（公理）に依存しているかを計算する。
- * ルートノード自身は自分自身に依存する。
+ * - getNodeDependencies: 接続グラフを逆方向に遡り、ルートノード（公理）を特定
+ * - getSubtreeNodeIds: 接続グラフを順方向に辿り、子孫ノードを収集
  *
  * 変更時は dependencyLogic.test.ts, ProofWorkspace.tsx, index.ts も同期すること。
  */
@@ -71,5 +71,39 @@ export function getAllNodeDependencies(
   for (const node of nodes) {
     result.set(node.id, getNodeDependencies(node.id, nodes, connections));
   }
+  return result;
+}
+
+/**
+ * あるノードとその全子孫（サブツリー）のID集合を返す。
+ *
+ * 接続グラフを順方向（fromNodeId → toNodeId）に辿り、
+ * 指定ノードから到達可能なすべてのノードを収集する。
+ * DAG構造で共有されたノード（複数の親を持つ）も含む。
+ * 循環参照がある場合は訪問済みノードをスキップして無限ループを防止する。
+ *
+ * @param nodeId 起点ノードのID
+ * @param connections ワークスペースの全接続
+ * @returns サブツリーに含まれるノードIDの集合（起点ノード自身を含む）
+ */
+export function getSubtreeNodeIds(
+  nodeId: string,
+  connections: readonly WorkspaceConnection[],
+): ReadonlySet<string> {
+  const result = new Set<string>([nodeId]);
+
+  function traverse(currentId: string): void {
+    const outgoing = connections.filter(
+      (c) => c.fromNodeId === currentId,
+    );
+    for (const conn of outgoing) {
+      if (!result.has(conn.toNodeId)) {
+        result.add(conn.toNodeId);
+        traverse(conn.toNodeId);
+      }
+    }
+  }
+
+  traverse(nodeId);
   return result;
 }

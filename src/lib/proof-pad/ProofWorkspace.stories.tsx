@@ -459,3 +459,76 @@ export const QuestMode: Story = {
     ).toHaveTextContent("QUEST");
   },
 };
+
+// --- サブツリー選択デモ ---
+
+function SubtreeSelectionWorkspace() {
+  const initial = (() => {
+    let ws = createEmptyWorkspace(lukasiewiczSystem);
+    // 2段のMPチェーン: axiom-1,axiom-2 → mp-1, axiom-3 → mp-2
+    ws = addNode(ws, "axiom", "A1", { x: 50, y: 50 }, "phi");
+    ws = addNode(ws, "axiom", "A2", { x: 350, y: 50 }, "phi -> psi");
+    const mp1 = applyMPAndConnect(ws, "node-1", "node-2", {
+      x: 200,
+      y: 200,
+    });
+    ws = mp1.workspace;
+    ws = addNode(ws, "axiom", "A3", { x: 500, y: 200 }, "psi -> chi");
+    const mp2 = applyMPAndConnect(ws, "node-3", "node-4", {
+      x: 350,
+      y: 350,
+    });
+    ws = mp2.workspace;
+    return ws;
+  })();
+
+  const [workspace, setWorkspace] = useState<WorkspaceState>(initial);
+  const handleChange = useCallback((ws: WorkspaceState) => {
+    setWorkspace(ws);
+  }, []);
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <ProofWorkspace
+        system={lukasiewiczSystem}
+        workspace={workspace}
+        onWorkspaceChange={handleChange}
+        testId="workspace"
+      />
+    </div>
+  );
+}
+
+/** サブツリー選択: 右クリック→Select Subtreeでサブツリーを一括選択 */
+export const SubtreeSelection: Story = {
+  render: () => <SubtreeSelectionWorkspace />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+
+    // ノードが表示されている
+    await expect(
+      canvas.getByTestId("proof-node-node-1"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("proof-node-node-5"),
+    ).toBeInTheDocument();
+
+    // node-1を右クリック → コンテキストメニュー表示
+    const node1 = canvas.getByTestId("proof-node-node-1");
+    await userEvent.pointer({ keys: "[MouseRight]", target: node1 });
+
+    // Select Subtreeメニュー項目が表示される
+    await expect(
+      canvas.getByTestId("workspace-select-subtree"),
+    ).toBeInTheDocument();
+
+    // Select Subtreeをクリック
+    await userEvent.click(canvas.getByTestId("workspace-select-subtree"));
+
+    // node-1からの子孫: node-1 → node-3 → node-5 = 3ノード
+    await expect(
+      canvas.getByTestId("workspace-selection-banner"),
+    ).toHaveTextContent("3 nodes selected");
+  },
+};
