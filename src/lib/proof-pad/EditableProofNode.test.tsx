@@ -528,9 +528,7 @@ describe("EditableProofNode", () => {
         dependencies: [{ nodeId: "axiom-1", displayName: "A1" }],
         testId: "test-node",
       });
-      expect(
-        screen.getByTestId("test-node-dependencies"),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("test-node-dependencies")).toBeInTheDocument();
     });
   });
 });

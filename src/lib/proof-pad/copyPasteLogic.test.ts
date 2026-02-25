@@ -208,13 +208,20 @@ describe("シリアライズ/デシリアライズ", () => {
   });
 
   it("不正な構造ではundefinedを返す", () => {
-    expect(deserializeClipboardData(JSON.stringify({ foo: "bar" }))).toBeUndefined();
+    expect(
+      deserializeClipboardData(JSON.stringify({ foo: "bar" })),
+    ).toBeUndefined();
   });
 
   it("_tagが異なる場合はundefinedを返す", () => {
     expect(
       deserializeClipboardData(
-        JSON.stringify({ _tag: "Wrong", version: 1, nodes: [], connections: [] }),
+        JSON.stringify({
+          _tag: "Wrong",
+          version: 1,
+          nodes: [],
+          connections: [],
+        }),
       ),
     ).toBeUndefined();
   });

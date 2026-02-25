@@ -34,7 +34,9 @@ describe("axiomNameLogic", () => {
 
       it("identifies A1 instance with specific propositions", () => {
         // p → (q → p) where p, q are specific formulas
-        const formula = parseFormula("(alpha -> beta) -> (chi -> (alpha -> beta))");
+        const formula = parseFormula(
+          "(alpha -> beta) -> (chi -> (alpha -> beta))",
+        );
         const result = identifyAxiomName(formula, lukasiewiczSystem);
         expect(result._tag).toBe("Identified");
         if (result._tag === "Identified") {
@@ -125,7 +127,9 @@ describe("axiomNameLogic", () => {
       });
 
       it("identifies E3 (Trans)", () => {
-        const formula = parseFormula("all x. all y. all z. x = y -> (y = z -> x = z)");
+        const formula = parseFormula(
+          "all x. all y. all z. x = y -> (y = z -> x = z)",
+        );
         const result = identifyAxiomName(formula, equalityLogicSystem);
         expect(result._tag).toBe("Identified");
         if (result._tag === "Identified") {

@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
-import {
-  getNodeDependencies,
-  getAllNodeDependencies,
-} from "./dependencyLogic";
+import { getNodeDependencies, getAllNodeDependencies } from "./dependencyLogic";
 import type { WorkspaceNode, WorkspaceConnection } from "./workspaceState";
 
 // --- ヘルパー ---
 
-function makeNode(id: string, kind: "axiom" | "mp" | "gen" = "axiom"): WorkspaceNode {
+function makeNode(
+  id: string,
+  kind: "axiom" | "mp" | "gen" = "axiom",
+): WorkspaceNode {
   return {
     id,
     kind,

@@ -62,6 +62,23 @@
 
 ---
 
+## 2026-02-25 - CI修復: Prettierフォーマット修正 + ESLint ignore設定
+- Prettierフォーマットエラー37ファイルを修正（CI失敗の原因）
+- ESLint config に `**/*.local.*` パターンを追加（ローカル実験ファイルを除外）
+- カバレッジ: 変化なし Stmts 99.27%, Branch 94.58%, Lines 100%
+- テスト: 2163 全パス
+- 変更ファイル:
+  - `eslint.config.mjs` - `*.local.*` を globalIgnores に追加
+  - `dev/cut-elimination/*.md` - Prettierフォーマット修正
+  - `dev/quest-problems/**/*.md` - Prettierフォーマット修正
+  - `src/lib/proof-pad/*.ts(x)` - Prettierフォーマット修正
+  - `tasks/**/*.md`, `tasks-archived/**/*.md` - Prettierフォーマット修正
+- **今後のイテレーションへの学び:**
+  - Prettierフォーマットは新ファイル作成後に必ず実行する。特にmdファイルは忘れやすい
+  - `*.local.*` はgitignoreに入っているがESLint除外には別途設定が必要
+  - CI失敗は最優先で修正すること。他のタスクより先にCIを直す
+---
+
 ## 2026-02-25 - カット除去定理リファレンス: 具体例によるカット除去の実演
 - `dev/cut-elimination/04-examples.md` を新規作成
 - 4つの具体例でカット除去アルゴリズムの動作を追跡:
@@ -1938,4 +1955,22 @@
   - v8のBranchカバレッジは `&&` / `||` の短絡評価の内部パスを個別にカウントする。既にテスト済みでもOR/AND条件の片方だけで判定されるケースが未カバーになることがある
   - exhaustive check defaultやv8 ignore済み防御コードのBranch未カバーは改善不要
   - 純粋ロジックファイルのテスト追加が最もBranchカバレッジ改善に効果的
+---
+
+## 2026-02-25 - カット除去リファレンス
+- 実装した内容
+  - `dev/cut-elimination/README.md` を作成（参考文献・索引ページ）
+  - 全4ドキュメントへのリンクと概要の目次テーブル
+  - 参考文献一覧（原典5冊 + オンラインリソース3件）
+  - 用語索引テーブル（日本語・英語の対応 22項目）
+  - `prd-cut-elimination-reference.md` の全US完了 → tasks-archived/ に移動
+- 変更したファイル
+  - `dev/cut-elimination/README.md` (新規作成)
+  - `tasks/prd-cut-elimination-reference.md` → `tasks-archived/prd-cut-elimination-reference.md` (移動)
+  - `task-processing.md` (更新・クリア)
+- カバレッジ: 変更なし（ドキュメントのみ）。ベースライン: Stmts 99.27%, Lines 100%
+- git push 実施済み
+- **今後のイテレーションへの学び:**
+  - `dev/cut-elimination/` のドキュメント群はUS-001〜US-005で完成。将来カット除去の実装時にはこれらを参照する
+  - PRDの全ストーリー完了時は tasks-archived/ に移動する
 ---

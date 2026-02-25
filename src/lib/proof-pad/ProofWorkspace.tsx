@@ -662,9 +662,7 @@ export function ProofWorkspace({
       setWorkspace(result);
       // ペースト後、新しいノードを選択状態にする
       const newNodeIds = new Set(
-        result.nodes
-          .slice(workspace.nodes.length)
-          .map((n) => n.id),
+        result.nodes.slice(workspace.nodes.length).map((n) => n.id),
       );
       setSelectedNodeIds(newNodeIds);
     };
@@ -969,7 +967,12 @@ export function ProofWorkspace({
     <div
       ref={containerRef}
       data-testid={testId}
-      style={{ width: "100%", height: "100%", position: "relative", outline: "none" }}
+      style={{
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        outline: "none",
+      }}
       tabIndex={-1}
       onClick={handleCanvasClick}
     >
@@ -1111,7 +1114,9 @@ export function ProofWorkspace({
       ) : null}
 
       {/* 選択バナー */}
-      {selectedNodeIds.size > 0 && mpSelection.phase === "idle" && genSelection.phase === "idle" ? (
+      {selectedNodeIds.size > 0 &&
+      mpSelection.phase === "idle" &&
+      genSelection.phase === "idle" ? (
         <div
           style={selectionBannerStyle}
           data-testid={
@@ -1144,7 +1149,10 @@ export function ProofWorkspace({
           </button>
           <button
             type="button"
-            style={{ ...selectionActionButtonStyle, background: "rgba(224,96,96,0.3)" }}
+            style={{
+              ...selectionActionButtonStyle,
+              background: "rgba(224,96,96,0.3)",
+            }}
             onClick={handleDeleteSelected}
             data-testid={
               testId ? `${testId satisfies string}-delete-button` : undefined

@@ -85,14 +85,17 @@ export function buildClipboardData(
       x: n.position.x - centroid.x,
       y: n.position.y - centroid.y,
     },
-    ...(n.genVariableName !== undefined ? { genVariableName: n.genVariableName } : {}),
+    ...(n.genVariableName !== undefined
+      ? { genVariableName: n.genVariableName }
+      : {}),
     ...(n.role !== undefined ? { role: n.role } : {}),
   }));
 
   // 選択ノード間の接続のみ
   const copiedConnections: readonly CopiedConnection[] = allConnections
     .filter(
-      (c) => selectedNodeIds.has(c.fromNodeId) && selectedNodeIds.has(c.toNodeId),
+      (c) =>
+        selectedNodeIds.has(c.fromNodeId) && selectedNodeIds.has(c.toNodeId),
     )
     .map((c) => ({
       fromOriginalNodeId: c.fromNodeId,
@@ -122,7 +125,9 @@ export function serializeClipboardData(data: ClipboardData): string {
  * JSON 文字列を ClipboardData にデシリアライズする。
  * 不正なデータの場合は undefined を返す。
  */
-export function deserializeClipboardData(json: string): ClipboardData | undefined {
+export function deserializeClipboardData(
+  json: string,
+): ClipboardData | undefined {
   try {
     const parsed: unknown = JSON.parse(json);
     if (typeof parsed !== "object" || parsed === null) return undefined;

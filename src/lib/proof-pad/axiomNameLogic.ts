@@ -11,10 +11,7 @@
  */
 
 import type { Formula } from "../logic-core/formula";
-import type {
-  AxiomId,
-  LogicSystem,
-} from "../logic-core/inferenceRule";
+import type { AxiomId, LogicSystem } from "../logic-core/inferenceRule";
 import { identifyAxiom } from "../logic-core/inferenceRule";
 
 // --- 公理IDから表示名へのマッピング ---

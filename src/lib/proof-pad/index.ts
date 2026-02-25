@@ -1,5 +1,8 @@
 export { EditableProofNode } from "./EditableProofNode";
-export type { EditableProofNodeProps, DependencyInfo } from "./EditableProofNode";
+export type {
+  EditableProofNodeProps,
+  DependencyInfo,
+} from "./EditableProofNode";
 export { AxiomPalette } from "./AxiomPalette";
 export type { AxiomPaletteProps } from "./AxiomPalette";
 export { getAvailableAxioms } from "./axiomPaletteLogic";
@@ -105,7 +108,4 @@ export type {
   GoalAchieved,
   GoalCheckResult,
 } from "./goalCheckLogic";
-export {
-  getNodeDependencies,
-  getAllNodeDependencies,
-} from "./dependencyLogic";
+export { getNodeDependencies, getAllNodeDependencies } from "./dependencyLogic";

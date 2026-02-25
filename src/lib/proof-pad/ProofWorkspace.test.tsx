@@ -1338,13 +1338,7 @@ describe("ProofWorkspace", () => {
   describe("axiom name auto-identification", () => {
     it("shows axiom name badge for A1 instance", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
-      ws = addNode(
-        ws,
-        "axiom",
-        "A1",
-        { x: 0, y: 0 },
-        "phi -> (psi -> phi)",
-      );
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi -> (psi -> phi)");
 
       render(
         <ProofWorkspace
@@ -1496,9 +1490,7 @@ describe("ProofWorkspace", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       ws = addNode(ws, "axiom", "A1", { x: 100, y: 100 }, "phi -> psi");
 
-      render(
-        <StatefulWorkspace initialWorkspace={ws} testId="workspace" />,
-      );
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
 
       // Click on the node
       const node = screen.getByTestId("proof-node-node-1");
@@ -1518,9 +1510,7 @@ describe("ProofWorkspace", () => {
       ws = addNode(ws, "axiom", "A1", { x: 100, y: 100 }, "phi");
       ws = addNode(ws, "axiom", "A2", { x: 300, y: 100 }, "psi");
 
-      render(
-        <StatefulWorkspace initialWorkspace={ws} testId="workspace" />,
-      );
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
 
       // Click first node
       const node1 = screen.getByTestId("proof-node-node-1");
@@ -1544,9 +1534,7 @@ describe("ProofWorkspace", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       ws = addNode(ws, "axiom", "A1", { x: 100, y: 100 }, "phi");
 
-      render(
-        <StatefulWorkspace initialWorkspace={ws} testId="workspace" />,
-      );
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
 
       // Click the node to select
       const node = screen.getByTestId("proof-node-node-1");
@@ -1575,9 +1563,7 @@ describe("ProofWorkspace", () => {
       ws = addNode(ws, "axiom", "A1", { x: 100, y: 100 }, "phi");
       ws = addNode(ws, "axiom", "A2", { x: 300, y: 100 }, "psi");
 
-      render(
-        <StatefulWorkspace initialWorkspace={ws} testId="workspace" />,
-      );
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
 
       // Select node-1
       const node1 = screen.getByTestId("proof-node-node-1");
@@ -1592,9 +1578,7 @@ describe("ProofWorkspace", () => {
         expect(
           screen.queryByTestId("proof-node-node-1"),
         ).not.toBeInTheDocument();
-        expect(
-          screen.getByTestId("proof-node-node-2"),
-        ).toBeInTheDocument();
+        expect(screen.getByTestId("proof-node-node-2")).toBeInTheDocument();
       });
     });
 
@@ -1603,9 +1587,7 @@ describe("ProofWorkspace", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       ws = addNode(ws, "axiom", "A1", { x: 100, y: 100 }, "phi");
 
-      render(
-        <StatefulWorkspace initialWorkspace={ws} testId="workspace" />,
-      );
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
 
       // Select node
       const node = screen.getByTestId("proof-node-node-1");
@@ -1621,9 +1603,7 @@ describe("ProofWorkspace", () => {
 
       // New node should appear (node-2)
       await waitFor(() => {
-        expect(
-          screen.getByTestId("proof-node-node-2"),
-        ).toBeInTheDocument();
+        expect(screen.getByTestId("proof-node-node-2")).toBeInTheDocument();
       });
     });
 
@@ -1633,9 +1613,7 @@ describe("ProofWorkspace", () => {
         { formulaText: "phi", position: { x: 100, y: 100 } },
       ]);
 
-      render(
-        <StatefulWorkspace initialWorkspace={ws} testId="workspace" />,
-      );
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
 
       // Select the protected node
       const node = screen.getByTestId("proof-node-node-1");
@@ -1646,9 +1624,7 @@ describe("ProofWorkspace", () => {
       await user.click(deleteButton);
 
       // Protected node should remain
-      expect(
-        screen.getByTestId("proof-node-node-1"),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("proof-node-node-1")).toBeInTheDocument();
     });
   });
 });

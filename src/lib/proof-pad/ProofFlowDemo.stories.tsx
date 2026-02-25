@@ -53,13 +53,7 @@ function IdentityProofComplete() {
     ws = mp1.workspace;
 
     // Step 4: A1インスタンス φ=phi, ψ=phi
-    ws = addNode(
-      ws,
-      "axiom",
-      "A1②",
-      { x: 50, y: 350 },
-      "phi -> (phi -> phi)",
-    );
+    ws = addNode(ws, "axiom", "A1②", { x: 50, y: 350 }, "phi -> (phi -> phi)");
 
     // Step 5: MP(4,3) → φ → φ
     const mp2 = applyMPAndConnect(ws, "node-4", "node-3", { x: 250, y: 500 });
@@ -112,13 +106,7 @@ function IdentityProofPartial() {
     ws = mp1.workspace;
 
     // Step 4: A1インスタンス（最後のMP適用待ち）
-    ws = addNode(
-      ws,
-      "axiom",
-      "A1②",
-      { x: 50, y: 350 },
-      "phi -> (phi -> phi)",
-    );
+    ws = addNode(ws, "axiom", "A1②", { x: 50, y: 350 }, "phi -> (phi -> phi)");
 
     // ゴール設定
     ws = updateGoalFormulaText(ws, "phi -> phi");

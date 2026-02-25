@@ -318,7 +318,13 @@ export function EditableProofNode({
 
   return (
     <div data-testid={testId} style={containerStyle}>
-      <div style={classification || isProtected || axiomName ? headerRowStyle : undefined}>
+      <div
+        style={
+          classification || isProtected || axiomName
+            ? headerRowStyle
+            : undefined
+        }
+      >
         <div style={labelStyle}>{label}</div>
         {axiomName ? (
           <div

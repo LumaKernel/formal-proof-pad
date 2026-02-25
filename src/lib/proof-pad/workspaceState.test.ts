@@ -835,13 +835,7 @@ describe("proofWorkspace", () => {
     it("preserves connections between pasted nodes", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       ws = addNode(ws, "axiom", "A1", { x: 100, y: 100 }, "phi");
-      ws = addNode(
-        ws,
-        "axiom",
-        "A2",
-        { x: 300, y: 100 },
-        "phi -> psi",
-      );
+      ws = addNode(ws, "axiom", "A2", { x: 300, y: 100 }, "phi -> psi");
       const mpResult = applyMPAndConnect(ws, "node-1", "node-2", {
         x: 200,
         y: 300,
@@ -860,7 +854,9 @@ describe("proofWorkspace", () => {
       expect(result.connections).toHaveLength(4);
       // New connections reference new IDs
       const newConns = result.connections.filter(
-        (c) => c.fromNodeId.startsWith("node-4") || c.fromNodeId.startsWith("node-5"),
+        (c) =>
+          c.fromNodeId.startsWith("node-4") ||
+          c.fromNodeId.startsWith("node-5"),
       );
       expect(newConns.length).toBeGreaterThanOrEqual(1);
     });

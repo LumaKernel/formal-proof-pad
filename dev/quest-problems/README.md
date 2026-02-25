@@ -7,14 +7,14 @@ Formal Logic Pad のクエストモードで出題する練習問題群を定義
 
 ## ドキュメント構成
 
-| ファイル | 内容 |
-|---------|------|
-| [01-propositional-basics.md](./01-propositional-basics.md) | 命題論理の基礎（Łukasiewicz系 A1-A3 + MP） |
-| [02-propositional-intermediate.md](./02-propositional-intermediate.md) | 命題論理の中級（演繹定理的テクニック） |
-| [03-propositional-advanced.md](./03-propositional-advanced.md) | 命題論理の上級（否定、対偶、背理法） |
-| [04-predicate-basics.md](./04-predicate-basics.md) | 述語論理の基礎（A4-A5 + Gen） |
-| [05-predicate-advanced.md](./05-predicate-advanced.md) | 述語論理の上級（複合量化子、自由変数） |
-| [06-equality.md](./06-equality.md) | 等号付き論理（E1-E3 + 等号推論） |
+| ファイル                                                               | 内容                                       |
+| ---------------------------------------------------------------------- | ------------------------------------------ |
+| [01-propositional-basics.md](./01-propositional-basics.md)             | 命題論理の基礎（Łukasiewicz系 A1-A3 + MP） |
+| [02-propositional-intermediate.md](./02-propositional-intermediate.md) | 命題論理の中級（演繹定理的テクニック）     |
+| [03-propositional-advanced.md](./03-propositional-advanced.md)         | 命題論理の上級（否定、対偶、背理法）       |
+| [04-predicate-basics.md](./04-predicate-basics.md)                     | 述語論理の基礎（A4-A5 + Gen）              |
+| [05-predicate-advanced.md](./05-predicate-advanced.md)                 | 述語論理の上級（複合量化子、自由変数）     |
+| [06-equality.md](./06-equality.md)                                     | 等号付き論理（E1-E3 + 等号推論）           |
 
 ## 問題の難易度
 
@@ -37,25 +37,27 @@ Formal Logic Pad のクエストモードで出題する練習問題群を定義
 **ヒント:** [任意のヒント]
 
 **解法の概略:**
+
 1. ステップ1の説明
 2. ステップ2の説明
-...
+   ...
 ```
 
 ## 解答ノート
 
 各問題の完全な形式証明を `solutions/` ディレクトリに配置する。
 
-| ファイル | 内容 |
-|---------|------|
-| [solutions/01-propositional-basics-solutions.md](./solutions/01-propositional-basics-solutions.md) | Q-01〜Q-07 の解答 |
+| ファイル                                                                                                       | 内容              |
+| -------------------------------------------------------------------------------------------------------------- | ----------------- |
+| [solutions/01-propositional-basics-solutions.md](./solutions/01-propositional-basics-solutions.md)             | Q-01〜Q-07 の解答 |
 | [solutions/02-propositional-intermediate-solutions.md](./solutions/02-propositional-intermediate-solutions.md) | Q-08〜Q-14 の解答 |
-| [solutions/03-propositional-advanced-solutions.md](./solutions/03-propositional-advanced-solutions.md) | Q-15〜Q-24 の解答 |
-| [solutions/04-predicate-basics-solutions.md](./solutions/04-predicate-basics-solutions.md) | Q-25〜Q-32 の解答 |
-| [solutions/05-predicate-advanced-solutions.md](./solutions/05-predicate-advanced-solutions.md) | Q-33〜Q-38 の解答 |
-| [solutions/06-equality-solutions.md](./solutions/06-equality-solutions.md) | Q-39〜Q-45 の解答 |
+| [solutions/03-propositional-advanced-solutions.md](./solutions/03-propositional-advanced-solutions.md)         | Q-15〜Q-24 の解答 |
+| [solutions/04-predicate-basics-solutions.md](./solutions/04-predicate-basics-solutions.md)                     | Q-25〜Q-32 の解答 |
+| [solutions/05-predicate-advanced-solutions.md](./solutions/05-predicate-advanced-solutions.md)                 | Q-33〜Q-38 の解答 |
+| [solutions/06-equality-solutions.md](./solutions/06-equality-solutions.md)                                     | Q-39〜Q-45 の解答 |
 
 各解答には:
+
 - 公理のインスタンス化の具体的な代入を明記
 - 推論ステップごとの根拠（公理名、既証補題名、MP の参照先）
 - 既証の補題を再利用するためのまとめ表

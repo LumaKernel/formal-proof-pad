@@ -69,10 +69,7 @@ export function getAllNodeDependencies(
 ): ReadonlyMap<string, ReadonlySet<string>> {
   const result = new Map<string, ReadonlySet<string>>();
   for (const node of nodes) {
-    result.set(
-      node.id,
-      getNodeDependencies(node.id, nodes, connections),
-    );
+    result.set(node.id, getNodeDependencies(node.id, nodes, connections));
   }
   return result;
 }

@@ -3,6 +3,7 @@
 本ドキュメントでは、カット除去定理の証明を構成するアルゴリズムを TypeScript 風の疑似コードで記述する。各変換ケースにはreasoning（なぜその変換が正しいか）をコメントで付記し、具体例を添える。
 
 > **前提知識:**
+>
 > - シーケント計算（LK）の基本: [01-sequent-calculus.md](./01-sequent-calculus.md)
 > - カット規則とカット除去定理の主張・意義: [02-cut-elimination-theorem.md](./02-cut-elimination-theorem.md)
 
@@ -12,13 +13,37 @@
 
 ```typescript
 type Formula =
-  | { readonly tag: "Atom"; readonly name: string; readonly terms: readonly Term[] }
+  | {
+      readonly tag: "Atom";
+      readonly name: string;
+      readonly terms: readonly Term[];
+    }
   | { readonly tag: "Negation"; readonly body: Formula }
-  | { readonly tag: "Implication"; readonly left: Formula; readonly right: Formula }
-  | { readonly tag: "Conjunction"; readonly left: Formula; readonly right: Formula }
-  | { readonly tag: "Disjunction"; readonly left: Formula; readonly right: Formula }
-  | { readonly tag: "Universal"; readonly variable: string; readonly body: Formula }
-  | { readonly tag: "Existential"; readonly variable: string; readonly body: Formula }
+  | {
+      readonly tag: "Implication";
+      readonly left: Formula;
+      readonly right: Formula;
+    }
+  | {
+      readonly tag: "Conjunction";
+      readonly left: Formula;
+      readonly right: Formula;
+    }
+  | {
+      readonly tag: "Disjunction";
+      readonly left: Formula;
+      readonly right: Formula;
+    }
+  | {
+      readonly tag: "Universal";
+      readonly variable: string;
+      readonly body: Formula;
+    }
+  | {
+      readonly tag: "Existential";
+      readonly variable: string;
+      readonly body: Formula;
+    };
 ```
 
 ### 1.2 項
@@ -26,7 +51,11 @@ type Formula =
 ```typescript
 type Term =
   | { readonly tag: "Variable"; readonly name: string }
-  | { readonly tag: "Function"; readonly name: string; readonly args: readonly Term[] }
+  | {
+      readonly tag: "Function";
+      readonly name: string;
+      readonly args: readonly Term[];
+    };
 ```
 
 ### 1.3 シーケント
@@ -34,9 +63,9 @@ type Term =
 ```typescript
 // 多重集合は配列で表現（順序は問わない）
 type Sequent = {
-  readonly antecedent: readonly Formula[]  // Γ（前件）
-  readonly succedent: readonly Formula[]   // Δ（後件）
-}
+  readonly antecedent: readonly Formula[]; // Γ（前件）
+  readonly succedent: readonly Formula[]; // Δ（後件）
+};
 ```
 
 ### 1.4 証明木
@@ -45,40 +74,116 @@ type Sequent = {
 type Proof =
   | { readonly tag: "Axiom"; readonly formula: Formula }
   // 構造規則
-  | { readonly tag: "WeakeningL"; readonly added: Formula; readonly premise: Proof }
-  | { readonly tag: "WeakeningR"; readonly added: Formula; readonly premise: Proof }
-  | { readonly tag: "ContractionL"; readonly formula: Formula; readonly premise: Proof }
-  | { readonly tag: "ContractionR"; readonly formula: Formula; readonly premise: Proof }
+  | {
+      readonly tag: "WeakeningL";
+      readonly added: Formula;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "WeakeningR";
+      readonly added: Formula;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "ContractionL";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "ContractionR";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
   // 否定
-  | { readonly tag: "NegationL"; readonly formula: Formula; readonly premise: Proof }
-  | { readonly tag: "NegationR"; readonly formula: Formula; readonly premise: Proof }
+  | {
+      readonly tag: "NegationL";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "NegationR";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
   // 含意
-  | { readonly tag: "ImplicationL"; readonly formula: Formula;
-      readonly leftPremise: Proof; readonly rightPremise: Proof }
-  | { readonly tag: "ImplicationR"; readonly formula: Formula; readonly premise: Proof }
+  | {
+      readonly tag: "ImplicationL";
+      readonly formula: Formula;
+      readonly leftPremise: Proof;
+      readonly rightPremise: Proof;
+    }
+  | {
+      readonly tag: "ImplicationR";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
   // 連言
-  | { readonly tag: "ConjunctionL1"; readonly formula: Formula; readonly premise: Proof }
-  | { readonly tag: "ConjunctionL2"; readonly formula: Formula; readonly premise: Proof }
-  | { readonly tag: "ConjunctionR"; readonly formula: Formula;
-      readonly leftPremise: Proof; readonly rightPremise: Proof }
+  | {
+      readonly tag: "ConjunctionL1";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "ConjunctionL2";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "ConjunctionR";
+      readonly formula: Formula;
+      readonly leftPremise: Proof;
+      readonly rightPremise: Proof;
+    }
   // 選言
-  | { readonly tag: "DisjunctionL"; readonly formula: Formula;
-      readonly leftPremise: Proof; readonly rightPremise: Proof }
-  | { readonly tag: "DisjunctionR1"; readonly formula: Formula; readonly premise: Proof }
-  | { readonly tag: "DisjunctionR2"; readonly formula: Formula; readonly premise: Proof }
+  | {
+      readonly tag: "DisjunctionL";
+      readonly formula: Formula;
+      readonly leftPremise: Proof;
+      readonly rightPremise: Proof;
+    }
+  | {
+      readonly tag: "DisjunctionR1";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "DisjunctionR2";
+      readonly formula: Formula;
+      readonly premise: Proof;
+    }
   // 全称量化
-  | { readonly tag: "UniversalL"; readonly formula: Formula;
-      readonly term: Term; readonly premise: Proof }
-  | { readonly tag: "UniversalR"; readonly formula: Formula;
-      readonly eigenvariable: string; readonly premise: Proof }
+  | {
+      readonly tag: "UniversalL";
+      readonly formula: Formula;
+      readonly term: Term;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "UniversalR";
+      readonly formula: Formula;
+      readonly eigenvariable: string;
+      readonly premise: Proof;
+    }
   // 存在量化
-  | { readonly tag: "ExistentialL"; readonly formula: Formula;
-      readonly eigenvariable: string; readonly premise: Proof }
-  | { readonly tag: "ExistentialR"; readonly formula: Formula;
-      readonly term: Term; readonly premise: Proof }
+  | {
+      readonly tag: "ExistentialL";
+      readonly formula: Formula;
+      readonly eigenvariable: string;
+      readonly premise: Proof;
+    }
+  | {
+      readonly tag: "ExistentialR";
+      readonly formula: Formula;
+      readonly term: Term;
+      readonly premise: Proof;
+    }
   // カット規則
-  | { readonly tag: "Cut"; readonly cutFormula: Formula;
-      readonly leftPremise: Proof; readonly rightPremise: Proof }
+  | {
+      readonly tag: "Cut";
+      readonly cutFormula: Formula;
+      readonly leftPremise: Proof;
+      readonly rightPremise: Proof;
+    };
 ```
 
 ### 1.5 補助関数
@@ -87,24 +192,41 @@ type Proof =
 // 論理式の複雑度（論理結合子の深さ）
 function complexity(f: Formula): number {
   switch (f.tag) {
-    case "Atom": return 0
-    case "Negation": return complexity(f.body) + 1
-    case "Implication": return Math.max(complexity(f.left), complexity(f.right)) + 1
-    case "Conjunction": return Math.max(complexity(f.left), complexity(f.right)) + 1
-    case "Disjunction": return Math.max(complexity(f.left), complexity(f.right)) + 1
-    case "Universal": return complexity(f.body) + 1
-    case "Existential": return complexity(f.body) + 1
+    case "Atom":
+      return 0;
+    case "Negation":
+      return complexity(f.body) + 1;
+    case "Implication":
+      return Math.max(complexity(f.left), complexity(f.right)) + 1;
+    case "Conjunction":
+      return Math.max(complexity(f.left), complexity(f.right)) + 1;
+    case "Disjunction":
+      return Math.max(complexity(f.left), complexity(f.right)) + 1;
+    case "Universal":
+      return complexity(f.body) + 1;
+    case "Existential":
+      return complexity(f.body) + 1;
   }
 }
 
 // 証明の結論シーケントを取得
-function conclusion(proof: Proof): Sequent { /* ... */ }
+function conclusion(proof: Proof): Sequent {
+  /* ... */
+}
 
 // 論理式中の変数 x を項 t で置換: A[t/x]
-function substituteVar(formula: Formula, variable: string, term: Term): Formula { /* ... */ }
+function substituteVar(
+  formula: Formula,
+  variable: string,
+  term: Term,
+): Formula {
+  /* ... */
+}
 
 // 証明中のカット式の最大複雑度（カット階数）
-function cutRank(proof: Proof): number { /* ... */ }
+function cutRank(proof: Proof): number {
+  /* ... */
+}
 ```
 
 ## 2. カット除去アルゴリズムの全体構造
@@ -133,11 +255,11 @@ function eliminateCuts(proof: Proof): Proof {
   // Reasoning: 各反復でカット階数が厳密に減少するか、同じ階数のカット数が減少する
   // よって、有限回で停止する
 
-  let current = proof
+  let current = proof;
   while (cutRank(current) > 0) {
-    current = reduceTopCut(current)
+    current = reduceTopCut(current);
   }
-  return current
+  return current;
 }
 ```
 
@@ -156,22 +278,22 @@ function reduceTopCut(proof: Proof): Proof {
   switch (proof.tag) {
     case "Cut": {
       // まず前提を再帰的に処理
-      const left = reduceTopCut(proof.leftPremise)
-      const right = reduceTopCut(proof.rightPremise)
+      const left = reduceTopCut(proof.leftPremise);
+      const right = reduceTopCut(proof.rightPremise);
       // 前提が処理済みなら、このカットを変換
-      return reduceCut(proof.cutFormula, left, right)
+      return reduceCut(proof.cutFormula, left, right);
     }
     // 他のすべての規則は前提を再帰的に処理するだけ
     case "Axiom":
-      return proof
+      return proof;
     case "WeakeningL":
-      return { ...proof, premise: reduceTopCut(proof.premise) }
+      return { ...proof, premise: reduceTopCut(proof.premise) };
     case "WeakeningR":
-      return { ...proof, premise: reduceTopCut(proof.premise) }
+      return { ...proof, premise: reduceTopCut(proof.premise) };
     // ... 他の規則も同様（すべての前提を再帰的に処理）
     default:
       // 各規則の前提を再帰的に走査
-      return mapPremises(proof, reduceTopCut)
+      return mapPremises(proof, reduceTopCut);
   }
 }
 ```
@@ -198,43 +320,46 @@ function reduceTopCut(proof: Proof): Proof {
 function reduceCut(
   cutFormula: Formula,
   leftProof: Proof,
-  rightProof: Proof
+  rightProof: Proof,
 ): Proof {
   // ── Case 1: 公理とのカット ──
   if (leftProof.tag === "Axiom") {
-    return reduceCutAxiomLeft(cutFormula, leftProof, rightProof)
+    return reduceCutAxiomLeft(cutFormula, leftProof, rightProof);
   }
   if (rightProof.tag === "Axiom") {
-    return reduceCutAxiomRight(cutFormula, leftProof, rightProof)
+    return reduceCutAxiomRight(cutFormula, leftProof, rightProof);
   }
 
   // ── Case 4: 構造規則との相互作用 ──
   // 弱化・縮約は非主式ケースより先に処理する
   // （弱化でカット式が導入された場合は特殊処理が必要なため）
   if (isWeakeningOnCutFormula(leftProof, cutFormula)) {
-    return reduceCutWeakeningLeft(cutFormula, leftProof, rightProof)
+    return reduceCutWeakeningLeft(cutFormula, leftProof, rightProof);
   }
   if (isWeakeningOnCutFormula(rightProof, cutFormula)) {
-    return reduceCutWeakeningRight(cutFormula, leftProof, rightProof)
+    return reduceCutWeakeningRight(cutFormula, leftProof, rightProof);
   }
   if (isContractionOnCutFormula(leftProof, cutFormula)) {
-    return reduceCutContractionLeft(cutFormula, leftProof, rightProof)
+    return reduceCutContractionLeft(cutFormula, leftProof, rightProof);
   }
   if (isContractionOnCutFormula(rightProof, cutFormula)) {
-    return reduceCutContractionRight(cutFormula, leftProof, rightProof)
+    return reduceCutContractionRight(cutFormula, leftProof, rightProof);
   }
 
   // ── Case 3: 両方で主式 (Principal Case) ──
-  if (isPrincipal(leftProof, cutFormula) && isPrincipal(rightProof, cutFormula)) {
-    return reducePrincipalCut(cutFormula, leftProof, rightProof)
+  if (
+    isPrincipal(leftProof, cutFormula) &&
+    isPrincipal(rightProof, cutFormula)
+  ) {
+    return reducePrincipalCut(cutFormula, leftProof, rightProof);
   }
 
   // ── Case 2: 非主式 (Non-principal Case) ──
   // カット式がどちらかで非主式 → カットを上に持ち上げる
   if (!isPrincipal(leftProof, cutFormula)) {
-    return pushCutUpLeft(cutFormula, leftProof, rightProof)
+    return pushCutUpLeft(cutFormula, leftProof, rightProof);
   }
-  return pushCutUpRight(cutFormula, leftProof, rightProof)
+  return pushCutUpRight(cutFormula, leftProof, rightProof);
 }
 ```
 
@@ -258,11 +383,11 @@ function reduceCut(
  */
 function reduceCutAxiomLeft(
   cutFormula: Formula,
-  leftProof: Proof,    // Axiom: A ⊢ A
-  rightProof: Proof    // A, Σ ⊢ Π
+  leftProof: Proof, // Axiom: A ⊢ A
+  rightProof: Proof, // A, Σ ⊢ Π
 ): Proof {
   // 右前提がそのまま答え
-  return rightProof
+  return rightProof;
 }
 
 /**
@@ -279,11 +404,11 @@ function reduceCutAxiomLeft(
  */
 function reduceCutAxiomRight(
   cutFormula: Formula,
-  leftProof: Proof,     // Γ ⊢ Δ, A
-  rightProof: Proof     // Axiom: A ⊢ A
+  leftProof: Proof, // Γ ⊢ Δ, A
+  rightProof: Proof, // Axiom: A ⊢ A
 ): Proof {
   // 左前提がそのまま答え
-  return leftProof
+  return leftProof;
 }
 ```
 
@@ -358,7 +483,7 @@ function reduceCutAxiomRight(
 function pushCutUpLeft(
   cutFormula: Formula,
   leftProof: Proof,
-  rightProof: Proof
+  rightProof: Proof,
 ): Proof {
   switch (leftProof.tag) {
     // ── 1前提の論理規則（A が非主式） ──
@@ -375,8 +500,8 @@ function pushCutUpLeft(
       //          B, Γ, Σ ⊢ Δ, Π
       //   ──────────────────────── (¬R)
       //        Γ, Σ ⊢ Δ, Π, ¬B
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "NegationR", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return { tag: "NegationR", formula: leftProof.formula, premise: newCut };
     }
 
     case "ImplicationR": {
@@ -386,8 +511,12 @@ function pushCutUpLeft(
       //    Γ ⊢ Δ, B → C, A        （A は B → C ではない = 非主式）
       //
       // 変換: カットを π に持ち上げ
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "ImplicationR", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "ImplicationR",
+        formula: leftProof.formula,
+        premise: newCut,
+      };
     }
 
     case "ImplicationL": {
@@ -416,94 +545,158 @@ function pushCutUpLeft(
       //   各前提でカットを行い、元の規則を再適用する。
       //   注意: Σ と Π が重複するが、必要に応じて縮約で整理できる。
       //   段数はいずれの場合も減少する。
-      const newLeft = reduceCut(cutFormula, leftProof.leftPremise, rightProof)
-      const newRight = reduceCut(cutFormula, leftProof.rightPremise, rightProof)
-      return { tag: "ImplicationL", formula: leftProof.formula,
-               leftPremise: newLeft, rightPremise: newRight }
+      const newLeft = reduceCut(cutFormula, leftProof.leftPremise, rightProof);
+      const newRight = reduceCut(
+        cutFormula,
+        leftProof.rightPremise,
+        rightProof,
+      );
+      return {
+        tag: "ImplicationL",
+        formula: leftProof.formula,
+        leftPremise: newLeft,
+        rightPremise: newRight,
+      };
     }
 
     // ── 連言 ──
     case "ConjunctionL1": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "ConjunctionL1", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "ConjunctionL1",
+        formula: leftProof.formula,
+        premise: newCut,
+      };
     }
     case "ConjunctionL2": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "ConjunctionL2", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "ConjunctionL2",
+        formula: leftProof.formula,
+        premise: newCut,
+      };
     }
     case "ConjunctionR": {
-      const newLeft = reduceCut(cutFormula, leftProof.leftPremise, rightProof)
-      const newRight = reduceCut(cutFormula, leftProof.rightPremise, rightProof)
-      return { tag: "ConjunctionR", formula: leftProof.formula,
-               leftPremise: newLeft, rightPremise: newRight }
+      const newLeft = reduceCut(cutFormula, leftProof.leftPremise, rightProof);
+      const newRight = reduceCut(
+        cutFormula,
+        leftProof.rightPremise,
+        rightProof,
+      );
+      return {
+        tag: "ConjunctionR",
+        formula: leftProof.formula,
+        leftPremise: newLeft,
+        rightPremise: newRight,
+      };
     }
 
     // ── 選言 ──
     case "DisjunctionL": {
-      const newLeft = reduceCut(cutFormula, leftProof.leftPremise, rightProof)
-      const newRight = reduceCut(cutFormula, leftProof.rightPremise, rightProof)
-      return { tag: "DisjunctionL", formula: leftProof.formula,
-               leftPremise: newLeft, rightPremise: newRight }
+      const newLeft = reduceCut(cutFormula, leftProof.leftPremise, rightProof);
+      const newRight = reduceCut(
+        cutFormula,
+        leftProof.rightPremise,
+        rightProof,
+      );
+      return {
+        tag: "DisjunctionL",
+        formula: leftProof.formula,
+        leftPremise: newLeft,
+        rightPremise: newRight,
+      };
     }
     case "DisjunctionR1": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "DisjunctionR1", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "DisjunctionR1",
+        formula: leftProof.formula,
+        premise: newCut,
+      };
     }
     case "DisjunctionR2": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "DisjunctionR2", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "DisjunctionR2",
+        formula: leftProof.formula,
+        premise: newCut,
+      };
     }
 
     // ── 否定 ──
     case "NegationL": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "NegationL", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return { tag: "NegationL", formula: leftProof.formula, premise: newCut };
     }
 
     // ── 量化子 ──
     case "UniversalL": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "UniversalL", formula: leftProof.formula,
-               term: leftProof.term, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "UniversalL",
+        formula: leftProof.formula,
+        term: leftProof.term,
+        premise: newCut,
+      };
     }
     case "UniversalR": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "UniversalR", formula: leftProof.formula,
-               eigenvariable: leftProof.eigenvariable, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "UniversalR",
+        formula: leftProof.formula,
+        eigenvariable: leftProof.eigenvariable,
+        premise: newCut,
+      };
     }
     case "ExistentialL": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "ExistentialL", formula: leftProof.formula,
-               eigenvariable: leftProof.eigenvariable, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "ExistentialL",
+        formula: leftProof.formula,
+        eigenvariable: leftProof.eigenvariable,
+        premise: newCut,
+      };
     }
     case "ExistentialR": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "ExistentialR", formula: leftProof.formula,
-               term: leftProof.term, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "ExistentialR",
+        formula: leftProof.formula,
+        term: leftProof.term,
+        premise: newCut,
+      };
     }
 
     // ── 構造規則（A が非主式の場合）──
     case "WeakeningL": {
       // 弱化で追加されたのは A ではない（A が非主式）
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "WeakeningL", added: leftProof.added, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return { tag: "WeakeningL", added: leftProof.added, premise: newCut };
     }
     case "WeakeningR": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "WeakeningR", added: leftProof.added, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return { tag: "WeakeningR", added: leftProof.added, premise: newCut };
     }
     case "ContractionL": {
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "ContractionL", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "ContractionL",
+        formula: leftProof.formula,
+        premise: newCut,
+      };
     }
     case "ContractionR": {
       // 縮約されたのは A ではない（A が非主式）
-      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof)
-      return { tag: "ContractionR", formula: leftProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof.premise, rightProof);
+      return {
+        tag: "ContractionR",
+        formula: leftProof.formula,
+        premise: newCut,
+      };
     }
 
     default:
-      throw new Error("Unexpected proof structure")
+      throw new Error("Unexpected proof structure");
   }
 }
 ```
@@ -536,7 +729,7 @@ function pushCutUpLeft(
 function pushCutUpRight(
   cutFormula: Formula,
   leftProof: Proof,
-  rightProof: Proof
+  rightProof: Proof,
 ): Proof {
   // pushCutUpLeft と対称的な処理
   // 右前提の各規則について、その前提でカットを行い、規則を再適用する
@@ -553,15 +746,15 @@ function pushCutUpRight(
       //   Γ ⊢ Δ, A     π: Γ₂ ⊢ Δ₂, B
       //   ... ここで A が π の前件に出現する場合はカットを行う ...
       //   ──────────── (¬L)
-      const newCut = reduceCut(cutFormula, leftProof, rightProof.premise)
-      return { tag: "NegationL", formula: rightProof.formula, premise: newCut }
+      const newCut = reduceCut(cutFormula, leftProof, rightProof.premise);
+      return { tag: "NegationL", formula: rightProof.formula, premise: newCut };
     }
 
     // ... 他の規則も pushCutUpLeft と対称的に処理
     // （左前提の場合の鏡像）
 
     default:
-      throw new Error("Unexpected proof structure")
+      throw new Error("Unexpected proof structure");
   }
 }
 ```
@@ -631,25 +824,27 @@ function pushCutUpRight(
 function reducePrincipalCut(
   cutFormula: Formula,
   leftProof: Proof,
-  rightProof: Proof
+  rightProof: Proof,
 ): Proof {
   switch (cutFormula.tag) {
     case "Negation":
-      return reducePrincipalNegation(cutFormula, leftProof, rightProof)
+      return reducePrincipalNegation(cutFormula, leftProof, rightProof);
     case "Implication":
-      return reducePrincipalImplication(cutFormula, leftProof, rightProof)
+      return reducePrincipalImplication(cutFormula, leftProof, rightProof);
     case "Conjunction":
-      return reducePrincipalConjunction(cutFormula, leftProof, rightProof)
+      return reducePrincipalConjunction(cutFormula, leftProof, rightProof);
     case "Disjunction":
-      return reducePrincipalDisjunction(cutFormula, leftProof, rightProof)
+      return reducePrincipalDisjunction(cutFormula, leftProof, rightProof);
     case "Universal":
-      return reducePrincipalUniversal(cutFormula, leftProof, rightProof)
+      return reducePrincipalUniversal(cutFormula, leftProof, rightProof);
     case "Existential":
-      return reducePrincipalExistential(cutFormula, leftProof, rightProof)
+      return reducePrincipalExistential(cutFormula, leftProof, rightProof);
     case "Atom":
       // 原子式のカットでは、両方が主式であることは公理ケース（Case 1）でのみ生じる。
       // ここに到達することはない。
-      throw new Error("Atomic principal cut should have been handled by axiom case")
+      throw new Error(
+        "Atomic principal cut should have been handled by axiom case",
+      );
   }
 }
 ```
@@ -688,17 +883,17 @@ function reducePrincipalCut(
  */
 function reducePrincipalNegation(
   cutFormula: Formula & { readonly tag: "Negation" },
-  leftProof: Proof,    // tag === "NegationR"
-  rightProof: Proof    // tag === "NegationL"
+  leftProof: Proof, // tag === "NegationR"
+  rightProof: Proof, // tag === "NegationL"
 ): Proof {
   // leftProof.premise: Γ ⊢ Δ, B を証明
   // rightProof.premise: B, Σ ⊢ Π を証明
-  const innerCutFormula = cutFormula.body  // B
+  const innerCutFormula = cutFormula.body; // B
   return reduceCut(
     innerCutFormula,
-    (leftProof as { readonly premise: Proof }).premise,    // Γ ⊢ Δ, B
-    (rightProof as { readonly premise: Proof }).premise    // B, Σ ⊢ Π
-  )
+    (leftProof as { readonly premise: Proof }).premise, // Γ ⊢ Δ, B
+    (rightProof as { readonly premise: Proof }).premise, // B, Σ ⊢ Π
+  );
 }
 ```
 
@@ -761,30 +956,31 @@ function reducePrincipalNegation(
  */
 function reducePrincipalImplication(
   cutFormula: Formula & { readonly tag: "Implication" },
-  leftProof: Proof,    // tag === "ImplicationR"
-  rightProof: Proof    // tag === "ImplicationL"
+  leftProof: Proof, // tag === "ImplicationR"
+  rightProof: Proof, // tag === "ImplicationL"
 ): Proof {
-  const B = cutFormula.left
-  const C = cutFormula.right
+  const B = cutFormula.left;
+  const C = cutFormula.right;
 
   // leftProof.premise: B, Γ ⊢ Δ, C
   // rightProof.leftPremise: Σ₁ ⊢ Π₁, B
   // rightProof.rightPremise: C, Σ₂ ⊢ Π₂
-  const leftInner = (leftProof as { readonly premise: Proof }).premise
-  const rightLeft = (rightProof as { readonly leftPremise: Proof }).leftPremise
-  const rightRight = (rightProof as { readonly rightPremise: Proof }).rightPremise
+  const leftInner = (leftProof as { readonly premise: Proof }).premise;
+  const rightLeft = (rightProof as { readonly leftPremise: Proof }).leftPremise;
+  const rightRight = (rightProof as { readonly rightPremise: Proof })
+    .rightPremise;
 
   // Step 1: B でカット
   //   rightLeft: Σ₁ ⊢ Π₁, B  と  leftInner: B, Γ ⊢ Δ, C
-  const cutOnB = reduceCut(B, rightLeft, leftInner)
+  const cutOnB = reduceCut(B, rightLeft, leftInner);
   // 結果: Σ₁, Γ ⊢ Π₁, Δ, C
 
   // Step 2: C でカット
   //   cutOnB: Σ₁, Γ ⊢ Π₁, Δ, C  と  rightRight: C, Σ₂ ⊢ Π₂
-  const cutOnC = reduceCut(C, cutOnB, rightRight)
+  const cutOnC = reduceCut(C, cutOnB, rightRight);
   // 結果: Σ₁, Γ, Σ₂ ⊢ Π₁, Δ, Π₂
 
-  return cutOnC
+  return cutOnC;
 }
 ```
 
@@ -847,19 +1043,19 @@ complexity(A) < complexity(A → B), complexity(B) < complexity(A → B)
  */
 function reducePrincipalConjunction(
   cutFormula: Formula & { readonly tag: "Conjunction" },
-  leftProof: Proof,    // tag === "ConjunctionR"
-  rightProof: Proof    // tag === "ConjunctionL1" or "ConjunctionL2"
+  leftProof: Proof, // tag === "ConjunctionR"
+  rightProof: Proof, // tag === "ConjunctionL1" or "ConjunctionL2"
 ): Proof {
-  const leftL = (leftProof as { readonly leftPremise: Proof }).leftPremise   // Γ ⊢ Δ, B
-  const leftR = (leftProof as { readonly rightPremise: Proof }).rightPremise // Γ ⊢ Δ, C
-  const rightInner = (rightProof as { readonly premise: Proof }).premise
+  const leftL = (leftProof as { readonly leftPremise: Proof }).leftPremise; // Γ ⊢ Δ, B
+  const leftR = (leftProof as { readonly rightPremise: Proof }).rightPremise; // Γ ⊢ Δ, C
+  const rightInner = (rightProof as { readonly premise: Proof }).premise;
 
   if (rightProof.tag === "ConjunctionL1") {
     // ∧L₁: B, Σ ⊢ Π
-    return reduceCut(cutFormula.left, leftL, rightInner)    // Cut on B
+    return reduceCut(cutFormula.left, leftL, rightInner); // Cut on B
   } else {
     // ∧L₂: C, Σ ⊢ Π
-    return reduceCut(cutFormula.right, leftR, rightInner)   // Cut on C
+    return reduceCut(cutFormula.right, leftR, rightInner); // Cut on C
   }
 }
 ```
@@ -917,20 +1113,20 @@ function reducePrincipalConjunction(
  */
 function reducePrincipalDisjunction(
   cutFormula: Formula & { readonly tag: "Disjunction" },
-  leftProof: Proof,    // tag === "DisjunctionR1" or "DisjunctionR2"
-  rightProof: Proof    // tag === "DisjunctionL"
+  leftProof: Proof, // tag === "DisjunctionR1" or "DisjunctionR2"
+  rightProof: Proof, // tag === "DisjunctionL"
 ): Proof {
-  const rightL = (rightProof as { readonly leftPremise: Proof }).leftPremise   // B, Σ₁ ⊢ Π₁
-  const rightR = (rightProof as { readonly rightPremise: Proof }).rightPremise // C, Σ₂ ⊢ Π₂
+  const rightL = (rightProof as { readonly leftPremise: Proof }).leftPremise; // B, Σ₁ ⊢ Π₁
+  const rightR = (rightProof as { readonly rightPremise: Proof }).rightPremise; // C, Σ₂ ⊢ Π₂
 
   if (leftProof.tag === "DisjunctionR1") {
     // ∨R₁: Γ ⊢ Δ, B
-    const leftInner = (leftProof as { readonly premise: Proof }).premise
-    return reduceCut(cutFormula.left, leftInner, rightL)    // Cut on B
+    const leftInner = (leftProof as { readonly premise: Proof }).premise;
+    return reduceCut(cutFormula.left, leftInner, rightL); // Cut on B
   } else {
     // ∨R₂: Γ ⊢ Δ, C
-    const leftInner = (leftProof as { readonly premise: Proof }).premise
-    return reduceCut(cutFormula.right, leftInner, rightR)   // Cut on C
+    const leftInner = (leftProof as { readonly premise: Proof }).premise;
+    return reduceCut(cutFormula.right, leftInner, rightR); // Cut on C
   }
 }
 ```
@@ -992,13 +1188,13 @@ function reducePrincipalDisjunction(
  */
 function reducePrincipalUniversal(
   cutFormula: Formula & { readonly tag: "Universal" },
-  leftProof: Proof,    // tag === "UniversalR"
-  rightProof: Proof    // tag === "UniversalL"
+  leftProof: Proof, // tag === "UniversalR"
+  rightProof: Proof, // tag === "UniversalL"
 ): Proof {
-  const x = cutFormula.variable
-  const B = cutFormula.body
-  const y = (leftProof as { readonly eigenvariable: string }).eigenvariable
-  const t = (rightProof as { readonly term: Term }).term
+  const x = cutFormula.variable;
+  const B = cutFormula.body;
+  const y = (leftProof as { readonly eigenvariable: string }).eigenvariable;
+  const t = (rightProof as { readonly term: Term }).term;
 
   // 左前提の証明で y を t に置換
   // leftProof.premise は Γ ⊢ Δ, B[y/x] を証明
@@ -1006,15 +1202,15 @@ function reducePrincipalUniversal(
   const leftSubstituted = substituteInProof(
     (leftProof as { readonly premise: Proof }).premise,
     y,
-    t
-  )
+    t,
+  );
 
   // 右前提の前提: B[t/x], Σ ⊢ Π
-  const rightInner = (rightProof as { readonly premise: Proof }).premise
+  const rightInner = (rightProof as { readonly premise: Proof }).premise;
 
   // B[t/x] でカット
-  const newCutFormula = substituteVar(B, x, t)
-  return reduceCut(newCutFormula, leftSubstituted, rightInner)
+  const newCutFormula = substituteVar(B, x, t);
+  return reduceCut(newCutFormula, leftSubstituted, rightInner);
 }
 ```
 
@@ -1069,27 +1265,27 @@ function reducePrincipalUniversal(
  */
 function reducePrincipalExistential(
   cutFormula: Formula & { readonly tag: "Existential" },
-  leftProof: Proof,    // tag === "ExistentialR"
-  rightProof: Proof    // tag === "ExistentialL"
+  leftProof: Proof, // tag === "ExistentialR"
+  rightProof: Proof, // tag === "ExistentialL"
 ): Proof {
-  const x = cutFormula.variable
-  const B = cutFormula.body
-  const t = (leftProof as { readonly term: Term }).term
-  const y = (rightProof as { readonly eigenvariable: string }).eigenvariable
+  const x = cutFormula.variable;
+  const B = cutFormula.body;
+  const t = (leftProof as { readonly term: Term }).term;
+  const y = (rightProof as { readonly eigenvariable: string }).eigenvariable;
 
   // 右前提の証明で y を t に置換
   const rightSubstituted = substituteInProof(
     (rightProof as { readonly premise: Proof }).premise,
     y,
-    t
-  )
+    t,
+  );
 
   // 左前提の前提: Γ ⊢ Δ, B[t/x]
-  const leftInner = (leftProof as { readonly premise: Proof }).premise
+  const leftInner = (leftProof as { readonly premise: Proof }).premise;
 
   // B[t/x] でカット
-  const newCutFormula = substituteVar(B, x, t)
-  return reduceCut(newCutFormula, leftInner, rightSubstituted)
+  const newCutFormula = substituteVar(B, x, t);
+  return reduceCut(newCutFormula, leftInner, rightSubstituted);
 }
 ```
 
@@ -1128,25 +1324,25 @@ function reducePrincipalExistential(
  */
 function reduceCutWeakeningLeft(
   cutFormula: Formula,
-  leftProof: Proof,    // tag === "WeakeningR", added === cutFormula
-  rightProof: Proof
+  leftProof: Proof, // tag === "WeakeningR", added === cutFormula
+  rightProof: Proof,
 ): Proof {
   // leftProof.premise: Γ ⊢ Δ を証明
   // 結論 Γ, Σ ⊢ Δ, Π を弱化で構築
-  const basePremise = (leftProof as { readonly premise: Proof }).premise
-  const rightConclusion = conclusion(rightProof)
+  const basePremise = (leftProof as { readonly premise: Proof }).premise;
+  const rightConclusion = conclusion(rightProof);
 
   // Σ の各式を WL で追加し、Π の各式を WR で追加
-  let result = basePremise
+  let result = basePremise;
   for (const formula of rightConclusion.antecedent) {
     if (!formulaEquals(formula, cutFormula)) {
-      result = { tag: "WeakeningL", added: formula, premise: result }
+      result = { tag: "WeakeningL", added: formula, premise: result };
     }
   }
   for (const formula of rightConclusion.succedent) {
-    result = { tag: "WeakeningR", added: formula, premise: result }
+    result = { tag: "WeakeningR", added: formula, premise: result };
   }
-  return result
+  return result;
 }
 
 /**
@@ -1165,21 +1361,21 @@ function reduceCutWeakeningLeft(
 function reduceCutWeakeningRight(
   cutFormula: Formula,
   leftProof: Proof,
-  rightProof: Proof    // tag === "WeakeningL", added === cutFormula
+  rightProof: Proof, // tag === "WeakeningL", added === cutFormula
 ): Proof {
-  const basePremise = (rightProof as { readonly premise: Proof }).premise
-  const leftConclusion = conclusion(leftProof)
+  const basePremise = (rightProof as { readonly premise: Proof }).premise;
+  const leftConclusion = conclusion(leftProof);
 
-  let result = basePremise
+  let result = basePremise;
   for (const formula of leftConclusion.antecedent) {
-    result = { tag: "WeakeningL", added: formula, premise: result }
+    result = { tag: "WeakeningL", added: formula, premise: result };
   }
   for (const formula of leftConclusion.succedent) {
     if (!formulaEquals(formula, cutFormula)) {
-      result = { tag: "WeakeningR", added: formula, premise: result }
+      result = { tag: "WeakeningR", added: formula, premise: result };
     }
   }
-  return result
+  return result;
 }
 ```
 
@@ -1237,22 +1433,22 @@ function reduceCutWeakeningRight(
  */
 function reduceCutContractionLeft(
   cutFormula: Formula,
-  leftProof: Proof,    // tag === "ContractionR", formula === cutFormula
-  rightProof: Proof
+  leftProof: Proof, // tag === "ContractionR", formula === cutFormula
+  rightProof: Proof,
 ): Proof {
   // leftProof.premise: Γ ⊢ Δ, A, A
-  const innerPremise = (leftProof as { readonly premise: Proof }).premise
+  const innerPremise = (leftProof as { readonly premise: Proof }).premise;
 
   // 1回目のカット: A を1つ消す（A がまだ1つ残る）
-  const firstCut = reduceCut(cutFormula, innerPremise, rightProof)
+  const firstCut = reduceCut(cutFormula, innerPremise, rightProof);
   // 結果: Γ, Σ ⊢ Δ, Π, A   (A が1つ残っている)
 
   // 2回目のカット: 残りの A を消す
-  const secondCut = reduceCut(cutFormula, firstCut, rightProof)
+  const secondCut = reduceCut(cutFormula, firstCut, rightProof);
   // 結果: Γ, Σ, Σ ⊢ Δ, Π, Π
 
   // 必要なら Σ と Π の重複を縮約で整理
-  return applyContractions(secondCut)
+  return applyContractions(secondCut);
 }
 
 /**
@@ -1263,14 +1459,14 @@ function reduceCutContractionLeft(
 function reduceCutContractionRight(
   cutFormula: Formula,
   leftProof: Proof,
-  rightProof: Proof    // tag === "ContractionL", formula === cutFormula
+  rightProof: Proof, // tag === "ContractionL", formula === cutFormula
 ): Proof {
-  const innerPremise = (rightProof as { readonly premise: Proof }).premise
+  const innerPremise = (rightProof as { readonly premise: Proof }).premise;
   // innerPremise: A, A, Σ ⊢ Π
 
-  const firstCut = reduceCut(cutFormula, leftProof, innerPremise)
-  const secondCut = reduceCut(cutFormula, leftProof, firstCut)
-  return applyContractions(secondCut)
+  const firstCut = reduceCut(cutFormula, leftProof, innerPremise);
+  const secondCut = reduceCut(cutFormula, leftProof, firstCut);
+  return applyContractions(secondCut);
 }
 ```
 
@@ -1335,22 +1531,22 @@ Mix はカット式 `A` の**すべての出現**を一度に除去する。
 
 カット除去アルゴリズムの停止性は、各変換で以下の辞書式順序 `(c, d)` が厳密に減少することで保証される:
 
-| 指標 | 定義 | 値域 |
-| --- | --- | --- |
-| `c` | カット式の複雑度（外側） | 自然数 ≥ 0 |
-| `d` | カットの段数 / 深さ（内側） | 自然数 ≥ 0 |
+| 指標 | 定義                        | 値域       |
+| ---- | --------------------------- | ---------- |
+| `c`  | カット式の複雑度（外側）    | 自然数 ≥ 0 |
+| `d`  | カットの段数 / 深さ（内側） | 自然数 ≥ 0 |
 
 辞書式順序: `(c₁, d₁) < (c₂, d₂)` ⟺ `c₁ < c₂` または（`c₁ = c₂` かつ `d₁ < d₂`）
 
 ### 8.2 各ケースの指標変化
 
-| ケース | c（複雑度） | d（段数） | 辞書式順序 |
-| --- | --- | --- | --- |
-| Case 1: 公理 | — | — | カット除去完了 |
-| Case 2: 非主式 | 不変 | 減少 | (c, d) → (c, d') where d' < d |
-| Case 3: 主式 | 減少 | 増加の可能性あり | (c, d) → (c', d') where c' < c |
-| Case 4a/b: 弱化 | — | — | カット除去完了 |
-| Case 4c/d: 縮約 | 不変 | 減少 | (c, d) → (c, d') where d' < d |
+| ケース          | c（複雑度） | d（段数）        | 辞書式順序                     |
+| --------------- | ----------- | ---------------- | ------------------------------ |
+| Case 1: 公理    | —           | —                | カット除去完了                 |
+| Case 2: 非主式  | 不変        | 減少             | (c, d) → (c, d') where d' < d  |
+| Case 3: 主式    | 減少        | 増加の可能性あり | (c, d) → (c', d') where c' < c |
+| Case 4a/b: 弱化 | —           | —                | カット除去完了                 |
+| Case 4c/d: 縮約 | 不変        | 減少             | (c, d) → (c, d') where d' < d  |
 
 ### 8.3 厳密な停止性証明の概略
 
@@ -1403,39 +1599,39 @@ function isPrincipal(proof: Proof, cutFormula: Formula): boolean {
       // ¬R の主式は ¬B（後件に導入）
       return formulaEquals(
         { tag: "Negation", body: extractBodyFromNegationR(proof) },
-        cutFormula
-      )
+        cutFormula,
+      );
     case "NegationL":
       // ¬L の主式は ¬B（前件に導入）
       return formulaEquals(
         { tag: "Negation", body: extractBodyFromNegationL(proof) },
-        cutFormula
-      )
+        cutFormula,
+      );
     case "ImplicationR":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "ImplicationL":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "ConjunctionR":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "ConjunctionL1":
     case "ConjunctionL2":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "DisjunctionR1":
     case "DisjunctionR2":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "DisjunctionL":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "UniversalR":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "UniversalL":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "ExistentialR":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     case "ExistentialL":
-      return formulaEquals(proof.formula, cutFormula)
+      return formulaEquals(proof.formula, cutFormula);
     default:
       // 公理、構造規則には「主式」の概念が（この意味では）ない
-      return false
+      return false;
   }
 }
 ```
