@@ -82,24 +82,26 @@ const inputBaseStyle: CSSProperties = {
   padding: "6px 8px",
   borderWidth: 1,
   borderStyle: "solid",
-  borderColor: "#ccc",
+  borderColor: "var(--color-border, #ccc)",
   borderRadius: 4,
   outline: "none",
   width: "100%",
   boxSizing: "border-box",
+  backgroundColor: "var(--color-surface, #ffffff)",
+  color: "var(--color-text-primary, #171717)",
 };
 
 /* v8 ignore start -- style constant, not worth testing */
 const inputErrorStyle: CSSProperties = {
   ...inputBaseStyle,
-  borderColor: "#e53e3e",
-  boxShadow: "0 0 0 1px #e53e3e",
+  borderColor: "var(--color-error, #e53e3e)",
+  boxShadow: "0 0 0 1px var(--color-error, #e53e3e)",
 };
 /* v8 ignore stop */
 
 const previewStyle: CSSProperties = {
   padding: "4px 8px",
-  backgroundColor: "#f7fafc",
+  backgroundColor: "var(--color-bg-secondary, #f7fafc)",
   borderRadius: 4,
   minHeight: 24,
 };
@@ -111,7 +113,7 @@ const errorContainerStyle: CSSProperties = {
 };
 
 const errorMessageStyle: CSSProperties = {
-  color: "#e53e3e",
+  color: "var(--color-error, #e53e3e)",
   fontSize: "0.85em",
   fontFamily: "monospace",
 };

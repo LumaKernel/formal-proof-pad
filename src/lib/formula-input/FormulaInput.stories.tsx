@@ -36,7 +36,7 @@ function FormulaInputWrapper({
           style={{
             marginTop: 8,
             fontSize: 12,
-            color: "#888",
+            color: "var(--color-text-secondary, #888)",
             fontFamily: "monospace",
           }}
         >
