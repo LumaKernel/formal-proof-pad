@@ -2190,3 +2190,30 @@
   - dev serverは port 13000 (package.json `dev` script: `next dev -p 13000`)
   - src/app/** のページコンポーネントはカバレッジ除外。不純なフレームワーク層として分離する方針
 ---
+
+## 2026-02-25 - [クエストモード] ゴール達成時のクエスト進捗自動記録
+- 実装した内容:
+  - questCompletionLogic.ts: ステップ数計算(computeStepCount)とゴール達成チェック(checkQuestGoals)の純粋ロジック
+  - ProofWorkspace: onGoalAchievedコールバック追加、false→true遷移検出パターン(useRef+useEffect)
+  - WorkspaceContent: useQuestProgressとonGoalAchievedを接続し、ゴール達成時にクエスト進捗を自動記録
+  - クエストモードではgoalFormulaTextではなくprotected goal nodesで判定する新しいcheckQuestGoals関数
+- 変更したファイル:
+  - src/lib/quest/questCompletionLogic.ts (NEW) + questCompletionLogic.test.ts (NEW) - 17テスト
+  - src/lib/proof-pad/ProofWorkspace.tsx - GoalAchievedInfo型、onGoalAchievedコールバック、クエストモードゴール判定
+  - src/lib/proof-pad/ProofWorkspace.test.tsx - 7テスト追加(89テスト合計)
+  - src/lib/proof-pad/index.ts - GoalAchievedInfoエクスポート追加
+  - src/lib/quest/index.ts - computeStepCount, checkQuestGoals, QuestGoalCheckResultエクスポート追加
+  - src/app/workspace/[id]/WorkspaceContent.tsx - handleGoalAchievedコールバック追加
+- カバレッジ:
+  - ベースライン: Stmts 99.19%, Branch 94.44%, Funcs 91.37%, Lines 100%
+  - 完了後: Stmts 99.20%, Branch 94.35%, Funcs 91.39%, Lines 100%
+- テスト: 2537 passed (119 test files)
+- ブラウザテスト: クエスト開始→解答→「Proof Complete!」バナー→ハブに戻りPerfect!バッジ確認
+- スクリーンショット: .screenshots/quest-workspace-axiom-added.png, .screenshots/quest-goal-achieved-banner.png, .screenshots/quest-catalog-after-completion.png
+- **今後のイテレーションへの学び:**
+  - クエストモードではgoalFormulaTextは常に空("")。ゴール判定はprotection: "quest-goal"ノードのformulaTextで行う
+  - checkGoal(goalCheckLogic.ts)は自由モード用、checkQuestGoals(questCompletionLogic.ts)はクエストモード用で別関数
+  - equalFormula(logic-core/equality.ts)でAST構造等価性を比較。文字列比較ではなくパース後のAST比較
+  - `@luma-dev/luma-ts/no-date`ルールでDate.now()が禁止。eslint-disable-next-lineで対処
+  - `react-hooks/preserve-manual-memoization`: useCallback内で`notebook?.questId`を直接deps配列に使うとエラー。定数に抽出してからdepsに渡す
+---
