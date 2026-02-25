@@ -364,11 +364,13 @@ export function ProofWorkspace({
     [workspace.system],
   );
 
-  /** 新しいノードの配置位置を計算する（ビューポート中心付近にオフセット配置） */
+  /** 新しいノードの配置位置を計算する（パレット右側にオフセット配置） */
   const computeNewNodePosition = useCallback(
     (existingNodes: readonly WorkspaceNode[]): Point => {
-      const baseX = -viewport.offsetX / viewport.scale + 100;
-      const baseY = -viewport.offsetY / viewport.scale + 100;
+      // パレット（left:12 + minWidth:200 + margin）の右側に配置
+      const baseX = -viewport.offsetX / viewport.scale + 250;
+      // ヘッダー（top:12 + height ~36px + margin）の下に配置
+      const baseY = -viewport.offsetY / viewport.scale + 60;
       const offset = existingNodes.length * 30;
       return { x: baseX + offset, y: baseY + offset };
     },
