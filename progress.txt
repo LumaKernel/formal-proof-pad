@@ -58,6 +58,9 @@
 - パーサーは `phi`, `psi`, `chi` 等のギリシャ文字名を命題変数として認識する。`p`, `q` 等の単一文字は項変数として扱われ、`=` が期待される
 - コピペロジックも3層分離: `copyPasteLogic.ts`(純粋データ変換) → `workspaceState.ts`(状態統合) → `ProofWorkspace.tsx`(UI・クリップボードAPI)
 - UIオーバーレイ（バナー等）のclickにはstopPropagationが必要（コンテナのclick解除を防ぐ）
+- マルチセレクションも3層分離: `multiSelection.ts`(純粋ロジック) → `useMarquee.ts`(React hook) → caller統合
+- InfiniteCanvasの`panEnabled`でパン/マーキーモード切り替え。空領域イベントは`onEmptyArea*`で転送
+- `screenToWorld`: `(screenX - offsetX) / scale` でスクリーン→ワールド変換（worldToScreenの逆）
 - 補完候補の重複排除: `computeCompletions` で同じ `insertText` の候補を `Set` で重複排除する
 - Prettier: 空のmdファイルは0バイトにする（改行のみの1バイトは不正フォーマット扱い）
 - `*.local.*` ファイルは `.gitignore` 済みだが、ESLint configにも `**/*.local.*` で除外が必要
@@ -71,6 +74,35 @@
 - `src/lib/quest/` はクエストモード管理。questDefinition.ts(型・カテゴリ) + builtinQuests.ts(問題データ) + questProgress.ts(進捗) + questCatalog.ts(カタログ)
 - クエスト進捗のMapもJSON化不可。serialize/deserializeパターンはnotebookSerializationと同様
 
+---
+
+## 2026-02-25 - InfiniteCanvas: マルチセレクション（矩形選択/マーキー）機能を追加
+- `multiSelection.ts`: マーキー矩形計算、screenToWorld座標変換、ヒット判定（rectsOverlap）、選択操作（addToSelection/replaceSelection/selectAll）、一括ドラッグ（computeMultiDragPositions）の純粋ロジック
+- `useMarquee.ts`: マーキー選択のReact hook。コンテナローカル座標計算、Shift+マーキーで追加選択、最小サイズ判定（3px以下は無視）
+- `InfiniteCanvas.tsx`: panEnabled（パン無効化）、onEmptyArea*（空領域イベント）、onEmptyAreaClick（空領域クリック）、marqueeRect/marqueeColor（マーキー描画）props追加
+- `MultiSelectionDemo.stories.tsx`: Pan/Marqueeモード切り替え、アイテムクリック選択、Escape/Ctrl+Aキーボード操作のデモ
+- テスト: multiSelection(36), useMarquee(12), InfiniteCanvas(+12) = 60件追加、全2684テストパス
+- カバレッジ: Stmts 99.33%(↑0.02), Branch 94.83%(維持), Funcs 90.69%(微減), Lines 100%(維持)
+  - ベースライン: Stmts 99.31%, Branch 94.87%, Funcs 91.2%, Lines 100%
+  - Funcs微減はv8の新規エクスポート関数カウント特性による。Stmts/Lines 100%で問題なし
+- ブラウザ確認: .screenshots/multi-selection-default.png, .screenshots/multi-selection-fullscreen.png
+- 変更ファイル:
+  - `src/lib/infinite-canvas/multiSelection.ts` (NEW)
+  - `src/lib/infinite-canvas/multiSelection.test.ts` (NEW)
+  - `src/lib/infinite-canvas/useMarquee.ts` (NEW)
+  - `src/lib/infinite-canvas/useMarquee.test.tsx` (NEW)
+  - `src/lib/infinite-canvas/MultiSelectionDemo.stories.tsx` (NEW)
+  - `src/lib/infinite-canvas/InfiniteCanvas.tsx` (MODIFIED)
+  - `src/lib/infinite-canvas/InfiniteCanvas.test.tsx` (MODIFIED)
+  - `src/lib/infinite-canvas/index.ts` (MODIFIED)
+- **今後のイテレーションへの学び:**
+  - マルチセレクションは3層分離パターン: multiSelection.ts(純粋ロジック) → useMarquee.ts(React hook) → caller(ProofWorkspace等)が統合
+  - InfiniteCanvasのpanEnabled=falseでパンを無効化し、代わりにonEmptyArea*でマーキーイベントを処理
+  - マーキー描画はInfiniteCanvas内のSVGオーバーレイで実現（pointerEvents:none, zIndex:9999）
+  - screenToWorld変換: `(screenX - offsetX) / scale`。worldToScreenの逆変換
+  - マーキーの最小サイズ判定（3px）でクリックとマーキーを区別。onEmptyAreaClickは別途isClick判定で処理
+  - Shift+マーキーで既存選択にaddToSelection、通常マーキーでreplaceSelection
+  - CSS変数 `--color-marquee` でマーキー色をテーマ対応可能
 ---
 
 ## 2026-02-25 - Storybook: fullscreenレイアウトのテーマラッパー修正
