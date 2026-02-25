@@ -24,12 +24,14 @@ export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
 /**
  * クエストのカテゴリ。
  * - "propositional-basics": 命題論理の基礎（Łukasiewicz体系）
+ * - "propositional-intermediate": 命題論理の中級（推移律の活用、複合的な証明）
  * - "propositional-negation": 否定を含む命題論理
  * - "predicate-basics": 述語論理の基礎
  * - "equality-basics": 等号付き述語論理の基礎
  */
 export type QuestCategory =
   | "propositional-basics"
+  | "propositional-intermediate"
   | "propositional-negation"
   | "predicate-basics"
   | "equality-basics";
@@ -52,22 +54,28 @@ export const questCategories: readonly QuestCategoryMeta[] = [
     order: 1,
   },
   {
+    id: "propositional-intermediate",
+    label: "命題論理の中級",
+    description: "推移律の活用や複合的な証明技法。",
+    order: 2,
+  },
+  {
     id: "propositional-negation",
     label: "否定を含む命題論理",
     description: "否定公理 A3 を活用する証明。",
-    order: 2,
+    order: 3,
   },
   {
     id: "predicate-basics",
     label: "述語論理の基礎",
     description: "量化子（∀, ∃）と Gen 規則を含む証明。",
-    order: 3,
+    order: 4,
   },
   {
     id: "equality-basics",
     label: "等号付き述語論理",
     description: "等号公理を含む証明。",
-    order: 4,
+    order: 5,
   },
 ] as const;
 

@@ -190,6 +190,156 @@ const q07Permutation: QuestDefinition = {
   order: 7,
 };
 
+// --- Level 2-3: 命題論理の中級 ---
+
+const q08TransitivityChain: QuestDefinition = {
+  id: "prop-08",
+  category: "propositional-intermediate",
+  title: "推移律の3段チェイン",
+  description:
+    "(φ → ψ) → ((ψ → χ) → ((χ → θ) → (φ → θ))) を証明せよ。推移律を2回適用する。",
+  difficulty: 2,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText:
+        "(phi -> psi) -> ((psi -> chi) -> ((chi -> theta) -> (phi -> theta)))",
+      label: "Goal",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "推移律 (Q-04) を2回適用します。",
+    "まず推移律で (φ → ψ) → ((ψ → χ) → (φ → χ)) を導きましょう。",
+    "次に推移律で (φ → χ) → ((χ → θ) → (φ → θ)) を導き、組み合わせます。",
+  ],
+  estimatedSteps: 25,
+  learningPoint: "推移律は任意の長さのチェインに拡張できる。",
+  order: 1,
+};
+
+const q10BComposition: QuestDefinition = {
+  id: "prop-10",
+  category: "propositional-intermediate",
+  title: "B combinator (合成)",
+  description:
+    "(ψ → χ) → ((φ → ψ) → (φ → χ)) を証明せよ。推移律の前提を入れ替えたもの。",
+  difficulty: 3,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "(psi -> chi) -> ((phi -> psi) -> (phi -> chi))",
+      label: "Goal",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "推移律 (Q-04) を出発点にします。",
+    "推移律: (φ → ψ) → ((ψ → χ) → (φ → χ))",
+    "含意の交換 (Q-07) を推移律に適用して前提を入れ替えましょう。",
+  ],
+  estimatedSteps: 20,
+  learningPoint: "B combinator: Bxyz = x(yz)。関数合成に対応。",
+  order: 2,
+};
+
+const q11PremiseConfluence: QuestDefinition = {
+  id: "prop-11",
+  category: "propositional-intermediate",
+  title: "前提の合流",
+  description: "(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ)) を証明せよ。A2そのもの。",
+  difficulty: 3,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))",
+      label: "Goal",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: ["この式はある公理のインスタンスです。", "A2をよく見てみましょう。"],
+  estimatedSteps: 1,
+  learningPoint:
+    "一見難しそうに見えても公理のインスタンスであることがある。メタ変数への代入パターンを見抜く力が重要。",
+  order: 3,
+};
+
+const q12LeftAssociation: QuestDefinition = {
+  id: "prop-12",
+  category: "propositional-intermediate",
+  title: "含意の左結合化",
+  description:
+    "((φ → ψ) → (φ → χ)) → (φ → (ψ → χ)) を証明せよ。演繹定理の逆方向。",
+  difficulty: 3,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "((phi -> psi) -> (phi -> chi)) -> (phi -> (psi -> chi))",
+      label: "Goal",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "A1でψをφ → ...の中に持ち上げます。",
+    "A1: ψ → (φ → ψ) を出発点にします。",
+    "推移律で (φ → ψ) → (φ → χ) の前提側を変形し、含意の交換 (Q-07) で整理します。",
+  ],
+  estimatedSteps: 20,
+  learningPoint:
+    "含意の「右結合」と「左結合」を相互変換する技法。演繹定理の逆方向。",
+  order: 4,
+};
+
+const q13FregeTheorem: QuestDefinition = {
+  id: "prop-13",
+  category: "propositional-intermediate",
+  title: "Frege の定理",
+  description:
+    "(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ)) を証明せよ。歴史的に重要な法則。",
+  difficulty: 3,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))",
+      label: "Goal",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "これもある公理のインスタンスです。",
+    "Q-11と同じゴールですが、歴史的文脈で「Fregeの定理」と呼ばれます。",
+  ],
+  estimatedSteps: 1,
+  learningPoint:
+    "Frege は歴史上最初にこの法則を明示的に公理として採用した。同じ定理が異なる文脈で別名を持つことがある。",
+  order: 5,
+};
+
+const q14DoubleImplicationDistribution: QuestDefinition = {
+  id: "prop-14",
+  category: "propositional-intermediate",
+  title: "二重含意の分配",
+  description:
+    "(φ → ψ) → ((φ → (ψ → χ)) → (φ → χ)) を証明せよ。前提の並び替え。",
+  difficulty: 3,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "(phi -> psi) -> ((phi -> (psi -> chi)) -> (phi -> chi))",
+      label: "Goal",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "A2の結論部分に推移律を適用する形です。",
+    "A2: (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))",
+    "含意の交換 (Q-07) で前提の順序を入れ替えます。",
+  ],
+  estimatedSteps: 18,
+  learningPoint: "前提の並び替えはHilbert系では頻出操作。慣れが必要。",
+  order: 6,
+};
+
 // --- 全ビルトインクエスト ---
 
 /** 全ビルトインクエスト定義 */
@@ -201,4 +351,10 @@ export const builtinQuests: readonly QuestDefinition[] = [
   q05ImplicationWeakening,
   q06SSpecialCase,
   q07Permutation,
+  q08TransitivityChain,
+  q10BComposition,
+  q11PremiseConfluence,
+  q12LeftAssociation,
+  q13FregeTheorem,
+  q14DoubleImplicationDistribution,
 ];

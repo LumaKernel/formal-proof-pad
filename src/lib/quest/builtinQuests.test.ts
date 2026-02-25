@@ -2,10 +2,11 @@ import { describe, it, expect } from "vitest";
 import { builtinQuests } from "./builtinQuests";
 import { validateUniqueIds, questCategories } from "./questDefinition";
 import { findPresetById } from "../notebook/notebookCreateLogic";
+import { parseString } from "../logic-lang/parser";
 
 describe("builtinQuests", () => {
-  it("クエスト数が7個である", () => {
-    expect(builtinQuests).toHaveLength(7);
+  it("クエスト数が13個である", () => {
+    expect(builtinQuests).toHaveLength(13);
   });
 
   it("全IDが一意である", () => {
@@ -42,6 +43,18 @@ describe("builtinQuests", () => {
     for (const quest of builtinQuests) {
       for (const goal of quest.goals) {
         expect(goal.formulaText.trim()).not.toBe("");
+      }
+    }
+  });
+
+  it("各クエストのゴール式テキストが正しくパースできる", () => {
+    for (const quest of builtinQuests) {
+      for (const goal of quest.goals) {
+        const result = parseString(goal.formulaText);
+        expect(
+          result.ok,
+          `${quest.id satisfies string}: "${goal.formulaText satisfies string}" のパースに失敗`,
+        ).toBe(true);
       }
     }
   });
@@ -86,11 +99,12 @@ describe("builtinQuests", () => {
     }
   });
 
-  it("クエストがorder順に並んでいる", () => {
-    let prevOrder = 0;
+  it("同カテゴリ内でクエストがorder順に並んでいる", () => {
+    const prevOrderByCategory = new Map<string, number>();
     for (const quest of builtinQuests) {
+      const prevOrder = prevOrderByCategory.get(quest.category) ?? 0;
       expect(quest.order).toBeGreaterThanOrEqual(prevOrder);
-      prevOrder = quest.order;
+      prevOrderByCategory.set(quest.category, quest.order);
     }
   });
 });
