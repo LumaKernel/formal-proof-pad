@@ -1,0 +1,283 @@
+import { describe, it, expect } from "vitest";
+import {
+  serializeCollection,
+  deserializeCollection,
+} from "./notebookSerialization";
+import {
+  createEmptyCollection,
+  createNotebook,
+  createQuestNotebook,
+} from "./notebookState";
+import { lukasiewiczSystem } from "../logic-core/inferenceRule";
+
+describe("notebookSerialization", () => {
+  describe("serializeCollection / deserializeCollection ラウンドトリップ", () => {
+    it("空コレクションをラウンドトリップできる", () => {
+      const original = createEmptyCollection();
+      const json = serializeCollection(original);
+      const restored = deserializeCollection(json);
+      expect(restored).toEqual(original);
+    });
+
+    it("ノートブック1件を含むコレクションをラウンドトリップできる", () => {
+      const col = createNotebook(createEmptyCollection(), {
+        name: "テストノート",
+        system: lukasiewiczSystem,
+        now: 1000,
+      });
+      const json = serializeCollection(col);
+      const restored = deserializeCollection(json);
+
+      expect(restored.notebooks.length).toBe(1);
+      expect(restored.notebooks[0]?.meta.name).toBe("テストノート");
+      expect(restored.notebooks[0]?.workspace.system.name).toBe("Łukasiewicz");
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms,
+      ).toBeInstanceOf(Set);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A1"),
+      ).toBe(true);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A2"),
+      ).toBe(true);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A3"),
+      ).toBe(true);
+      expect(restored.nextId).toBe(col.nextId);
+    });
+
+    it("複数ノートブックを含むコレクションをラウンドトリップできる", () => {
+      let col = createEmptyCollection();
+      col = createNotebook(col, {
+        name: "ノート1",
+        system: lukasiewiczSystem,
+        now: 1000,
+      });
+      col = createNotebook(col, {
+        name: "ノート2",
+        system: lukasiewiczSystem,
+        now: 2000,
+      });
+      const json = serializeCollection(col);
+      const restored = deserializeCollection(json);
+
+      expect(restored.notebooks.length).toBe(2);
+      expect(restored.notebooks[0]?.meta.name).toBe("ノート1");
+      expect(restored.notebooks[1]?.meta.name).toBe("ノート2");
+      expect(restored.nextId).toBe(3);
+    });
+
+    it("クエストノートブックをラウンドトリップできる", () => {
+      const col = createQuestNotebook(createEmptyCollection(), {
+        name: "クエスト",
+        system: lukasiewiczSystem,
+        goals: [{ formulaText: "phi -> phi", position: { x: 0, y: 0 } }],
+        now: 1000,
+      });
+      const json = serializeCollection(col);
+      const restored = deserializeCollection(json);
+
+      expect(restored.notebooks.length).toBe(1);
+      expect(restored.notebooks[0]?.workspace.mode).toBe("quest");
+      expect(restored.notebooks[0]?.workspace.nodes.length).toBe(1);
+    });
+  });
+
+  describe("deserializeCollection の不正入力処理", () => {
+    it("不正なJSON文字列では空コレクションを返す", () => {
+      const result = deserializeCollection("invalid json{{{");
+      expect(result).toEqual(createEmptyCollection());
+    });
+
+    it("nullでは空コレクションを返す", () => {
+      const result = deserializeCollection("null");
+      expect(result).toEqual(createEmptyCollection());
+    });
+
+    it("空文字列では空コレクションを返す", () => {
+      const result = deserializeCollection("");
+      expect(result).toEqual(createEmptyCollection());
+    });
+
+    it("notebooksフィールドがない場合は空コレクションを返す", () => {
+      const result = deserializeCollection(JSON.stringify({ nextId: 1 }));
+      expect(result).toEqual(createEmptyCollection());
+    });
+
+    it("nextIdが数値でない場合は空コレクションを返す", () => {
+      const result = deserializeCollection(
+        JSON.stringify({ notebooks: [], nextId: "abc" }),
+      );
+      expect(result).toEqual(createEmptyCollection());
+    });
+
+    it("nextIdがInfinityの場合は空コレクションを返す", () => {
+      const result = deserializeCollection(
+        JSON.stringify({ notebooks: [], nextId: Infinity }),
+      );
+      // InfinityはJSON.stringifyでnullになるため
+      expect(result).toEqual(createEmptyCollection());
+    });
+
+    it("不正なLogicSystemのノートブックは除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "valid",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: {
+                name: "test",
+                propositionalAxioms: ["A1"],
+                predicateLogic: false,
+                equalityLogic: false,
+                generalization: false,
+              },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+          {
+            meta: {
+              id: "notebook-2",
+              name: "invalid",
+              createdAt: 2000,
+              updatedAt: 2000,
+            },
+            workspace: {
+              system: { name: "bad", propositionalAxioms: "not-array" },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 3,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(1);
+      expect(result.notebooks[0]?.meta.name).toBe("valid");
+    });
+
+    it("workspaceがnullのノートブックは除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "no-workspace",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: null,
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("metaがないノートブックは除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            workspace: {
+              system: {
+                name: "test",
+                propositionalAxioms: ["A1"],
+                predicateLogic: false,
+                equalityLogic: false,
+                generalization: false,
+              },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("ノートブック要素がプリミティブの場合は除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [42, "string", null],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+
+    it("不正な公理IDを含むノートブックは除外される", () => {
+      const json = JSON.stringify({
+        notebooks: [
+          {
+            meta: {
+              id: "notebook-1",
+              name: "bad axiom",
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+            workspace: {
+              system: {
+                name: "test",
+                propositionalAxioms: ["A1", "INVALID"],
+                predicateLogic: false,
+                equalityLogic: false,
+                generalization: false,
+              },
+              nodes: [],
+              connections: [],
+              nextNodeId: 1,
+              goalFormulaText: "",
+              mode: "free",
+            },
+          },
+        ],
+        nextId: 2,
+      });
+      const result = deserializeCollection(json);
+      expect(result.notebooks.length).toBe(0);
+    });
+  });
+
+  describe("serializeCollection の出力形式", () => {
+    it("propositionalAxiomsがArrayとしてシリアライズされる", () => {
+      const col = createNotebook(createEmptyCollection(), {
+        name: "test",
+        system: lukasiewiczSystem,
+        now: 1000,
+      });
+      const json = serializeCollection(col);
+      const parsed = JSON.parse(json) as {
+        notebooks: readonly {
+          workspace: {
+            system: { propositionalAxioms: readonly string[] };
+          };
+        }[];
+      };
+      expect(
+        Array.isArray(
+          parsed.notebooks[0]?.workspace.system.propositionalAxioms,
+        ),
+      ).toBe(true);
+      expect(parsed.notebooks[0]?.workspace.system.propositionalAxioms).toEqual(
+        ["A1", "A2", "A3"],
+      );
+    });
+  });
+});

@@ -1,16 +1,14 @@
-## 申し送り事項
+## 現在のタスク
 
-**出典:** `tasks/prd-logic-pad-world.md`
+**出典:** `tasks/prd-logic-pad-world.md` - 「ノート管理ができる。複製、削除、変換、詳細を見る、など」
 
-### 完了したこと
+### 実行内容
 
-- ノートブック管理の純粋ロジック層 (`src/lib/notebook/notebookState.ts`) を作成
-- 型定義、操作関数、テスト（31テスト、100%カバレッジ）を完成
+- useNotebookCollection hook（localStorage永続化含む）の作成
+- ノート一覧UIコンポーネントの作成（一覧表示、削除、複製、名前変更）
 
-### 次のイテレーションで必要なこと
+### 周辺情報
 
-- ノート一覧UIコンポーネントの作成
-- ノート作成ダイアログ（名前入力、体系選択）
-- ノート詳細画面（既存ProofWorkspaceの統合）
-- ルーティング設計（ホーム → ノート詳細の遷移）
-- useNotebookCollection hook の作成（localStorage永続化含む）
+- 純粋ロジック層 `src/lib/notebook/notebookState.ts` は完成済み（型定義・操作関数・テスト31件・100%カバレッジ）
+- 3層分離パターン: notebookState.ts(純粋ロジック) → hook → UIコンポーネント
+- ノート作成ダイアログ（体系選択等）は次のイテレーションで実施

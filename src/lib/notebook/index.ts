@@ -18,3 +18,24 @@ export {
   listNotebooksByUpdatedAt,
   listNotebooksByCreatedAt,
 } from "./notebookState";
+
+export {
+  serializeCollection,
+  deserializeCollection,
+} from "./notebookSerialization";
+
+export {
+  useNotebookCollection,
+  type UseNotebookCollectionResult,
+} from "./useNotebookCollection";
+
+export {
+  type NotebookListItem,
+  formatRelativeTime,
+  toNotebookListItem,
+  toNotebookListItems,
+  validateNotebookName,
+  deleteConfirmMessage,
+} from "./notebookListLogic";
+
+export { NotebookList, type NotebookListProps } from "./NotebookListComponent";
