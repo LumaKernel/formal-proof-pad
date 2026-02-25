@@ -1302,4 +1302,159 @@ describe("ProofWorkspace", () => {
       ).not.toBeInTheDocument();
     });
   });
+
+  describe("axiom name auto-identification", () => {
+    it("shows axiom name badge for A1 instance", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(
+        ws,
+        "axiom",
+        "A1",
+        { x: 0, y: 0 },
+        "phi -> (psi -> phi)",
+      );
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.getByTestId("proof-node-node-1-axiom-name"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("proof-node-node-1-axiom-name"),
+      ).toHaveTextContent("A1 (K)");
+    });
+
+    it("shows axiom name badge for A2 instance", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(
+        ws,
+        "axiom",
+        "Axiom",
+        { x: 0, y: 0 },
+        "(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))",
+      );
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.getByTestId("proof-node-node-1-axiom-name"),
+      ).toHaveTextContent("A2 (S)");
+    });
+
+    it("shows axiom name badge for A3 instance", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(
+        ws,
+        "axiom",
+        "Axiom",
+        { x: 0, y: 0 },
+        "(~phi -> ~psi) -> (psi -> phi)",
+      );
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.getByTestId("proof-node-node-1-axiom-name"),
+      ).toHaveTextContent("A3");
+    });
+
+    it("does not show axiom name badge for non-axiom formula", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Custom", { x: 0, y: 0 }, "phi -> psi");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.queryByTestId("proof-node-node-1-axiom-name"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("does not show axiom name badge for empty formula", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.queryByTestId("proof-node-node-1-axiom-name"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("does not show axiom name badge for parse-error formula", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "-> ->");
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.queryByTestId("proof-node-node-1-axiom-name"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows axiom name for MP conclusion that matches an axiom pattern", () => {
+      // MP conclusion phi -> (psi -> phi) is also A1
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A", { x: 0, y: 0 }, "alpha");
+      ws = addNode(
+        ws,
+        "axiom",
+        "B",
+        { x: 200, y: 0 },
+        "alpha -> (phi -> (psi -> phi))",
+      );
+      const result = applyMPAndConnect(ws, "node-1", "node-2", {
+        x: 100,
+        y: 150,
+      });
+
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={result.workspace}
+          testId="workspace"
+        />,
+      );
+
+      // MP node (node-3) conclusion = phi -> (psi -> phi) = A1
+      expect(
+        screen.getByTestId("proof-node-node-3-axiom-name"),
+      ).toHaveTextContent("A1 (K)");
+    });
+  });
 });

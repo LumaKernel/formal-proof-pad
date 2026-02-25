@@ -434,4 +434,42 @@ describe("EditableProofNode", () => {
       expect(container.textContent).toContain("QUEST");
     });
   });
+
+  describe("公理名バッジ", () => {
+    it("axiomNameが指定されると公理名バッジが表示される", () => {
+      renderNode({ axiomName: "A1 (K)" });
+      expect(screen.getByTestId("test-node-axiom-name")).toBeInTheDocument();
+      expect(screen.getByTestId("test-node-axiom-name")).toHaveTextContent(
+        "A1 (K)",
+      );
+    });
+
+    it("axiomNameが未指定だと公理名バッジは表示されない", () => {
+      renderNode();
+      expect(
+        screen.queryByTestId("test-node-axiom-name"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("axiomNameが指定されるとヘッダー行にflexレイアウトが適用される", () => {
+      renderNode({ axiomName: "A2 (S)" });
+      // ヘッダー行が存在し、公理名バッジが含まれる
+      expect(screen.getByText("A2 (S)")).toBeInTheDocument();
+      expect(screen.getByText("A1")).toBeInTheDocument(); // label
+    });
+
+    it("testIdなしでも公理名バッジが表示される", () => {
+      const { container } = render(
+        <EditableProofNode
+          id="node-1"
+          kind="axiom"
+          label="A1"
+          formulaText="φ"
+          onFormulaTextChange={() => {}}
+          axiomName="A1 (K)"
+        />,
+      );
+      expect(container.textContent).toContain("A1 (K)");
+    });
+  });
 });

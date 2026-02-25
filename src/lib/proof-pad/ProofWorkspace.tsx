@@ -29,6 +29,8 @@ import {
 } from "./genApplicationLogic";
 import { checkGoal } from "./goalCheckLogic";
 import { classifyAllNodes } from "./nodeRoleLogic";
+import { identifyAxiomName } from "./axiomNameLogic";
+import { parseNodeFormula } from "./mpApplicationLogic";
 import type { NodeRole } from "./nodeRoleLogic";
 import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
 import {
@@ -502,6 +504,21 @@ export function ProofWorkspace({
     [workspace.nodes, workspace.connections],
   );
 
+  // --- 公理名自動判別 ---
+
+  const axiomNames = useMemo(() => {
+    const names = new Map<string, string>();
+    for (const node of workspace.nodes) {
+      const formula = parseNodeFormula(node);
+      if (formula === undefined) continue;
+      const result = identifyAxiomName(formula, workspace.system);
+      if (result._tag === "Identified") {
+        names.set(node.id, result.displayName);
+      }
+    }
+    return names;
+  }, [workspace.nodes, workspace.system]);
+
   const handleRoleChange = useCallback(
     (nodeId: string, role: NodeRole | undefined) => {
       setWorkspace(updateNodeRole(workspace, nodeId, role));
@@ -699,6 +716,7 @@ export function ProofWorkspace({
               classification={nodeClassifications.get(node.id)}
               onRoleChange={handleRoleChange}
               isProtected={isNodeProtected(workspace, node.id)}
+              axiomName={axiomNames.get(node.id)}
               testId={`proof-node-${node.id satisfies string}`}
             />
           </div>
@@ -715,6 +733,7 @@ export function ProofWorkspace({
       mpValidations,
       genValidations,
       nodeClassifications,
+      axiomNames,
       handlePositionChange,
       handleFormulaTextChange,
       handleFormulaParsed,

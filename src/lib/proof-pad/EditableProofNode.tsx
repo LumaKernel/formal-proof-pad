@@ -45,6 +45,8 @@ export interface EditableProofNodeProps {
   readonly onRoleChange?: (id: string, role: NodeRole | undefined) => void;
   /** ノードが保護されているか（クエストモードのゴールノードなど） */
   readonly isProtected?: boolean;
+  /** 自動判別された公理名（例: "A1 (K)"）。undefined = 公理でない or 判別不能 */
+  readonly axiomName?: string;
   /** data-testid */
   readonly testId?: string;
 }
@@ -122,6 +124,19 @@ const protectedBadgeStyle: CSSProperties = {
   border: "1px solid rgba(255,215,0,0.6)",
 };
 
+const axiomNameBadgeStyle: CSSProperties = {
+  fontSize: 9,
+  fontFamily: "sans-serif",
+  fontWeight: 600,
+  padding: "1px 6px",
+  borderRadius: 3,
+  userSelect: "none",
+  letterSpacing: 0.5,
+  background: "rgba(255,255,255,0.25)",
+  color: "#fff",
+  border: "1px solid rgba(255,255,255,0.3)",
+};
+
 function getRoleBadgeStyle(classification: NodeClassification): CSSProperties {
   switch (classification) {
     case "root-axiom":
@@ -181,6 +196,7 @@ export function EditableProofNode({
   classification,
   onRoleChange,
   isProtected = false,
+  axiomName,
   testId,
 }: EditableProofNodeProps) {
   const nodeStyle = useMemo(() => getProofNodeStyle(kind), [kind]);
@@ -254,8 +270,19 @@ export function EditableProofNode({
 
   return (
     <div data-testid={testId} style={containerStyle}>
-      <div style={classification || isProtected ? headerRowStyle : undefined}>
+      <div style={classification || isProtected || axiomName ? headerRowStyle : undefined}>
         <div style={labelStyle}>{label}</div>
+        {axiomName ? (
+          <div
+            style={axiomNameBadgeStyle}
+            title={`Identified as axiom: ${axiomName satisfies string}`}
+            data-testid={
+              testId ? `${testId satisfies string}-axiom-name` : undefined
+            }
+          >
+            {axiomName}
+          </div>
+        ) : null}
         {isProtected ? (
           <div
             style={protectedBadgeStyle}

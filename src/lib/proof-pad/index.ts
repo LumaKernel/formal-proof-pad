@@ -76,6 +76,8 @@ export {
   getAxiomNodeIds,
 } from "./nodeRoleLogic";
 export type { NodeRole, NodeClassification } from "./nodeRoleLogic";
+export { identifyAxiomName, getAxiomDisplayName } from "./axiomNameLogic";
+export type { AxiomNameResult } from "./axiomNameLogic";
 export { parseGoalFormula, checkGoal } from "./goalCheckLogic";
 export type {
   GoalNotSet,
