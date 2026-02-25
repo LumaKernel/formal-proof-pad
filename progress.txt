@@ -73,6 +73,30 @@
 
 ---
 
+## 2026-02-25 - クエストモード: クエスト開始ロジック・進捗hook層の作成
+- `src/lib/quest/questStartLogic.ts` を新規作成 - QuestDefinitionからノートブック作成パラメータへの変換、SystemPresetId→LogicSystem解決
+- `src/lib/quest/questStartLogic.test.ts` を新規作成 - 15テスト（プリセット解決、パラメータ生成、クエスト開始準備）
+- `src/lib/quest/useQuestProgress.ts` を新規作成 - クエスト進捗のlocalStorage永続化hook（useNotebookCollectionと同パターン）
+- `src/lib/quest/useQuestProgress.test.tsx` を新規作成 - 16テスト（localStorage adapter + hook: 記録、リセット、永続化）
+- `src/lib/quest/index.ts` を更新 - questStartLogic, useQuestProgressのエクスポート追加
+- カバレッジ: Stmts 99.19% (↑0.01), Branch 94.42% (↑0.02), Funcs 91.34% (↑0.11), Lines 100% (維持)
+  - ベースライン: Stmts 99.18%, Branch 94.40%, Funcs 91.23%, Lines 100%
+  - 新ファイル questStartLogic.ts: Stmts 100%, Branch 100%, Funcs 100%, Lines 100%
+  - 新ファイル useQuestProgress.ts: Stmts 100%, Branch 100%, Funcs 100%, Lines 100%
+- テスト: 2492 全パス（+31テスト追加）
+- ブラウザ確認: Playwright MCPでQuestCatalogストーリー表示確認済み
+- 変更ファイル:
+  - `src/lib/quest/questStartLogic.ts` (NEW)
+  - `src/lib/quest/questStartLogic.test.ts` (NEW)
+  - `src/lib/quest/useQuestProgress.ts` (NEW)
+  - `src/lib/quest/useQuestProgress.test.tsx` (NEW)
+  - `src/lib/quest/index.ts` (MODIFIED)
+- **今後のイテレーションへの学び:**
+  - useNotebookCollectionのパターン（useState初期化でload、useEffectでsave）はhook層の標準パターンとして再利用可能
+  - questStartLogicのprepareQuestStart()はResult型パターンで、呼び出し側がエラーケースを明示的にハンドリングできる
+  - 次のイテレーション候補: クエスト開始UIの統合（カタログからクエスト選択→ノートブック自動作成→ワークスペース表示）
+---
+
 ## 2026-02-25 - クエストモード: クエストカタログ一覧UIコンポーネントの作成
 - `src/lib/quest/questCatalogListLogic.ts` を新規作成 - フィルタ状態管理、表示用テキスト生成（難易度ラベル、評価ラベル・カラー、ステップ数テキスト）
 - `src/lib/quest/questCatalogListLogic.test.ts` を新規作成 - 25テスト

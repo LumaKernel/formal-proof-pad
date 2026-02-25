@@ -62,4 +62,21 @@ export {
   difficultyFilterOptions,
 } from "./questCatalogListLogic";
 
+export {
+  type QuestStartParams,
+  type QuestStartResult,
+  type QuestStartError,
+  resolveSystemPreset,
+  buildQuestStartParams,
+  prepareQuestStart,
+} from "./questStartLogic";
+
+export {
+  type UseQuestProgressResult,
+  useQuestProgress,
+  loadProgress,
+  saveProgress,
+  QUEST_PROGRESS_STORAGE_KEY,
+} from "./useQuestProgress";
+
 export { QuestCatalog, type QuestCatalogProps } from "./QuestCatalogComponent";
