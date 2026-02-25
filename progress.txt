@@ -73,6 +73,34 @@
 
 ---
 
+## 2026-02-25 - InfiniteCanvas: ズームUIコントロール追加
+- `src/lib/infinite-canvas/zoom.ts` に純粋ロジック関数を追加: `computeZoomInScale`, `computeZoomOutScale`, `computeResetViewport`, `computeFitToContentViewport`, `formatZoomPercent`, `findNearestPreset`, `nextPresetUp`, `nextPresetDown`, `ZOOM_PRESETS`, `ZOOM_STEP_FACTOR`
+- `src/lib/infinite-canvas/zoomControls.ts` にUIコントロール用純粋ロジックを追加: 位置計算、ズームイン/アウト/プリセット/リセット/フィットのViewport計算
+- `src/lib/infinite-canvas/ZoomControlsComponent.tsx` にUIコンポーネントを実装: ズームイン/アウトボタン、パーセンテージ表示、プリセットドロップダウン(10%〜500%)、リセットボタン、フィットボタン
+- `src/lib/infinite-canvas/ZoomControlsDemo.stories.tsx` にStorybookストーリーを追加: Default, ZoomInOut, PresetDropdown, TopRightPosition, MinimalControls の5ストーリー
+- テスト: zoom.test.ts(54), zoomControls.test.ts(22), ZoomControlsComponent.test.tsx(21) = 97件の新テスト
+- カバレッジ: Stmts 99.34%→99.31%, Branch 94.79%→94.85%(↑), Funcs 91.39%→91.22%, Lines 100%(維持)
+  - Funcs微減は新規エクスポート関数のv8カバレッジ計測特性による。Stmts/Lines 100%。
+- ベースライン: Stmts 99.34%, Branch 94.79%, Funcs 91.39%, Lines 100%
+- テスト総数: 2549→2630 (全パス, 122ファイル)
+- ブラウザ確認: .screenshots/zoom-controls-fullpage.png, .screenshots/zoom-controls-preset-dropdown.png, .screenshots/zoom-controls-200pct.png, .screenshots/zoom-controls-fit.png
+- 変更ファイル:
+  - `src/lib/infinite-canvas/zoom.ts` (MODIFIED)
+  - `src/lib/infinite-canvas/zoom.test.ts` (MODIFIED)
+  - `src/lib/infinite-canvas/zoomControls.ts` (NEW)
+  - `src/lib/infinite-canvas/zoomControls.test.ts` (NEW)
+  - `src/lib/infinite-canvas/ZoomControlsComponent.tsx` (NEW)
+  - `src/lib/infinite-canvas/ZoomControlsComponent.test.tsx` (NEW)
+  - `src/lib/infinite-canvas/ZoomControlsDemo.stories.tsx` (NEW)
+  - `src/lib/infinite-canvas/index.ts` (MODIFIED)
+- **今後のイテレーションへの学び:**
+  - ZoomControlsは3層分離パターン: zoom.ts(純粋数学) → zoomControls.ts(UIロジック) → ZoomControlsComponent.tsx(React UI)
+  - `applyZoom()` はスクリーン座標のcenterが必要。ボタンズームではcontainerSizeの中心を使う
+  - プリセット: ZOOM_PRESETS定数として定義。`nextPresetUp/Down` のしきい値は0.001
+  - CSS変数: `--color-zoom-controls-bg`, `--color-zoom-controls-border`, `--color-zoom-controls-text`, `--color-zoom-controls-separator` でテーマ対応
+  - ESLint: `satisfies string` ではなく `satisfies number` でテンプレートリテラル内のMath.roundを満たす
+---
+
 ## 2026-02-25 - クエストモード: 命題論理上級クエスト Q-20〜Q-24 を追加
 - `src/lib/quest/questDefinition.ts` を更新 - `propositional-advanced` カテゴリを新設（命題論理の挑戦問題、order=4）
 - `src/lib/quest/builtinQuests.ts` を更新 - 5問のクエストを追加（Q-20〜Q-24）

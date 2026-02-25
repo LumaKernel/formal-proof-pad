@@ -1,4 +1,4 @@
-import type { Point, ViewportState } from "./types";
+import type { Point, Size, ViewportState } from "./types";
 
 /** Default minimum zoom scale */
 export const MIN_SCALE = 0.1;
@@ -73,6 +73,142 @@ export function classifyWheelEvent(event: WheelEventInput): WheelAction {
     return "zoom";
   }
   return "pan";
+}
+
+/** Default zoom step factor for button-based zoom in/out.
+ *  Each step multiplies (zoom in) or divides (zoom out) by this factor. */
+export const ZOOM_STEP_FACTOR = 1.2;
+
+/** Predefined zoom presets as scale values. */
+export const ZOOM_PRESETS: readonly number[] = [
+  0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5,
+] as const;
+
+/** Compute the new scale after a "zoom in" step.
+ *  Multiplies by ZOOM_STEP_FACTOR. Pure function. */
+export function computeZoomInScale(
+  currentScale: number,
+  stepFactor: number = ZOOM_STEP_FACTOR,
+): number {
+  return currentScale * stepFactor;
+}
+
+/** Compute the new scale after a "zoom out" step.
+ *  Divides by ZOOM_STEP_FACTOR. Pure function. */
+export function computeZoomOutScale(
+  currentScale: number,
+  stepFactor: number = ZOOM_STEP_FACTOR,
+): number {
+  return currentScale / stepFactor;
+}
+
+/** Compute a reset viewport (scale=1, centered on origin). Pure function. */
+export function computeResetViewport(): ViewportState {
+  return { offsetX: 0, offsetY: 0, scale: 1 };
+}
+
+/** Bounding box for items on the canvas. */
+export type ZoomItemBounds = {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+};
+
+/** Compute a viewport that fits all items within the container.
+ *  Adds padding around the content. Returns a reset viewport if no items.
+ *  Pure function. */
+export function computeFitToContentViewport(
+  items: readonly ZoomItemBounds[],
+  containerSize: Size,
+  padding: number = 40,
+  minScale: number = MIN_SCALE,
+  maxScale: number = MAX_SCALE,
+): ViewportState {
+  if (items.length === 0) {
+    return computeResetViewport();
+  }
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const item of items) {
+    minX = Math.min(minX, item.x);
+    minY = Math.min(minY, item.y);
+    maxX = Math.max(maxX, item.x + item.width);
+    maxY = Math.max(maxY, item.y + item.height);
+  }
+
+  const contentWidth = maxX - minX;
+  const contentHeight = maxY - minY;
+
+  const availableWidth = Math.max(1, containerSize.width - padding * 2);
+  const availableHeight = Math.max(1, containerSize.height - padding * 2);
+
+  const scaleX = availableWidth / Math.max(1, contentWidth);
+  const scaleY = availableHeight / Math.max(1, contentHeight);
+  const scale = clampScale(Math.min(scaleX, scaleY), minScale, maxScale);
+
+  const centerWorldX = (minX + maxX) / 2;
+  const centerWorldY = (minY + maxY) / 2;
+
+  const offsetX = containerSize.width / 2 - centerWorldX * scale;
+  const offsetY = containerSize.height / 2 - centerWorldY * scale;
+
+  return { offsetX, offsetY, scale };
+}
+
+/** Format a scale value as a zoom percentage string. Pure function.
+ *  e.g. 1.0 → "100%", 0.5 → "50%", 2.0 → "200%" */
+export function formatZoomPercent(scale: number): string {
+  return `${Math.round(scale * 100) satisfies number}%`;
+}
+
+/** Find the nearest preset scale value. Pure function. */
+export function findNearestPreset(
+  scale: number,
+  presets: readonly number[] = ZOOM_PRESETS,
+): number {
+  let nearest = presets[0]!;
+  let minDiff = Math.abs(scale - nearest);
+  for (const preset of presets) {
+    const diff = Math.abs(scale - preset);
+    if (diff < minDiff) {
+      minDiff = diff;
+      nearest = preset;
+    }
+  }
+  return nearest;
+}
+
+/** Snap to the next preset scale going up (zoom in). Returns current scale if already at max preset.
+ *  Pure function. */
+export function nextPresetUp(
+  currentScale: number,
+  presets: readonly number[] = ZOOM_PRESETS,
+): number {
+  for (const preset of presets) {
+    if (preset > currentScale + 0.001) {
+      return preset;
+    }
+  }
+  return currentScale;
+}
+
+/** Snap to the next preset scale going down (zoom out). Returns current scale if already at min preset.
+ *  Pure function. */
+export function nextPresetDown(
+  currentScale: number,
+  presets: readonly number[] = ZOOM_PRESETS,
+): number {
+  for (let i = presets.length - 1; i >= 0; i--) {
+    if (presets[i]! < currentScale - 0.001) {
+      return presets[i]!;
+    }
+  }
+  return currentScale;
 }
 
 /** Compute a new scale from a wheel deltaY value.

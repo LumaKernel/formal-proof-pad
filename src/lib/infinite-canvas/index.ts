@@ -60,11 +60,35 @@ export {
   applyZoom,
   clampScale,
   classifyWheelEvent,
+  computeFitToContentViewport,
+  computeResetViewport,
   computeScaleFromWheel,
+  computeZoomInScale,
+  computeZoomOutScale,
+  findNearestPreset,
+  formatZoomPercent,
+  nextPresetDown,
+  nextPresetUp,
   MIN_SCALE,
   MAX_SCALE,
+  ZOOM_PRESETS,
+  ZOOM_STEP_FACTOR,
 } from "./zoom";
-export type { WheelAction, WheelEventInput } from "./zoom";
+export type { WheelAction, WheelEventInput, ZoomItemBounds } from "./zoom";
+export { ZoomControlsComponent } from "./ZoomControlsComponent";
+export type { ZoomControlsProps } from "./ZoomControlsComponent";
+export {
+  computeFitViewport,
+  computePresetLabels,
+  computePresetZoomViewport,
+  computeResetZoomViewport,
+  computeZoomButtonStates,
+  computeZoomControlsPlacementStyle,
+  computeZoomDisplayLabel,
+  computeZoomInViewport,
+  computeZoomOutViewport,
+} from "./zoomControls";
+export type { ZoomControlsPosition } from "./zoomControls";
 export { useZoom } from "./useZoom";
 export type { UseZoomResult } from "./useZoom";
 export { useContextMenu, useLongPress } from "./useContextMenu";
