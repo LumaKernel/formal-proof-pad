@@ -1563,3 +1563,26 @@
 - getRoleBadgeStyle/getRoleBadgeLabel は exhaustive switch でNodeClassification追加時に必ず対応が必要
 - ロールバッジのサイクル: root-unmarked → axiom → goal → undefined(root-unmarked) の3ステップ
 ---
+
+## 2026-02-25 - クエストモード（保護ゴールノード付きワークスペース）実装
+- **実装内容**: WorkspaceStateにクエストモードを追加。保護されたゴールノード（編集・削除・役割変更不可）を持つワークスペースを作成でき、自由帳モードへの変換も可能
+- 変更ファイル:
+  - `src/lib/proof-pad/workspaceState.ts` (MODIFIED) - WorkspaceMode型、NodeProtection型、createQuestWorkspace、convertToFreeMode、isNodeProtected、ガード付きremoveNode/updateNodeFormulaText/updateNodeRole
+  - `src/lib/proof-pad/workspaceState.test.ts` (MODIFIED) - クエストモード関連23テスト追加
+  - `src/lib/proof-pad/EditableProofNode.tsx` (MODIFIED) - isProtectedプロップ、QUESTバッジ、保護ノードの編集抑制
+  - `src/lib/proof-pad/EditableProofNode.test.tsx` (MODIFIED) - 保護ノードテスト6件追加
+  - `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED) - クエストモードUI（Questバッジ、Convert to Freeボタン、isNodeProtected連携）
+  - `src/lib/proof-pad/ProofWorkspace.test.tsx` (MODIFIED) - クエストモードテスト6件追加
+  - `src/lib/proof-pad/ProofWorkspace.stories.tsx` (MODIFIED) - QuestModeストーリー追加
+  - `src/lib/proof-pad/index.ts` (MODIFIED) - 新型・関数のエクスポート追加
+- テスト: 2015 → 2051（+36テスト）
+- カバレッジ: Stmts 99.40%, Branch 95.08%, Lines 100%（ベースライン: 99.39%/95.09% - 実質維持）
+- スクリーンショット:
+  - `.screenshots/quest-mode-iframe.png` (クエストモードの全体表示)
+- **今後のイテレーションへの学び:**
+  - `WorkspaceNode.protection` フィールドでノードレベルの保護を実現。`isNodeProtected(state, nodeId)` で状態とノードの両方を考慮した判定が可能
+  - `removeNode`, `updateNodeFormulaText`, `updateNodeRole` にガードを追加する際、状態を返すだけ（例外を投げない）設計で既存コードとの互換性を維持
+  - `useCallback` の依存配列にworkspaceを追加するのを忘れずに（ESLint `react-hooks/exhaustive-deps` で検出可能）
+  - 保護ノードのUIでは `editable && !isProtected` の `effectiveEditable` パターンで既存の編集ロジックを活用
+  - `convertToFreeMode` は冪等（free mode → 同じ参照を返す）で安全
+---
