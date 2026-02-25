@@ -1813,3 +1813,22 @@
   - 等号問題Q-44/Q-45ではE1-E3のみでは等号の代入可能性(Leibniz's law)が示せず、E4/E5が必要
   - Level 5問題（Q-22, Q-24, Q-37, Q-38）はHilbert系での完全な形式証明が40-60ステップ以上になるため、構造と骨格を示す形式が適切
 ---
+
+## 2026-02-25 - テストカバレッジ改善
+- Branch カバレッジ改善: 94.49% → 94.58% (+0.09%), Stmts: 99.22% → 99.27% (+0.05%)
+- テスト数: 2154 → 2163 (+9テスト)
+- **copyPasteLogic.ts**: Branch 86.66% → 93.33% (+6.67%)
+  - `pasteClipboardData`: 存在しないノードIDを参照する接続がスキップされるケースのテスト追加
+  - `deserializeClipboardData`: null, 配列, nodesが配列でない, connectionsが配列でないケースのテスト追加
+  - `buildClipboardData`: genVariableName/roleが未定義のノードの確認テスト追加
+- **workspaceState.ts**: removeNode/removeSelectedNodesで中間ノード（fromとtoの両方の接続を持つ）削除テスト追加
+- **axiomNameLogic.test.ts**: ESLintエラー修正（未使用import削除、template literal satisfies追加）
+- 変更ファイル:
+  - `src/lib/proof-pad/copyPasteLogic.test.ts` - +7テスト
+  - `src/lib/proof-pad/workspaceState.test.ts` - +2テスト
+  - `src/lib/proof-pad/axiomNameLogic.test.ts` - ESLint修正
+- **今後のイテレーションへの学び:**
+  - v8のBranchカバレッジは `&&` / `||` の短絡評価の内部パスを個別にカウントする。既にテスト済みでもOR/AND条件の片方だけで判定されるケースが未カバーになることがある
+  - exhaustive check defaultやv8 ignore済み防御コードのBranch未カバーは改善不要
+  - 純粋ロジックファイルのテスト追加が最もBranchカバレッジ改善に効果的
+---
