@@ -466,6 +466,140 @@ const q19ConverseContraposition: QuestDefinition = {
   order: 5,
 };
 
+// --- Level 4: 否定と含意の相互作用（続き） ---
+
+const q20LawOfExcludedMiddle: QuestDefinition = {
+  id: "prop-20",
+  category: "propositional-negation",
+  title: "排中律 (Law of Excluded Middle)",
+  description:
+    "¬φ ∨ φ を証明せよ。選言の定義 α ∨ β ≡ ¬α → β を使えば DNE と同値。",
+  difficulty: 4,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "~phi \\/ phi",
+      label: "Goal: ¬φ ∨ φ",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "選言 α ∨ β は ¬α → β として定義されています。",
+    "つまりゴールは ¬¬φ → φ（二重否定除去）と同値です。",
+    "Q-17 (DNE) の証明を再利用しましょう。",
+  ],
+  estimatedSteps: 18,
+  learningPoint:
+    "選言の定義 α ∨ β ≡ ¬α → β を使えば、排中律は二重否定除去 (DNE) と等価。",
+  order: 6,
+};
+
+const q21PeirceLaw: QuestDefinition = {
+  id: "prop-21",
+  category: "propositional-negation",
+  title: "Peirce の法則",
+  description:
+    "((φ → ψ) → φ) → φ を証明せよ。古典論理に特有の法則。排中律・DNE と等価。",
+  difficulty: 4,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "((phi -> psi) -> phi) -> phi",
+      label: "Goal: ((φ → ψ) → φ) → φ",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "A3（対偶）を複数回使う複雑な証明が必要です。",
+    "爆発律 (Q-18) と推移律を活用します。",
+    "DNE (Q-17) と組み合わせると見通しがよくなります。",
+  ],
+  estimatedSteps: 30,
+  learningPoint:
+    "Peirce の法則は古典論理と直観主義論理を分ける等価条件のひとつ。排中律、DNE と等価。",
+  order: 7,
+};
+
+// --- Level 5: 挑戦問題（連言・選言の定義展開） ---
+
+const q22ConjunctionIntro: QuestDefinition = {
+  id: "prop-22",
+  category: "propositional-advanced",
+  title: "連言の導入 (Conjunction Introduction)",
+  description:
+    "φ → (ψ → (φ ∧ ψ)) を証明せよ。連言 α ∧ β ≡ ¬(α → ¬β) の定義を使う。",
+  difficulty: 5,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "phi -> (psi -> (phi /\\ psi))",
+      label: "Goal: φ → (ψ → (φ ∧ ψ))",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "連言 α ∧ β は ¬(α → ¬β) として定義されています。",
+    "ゴールを展開: φ → (ψ → ¬(φ → ¬ψ))。",
+    "A1, A2, A3 と二重否定の処理を組み合わせる非常に長い証明になります。",
+  ],
+  estimatedSteps: 40,
+  learningPoint:
+    "Hilbert 系で連言を直接扱うのは非常に手間がかかる。自然演繹の方がはるかに簡潔。",
+  order: 1,
+};
+
+const q23ConjunctionElim: QuestDefinition = {
+  id: "prop-23",
+  category: "propositional-advanced",
+  title: "連言の除去 (Conjunction Elimination)",
+  description:
+    "(φ ∧ ψ) → φ を証明せよ。連言 α ∧ β ≡ ¬(α → ¬β) の定義を展開し二重否定除去を使う。",
+  difficulty: 5,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "(phi /\\ psi) -> phi",
+      label: "Goal: (φ ∧ ψ) → φ",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "連言を定義で展開: ¬(φ → ¬ψ) → φ。",
+    "対偶を取って変形します。",
+    "A1, A3, 推移律を組み合わせましょう。",
+  ],
+  estimatedSteps: 25,
+  learningPoint:
+    "連言の除去も定義の展開が必要。左射影 (φ∧ψ→φ) と右射影 (φ∧ψ→ψ) は別々に証明する。",
+  order: 2,
+};
+
+const q24DeMorgan: QuestDefinition = {
+  id: "prop-24",
+  category: "propositional-advanced",
+  title: "De Morgan の法則",
+  description:
+    "¬(φ ∨ ψ) → (¬φ ∧ ¬ψ) を証明せよ。選言と連言の定義を展開し否定の性質を使う。",
+  difficulty: 5,
+  systemPresetId: "lukasiewicz",
+  goals: [
+    {
+      formulaText: "~(phi \\/ psi) -> (~phi /\\ ~psi)",
+      label: "Goal: ¬(φ ∨ ψ) → (¬φ ∧ ¬ψ)",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "選言の定義: φ ∨ ψ ≡ ¬φ → ψ。連言の定義: α ∧ β ≡ ¬(α → ¬β)。",
+    "展開すると: ¬(¬φ → ψ) → ¬(¬φ → ¬¬ψ)。",
+    "二重否定導入 ψ → ¬¬ψ を使って内部を変形します。",
+  ],
+  estimatedSteps: 40,
+  learningPoint:
+    "De Morgan の法則は命題論理の重要な等価性。Hilbert 系では証明が非常に長くなる典型例。",
+  order: 3,
+};
+
 // --- 全ビルトインクエスト ---
 
 /** 全ビルトインクエスト定義 */
@@ -488,4 +622,9 @@ export const builtinQuests: readonly QuestDefinition[] = [
   q17DoubleNegationElim,
   q18ExFalso,
   q19ConverseContraposition,
+  q20LawOfExcludedMiddle,
+  q21PeirceLaw,
+  q22ConjunctionIntro,
+  q23ConjunctionElim,
+  q24DeMorgan,
 ];
