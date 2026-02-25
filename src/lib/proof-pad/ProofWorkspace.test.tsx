@@ -15,7 +15,9 @@ import {
   addNode,
   addConnection,
   updateGoalFormulaText,
+  updateNodeGenVariableName,
   applyMPAndConnect,
+  applyGenAndConnect,
 } from "./workspaceState";
 
 // --- 状態管理ラッパー（インタラクションテスト用） ---
@@ -843,6 +845,240 @@ describe("ProofWorkspace", () => {
           screen.getByTestId("workspace-goal-achieved"),
         ).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("Gen button and selection (predicate logic)", () => {
+    it("renders Gen button and variable input for predicate logic system", () => {
+      render(
+        <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
+      );
+      expect(screen.getByTestId("workspace-gen-button")).toBeInTheDocument();
+      expect(screen.getByTestId("workspace-gen-button")).toHaveTextContent(
+        "Apply Gen",
+      );
+      expect(
+        screen.getByTestId("workspace-gen-variable-input"),
+      ).toBeInTheDocument();
+    });
+
+    it("does not render Gen button for propositional logic system", () => {
+      render(<ProofWorkspace system={lukasiewiczSystem} testId="workspace" />);
+      expect(
+        screen.queryByTestId("workspace-gen-button"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("workspace-gen-variable-input"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("does not enter Gen selection when variable is empty", async () => {
+      const user = userEvent.setup();
+      render(
+        <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
+      );
+
+      // Click Gen without typing variable name
+      await user.click(screen.getByTestId("workspace-gen-button"));
+
+      // Banner should NOT appear
+      expect(
+        screen.queryByTestId("workspace-gen-banner"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("enters Gen selection mode when variable is set and Gen is clicked", async () => {
+      const user = userEvent.setup();
+      render(
+        <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
+      );
+
+      // Type variable name
+      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
+
+      // Click Gen button
+      await user.click(screen.getByTestId("workspace-gen-button"));
+
+      // Banner should appear
+      expect(screen.getByTestId("workspace-gen-banner")).toBeInTheDocument();
+      expect(screen.getByTestId("workspace-gen-banner")).toHaveTextContent(
+        "Click the premise",
+      );
+      expect(screen.getByTestId("workspace-gen-banner")).toHaveTextContent("x");
+
+      // Button should say "Cancel Gen"
+      expect(screen.getByTestId("workspace-gen-button")).toHaveTextContent(
+        "Cancel Gen",
+      );
+    });
+
+    it("cancels Gen selection mode", async () => {
+      const user = userEvent.setup();
+      render(
+        <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
+      );
+
+      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
+      await user.click(screen.getByTestId("workspace-gen-button"));
+      expect(screen.getByTestId("workspace-gen-banner")).toBeInTheDocument();
+
+      // Click Cancel Gen
+      await user.click(screen.getByTestId("workspace-gen-button"));
+      expect(
+        screen.queryByTestId("workspace-gen-banner"),
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("workspace-gen-button")).toHaveTextContent(
+        "Apply Gen",
+      );
+    });
+
+    it("creates Gen node when premise is selected", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <StatefulWorkspace
+          initialWorkspace={(() => {
+            let ws = createEmptyWorkspace(predicateLogicSystem);
+            ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+            return ws;
+          })()}
+        />,
+      );
+
+      // Type variable name and start Gen selection
+      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
+      await user.click(screen.getByTestId("workspace-gen-button"));
+
+      // Click premise node
+      await user.click(screen.getByTestId("proof-node-node-1"));
+
+      // Banner should disappear
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId("workspace-gen-banner"),
+        ).not.toBeInTheDocument();
+      });
+
+      // Gen node should be created
+      await waitFor(() => {
+        expect(screen.getByTestId("proof-node-node-2")).toBeInTheDocument();
+      });
+    });
+
+    it("shows success status on valid Gen application", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <StatefulWorkspace
+          initialWorkspace={(() => {
+            let ws = createEmptyWorkspace(predicateLogicSystem);
+            ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+            return ws;
+          })()}
+        />,
+      );
+
+      // Apply Gen
+      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
+      await user.click(screen.getByTestId("workspace-gen-button"));
+      await user.click(screen.getByTestId("proof-node-node-1"));
+
+      // Gen node should show success status
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("proof-node-node-2-status"),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId("proof-node-node-2-status"),
+        ).toHaveTextContent("Gen applied");
+      });
+    });
+
+    it("MP selection cancels Gen selection and vice versa", async () => {
+      const user = userEvent.setup();
+      render(
+        <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
+      );
+
+      // Start Gen selection
+      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
+      await user.click(screen.getByTestId("workspace-gen-button"));
+      expect(screen.getByTestId("workspace-gen-banner")).toBeInTheDocument();
+
+      // Click MP button - should cancel Gen
+      await user.click(screen.getByTestId("workspace-mp-button"));
+      expect(
+        screen.queryByTestId("workspace-gen-banner"),
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("workspace-mp-banner")).toBeInTheDocument();
+    });
+  });
+
+  describe("Gen validation display", () => {
+    it("shows success status for valid Gen node", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      const result = applyGenAndConnect(ws, "node-1", "x", {
+        x: 0,
+        y: 150,
+      });
+
+      render(
+        <ProofWorkspace
+          system={predicateLogicSystem}
+          workspace={result.workspace}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.getByTestId("proof-node-node-2-status"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("proof-node-node-2-status")).toHaveTextContent(
+        "Gen applied",
+      );
+    });
+
+    it("does not show status for Gen node without connections", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "gen", "Gen", { x: 0, y: 0 });
+      ws = updateNodeGenVariableName(ws, "node-1", "x");
+
+      render(
+        <ProofWorkspace
+          system={predicateLogicSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      // PremiseMissing is excluded from display (same as BothPremisesMissing for MP)
+      expect(
+        screen.queryByTestId("proof-node-node-1-status"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows error status for Gen node with empty variable name", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "gen", "Gen", { x: 0, y: 150 });
+      // No genVariableName set (defaults to "")
+      ws = addConnection(ws, "node-1", "out", "node-2", "premise");
+
+      render(
+        <ProofWorkspace
+          system={predicateLogicSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+
+      expect(
+        screen.getByTestId("proof-node-node-2-status"),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("proof-node-node-2-status")).toHaveTextContent(
+        "Enter a variable name",
+      );
     });
   });
 });

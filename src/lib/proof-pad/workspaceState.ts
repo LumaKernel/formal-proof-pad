@@ -14,6 +14,10 @@ import {
   validateMPApplication,
   type MPApplicationResult,
 } from "./mpApplicationLogic";
+import {
+  validateGenApplication,
+  type GenApplicationResult,
+} from "./genApplicationLogic";
 
 // --- ワークスペースノード ---
 
@@ -24,6 +28,8 @@ export type WorkspaceNode = {
   readonly label: string;
   readonly formulaText: string;
   readonly position: Point;
+  /** Gen規則で使用する量化変数名（genノードのみ） */
+  readonly genVariableName?: string;
 };
 
 /** ワークスペース上の接続（ポートベース） */
@@ -119,6 +125,20 @@ export function updateGoalFormulaText(
   return {
     ...state,
     goalFormulaText,
+  };
+}
+
+/** ノードのGen変数名を更新する */
+export function updateNodeGenVariableName(
+  state: WorkspaceState,
+  nodeId: string,
+  genVariableName: string,
+): WorkspaceState {
+  return {
+    ...state,
+    nodes: state.nodes.map((node) =>
+      node.id === nodeId ? { ...node, genVariableName } : node,
+    ),
   };
 }
 
@@ -233,4 +253,49 @@ export function applyMPAndConnect(
   }
 
   return { workspace: ws, mpNodeId, validation };
+}
+
+// --- Gen適用（ノード作成 + 接続 + 結論自動生成） ---
+
+/** Gen適用結果 */
+export type ApplyGenResult = {
+  readonly workspace: WorkspaceState;
+  readonly genNodeId: string;
+  readonly validation: GenApplicationResult;
+};
+
+/**
+ * ソースノードを接続してGenノードを作成し、Gen適用を検証する。
+ *
+ * @param state 現在のワークスペース状態
+ * @param premiseNodeId 前提（φ）ノードのID
+ * @param variableName 量化する変数名
+ * @param position Genノードの配置位置
+ * @returns 新しいワークスペース状態、GenノードID、検証結果
+ */
+export function applyGenAndConnect(
+  state: WorkspaceState,
+  premiseNodeId: string,
+  variableName: string,
+  position: Point,
+): ApplyGenResult {
+  // Genノードを追加
+  let ws = addNode(state, "gen", "Gen", position);
+  const genNodeId = `node-${String(state.nextNodeId) satisfies string}`;
+
+  // Gen変数名を設定
+  ws = updateNodeGenVariableName(ws, genNodeId, variableName);
+
+  // 接続を追加（premise → premise）
+  ws = addConnection(ws, premiseNodeId, "out", genNodeId, "premise");
+
+  // Gen適用を検証
+  const validation = validateGenApplication(ws, genNodeId, variableName);
+
+  // 成功時は結論テキストをGenノードに設定
+  if (validation._tag === "Success") {
+    ws = updateNodeFormulaText(ws, genNodeId, validation.conclusionText);
+  }
+
+  return { workspace: ws, genNodeId, validation };
 }

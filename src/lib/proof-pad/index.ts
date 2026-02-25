@@ -12,18 +12,21 @@ export {
   updateNodePosition,
   updateNodeFormulaText,
   updateGoalFormulaText,
+  updateNodeGenVariableName,
   findNode,
   removeNode,
   addConnection,
   removeConnection,
   changeSystem,
   applyMPAndConnect,
+  applyGenAndConnect,
 } from "./workspaceState";
 export type {
   WorkspaceNode,
   WorkspaceConnection,
   WorkspaceState,
   ApplyMPResult,
+  ApplyGenResult,
 } from "./workspaceState";
 export {
   getMPPremises,
@@ -38,9 +41,20 @@ export type {
   MPApplicationResult,
 } from "./mpApplicationLogic";
 export {
+  getGenPremise,
+  validateGenApplication,
+  getGenErrorMessage,
+} from "./genApplicationLogic";
+export type {
+  GenApplicationSuccess,
+  GenApplicationError,
+  GenApplicationResult,
+} from "./genApplicationLogic";
+export {
   PROOF_NODE_KINDS,
   AXIOM_PORTS,
   MP_PORTS,
+  GEN_PORTS,
   CONCLUSION_PORTS,
   getProofNodeStyle,
   getProofNodePorts,

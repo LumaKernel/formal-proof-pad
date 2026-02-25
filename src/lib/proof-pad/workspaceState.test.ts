@@ -9,6 +9,7 @@ import {
   addNode,
   updateNodePosition,
   updateNodeFormulaText,
+  updateNodeGenVariableName,
   updateGoalFormulaText,
   findNode,
   removeNode,
@@ -16,6 +17,7 @@ import {
   removeConnection,
   changeSystem,
   applyMPAndConnect,
+  applyGenAndConnect,
 } from "./workspaceState";
 
 describe("proofWorkspace", () => {
@@ -369,6 +371,100 @@ describe("proofWorkspace", () => {
       applyMPAndConnect(ws, "node-1", "node-2", { x: 100, y: 150 });
 
       expect(ws.nodes).toHaveLength(2);
+      expect(ws.connections).toHaveLength(0);
+    });
+  });
+
+  describe("updateNodeGenVariableName", () => {
+    it("updates gen variable name on a node", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "gen", "Gen", { x: 0, y: 0 });
+      const result = updateNodeGenVariableName(ws, "node-1", "x");
+      expect(result.nodes[0]!.genVariableName).toBe("x");
+    });
+
+    it("does not affect other nodes", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "gen", "Gen", { x: 100, y: 100 });
+      const result = updateNodeGenVariableName(ws, "node-2", "x");
+      expect(result.nodes[0]!.genVariableName).toBeUndefined();
+      expect(result.nodes[1]!.genVariableName).toBe("x");
+    });
+  });
+
+  describe("applyGenAndConnect", () => {
+    it("creates Gen node with connection and validates successfully", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+
+      const result = applyGenAndConnect(ws, "node-1", "x", {
+        x: 0,
+        y: 150,
+      });
+
+      expect(result.genNodeId).toBe("node-2");
+      expect(result.validation._tag).toBe("Success");
+      expect(result.workspace.nodes).toHaveLength(2);
+      expect(result.workspace.connections).toHaveLength(1);
+
+      const genNode = findNode(result.workspace, "node-2");
+      expect(genNode).toBeDefined();
+      expect(genNode!.kind).toBe("gen");
+      expect(genNode!.label).toBe("Gen");
+      expect(genNode!.formulaText).toBe("∀x.φ");
+      expect(genNode!.genVariableName).toBe("x");
+    });
+
+    it("creates connection from source to Gen node", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+
+      const result = applyGenAndConnect(ws, "node-1", "x", {
+        x: 0,
+        y: 150,
+      });
+
+      const conn = result.workspace.connections[0];
+      expect(conn!.fromNodeId).toBe("node-1");
+      expect(conn!.fromPortId).toBe("out");
+      expect(conn!.toNodeId).toBe("node-2");
+      expect(conn!.toPortId).toBe("premise");
+    });
+
+    it("returns error when Gen is not enabled", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+
+      const result = applyGenAndConnect(ws, "node-1", "x", {
+        x: 0,
+        y: 150,
+      });
+
+      expect(result.validation._tag).toBe("GeneralizationNotEnabled");
+      const genNode = findNode(result.workspace, "node-2");
+      expect(genNode!.formulaText).toBe("");
+    });
+
+    it("returns error when premise is empty", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "");
+
+      const result = applyGenAndConnect(ws, "node-1", "x", {
+        x: 0,
+        y: 150,
+      });
+
+      expect(result.validation._tag).toBe("PremiseParseError");
+    });
+
+    it("does not mutate original state", () => {
+      let ws = createEmptyWorkspace(predicateLogicSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+
+      applyGenAndConnect(ws, "node-1", "x", { x: 0, y: 150 });
+
+      expect(ws.nodes).toHaveLength(1);
       expect(ws.connections).toHaveLength(0);
     });
   });

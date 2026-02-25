@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   AXIOM_PORTS,
   CONCLUSION_PORTS,
+  GEN_PORTS,
   MP_PORTS,
   PROOF_NODE_KINDS,
   getProofEdgeColor,
@@ -11,7 +12,7 @@ import {
 import type { ProofNodeKind } from "./proofNodeUI";
 
 describe("getProofNodeStyle", () => {
-  it.each<ProofNodeKind>(["axiom", "mp", "conclusion"])(
+  it.each<ProofNodeKind>(["axiom", "mp", "gen", "conclusion"])(
     "returns a style object for kind=%s",
     (kind) => {
       const style = getProofNodeStyle(kind);
@@ -35,9 +36,10 @@ describe("getProofNodeStyle", () => {
     expect(getProofNodeStyle("conclusion").borderRadius).toBe(12);
   });
 
-  it("axiom and mp have border radius 8", () => {
+  it("axiom, mp, and gen have border radius 8", () => {
     expect(getProofNodeStyle("axiom").borderRadius).toBe(8);
     expect(getProofNodeStyle("mp").borderRadius).toBe(8);
+    expect(getProofNodeStyle("gen").borderRadius).toBe(8);
   });
 });
 
@@ -59,6 +61,13 @@ describe("getProofNodePorts", () => {
       "premise-right",
       "out",
     ]);
+  });
+
+  it("gen has 2 ports (1 input + 1 output)", () => {
+    const ports = getProofNodePorts("gen");
+    expect(ports).toBe(GEN_PORTS);
+    expect(ports).toHaveLength(2);
+    expect(ports.map((p) => p.id)).toEqual(["premise", "out"]);
   });
 
   it("conclusion has 2 input ports", () => {
@@ -83,10 +92,14 @@ describe("getProofEdgeColor", () => {
   it("mp edges are lighter orange", () => {
     expect(getProofEdgeColor("mp")).toBe("#e0a87a");
   });
+
+  it("gen edges are lighter purple", () => {
+    expect(getProofEdgeColor("gen")).toBe("#c39bd3");
+  });
 });
 
 describe("PROOF_NODE_KINDS", () => {
-  it("contains all 3 kinds", () => {
-    expect(PROOF_NODE_KINDS).toEqual(["axiom", "mp", "conclusion"]);
+  it("contains all 4 kinds", () => {
+    expect(PROOF_NODE_KINDS).toEqual(["axiom", "mp", "gen", "conclusion"]);
   });
 });

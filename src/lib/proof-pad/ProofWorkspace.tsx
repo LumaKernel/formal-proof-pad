@@ -23,6 +23,10 @@ import { getProofNodePorts, getProofEdgeColor } from "./proofNodeUI";
 import { AxiomPalette } from "./AxiomPalette";
 import { getAvailableAxioms, type AxiomPaletteItem } from "./axiomPaletteLogic";
 import { validateMPApplication, getMPErrorMessage } from "./mpApplicationLogic";
+import {
+  validateGenApplication,
+  getGenErrorMessage,
+} from "./genApplicationLogic";
 import { checkGoal } from "./goalCheckLogic";
 import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
 import {
@@ -33,6 +37,7 @@ import {
   updateGoalFormulaText,
   findNode,
   applyMPAndConnect,
+  applyGenAndConnect,
 } from "./workspaceState";
 
 // --- Props ---
@@ -56,6 +61,15 @@ type MPSelectionState =
   | { readonly phase: "idle" }
   | { readonly phase: "selecting-left" }
   | { readonly phase: "selecting-right"; readonly leftNodeId: string };
+
+// --- Gen選択モードの状態 ---
+
+type GenSelectionState =
+  | { readonly phase: "idle" }
+  | {
+      readonly phase: "selecting-premise";
+      readonly variableName: string;
+    };
 
 // --- デフォルトノードサイズ（ポート位置計算に必要） ---
 
@@ -135,6 +149,34 @@ const cancelButtonStyle = {
   cursor: "pointer",
   fontSize: 11,
   fontFamily: "sans-serif",
+};
+
+const genButtonStyle = {
+  ...mpButtonStyle,
+  background: "#9b59b6",
+};
+
+const genButtonActiveStyle = {
+  ...genButtonStyle,
+  background: "#7d3c98",
+  boxShadow: "0 0 0 2px rgba(155,89,182,0.5)",
+};
+
+const genSelectionBannerStyle = {
+  ...mpSelectionBannerStyle,
+  background: "rgba(155,89,182,0.95)",
+};
+
+const genVariableInputStyle = {
+  padding: "2px 6px",
+  border: "1px solid rgba(255,255,255,0.5)",
+  borderRadius: 4,
+  fontSize: 12,
+  fontFamily: "serif",
+  width: 40,
+  outline: "none",
+  background: "rgba(255,255,255,0.2)",
+  color: "#fff",
 };
 
 // --- ゴール関連スタイル ---
@@ -241,6 +283,14 @@ export function ProofWorkspace({
     phase: "idle",
   });
 
+  // Gen選択モード
+  const [genSelection, setGenSelection] = useState<GenSelectionState>({
+    phase: "idle",
+  });
+
+  // Gen変数名入力
+  const [genVariableInput, setGenVariableInput] = useState("");
+
   // --- 公理パレット ---
 
   const availableAxioms = useMemo(
@@ -273,6 +323,7 @@ export function ProofWorkspace({
 
   const handleStartMPSelection = useCallback(() => {
     setMPSelection({ phase: "selecting-left" });
+    setGenSelection({ phase: "idle" });
   }, []);
 
   const handleCancelMPSelection = useCallback(() => {
@@ -309,6 +360,61 @@ export function ProofWorkspace({
     [mpSelection, workspace, setWorkspace],
   );
 
+  // --- Gen選択モードハンドラ ---
+
+  const handleStartGenSelection = useCallback(() => {
+    if (genVariableInput.trim() === "") return;
+    setGenSelection({
+      phase: "selecting-premise",
+      variableName: genVariableInput.trim(),
+    });
+    setMPSelection({ phase: "idle" });
+  }, [genVariableInput]);
+
+  const handleCancelGenSelection = useCallback(() => {
+    setGenSelection({ phase: "idle" });
+  }, []);
+
+  const handleNodeClickForGen = useCallback(
+    (nodeId: string) => {
+      if (genSelection.phase !== "selecting-premise") return;
+
+      const premiseNode = findNode(workspace, nodeId);
+      if (!premiseNode) return;
+
+      const genPosition: Point = {
+        x: premiseNode.position.x,
+        y: premiseNode.position.y + 150,
+      };
+
+      const result = applyGenAndConnect(
+        workspace,
+        nodeId,
+        genSelection.variableName,
+        genPosition,
+      );
+
+      setWorkspace(result.workspace);
+      setGenSelection({ phase: "idle" });
+    },
+    [genSelection, workspace, setWorkspace],
+  );
+
+  // 統合ノードクリックハンドラ
+  const handleNodeClickForSelection = useCallback(
+    (nodeId: string) => {
+      if (mpSelection.phase !== "idle") {
+        handleNodeClickForMP(nodeId);
+      } else if (genSelection.phase !== "idle") {
+        handleNodeClickForGen(nodeId);
+      }
+    },
+    [mpSelection, genSelection, handleNodeClickForMP, handleNodeClickForGen],
+  );
+
+  const isSelectionActive =
+    mpSelection.phase !== "idle" || genSelection.phase !== "idle";
+
   // --- MPノードの検証状態を計算 ---
 
   const mpValidations = useMemo(() => {
@@ -324,6 +430,29 @@ export function ProofWorkspace({
       } else if (result._tag !== "BothPremisesMissing") {
         validations.set(node.id, {
           message: getMPErrorMessage(result),
+          type: "error",
+        });
+      }
+    }
+    return validations;
+  }, [workspace]);
+
+  // --- Genノードの検証状態を計算 ---
+
+  const genValidations = useMemo(() => {
+    const validations = new Map<
+      string,
+      { readonly message: string; readonly type: "error" | "success" }
+    >();
+    for (const node of workspace.nodes) {
+      if (node.kind !== "gen") continue;
+      const variableName = node.genVariableName ?? "";
+      const result = validateGenApplication(workspace, node.id, variableName);
+      if (result._tag === "Success") {
+        validations.set(node.id, { message: "Gen applied", type: "success" });
+      } else if (result._tag !== "PremiseMissing") {
+        validations.set(node.id, {
+          message: getGenErrorMessage(result),
           type: "error",
         });
       }
@@ -429,10 +558,11 @@ export function ProofWorkspace({
         const toPort = findPort(toPorts, conn.toPortId);
         if (!fromPort || !toPort) return null;
 
-        // MPノードへの接続: 検証状態に応じて色を変える
-        const mpValidation = mpValidations.get(conn.toNodeId);
-        const color = mpValidation
-          ? mpValidation.type === "error"
+        // MP/Genノードへの接続: 検証状態に応じて色を変える
+        const nodeValidation =
+          mpValidations.get(conn.toNodeId) ?? genValidations.get(conn.toNodeId);
+        const color = nodeValidation
+          ? nodeValidation.type === "error"
             ? "#e06060"
             : "#60c060"
           : getProofEdgeColor(fromNode.kind);
@@ -458,22 +588,29 @@ export function ProofWorkspace({
           />
         );
       }),
-    [workspace, nodeSizes, viewport, mpValidations],
+    [workspace, nodeSizes, viewport, mpValidations, genValidations],
   );
 
   // --- ノードのレンダリング ---
 
   const renderNode = useCallback(
     (node: WorkspaceNode) => {
-      const isDragEnabled =
-        !editingNodeIds.has(node.id) && mpSelection.phase === "idle";
-      const isSelecting = mpSelection.phase !== "idle";
+      const isDragEnabled = !editingNodeIds.has(node.id) && !isSelectionActive;
       const isSelectedLeft =
         mpSelection.phase === "selecting-right" &&
         mpSelection.leftNodeId === node.id;
 
-      // MPノードの検証状態
-      const mpValidation = mpValidations.get(node.id);
+      // ノードの検証状態（MPまたはGen）
+      const nodeValidation =
+        mpValidations.get(node.id) ?? genValidations.get(node.id);
+
+      // 選択モードの視覚的ハイライト色
+      const selectionColor =
+        mpSelection.phase !== "idle"
+          ? "rgba(217,148,74,0.6)"
+          : genSelection.phase !== "idle"
+            ? "rgba(155,89,182,0.6)"
+            : undefined;
 
       return (
         <CanvasItem
@@ -486,19 +623,19 @@ export function ProofWorkspace({
           <div
             ref={getNodeSizeRef(node.id)}
             onClick={
-              isSelecting
+              isSelectionActive
                 ? (e) => {
                     e.stopPropagation();
-                    handleNodeClickForMP(node.id);
+                    handleNodeClickForSelection(node.id);
                   }
                 : undefined
             }
             style={{
-              cursor: isSelecting ? "pointer" : undefined,
+              cursor: isSelectionActive ? "pointer" : undefined,
               outline: isSelectedLeft
                 ? "3px solid #d9944a"
-                : isSelecting
-                  ? "2px dashed rgba(217,148,74,0.6)"
+                : isSelectionActive && selectionColor
+                  ? `2px dashed ${selectionColor satisfies string}`
                   : undefined,
               outlineOffset: 2,
               borderRadius: 10,
@@ -512,9 +649,9 @@ export function ProofWorkspace({
               onFormulaTextChange={handleFormulaTextChange}
               onFormulaParsed={handleFormulaParsed}
               onModeChange={handleModeChange}
-              editable={node.kind !== "mp"}
-              statusMessage={mpValidation?.message}
-              statusType={mpValidation?.type}
+              editable={node.kind !== "mp" && node.kind !== "gen"}
+              statusMessage={nodeValidation?.message}
+              statusType={nodeValidation?.type}
               testId={`proof-node-${node.id satisfies string}`}
             />
           </div>
@@ -524,13 +661,16 @@ export function ProofWorkspace({
     [
       viewport,
       editingNodeIds,
+      isSelectionActive,
       mpSelection,
+      genSelection,
       mpValidations,
+      genValidations,
       handlePositionChange,
       handleFormulaTextChange,
       handleFormulaParsed,
       handleModeChange,
-      handleNodeClickForMP,
+      handleNodeClickForSelection,
       getNodeSizeRef,
     ],
   );
@@ -568,6 +708,45 @@ export function ProofWorkspace({
         >
           {mpSelection.phase !== "idle" ? "Cancel MP" : "Apply MP"}
         </button>
+        {workspace.system.generalization ? (
+          <>
+            <input
+              type="text"
+              value={genVariableInput}
+              onChange={(e) => setGenVariableInput(e.target.value)}
+              placeholder="x"
+              style={{
+                ...genVariableInputStyle,
+                ...(genSelection.phase !== "idle"
+                  ? { border: "1px solid #9b59b6" }
+                  : {}),
+              }}
+              data-testid={
+                testId
+                  ? `${testId satisfies string}-gen-variable-input`
+                  : undefined
+              }
+            />
+            <button
+              type="button"
+              style={
+                genSelection.phase !== "idle"
+                  ? genButtonActiveStyle
+                  : genButtonStyle
+              }
+              onClick={
+                genSelection.phase !== "idle"
+                  ? handleCancelGenSelection
+                  : handleStartGenSelection
+              }
+              data-testid={
+                testId ? `${testId satisfies string}-gen-button` : undefined
+              }
+            >
+              {genSelection.phase !== "idle" ? "Cancel Gen" : "Apply Gen"}
+            </button>
+          </>
+        ) : null}
       </div>
 
       {/* MP選択バナー */}
@@ -587,6 +766,27 @@ export function ProofWorkspace({
             type="button"
             style={cancelButtonStyle}
             onClick={handleCancelMPSelection}
+          >
+            Cancel
+          </button>
+        </div>
+      ) : null}
+
+      {/* Gen選択バナー */}
+      {genSelection.phase !== "idle" ? (
+        <div
+          style={genSelectionBannerStyle}
+          data-testid={
+            testId ? `${testId satisfies string}-gen-banner` : undefined
+          }
+        >
+          <span>
+            {`Click the premise (φ) to generalize over ${genSelection.variableName satisfies string}`}
+          </span>
+          <button
+            type="button"
+            style={cancelButtonStyle}
+            onClick={handleCancelGenSelection}
           >
             Cancel
           </button>

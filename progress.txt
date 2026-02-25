@@ -34,6 +34,7 @@
 - `replacePresent` はundo エントリを作らない一時的な更新用（ドラッグ中等）。`pushState` は通常のundo可能な操作用
 - 防御的コード（到達不能だが安全のために残す）は `/* v8 ignore start/stop */` で除外。コメントで理由を明記すること
 - MP適用ロジックは3層分離: 純粋バリデーション(`mpApplicationLogic.ts`) → 状態管理(`workspaceState.ts`) → UI(`ProofWorkspace.tsx`)
+- Gen適用ロジックも同様の3層: `genApplicationLogic.ts` → `workspaceState.ts` → `ProofWorkspace.tsx`。新しい推論規則追加時はこのパターンに従う
 - `formatFormula` は右結合→で最小括弧化。テスト期待値は `χ → φ → ψ → φ`（括弧なし）
 - unificationのMartelli-Montanariアルゴリズムでは即時代入適用により一部の分岐が到達不能になる
 - parserのPratt parserではinfixBPが事前フィルタするため`tokenToBinaryOperator`のdefaultケースは到達不能
@@ -52,6 +53,53 @@
 
 - Storybookテーマ切り替え: `globalTypes` + デコレーターで `data-theme` 属性を制御。ThemeProviderは使わず、CSS変数の `[data-theme]` セレクタに直接依存
 - Side by Sideモード: ストーリーを2回レンダリングするため、play関数のクエリが複数マッチする。テストは単一テーマ（デフォルト: light）で実行
+
+---
+
+## 2026-02-25 - 汎化規則(Gen)のUI統合 (US-023部分実装)
+- US-023の部分実装: 汎化規則(Gen)のUI統合を完了
+- proofNodeUI.ts に "gen" ノード種別・スタイル・ポート・エッジ色を追加
+- genApplicationLogic.ts を新規作成（Gen適用の純粋バリデーションロジック）
+- workspaceState.ts に genVariableName フィールド, updateNodeGenVariableName, applyGenAndConnect を追加
+- ProofWorkspace.tsx に Gen選択UI（変数名入力 + Apply Genボタン + 選択バナー）を追加
+- index.ts に Gen関連エクスポートを追加
+- 変更ファイル:
+  - `src/lib/proof-pad/proofNodeUI.ts` (MODIFIED) - "gen"ノード種別追加
+  - `src/lib/proof-pad/genApplicationLogic.ts` (NEW) - Gen適用バリデーション
+  - `src/lib/proof-pad/genApplicationLogic.test.ts` (NEW) - 19テスト
+  - `src/lib/proof-pad/workspaceState.ts` (MODIFIED) - Gen状態管理
+  - `src/lib/proof-pad/workspaceState.test.ts` (MODIFIED) - Genテスト追加
+  - `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED) - Gen UI追加
+  - `src/lib/proof-pad/ProofWorkspace.test.tsx` (MODIFIED) - Gen UIテスト11件追加
+  - `src/lib/proof-pad/proofNodeUI.test.ts` (MODIFIED) - genノード対応
+  - `src/lib/proof-pad/index.ts` (MODIFIED) - Genエクスポート追加
+- カバレッジ: Stmts 99.28% → 99.24%, Lines 100% → 100%（Lines維持、Stmts微減はUI防御コードの分岐）
+- テスト: 1938 → 1949（+11件Gen UIテスト）
+- スクリーンショット:
+  - `.screenshots/gen-predicate-logic-fullscreen.png` (述語論理GenボタンUI)
+  - `.screenshots/gen-selection-banner.png` (Gen選択バナー表示)
+  - `.screenshots/gen-lukasiewicz-no-gen-button.png` (命題論理ではGenボタン非表示)
+- **今後のイテレーションへの学び:**
+  - Gen適用ロジックもMP同様3層分離: genApplicationLogic.ts → workspaceState.ts → ProofWorkspace.tsx
+  - MP/Gen選択モードは排他的。一方を開始すると他方はキャンセルされる
+  - GenはMPと異なり1ノード選択（前提のみ）。変数名入力UIが追加で必要
+  - 公理パレットがノードと重なる場合、ブラウザテストでクリックが困難。ノード配置位置の調整が必要
+
+---
+
+## 2026-02-25 - カバレッジ改善
+- `useTheme.ts`: SSRガード（typeof window/document === "undefined"）にv8 ignore追加 → Stmts 92% → 100%
+- `TermInput.tsx`: rAFコールバック内のsetSelectionRangeにv8 ignore追加 → Stmts 93.97% → 96.29%
+- `vitest.config.ts`: `src/stories/**`をカバレッジ対象外に（Storybookテンプレートサンプルコード）
+- 全体カバレッジ: Stmts 99.05% → 99.28%, Lines 99.89% → 100%
+- 変更ファイル:
+  - `src/lib/theme/useTheme.ts` (MODIFIED) - v8 ignore追加
+  - `src/lib/formula-input/TermInput.tsx` (MODIFIED) - v8 ignore追加
+  - `vitest.config.ts` (MODIFIED) - stories除外
+- **今後のイテレーションへの学び:**
+  - SSRガード（typeof window/document === "undefined"）はjsdomでは常にfalseなのでv8 ignoreが適切
+  - `src/stories/`はStorybookテンプレートであり、プロジェクトコードではないのでカバレッジ対象外にすべき
+  - 残りの低カバレッジ（ConnectorPortComponent 96.66%、FormulaEditor 98.5%等）はJSXの条件分岐ブランチ。Lines 100%なので実質的な問題なし
 
 ---
 

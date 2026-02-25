@@ -15,14 +15,16 @@ import type { ConnectorPort } from "../infinite-canvas/connector";
  * 証明ノードの種類。
  * - axiom: 公理（葉ノード）— 編集可能な論理式
  * - mp: Modus Ponens（推論規則）— 2つの前提から結論を導出
+ * - gen: Generalization（汎化規則）— 1つの前提から ∀x.φ を導出
  * - conclusion: 最終結論
  */
-export type ProofNodeKind = "axiom" | "mp" | "conclusion";
+export type ProofNodeKind = "axiom" | "mp" | "gen" | "conclusion";
 
 /** すべてのProofNodeKindの値（exhaustive checkに使用） */
 export const PROOF_NODE_KINDS: readonly ProofNodeKind[] = [
   "axiom",
   "mp",
+  "gen",
   "conclusion",
 ] as const;
 
@@ -38,6 +40,7 @@ export interface ProofNodeStyle {
 
 const AXIOM_COLOR = "#5b8bd9";
 const MP_COLOR = "#d9944a";
+const GEN_COLOR = "#9b59b6";
 const CONCLUSION_COLOR = "#4ad97a";
 
 /**
@@ -57,6 +60,14 @@ export function getProofNodeStyle(kind: ProofNodeKind): ProofNodeStyle {
     case "mp":
       return {
         backgroundColor: MP_COLOR,
+        textColor: "#fff",
+        borderRadius: 8,
+        border: "1px solid rgba(255,255,255,0.2)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+      };
+    case "gen":
+      return {
+        backgroundColor: GEN_COLOR,
         textColor: "#fff",
         borderRadius: 8,
         border: "1px solid rgba(255,255,255,0.2)",
@@ -87,6 +98,12 @@ export const MP_PORTS: readonly ConnectorPort[] = [
   { id: "out", edge: "bottom", position: 0.5 },
 ];
 
+/** Genノード: 上に1つの入力ポート、下に1つの出力ポート */
+export const GEN_PORTS: readonly ConnectorPort[] = [
+  { id: "premise", edge: "top", position: 0.5 },
+  { id: "out", edge: "bottom", position: 0.5 },
+];
+
 /** 結論ノード: 上に2つの入力ポートのみ */
 export const CONCLUSION_PORTS: readonly ConnectorPort[] = [
   { id: "premise-left", edge: "top", position: 0.3 },
@@ -105,6 +122,8 @@ export function getProofNodePorts(
       return AXIOM_PORTS;
     case "mp":
       return MP_PORTS;
+    case "gen":
+      return GEN_PORTS;
     case "conclusion":
       return CONCLUSION_PORTS;
   }
@@ -121,6 +140,8 @@ export function getProofEdgeColor(fromKind: ProofNodeKind): string {
       return "#7aa3e0";
     case "mp":
       return "#e0a87a";
+    case "gen":
+      return "#c39bd3";
     case "conclusion":
       return "#7ae0a3";
   }
