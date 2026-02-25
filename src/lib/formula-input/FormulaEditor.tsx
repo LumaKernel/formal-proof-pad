@@ -67,10 +67,12 @@ const displayContainerHoverStyle: CSSProperties = {
   backgroundColor: "#f7fafc",
 };
 
+/* v8 ignore start -- style constant */
 const placeholderStyle: CSSProperties = {
   color: "#a0aec0",
   fontStyle: "italic",
 };
+/* v8 ignore stop */
 
 const editContainerStyle: CSSProperties = {
   transition: "opacity 0.15s ease-in-out",

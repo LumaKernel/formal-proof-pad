@@ -292,4 +292,20 @@ describe("CompletionPopup", () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
+
+  describe("testIdなしのレンダリング", () => {
+    it("testIdなしでも正常にレンダリングされる", () => {
+      const { container } = render(
+        <CompletionPopup
+          candidates={mockCandidates}
+          selectedIndex={0}
+          onSelect={() => {}}
+          onSelectedIndexChange={() => {}}
+          onClose={() => {}}
+        />,
+      );
+      expect(container.querySelector("[role='listbox']")).toBeInTheDocument();
+      expect(container.querySelectorAll("[role='option']")).toHaveLength(3);
+    });
+  });
 });

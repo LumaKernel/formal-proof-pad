@@ -421,4 +421,21 @@ describe("FormulaInput", () => {
       expect(screen.getByTestId("fi-formula")).toHaveTextContent("x = y");
     });
   });
+
+  describe("testIdなしのレンダリング", () => {
+    it("testIdなしでも正常にレンダリングされる", () => {
+      const { container } = render(
+        <FormulaInput value="φ → ψ" onChange={() => {}} />,
+      );
+      expect(container.querySelector("input")).toBeInTheDocument();
+    });
+
+    it("testIdなしでエラー表示も正常", () => {
+      const { container } = render(
+        <FormulaInput value="→" onChange={() => {}} />,
+      );
+      const alert = container.querySelector("[role='alert']");
+      expect(alert).toBeInTheDocument();
+    });
+  });
 });

@@ -339,3 +339,35 @@ describe("FormulaEditor - onModeChange", () => {
     expect(onModeChange).not.toHaveBeenCalledWith("display");
   });
 });
+
+// --- testIdなしのレンダリング ---
+
+describe("FormulaEditor - testIdなしのレンダリング", () => {
+  it("testIdなしでも正常にレンダリングされる（Unicode表示）", () => {
+    const { container } = render(
+      <EditorWrapper initialValue="φ → ψ" testId={undefined} />,
+    );
+    expect(container.querySelector("[role='button']")).toBeInTheDocument();
+  });
+
+  it("testIdなしでもKaTeX表示が正常にレンダリングされる", () => {
+    const { container } = render(
+      <EditorWrapper
+        initialValue="φ → ψ"
+        displayRenderer="katex"
+        testId={undefined}
+      />,
+    );
+    expect(container.querySelector("[role='button']")).toBeInTheDocument();
+  });
+
+  it("testIdなしでも編集モードに遷移できる", () => {
+    const { container } = render(
+      <EditorWrapper initialValue="φ" testId={undefined} />,
+    );
+    const button = container.querySelector("[role='button']");
+    expect(button).toBeInTheDocument();
+    fireEvent.click(button!);
+    expect(container.querySelector("input")).toBeInTheDocument();
+  });
+});

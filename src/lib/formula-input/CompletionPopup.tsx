@@ -94,6 +94,7 @@ export function CompletionPopup({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      /* v8 ignore next -- defensive guard: component renders null when empty */
       if (candidates.length === 0) return;
 
       switch (e.key) {
@@ -114,6 +115,7 @@ export function CompletionPopup({
         case "Enter": {
           e.preventDefault();
           const candidate = candidates[selectedIndex];
+          /* v8 ignore next -- defensive: selectedIndex should always be in bounds */
           if (candidate) {
             onSelect(candidate);
           }

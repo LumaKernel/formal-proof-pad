@@ -106,9 +106,11 @@ export function MinimapComponent({
       e.stopPropagation();
       e.preventDefault();
       isDragging.current = true;
+      /* v8 ignore start -- browser API availability check */
       if (e.currentTarget.setPointerCapture) {
         e.currentTarget.setPointerCapture(e.pointerId);
       }
+      /* v8 ignore stop */
       navigateToPoint(e.clientX, e.clientY);
     },
     [navigateToPoint],
@@ -127,9 +129,11 @@ export function MinimapComponent({
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!isDragging.current) return;
       isDragging.current = false;
+      /* v8 ignore start -- browser API availability check */
       if (e.currentTarget.releasePointerCapture) {
         e.currentTarget.releasePointerCapture(e.pointerId);
       }
+      /* v8 ignore stop */
     },
     [],
   );

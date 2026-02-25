@@ -285,6 +285,21 @@ describe("TermInput", () => {
     });
   });
 
+  describe("testIdなしのレンダリング", () => {
+    it("testIdなしでも正常にレンダリングされる", () => {
+      const { container } = render(
+        <TermInput value="x + y" onChange={() => {}} />,
+      );
+      expect(container.querySelector("input")).toBeInTheDocument();
+    });
+
+    it("testIdなしでエラー表示も正常", () => {
+      const { container } = render(<TermInput value="→" onChange={() => {}} />);
+      const alert = container.querySelector("[role='alert']");
+      expect(alert).toBeInTheDocument();
+    });
+  });
+
   describe("補完機能", () => {
     it("補完候補を選択すると onChange が呼ばれる", async () => {
       const onChange = vi.fn();

@@ -121,4 +121,12 @@ describe("AxiomPalette", () => {
     expect(item.getAttribute("role")).toBe("button");
     expect(item.getAttribute("tabindex")).toBe("0");
   });
+
+  it("testIdなしでも正常にレンダリングされる", () => {
+    const { container } = render(
+      <AxiomPalette axioms={defaultAxioms} onAddAxiom={() => {}} />,
+    );
+    expect(container.textContent).toContain("Axioms");
+    expect(container.textContent).toContain("A1 (K)");
+  });
 });

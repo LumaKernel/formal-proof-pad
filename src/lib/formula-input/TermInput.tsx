@@ -89,11 +89,13 @@ const inputBaseStyle: CSSProperties = {
   boxSizing: "border-box",
 };
 
+/* v8 ignore start -- style constant, not worth testing */
 const inputErrorStyle: CSSProperties = {
   ...inputBaseStyle,
   borderColor: "#e53e3e",
   boxShadow: "0 0 0 1px #e53e3e",
 };
+/* v8 ignore stop */
 
 const previewStyle: CSSProperties = {
   padding: "4px 8px",

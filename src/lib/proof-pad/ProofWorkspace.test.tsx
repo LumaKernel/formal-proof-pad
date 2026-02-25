@@ -1081,4 +1081,24 @@ describe("ProofWorkspace", () => {
       );
     });
   });
+
+  describe("testIdなしのレンダリング", () => {
+    it("testIdなしでも正常にレンダリングされる", () => {
+      const ws = createEmptyWorkspace(lukasiewiczSystem);
+      const { container } = render(
+        <ProofWorkspace system={lukasiewiczSystem} workspace={ws} />,
+      );
+      expect(container.querySelector("input")).toBeInTheDocument();
+    });
+
+    it("testIdなしでゴール達成バナーが表示される", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = updateGoalFormulaText(ws, "φ → φ");
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "φ → φ");
+      const { container } = render(
+        <ProofWorkspace system={lukasiewiczSystem} workspace={ws} />,
+      );
+      expect(container.textContent).toContain("Proof Complete!");
+    });
+  });
 });

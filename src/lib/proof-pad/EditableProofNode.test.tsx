@@ -231,4 +231,19 @@ describe("EditableProofNode", () => {
       expect(screen.queryByTestId("test-node-status")).not.toBeInTheDocument();
     });
   });
+
+  describe("testIdなしのレンダリング", () => {
+    it("testIdなしでも正常にレンダリングされる", () => {
+      const { container } = render(
+        <EditableProofNode
+          id="node-1"
+          kind="axiom"
+          label="A1"
+          formulaText="φ → ψ"
+          onFormulaTextChange={() => {}}
+        />,
+      );
+      expect(container.firstChild).toBeInTheDocument();
+    });
+  });
 });

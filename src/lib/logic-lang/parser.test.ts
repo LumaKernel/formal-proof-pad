@@ -946,5 +946,21 @@ describe("parseTermString", () => {
       const result = parseTermString(",");
       expect(result.ok).toBe(false);
     });
+
+    it("括弧内に不正なトークンがあるとエラーを返す", () => {
+      const result = parseTermString("(→)");
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.errors.length).toBeGreaterThan(0);
+      }
+    });
+
+    it("関数引数の先頭が不正なトークンだとエラーを返す", () => {
+      const result = parseTermString("f(→)");
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.errors.length).toBeGreaterThan(0);
+      }
+    });
   });
 });
