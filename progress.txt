@@ -53,6 +53,26 @@
 
 - Storybookテーマ切り替え: `globalTypes` + デコレーターで `data-theme` 属性を制御。ThemeProviderは使わず、CSS変数の `[data-theme]` セレクタに直接依存
 - Side by Sideモード: ストーリーを2回レンダリングするため、play関数のクエリが複数マッチする。テストは単一テーマ（デフォルト: light）で実行
+- FormulaEditorのホバースタイルは`currentColor`ベース。不透明な背景色はEditableProofNode内（白文字+色付き背景）でコントラスト問題を起こすため禁止
+
+---
+
+## 2026-02-25 - FormulaEditorホバー時コントラスト修正
+- **問題**: FormulaEditorの表示モードでホバー時に不透明な白背景(#f7fafc)が適用され、EditableProofNode内（白文字）で論理式が見えなくなる
+- **原因**: `displayContainerHoverStyle` の `backgroundColor: "#f7fafc"` が白文字の上で使用され、コントラスト比がほぼ1:1
+- **修正**: ホバースタイルを `borderColor: "currentColor"`, `borderStyle: "dashed"`, `opacity: 0.8` に変更。背景色変更を廃止し、任意の背景色で動作するようにした
+- 変更ファイル:
+  - `src/lib/formula-input/FormulaEditor.tsx` (MODIFIED) - displayContainerHoverStyleのコントラスト修正
+- カバレッジ: Stmts 99.38%, Branch 95.09%, Lines 100%（維持）
+- テスト: 1972（変更なし）
+- スクリーンショット:
+  - `.screenshots/contrast-before-normal.png` (修正前・通常状態)
+  - `.screenshots/contrast-before-hover.png` (修正前・ホバー時 - 白文字が見えない)
+  - `.screenshots/contrast-after-hover-dashed.png` (修正後・ホバー時 - 破線ボーダーで明確)
+- **今後のイテレーションへの学び:**
+  - ホバースタイルで不透明な背景色を設定すると、親コンポーネントの文字色との相性問題が発生する。`currentColor`や`opacity`を使えば親のコンテキストに適応する
+  - FormulaEditorはEditableProofNode（色付き背景）とスタンドアロン（白背景）の両方で使われるため、ハードコードされた色は避けるべき
+  - Playwright MCPの`browser_evaluate`でcomputed stylesを確認するとコントラスト問題を数値的に検証できる
 
 ---
 
