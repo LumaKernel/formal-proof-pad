@@ -71,7 +71,6 @@ describe("defaultCreateFormValues", () => {
   it("returns default values", () => {
     const values = defaultCreateFormValues();
     expect(values.name).toBe("");
-    expect(values.mode).toBe("free");
     expect(values.systemPresetId).toBe(defaultPresetId);
   });
 });
@@ -79,18 +78,11 @@ describe("defaultCreateFormValues", () => {
 describe("validateCreateForm", () => {
   const validValues: CreateFormValues = {
     name: "テストノート",
-    mode: "free",
     systemPresetId: "lukasiewicz",
   };
 
   it("valid form returns valid: true", () => {
     expect(validateCreateForm(validValues)).toEqual({ valid: true });
-  });
-
-  it("valid form with quest mode", () => {
-    expect(validateCreateForm({ ...validValues, mode: "quest" })).toEqual({
-      valid: true,
-    });
   });
 
   it("valid form with predicate system", () => {
@@ -177,7 +169,6 @@ describe("validateCreateForm", () => {
     it("returns both name and system errors", () => {
       const result = validateCreateForm({
         name: "",
-        mode: "free",
         systemPresetId: "nonexistent",
       });
       expect(result.valid).toBe(false);
@@ -194,7 +185,6 @@ describe("getFieldError", () => {
   it("returns undefined for valid form", () => {
     const validation = validateCreateForm({
       name: "テスト",
-      mode: "free",
       systemPresetId: "lukasiewicz",
     });
     expect(getFieldError(validation, "name")).toBeUndefined();
@@ -204,7 +194,6 @@ describe("getFieldError", () => {
   it("returns error message for invalid name", () => {
     const validation = validateCreateForm({
       name: "",
-      mode: "free",
       systemPresetId: "lukasiewicz",
     });
     expect(getFieldError(validation, "name")).toBe("名前を入力してください");
@@ -214,7 +203,6 @@ describe("getFieldError", () => {
   it("returns error message for invalid systemPresetId", () => {
     const validation = validateCreateForm({
       name: "テスト",
-      mode: "free",
       systemPresetId: "bad",
     });
     expect(getFieldError(validation, "name")).toBeUndefined();

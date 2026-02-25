@@ -46,7 +46,6 @@ export {
 } from "./NotebookCreateFormComponent";
 
 export {
-  type CreateMode,
   type CreateFormValues,
   systemPresets,
   defaultCreateFormValues,

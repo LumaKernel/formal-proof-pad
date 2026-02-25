@@ -31,18 +31,6 @@ describe("NotebookCreateForm", () => {
       expect(input).toHaveValue("");
     });
 
-    it("自由帳モードがデフォルトで選択される", () => {
-      renderForm();
-      const freeRadio = screen.getByTestId("create-mode-free");
-      expect(freeRadio).toBeChecked();
-    });
-
-    it("クエストモードはデフォルトで未選択", () => {
-      renderForm();
-      const questRadio = screen.getByTestId("create-mode-quest");
-      expect(questRadio).not.toBeChecked();
-    });
-
     it("Łukasiewicz公理系がデフォルトで選択される", () => {
       renderForm();
       const card = screen.getByTestId("system-preset-lukasiewicz");
@@ -80,24 +68,6 @@ describe("NotebookCreateForm", () => {
       const input = screen.getByTestId("create-name-input");
       await user.type(input, "テストノート");
       expect(input).toHaveValue("テストノート");
-    });
-  });
-
-  describe("モード選択", () => {
-    it("クエストモードを選択できる", async () => {
-      renderForm();
-      const user = userEvent.setup();
-      await user.click(screen.getByTestId("create-mode-quest"));
-      expect(screen.getByTestId("create-mode-quest")).toBeChecked();
-      expect(screen.getByTestId("create-mode-free")).not.toBeChecked();
-    });
-
-    it("自由帳モードに戻せる", async () => {
-      renderForm();
-      const user = userEvent.setup();
-      await user.click(screen.getByTestId("create-mode-quest"));
-      await user.click(screen.getByTestId("create-mode-free"));
-      expect(screen.getByTestId("create-mode-free")).toBeChecked();
     });
   });
 
@@ -152,23 +122,6 @@ describe("NotebookCreateForm", () => {
 
       expect(onSubmit).toHaveBeenCalledWith({
         name: "テストノート",
-        mode: "free",
-        system: lukasiewiczSystem,
-      });
-    });
-
-    it("クエストモードで送信できる", async () => {
-      const onSubmit = vi.fn();
-      renderForm({ onSubmit });
-      const user = userEvent.setup();
-
-      await user.type(screen.getByTestId("create-name-input"), "クエスト1");
-      await user.click(screen.getByTestId("create-mode-quest"));
-      await user.click(screen.getByTestId("create-submit-btn"));
-
-      expect(onSubmit).toHaveBeenCalledWith({
-        name: "クエスト1",
-        mode: "quest",
         system: lukasiewiczSystem,
       });
     });
@@ -187,7 +140,6 @@ describe("NotebookCreateForm", () => {
 
       expect(onSubmit).toHaveBeenCalledWith({
         name: "述語論理ノート",
-        mode: "free",
         system: predicateLogicSystem,
       });
     });

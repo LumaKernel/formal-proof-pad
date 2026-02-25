@@ -24,8 +24,6 @@ export const Default: Story = {
     ).toBeInTheDocument();
     // 名前入力欄が空
     await expect(canvas.getByTestId("create-name-input")).toHaveValue("");
-    // デフォルトで自由帳モード
-    await expect(canvas.getByTestId("create-mode-free")).toBeChecked();
     // デフォルトでŁukasiewicz選択
     await expect(
       canvas.getByTestId("system-preset-lukasiewicz"),
@@ -54,16 +52,6 @@ export const SubmitWithName: Story = {
     // 送信
     await userEvent.click(canvas.getByTestId("create-submit-btn"));
     await expect(args.onSubmit).toHaveBeenCalledOnce();
-  },
-};
-
-export const SelectQuestMode: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    // クエストモードを選択
-    await userEvent.click(canvas.getByTestId("create-mode-quest"));
-    await expect(canvas.getByTestId("create-mode-quest")).toBeChecked();
-    await expect(canvas.getByTestId("create-mode-free")).not.toBeChecked();
   },
 };
 

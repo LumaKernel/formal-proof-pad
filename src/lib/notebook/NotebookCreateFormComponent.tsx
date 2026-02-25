@@ -1,7 +1,8 @@
 /**
  * ノートブック新規作成フォームUIコンポーネント。
  *
- * 名前入力、モード選択（自由帳/クエスト）、公理系選択を提供する。
+ * 名前入力、公理系選択を提供する。
+ * クエストモードはクエストマップから自動開始されるため、このフォームでは選択しない。
  * 制御コンポーネント: バリデーションは notebookCreateLogic に委譲する。
  *
  * 変更時は NotebookCreateFormComponent.test.tsx, NotebookCreateFormComponent.stories.tsx も同期すること。
@@ -14,7 +15,6 @@ import {
   validateCreateForm,
   getFieldError,
   findPresetById,
-  type CreateMode,
   type CreateFormValues,
 } from "./notebookCreateLogic";
 import type { LogicSystem } from "../logic-core/inferenceRule";
@@ -25,7 +25,6 @@ export type NotebookCreateFormProps = {
   /** フォーム送信時のコールバック */
   readonly onSubmit: (params: {
     readonly name: string;
-    readonly mode: CreateMode;
     readonly system: LogicSystem;
   }) => void;
   /** キャンセル時のコールバック */
@@ -74,20 +73,6 @@ const inputErrorStyle: CSSProperties = {
 const errorTextStyle: CSSProperties = {
   fontSize: 12,
   color: "var(--color-error, #d32f2f)",
-};
-
-const radioGroupStyle: CSSProperties = {
-  display: "flex",
-  gap: 12,
-};
-
-const radioLabelStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-  fontSize: 14,
-  cursor: "pointer",
-  color: "var(--color-text-primary, #333)",
 };
 
 const systemCardStyle: CSSProperties = {
@@ -174,7 +159,6 @@ export function NotebookCreateForm({
 
     onSubmit({
       name: values.name.trim(),
-      mode: values.mode,
       system: preset.system,
     });
   };
@@ -205,35 +189,6 @@ export function NotebookCreateForm({
             {nameError}
           </span>
         )}
-      </div>
-
-      {/* モード選択 */}
-      <div style={fieldGroupStyle}>
-        <span style={labelStyle}>モード</span>
-        <div style={radioGroupStyle}>
-          <label style={radioLabelStyle}>
-            <input
-              type="radio"
-              name="mode"
-              value="free"
-              checked={values.mode === "free"}
-              onChange={() => setValues({ ...values, mode: "free" })}
-              data-testid="create-mode-free"
-            />
-            自由帳
-          </label>
-          <label style={radioLabelStyle}>
-            <input
-              type="radio"
-              name="mode"
-              value="quest"
-              checked={values.mode === "quest"}
-              onChange={() => setValues({ ...values, mode: "quest" })}
-              data-testid="create-mode-quest"
-            />
-            クエスト
-          </label>
-        </div>
       </div>
 
       {/* 公理系選択 */}

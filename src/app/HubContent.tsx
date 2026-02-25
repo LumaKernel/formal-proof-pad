@@ -182,11 +182,7 @@ function HubInner() {
 
   // Create notebook
   const handleCreateNotebook = useCallback(
-    (params: {
-      readonly name: string;
-      readonly mode: "free" | "quest";
-      readonly system: LogicSystem;
-    }) => {
+    (params: { readonly name: string; readonly system: LogicSystem }) => {
       const nextId = predictNextNotebookId();
       notebookCollection.create(params.name, params.system);
       setView("list");

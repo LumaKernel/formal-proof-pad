@@ -14,11 +14,6 @@ import {
   equalityLogicSystem,
 } from "../logic-core/inferenceRule";
 
-// --- ノート作成モード ---
-
-/** ノートの作成モード */
-export type CreateMode = "free" | "quest";
-
 // --- プリセット公理系 ---
 
 /** プリセット公理系の定義 */
@@ -64,7 +59,6 @@ export function findPresetById(id: string): SystemPreset | undefined {
 /** ノート作成フォームの入力値 */
 export type CreateFormValues = {
   readonly name: string;
-  readonly mode: CreateMode;
   readonly systemPresetId: string;
 };
 
@@ -72,7 +66,6 @@ export type CreateFormValues = {
 export function defaultCreateFormValues(): CreateFormValues {
   return {
     name: "",
-    mode: "free",
     systemPresetId: defaultPresetId,
   };
 }

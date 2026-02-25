@@ -12,5 +12,7 @@
     check with pw mcp!
 - [x] http://localhost:13006/?path=/story/notebook-notebookcreateform--default&globals=theme:dark → --color-surface-selected, --color-accent 等の既存テーマトークンに置き換え
     ダークモードでselectedなやつのタイトル部分がコントラストが悪い。
-- [ ] http://localhost:13006/?path=/story/notebook-notebookcreateform--default
+- [x] http://localhost:13006/?path=/story/notebook-notebookcreateform--default → モード選択UIを削除、CreateFormValuesからmode除去
     クエストはあくまでもクエストのマップから選ぶときにクエストモードで自動的に開始されるというだけで、ユーザーがこのような画面で自分で選ぶものではない。
+- [ ] http://localhost:13006/?path=/story/infinitecanvas-formulanodeintegration--interactive&globals=theme:dark
+        文字だけ白くなるから見えにくいけど合ってるのかな？
