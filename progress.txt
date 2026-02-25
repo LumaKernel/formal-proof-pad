@@ -56,6 +56,40 @@
 - Side by Sideモード: ストーリーを2回レンダリングするため、play関数のクエリが複数マッチする。テストは単一テーマ（デフォルト: light）で実行
 - FormulaEditorのホバースタイルは`currentColor`ベース。不透明な背景色はEditableProofNode内（白文字+色付き背景）でコントラスト問題を起こすため禁止
 - パーサーは `phi`, `psi`, `chi` 等のギリシャ文字名を命題変数として認識する。`p`, `q` 等の単一文字は項変数として扱われ、`=` が期待される
+- コピペロジックも3層分離: `copyPasteLogic.ts`(純粋データ変換) → `workspaceState.ts`(状態統合) → `ProofWorkspace.tsx`(UI・クリップボードAPI)
+- UIオーバーレイ（バナー等）のclickにはstopPropagationが必要（コンテナのclick解除を防ぐ）
+
+---
+
+## 2026-02-25 - コピー＆ペースト機能実装
+- ノード選択・コピー・ペースト・削除機能をProofWorkspaceに実装
+  - 純粋ロジック: `copyPasteLogic.ts` にクリップボードデータ構築・シリアライズ・デシリアライズ・ペースト復元
+  - 状態管理: `workspaceState.ts` に `copySelectedNodes`, `pasteNodes`, `removeSelectedNodes` を追加
+  - UI: `ProofWorkspace.tsx` にノード選択状態、選択バナー（Copy/Paste/Delete/Clear）、キーボードショートカット（Ctrl+C/V/A, Delete, Escape）
+- ノード選択: クリックで単一選択、Ctrl/Cmd+クリックでトグル選択
+- コピー: 選択ノード＋内部接続をクリップボードデータとして保持（内部ref + navigator.clipboard API）
+- ペースト: 新しいIDで復元、ビューポート中心に配置、protectionは意図的にコピーしない
+- 削除: 選択ノード削除（保護ノードはスキップ）、関連接続も自動削除
+- 変更ファイル:
+  - `src/lib/proof-pad/copyPasteLogic.ts` (NEW) - コピペ純粋ロジック
+  - `src/lib/proof-pad/copyPasteLogic.test.ts` (NEW) - 28テスト
+  - `src/lib/proof-pad/workspaceState.ts` (MODIFIED) - コピペ統合関数追加
+  - `src/lib/proof-pad/workspaceState.test.ts` (MODIFIED) - 11テスト追加
+  - `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED) - 選択UI・キーボードショートカット
+  - `src/lib/proof-pad/ProofWorkspace.test.tsx` (MODIFIED) - 6テスト追加
+  - `src/lib/proof-pad/index.ts` (MODIFIED) - エクスポート追加
+- カバレッジ: Stmts 99.26%, Branch 94.53%, Lines 100%（Lines維持）
+- テスト: 2087 → 2132（+45）
+- スクリーンショット:
+  - `.screenshots/copy-paste-node-selected.png` (ノード選択状態、青バナー表示)
+  - `.screenshots/copy-paste-after-paste.png` (ペースト後、新ノード表示)
+  - `.screenshots/copy-paste-after-delete.png` (削除後)
+- **今後のイテレーションへの学び:**
+  - 3層分離パターン: copyPasteLogic.ts(純粋) → workspaceState.ts(状態) → ProofWorkspace.tsx(UI) は既存のMP/Genと同じ
+  - 選択バナーのclickイベントはstopPropagationが必要（コンテナのhandleCanvasClickで選択解除されるため）
+  - navigator.clipboard APIはJSDOMでは動作しない。内部ref（clipboardRef）をフォールバックとして持つことでテスト可能に
+  - v8 ignore: キーボードイベントリスナー（useEffect + addEventListener）はJSDOMでfocus制御が不安定なため除外し、ブラウザテストで検証
+  - ノードの重なり問題: 公理パレットやヘッダーがノードを遮ることがあり、ブラウザテストではフルスクリーンモードを使用
 
 ---
 
