@@ -64,7 +64,47 @@
 - 新ファイル作成後は必ず `npx prettier --write` を実行する（特にmdファイル）
 - `src/lib/notebook/` はノートブック管理の純粋ロジック。notebookState.ts にNotebook/NotebookCollection型と操作関数を配置
 - ノートブック管理も3層分離パターン: notebookState.ts(純粋ロジック) → hook → UIコンポーネント
+- LogicSystemのReadonlySet<PropositionalAxiomId>はJSON化不可。シリアライズ時にArray変換、デシリアライズ時にSet復元が必要
+- `@luma-dev/luma-ts/no-date` ルールのため、hookでは `getNow` DI パターンで Date.now() 依存を注入。テスト時はインクリメントカウンタで決定的タイムスタンプ
+- 日付フォーマットは `Intl.DateTimeFormat` を使用（`new Date()` はno-dateルール違反）
+- localStorage永続化hookパターン: useState初期化でloadし、useEffectでsave（useTheme.tsと同じ）
 
+---
+
+## 2026-02-25 - ノートブック管理: ノート一覧UI・hook・シリアライズ層の作成
+- `src/lib/notebook/notebookSerialization.ts` を新規作成 - ReadonlySet↔Array変換を含む純粋シリアライズ/デシリアライズ層
+- `src/lib/notebook/notebookSerialization.test.ts` を新規作成 - 16テスト（ラウンドトリップ、不正入力、バリデーション）
+- `src/lib/notebook/useNotebookCollection.ts` を新規作成 - localStorage永続化付きReact hook（getNow DI対応）
+- `src/lib/notebook/useNotebookCollection.test.tsx` を新規作成 - 14テスト（localStorage adapter 3件、hook操作 11件）
+- `src/lib/notebook/notebookListLogic.ts` を新規作成 - 表示用データ変換・バリデーション・相対時刻フォーマット
+- `src/lib/notebook/notebookListLogic.test.ts` を新規作成 - 14テスト
+- `src/lib/notebook/NotebookListComponent.tsx` を新規作成 - ノート一覧UIコンポーネント（インラインリネーム対応）
+- `src/lib/notebook/NotebookListComponent.test.tsx` を新規作成 - 20テスト
+- `src/lib/notebook/NotebookListComponent.stories.tsx` を新規作成 - 7ストーリー（全play関数付き）
+- `src/lib/notebook/index.ts` を更新 - 新モジュールのエクスポート追加
+- カバレッジ: Stmts 99.12%, Branch 94.48%, Funcs 91.85%, Lines 100% (維持)
+  - ベースライン: Stmts 99.28%, Branch 94.65%, Funcs 91.88%, Lines 100%
+  - Stmts微減は新UIコンポーネントの一部防御的コード（v8 ignore対象外の箇所）のため
+  - Lines 100%は維持
+- テスト: 2265 全パス（102テスト追加: 16+14+14+20+7ストーリー中のassert）
+- ブラウザ確認: Playwright MCPで.screenshots/にスクリーンショット保存済み
+- 変更ファイル:
+  - `src/lib/notebook/notebookSerialization.ts` (NEW)
+  - `src/lib/notebook/notebookSerialization.test.ts` (NEW)
+  - `src/lib/notebook/useNotebookCollection.ts` (NEW)
+  - `src/lib/notebook/useNotebookCollection.test.tsx` (NEW)
+  - `src/lib/notebook/notebookListLogic.ts` (NEW)
+  - `src/lib/notebook/notebookListLogic.test.ts` (NEW)
+  - `src/lib/notebook/NotebookListComponent.tsx` (NEW)
+  - `src/lib/notebook/NotebookListComponent.test.tsx` (NEW)
+  - `src/lib/notebook/NotebookListComponent.stories.tsx` (NEW)
+  - `src/lib/notebook/index.ts` (MODIFIED)
+  - `tasks/prd-logic-pad-world.md` - ノート管理タスク完了マーク
+- **今後のイテレーションへの学び:**
+  - LogicSystemのReadonlySetはJSON化できない。シリアライズ層は必須で、バリデーション付きデシリアライズが重要
+  - `@luma-dev/luma-ts/no-date` ルール対策: hookの `getNow` DIパターンはテスタビリティも向上する
+  - `Intl.DateTimeFormat` は `new Date()` なしで timestamp→文字列変換が可能
+  - 次のイテレーション候補: ノート新規作成ダイアログ（モード・公理系選択）、ルーティング（ノート一覧→ノート詳細遷移）
 ---
 
 ## 2026-02-25 - ノートブック管理: 純粋ロジック層の作成
