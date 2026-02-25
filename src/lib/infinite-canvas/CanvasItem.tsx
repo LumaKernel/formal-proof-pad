@@ -3,6 +3,7 @@ import type { ContextMenuItem } from "./contextMenu";
 import { ContextMenuComponent } from "./ContextMenuComponent";
 import { worldToScreen } from "./coordinate";
 import { isClick } from "./nodeMenu";
+import type { SnapConfig } from "./snap";
 import type { Point, ViewportState } from "./types";
 import { useContextMenu, useLongPress } from "./useContextMenu";
 import { useDragItem } from "./useDragItem";
@@ -19,6 +20,8 @@ export interface CanvasItemProps {
   /** Explicitly control drag enabled state (default: true when onPositionChange is provided).
    *  Set to false to temporarily disable drag, e.g. during inline editing. */
   readonly dragEnabled?: boolean;
+  /** Snap configuration for grid snapping during drag (default: disabled) */
+  readonly snapConfig?: SnapConfig;
   /** Context menu items (enables context menu when provided) */
   readonly contextMenuItems?: readonly ContextMenuItem[];
   /** Callback when a context menu item is selected */
@@ -40,6 +43,7 @@ export function CanvasItem({
   children,
   onPositionChange = NOOP,
   dragEnabled,
+  snapConfig,
   contextMenuItems = EMPTY_ITEMS,
   onContextMenuSelect = NOOP,
   onClick,
@@ -53,6 +57,7 @@ export function CanvasItem({
     position,
     viewport.scale,
     onPositionChange,
+    snapConfig,
   );
 
   const {

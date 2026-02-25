@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 import { computeDelta } from "./pan";
 import { applyDragDelta } from "./drag";
+import { applySnap, SNAP_DISABLED } from "./snap";
+import type { SnapConfig } from "./snap";
 import type { Point } from "./types";
 
 export type UseDragItemResult = {
@@ -16,15 +18,18 @@ export type UseDragItemResult = {
 
 /** Hook that provides drag-to-move behavior for a CanvasItem.
  *  Converts screen-space drag deltas to world-space position changes.
+ *  Optionally snaps the resulting position to a grid.
  *
  *  @param position       Current world-space position of the item
  *  @param scale          Current viewport scale (for screen→world conversion)
  *  @param onPositionChange  Callback when position changes due to dragging
+ *  @param snapConfig     Optional snap configuration (default: disabled)
  */
 export function useDragItem(
   position: Point,
   scale: number,
   onPositionChange: (next: Point) => void,
+  snapConfig: SnapConfig = SNAP_DISABLED,
 ): UseDragItemResult {
   const [isDragging, setIsDragging] = useState(false);
   const lastPointRef = useRef<Point | null>(null);
@@ -55,12 +60,13 @@ export function useDragItem(
 
       const currentPoint: Point = { x: e.clientX, y: e.clientY };
       const delta = computeDelta(lastPoint, currentPoint);
-      const newPosition = applyDragDelta(position, delta, scale);
+      const rawPosition = applyDragDelta(position, delta, scale);
+      const newPosition = applySnap(rawPosition, snapConfig);
 
       lastPointRef.current = currentPoint;
       onPositionChange(newPosition);
     },
-    [position, scale, onPositionChange],
+    [position, scale, onPositionChange, snapConfig],
   );
 
   const onPointerUp = useCallback((e: React.PointerEvent<HTMLElement>) => {

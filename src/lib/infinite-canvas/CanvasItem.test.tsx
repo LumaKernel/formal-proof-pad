@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CanvasItem } from "./CanvasItem";
 import type { ContextMenuItem } from "./contextMenu";
+import type { SnapConfig } from "./snap";
 
 describe("CanvasItem", () => {
   it("renders children", () => {
@@ -625,5 +626,73 @@ describe("CanvasItem onClick", () => {
 
     const item = screen.getByTestId("canvas-item");
     expect(item.style.touchAction).toBe("none");
+  });
+});
+
+describe("CanvasItem snapConfig", () => {
+  beforeEach(() => {
+    Element.prototype.setPointerCapture = vi.fn();
+    Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  it("snaps drag position to grid when snapConfig is enabled", () => {
+    const onPositionChange = vi.fn();
+    const snapConfig: SnapConfig = { enabled: true, gridSpacing: 20 };
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={onPositionChange}
+        snapConfig={snapConfig}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+
+    fireEvent.pointerDown(item, {
+      button: 0,
+      clientX: 50,
+      clientY: 50,
+      pointerId: 1,
+    });
+    // Move by (12, 18) from origin → raw (12, 18) → snap to (20, 20)
+    fireEvent.pointerMove(item, {
+      clientX: 62,
+      clientY: 68,
+      pointerId: 1,
+    });
+
+    expect(onPositionChange).toHaveBeenCalledWith({ x: 20, y: 20 });
+  });
+
+  it("does not snap without snapConfig", () => {
+    const onPositionChange = vi.fn();
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={onPositionChange}
+      >
+        <span>Item</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+
+    fireEvent.pointerDown(item, {
+      button: 0,
+      clientX: 50,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(item, {
+      clientX: 62,
+      clientY: 68,
+      pointerId: 1,
+    });
+
+    expect(onPositionChange).toHaveBeenCalledWith({ x: 12, y: 18 });
   });
 });

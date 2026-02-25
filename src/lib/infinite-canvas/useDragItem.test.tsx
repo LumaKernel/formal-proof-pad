@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { SnapConfig } from "./snap";
 import { useDragItem } from "./useDragItem";
 
 function TestHarness({
@@ -7,6 +8,7 @@ function TestHarness({
   positionY,
   scale,
   onPositionChange,
+  snapConfig,
 }: {
   readonly positionX: number;
   readonly positionY: number;
@@ -15,11 +17,13 @@ function TestHarness({
     readonly x: number;
     readonly y: number;
   }) => void;
+  readonly snapConfig?: SnapConfig;
 }) {
   const { isDragging, onPointerDown, onPointerMove, onPointerUp } = useDragItem(
     { x: positionX, y: positionY },
     scale,
     onPositionChange,
+    snapConfig,
   );
 
   return (
@@ -262,5 +266,92 @@ describe("useDragItem", () => {
       pointerId: 7,
     });
     expect(Element.prototype.releasePointerCapture).not.toHaveBeenCalled();
+  });
+
+  it("snaps position to grid when snap is enabled", () => {
+    const onPositionChange = vi.fn();
+    const snapConfig: SnapConfig = { enabled: true, gridSpacing: 20 };
+    render(
+      <TestHarness
+        positionX={0}
+        positionY={0}
+        scale={1}
+        onPositionChange={onPositionChange}
+        snapConfig={snapConfig}
+      />,
+    );
+    const target = screen.getByTestId("drag-target");
+
+    fireEvent.pointerDown(target, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    // Move by (12, 18) from origin (0,0) → raw (12, 18) → snap to (20, 20)
+    fireEvent.pointerMove(target, {
+      clientX: 112,
+      clientY: 118,
+      pointerId: 1,
+    });
+
+    expect(onPositionChange).toHaveBeenCalledWith({ x: 20, y: 20 });
+  });
+
+  it("does not snap when snap is disabled (default)", () => {
+    const onPositionChange = vi.fn();
+    render(
+      <TestHarness
+        positionX={0}
+        positionY={0}
+        scale={1}
+        onPositionChange={onPositionChange}
+      />,
+    );
+    const target = screen.getByTestId("drag-target");
+
+    fireEvent.pointerDown(target, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(target, {
+      clientX: 112,
+      clientY: 118,
+      pointerId: 1,
+    });
+
+    expect(onPositionChange).toHaveBeenCalledWith({ x: 12, y: 18 });
+  });
+
+  it("snaps with custom grid spacing", () => {
+    const onPositionChange = vi.fn();
+    const snapConfig: SnapConfig = { enabled: true, gridSpacing: 50 };
+    render(
+      <TestHarness
+        positionX={0}
+        positionY={0}
+        scale={1}
+        onPositionChange={onPositionChange}
+        snapConfig={snapConfig}
+      />,
+    );
+    const target = screen.getByTestId("drag-target");
+
+    fireEvent.pointerDown(target, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 1,
+    });
+    // Move by (30, 80) → snap to (50, 100) with gridSpacing=50
+    fireEvent.pointerMove(target, {
+      clientX: 130,
+      clientY: 180,
+      pointerId: 1,
+    });
+
+    expect(onPositionChange).toHaveBeenCalledWith({ x: 50, y: 100 });
   });
 });
