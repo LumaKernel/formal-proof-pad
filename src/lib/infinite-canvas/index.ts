@@ -136,3 +136,17 @@ export type {
 } from "./multiSelection";
 export { useMarquee } from "./useMarquee";
 export type { UseMarqueeResult } from "./useMarquee";
+export {
+  classifyKeyDown,
+  classifyKeyUp,
+  computeArrowPanDelta,
+  PAN_STEP,
+  PAN_STEP_LARGE,
+} from "./keyboardShortcuts";
+export type { KeyboardAction, KeyEventInput } from "./keyboardShortcuts";
+export { useKeyboardShortcuts } from "./useKeyboardShortcuts";
+export type {
+  KeyboardEventLike,
+  KeyboardShortcutCallbacks,
+  UseKeyboardShortcutsResult,
+} from "./useKeyboardShortcuts";
