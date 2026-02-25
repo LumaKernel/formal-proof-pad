@@ -195,6 +195,26 @@ describe("proofWorkspace", () => {
       expect(result.connections).toHaveLength(0);
     });
 
+    it("removes connections where removed node is both source and target", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 });
+      ws = addNode(ws, "mp", "MP-1", { x: 100, y: 150 });
+      ws = addNode(ws, "mp", "MP-2", { x: 200, y: 300 });
+      ws = addNode(ws, "axiom", "A2", { x: 300, y: 0 });
+      // node-1 → node-2 (node-2 is target)
+      ws = addConnection(ws, "node-1", "out", "node-2", "premise-left");
+      // node-2 → node-3 (node-2 is source)
+      ws = addConnection(ws, "node-2", "out", "node-3", "premise-left");
+      // node-4 → node-3 (unrelated to node-2)
+      ws = addConnection(ws, "node-4", "out", "node-3", "premise-right");
+      // Remove node-2: should remove both connections involving node-2
+      const result = removeNode(ws, "node-2");
+      expect(result.nodes).toHaveLength(3);
+      expect(result.connections).toHaveLength(1);
+      expect(result.connections[0]!.fromNodeId).toBe("node-4");
+      expect(result.connections[0]!.toNodeId).toBe("node-3");
+    });
+
     it("does not mutate original state", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 });
@@ -920,6 +940,27 @@ describe("proofWorkspace", () => {
       expect(result.nodes).toHaveLength(2);
       expect(result.nodes[0]!.id).toBe("node-1");
       expect(result.nodes[1]!.id).toBe("node-3");
+    });
+
+    it("removes connections where selected node is target only", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 });
+      ws = addNode(ws, "mp", "MP-1", { x: 100, y: 150 });
+      ws = addNode(ws, "mp", "MP-2", { x: 200, y: 300 });
+      ws = addNode(ws, "axiom", "A2", { x: 300, y: 0 });
+      // node-1 → node-2 (node-2 is target)
+      ws = addConnection(ws, "node-1", "out", "node-2", "premise-left");
+      // node-2 → node-3 (node-2 is source)
+      ws = addConnection(ws, "node-2", "out", "node-3", "premise-left");
+      // node-4 → node-3 (node-3 is target)
+      ws = addConnection(ws, "node-4", "out", "node-3", "premise-right");
+      // Remove node-3: connections with node-3 as target/source should be removed
+      const result = removeSelectedNodes(ws, new Set(["node-3"]));
+      expect(result.nodes).toHaveLength(3);
+      // Only node-1 → node-2 connection should remain
+      expect(result.connections).toHaveLength(1);
+      expect(result.connections[0]!.fromNodeId).toBe("node-1");
+      expect(result.connections[0]!.toNodeId).toBe("node-2");
     });
   });
 });

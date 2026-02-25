@@ -150,6 +150,24 @@ describe("buildClipboardData", () => {
     expect(result.connections).toEqual([]);
   });
 
+  it("genVariableNameがないノードではgenVariableNameが含まれない", () => {
+    const result = buildClipboardData(
+      new Set(["node-2"]),
+      allNodes,
+      allConnections,
+    );
+    expect(result.nodes[0]?.genVariableName).toBeUndefined();
+  });
+
+  it("roleがないノードではroleが含まれない", () => {
+    const result = buildClipboardData(
+      new Set(["node-2"]),
+      allNodes,
+      allConnections,
+    );
+    expect(result.nodes[0]?.role).toBeUndefined();
+  });
+
   it("genVariableName が保存される", () => {
     const result = buildClipboardData(
       new Set(["node-4"]),
@@ -209,6 +227,40 @@ describe("シリアライズ/デシリアライズ", () => {
           version: 2,
           nodes: [],
           connections: [],
+        }),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("nullではundefinedを返す", () => {
+    expect(deserializeClipboardData("null")).toBeUndefined();
+  });
+
+  it("配列ではundefinedを返す", () => {
+    expect(deserializeClipboardData("[]")).toBeUndefined();
+  });
+
+  it("nodesが配列でない場合はundefinedを返す", () => {
+    expect(
+      deserializeClipboardData(
+        JSON.stringify({
+          _tag: "ProofPadClipboard",
+          version: 1,
+          nodes: "not-array",
+          connections: [],
+        }),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("connectionsが配列でない場合はundefinedを返す", () => {
+    expect(
+      deserializeClipboardData(
+        JSON.stringify({
+          _tag: "ProofPadClipboard",
+          version: 1,
+          nodes: [],
+          connections: "not-array",
         }),
       ),
     ).toBeUndefined();
@@ -310,6 +362,39 @@ describe("pasteClipboardData", () => {
     );
     const result = pasteClipboardData(clipboard, { x: 0, y: 0 }, 1);
     expect(result.newNodes[0]?.role).toBe("axiom");
+  });
+
+  it("接続が存在しないノードIDを参照する場合はスキップされる", () => {
+    const clipboardWithBadConn: ClipboardData = {
+      _tag: "ProofPadClipboard",
+      version: 1,
+      nodes: [
+        {
+          originalId: "node-1",
+          kind: "axiom",
+          label: "A1",
+          formulaText: "phi",
+          relativePosition: { x: 0, y: 0 },
+        },
+      ],
+      connections: [
+        {
+          fromOriginalNodeId: "node-1",
+          fromPortId: "out",
+          toOriginalNodeId: "node-unknown",
+          toPortId: "premise-left",
+        },
+        {
+          fromOriginalNodeId: "node-missing",
+          fromPortId: "out",
+          toOriginalNodeId: "node-1",
+          toPortId: "premise-right",
+        },
+      ],
+    };
+    const result = pasteClipboardData(clipboardWithBadConn, { x: 0, y: 0 }, 1);
+    expect(result.newNodes).toHaveLength(1);
+    expect(result.newConnections).toHaveLength(0);
   });
 
   it("空のクリップボードデータでは空の結果を返す", () => {

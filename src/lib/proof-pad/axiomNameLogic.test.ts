@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { identifyAxiomName, getAxiomDisplayName } from "./axiomNameLogic";
 import {
   lukasiewiczSystem,
-  predicateLogicSystem,
   equalityLogicSystem,
 } from "../logic-core/inferenceRule";
 import type { LogicSystem } from "../logic-core/inferenceRule";
@@ -15,7 +14,7 @@ import { parseString } from "../logic-lang/parser";
 /** DSL文字列をパースしてFormulaを返す（テスト用）*/
 function parseFormula(text: string) {
   const result = parseString(text);
-  if (!result.ok) throw new Error(`Parse error: ${text}`);
+  if (!result.ok) throw new Error(`Parse error: ${text satisfies string}`);
   return result.formula;
 }
 
