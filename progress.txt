@@ -47,7 +47,40 @@
 - テーマ遷移: `--theme-transition-duration` CSS変数で一元管理。`data-theme-loaded` 属性でFOUC防止、`prefers-reduced-motion` で無効化
 - FOUC防止: `layout.tsx` の `<head>` にインラインスクリプトでlocalStorageからテーマ読み取り → `data-theme` 属性設定。React hydration前に実行
 - InfiniteCanvasのデフォルト色はCSS変数 `var(--color-canvas-bg, #ffffff)` / `var(--color-canvas-dot, #c0c0c0)` で指定。propsで上書き可能
+- InfiniteCanvasのグリッドライン: SVGパターン重ね描画。`computeGridLinePatternParams` で純粋計算、`majorGridEvery=0` で無効化
 - Storybook iframe内でCSS変数を使うには `.storybook/preview.ts` で `globals.css` をインポートする必要がある
+
+---
+
+## 2026-02-25 - InfiniteCanvasに基準線追加 (US-006)
+- InfiniteCanvasにメジャーグリッドライン（基準線）を追加
+- `computeGridLinePatternParams()` 純粋関数をgrid.tsに追加（ドットパターンと同じアーキテクチャ）
+- SVGパターンで縦横の線を描画（ドットN個おき、デフォルト5個おき）
+- 新しいprops: `majorGridEvery`(デフォルト5), `gridLineColor`(CSS変数), `gridLineWidth`(0.5px)
+- `majorGridEvery=0` でグリッドライン無効化（パターン自体を描画しない）
+- CSS変数 `var(--color-canvas-grid-line)` でライト/ダーク両モード対応
+- テスト: +18テスト（1838 → 1856）
+  - grid.test.ts: +6テスト（computeGridLinePatternParams）
+  - InfiniteCanvas.test.tsx: +9テスト（グリッドライン描画テスト）
+  - InfiniteCanvas.stories.ts: +3ストーリー（WithGridLines, WithoutGridLines, DenseGridLines）
+- カバレッジ: Lines 99.88%（維持）, Stmts 99.04%（維持）
+- スクリーンショット:
+  - `.screenshots/us-006-grid-lines-iframe.png` (デフォルト: 5ドットおきの基準線)
+  - `.screenshots/us-006-dense-grid-lines.png` (3ドットおき、太さ1px)
+  - `.screenshots/us-006-without-grid-lines.png` (基準線無効)
+  - `.screenshots/us-006-grid-lines-dark-bg.png` (ダーク背景での基準線)
+  - `.screenshots/us-006-default-with-grid-lines.png` (デフォルトストーリー)
+- 変更ファイル:
+  - `src/lib/infinite-canvas/grid.ts` (MODIFIED) - computeGridLinePatternParams追加
+  - `src/lib/infinite-canvas/grid.test.ts` (MODIFIED) - computeGridLinePatternParamsテスト追加
+  - `src/lib/infinite-canvas/InfiniteCanvas.tsx` (MODIFIED) - グリッドラインパターン描画追加
+  - `src/lib/infinite-canvas/InfiniteCanvas.test.tsx` (MODIFIED) - グリッドラインテスト追加
+  - `src/lib/infinite-canvas/InfiniteCanvas.stories.ts` (MODIFIED) - グリッドラインストーリー追加
+  - `tasks/prd-dark-mode.md` (MODIFIED) - US-006完了
+- **今後のイテレーションへの学び:**
+  - SVGパターンは複数重ねて描画可能。ドットパターンの上にグリッドラインパターンを重ねるアプローチが効果的
+  - SVG `<line>` の `stroke` 属性にもCSS変数が使える
+  - `majorGridEvery=0` のような無効化パラメータは、パターン自体を条件付きレンダリングするのが最も確実（nullチェック）
 
 ---
 
