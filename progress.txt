@@ -60,6 +60,8 @@
 - UIオーバーレイ（バナー等）のclickにはstopPropagationが必要（コンテナのclick解除を防ぐ）
 - マルチセレクションも3層分離: `multiSelection.ts`(純粋ロジック) → `useMarquee.ts`(React hook) → caller統合
 - InfiniteCanvasの`panEnabled`でパン/マーキーモード切り替え。空領域イベントは`onEmptyArea*`で転送
+- キーボードショートカットも3層: `keyboardShortcuts.ts`(純粋ロジック) → `useKeyboardShortcuts.ts`(hook) → caller統合
+- テストで`as unknown as`を避けるため、hookのイベント型は`KeyboardEventLike`（narrower type）で定義
 - `screenToWorld`: `(screenX - offsetX) / scale` でスクリーン→ワールド変換（worldToScreenの逆）
 - 補完候補の重複排除: `computeCompletions` で同じ `insertText` の候補を `Set` で重複排除する
 - Prettier: 空のmdファイルは0バイトにする（改行のみの1バイトは不正フォーマット扱い）
@@ -74,6 +76,30 @@
 - `src/lib/quest/` はクエストモード管理。questDefinition.ts(型・カテゴリ) + builtinQuests.ts(問題データ) + questProgress.ts(進捗) + questCatalog.ts(カタログ)
 - クエスト進捗のMapもJSON化不可。serialize/deserializeパターンはnotebookSerializationと同様
 
+---
+
+## 2026-02-25 - InfiniteCanvas: キーボードショートカット機能を追加
+- `keyboardShortcuts.ts`: 純粋ロジック。KeyEventInput → KeyboardAction の分類関数（classifyKeyDown/classifyKeyUp）、矢印パンデルタ計算（computeArrowPanDelta）
+- `useKeyboardShortcuts.ts`: React hook。KeyboardEventLike型で受けてclassify → callbacksに振り分け。スペースパンモードの状態管理
+- `KeyboardShortcutsDemo.stories.tsx`: 全ショートカットのインタラクティブデモ。Delete削除、矢印パン、Ctrl+/-ズーム、Space+ドラッグパン
+- テスト: keyboardShortcuts(37), useKeyboardShortcuts(15) = 52件追加、全2737テストパス
+- カバレッジ: Stmts 99.34%(↑0.01), Branch 94.92%(↑0.09), Funcs 90.58%(微減), Lines 100%(維持)
+  - ベースライン: Stmts 99.33%, Branch 94.83%, Funcs 90.69%, Lines 100%
+- ブラウザ確認: .screenshots/keyboard-shortcuts-demo-default.png, .screenshots/keyboard-shortcuts-demo-iframe.png
+- 変更ファイル:
+  - `src/lib/infinite-canvas/keyboardShortcuts.ts` (NEW)
+  - `src/lib/infinite-canvas/keyboardShortcuts.test.ts` (NEW)
+  - `src/lib/infinite-canvas/useKeyboardShortcuts.ts` (NEW)
+  - `src/lib/infinite-canvas/useKeyboardShortcuts.test.tsx` (NEW)
+  - `src/lib/infinite-canvas/KeyboardShortcutsDemo.stories.tsx` (NEW)
+  - `src/lib/infinite-canvas/index.ts` (MODIFIED)
+- **今後のイテレーションへの学び:**
+  - キーボードショートカットも3層分離: keyboardShortcuts.ts(純粋ロジック) → useKeyboardShortcuts.ts(hook) → caller統合
+  - `KeyboardEventLike` 型を定義してReact.KeyboardEventの必要最小限を抽象化。テストで`as unknown as`不要に
+  - `@luma-dev/luma-ts/no-as-unknown-as` ESLintルールがある。テスト用モックは narrower type を定義してキャスト回避
+  - React hookでのrefへのrender中の書き込み（`ref.current = value`）はreact-hooks/refsルール違反。useEffectかcallback依存で解決
+  - スペースパンモードはisSpacePanActive状態をhook内で管理。callerはpanEnabled propに反映
+  - computeZoomInViewport/computeZoomOutViewport（zoomControls.ts）をキーボードズームにも再利用。コンテナ中心基準
 ---
 
 ## 2026-02-25 - InfiniteCanvas: マルチセレクション（矩形選択/マーキー）機能を追加
