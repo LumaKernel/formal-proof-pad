@@ -1082,6 +1082,92 @@ describe("ProofWorkspace", () => {
     });
   });
 
+  describe("node role badges", () => {
+    it("axiom nodes show role badge", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          testId="workspace"
+        />,
+      );
+      const badge = screen.getByTestId("proof-node-node-1-role-badge");
+      expect(badge).toBeInTheDocument();
+      // Root node without explicit role shows "ROOT"
+      expect(badge).toHaveTextContent("ROOT");
+    });
+
+    it("derived (MP) nodes show DERIVED badge", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 200, y: 0 }, "phi -> psi");
+      const result = applyMPAndConnect(ws, "node-1", "node-2", {
+        x: 100,
+        y: 150,
+      });
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={result.workspace}
+          testId="workspace"
+        />,
+      );
+      const mpBadge = screen.getByTestId("proof-node-node-3-role-badge");
+      expect(mpBadge).toHaveTextContent("DERIVED");
+    });
+
+    it("clicking role badge cycles role (external state)", async () => {
+      const user = userEvent.setup();
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+
+      const onWorkspaceChange = vi.fn();
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={ws}
+          onWorkspaceChange={onWorkspaceChange}
+          testId="workspace"
+        />,
+      );
+      const badge = screen.getByTestId("proof-node-node-1-role-badge");
+      expect(badge).toHaveTextContent("ROOT");
+
+      // Click to cycle: ROOT -> AXIOM
+      await user.click(badge);
+      expect(onWorkspaceChange).toHaveBeenCalled();
+      const updatedWs = onWorkspaceChange.mock.calls[0]![0] as WorkspaceState;
+      expect(updatedWs.nodes[0]!.role).toBe("axiom");
+    });
+
+    it("cycles through all roles (internal state)", async () => {
+      const user = userEvent.setup();
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+
+      render(<StatefulWorkspace initialWorkspace={ws} />);
+
+      const badge = screen.getByTestId("proof-node-node-1-role-badge");
+
+      // Initial: ROOT
+      expect(badge).toHaveTextContent("ROOT");
+
+      // Click: ROOT -> AXIOM
+      await user.click(badge);
+      expect(badge).toHaveTextContent("AXIOM");
+
+      // Click: AXIOM -> GOAL
+      await user.click(badge);
+      expect(badge).toHaveTextContent("GOAL");
+
+      // Click: GOAL -> ROOT
+      await user.click(badge);
+      expect(badge).toHaveTextContent("ROOT");
+    });
+  });
+
   describe("testIdなしのレンダリング", () => {
     it("testIdなしでも正常にレンダリングされる", () => {
       const ws = createEmptyWorkspace(lukasiewiczSystem);

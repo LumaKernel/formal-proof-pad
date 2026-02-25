@@ -28,6 +28,7 @@
 - FormulaEditor内 `onPointerDown` で `stopPropagation` し、CanvasItem の PointerCapture によるclick干渉を防止
 - `src/lib/proof-pad/` は ProofPad（証明ワークスペース）のUIコンポーネント群。logic-core, formula-input, infinite-canvas を統合
 - ProofWorkspace: 制御/非制御両モード対応。workspaceState.ts にピュアロジック、ProofWorkspace.tsx にUIを分離
+- nodeRoleLogic.ts: ノード分類の純粋ロジック。NodeRole("axiom"|"goal") と NodeClassification("root-axiom"|"root-goal"|"root-unmarked"|"derived") で分類
 - EditableProofNode: FormulaEditorを内包した編集可能な証明ノード。proofNodeUI.ts に純粋ロジック（スタイル・ポート定義）を分離
 - FormulaEditorは制御コンポーネントなので、onParsedテストには状態管理ラッパーが必要（useDeferredValueで非同期）
 - `src/lib/history/` は汎用undo/redoライブラリ。純粋ロジック（history.ts）+ React hook（useHistory.ts）。InfiniteCanvasとは独立
@@ -1520,4 +1521,45 @@
   - ESM環境では `require()` は使えない。テストでも `import` を使用すること
   - MP適用結果の `_tag` で discriminated union を使い、exhaustive check でエラー種別を網羅的に処理
   - 接続線の色分け（緑=成功、赤=エラー）はmpValidationsメモ化で全MPノードを一括バリデーション
+---
+
+## 2026-02-25 - [ProofPad] ノードに公理/ゴールの役割マーク機能を追加
+- **タスク:** `tasks/prd-inserted-tasks.md` - 公理、ゴールとしてマークできる機能
+- **ベースラインカバレッジ:** Stmts 99.38%, Branch 95.09%, Lines 100% (1972 tests, 94 files)
+- **最終カバレッジ:** Stmts 99.39%, Branch 95.09%, Lines 100% (1996+ tests)
+
+### 実装した内容
+- `nodeRoleLogic.ts` を新規作成: ノード分類の純粋ロジック
+  - `NodeRole` = "axiom" | "goal"
+  - `NodeClassification` = "root-axiom" | "root-goal" | "root-unmarked" | "derived"
+  - `isRootNode`, `classifyNode`, `classifyAllNodes`, `getGoalNodeIds`, `getAxiomNodeIds`
+- `workspaceState.ts` に `role?: NodeRole` フィールドと `updateNodeRole` 関数を追加
+- `EditableProofNode.tsx` にロールバッジUI追加（クリックでROOT→AXIOM→GOAL→ROOTサイクル）
+- `ProofWorkspace.tsx` にノード分類の統合（classifyAllNodes + handleRoleChange）
+- `index.ts` に新しいエクスポートを追加
+
+### 変更したファイル
+- `src/lib/proof-pad/nodeRoleLogic.ts` (NEW)
+- `src/lib/proof-pad/nodeRoleLogic.test.ts` (NEW - 23テスト)
+- `src/lib/proof-pad/workspaceState.ts` (MODIFIED)
+- `src/lib/proof-pad/workspaceState.test.ts` (MODIFIED - +5テスト)
+- `src/lib/proof-pad/EditableProofNode.tsx` (MODIFIED)
+- `src/lib/proof-pad/EditableProofNode.test.tsx` (MODIFIED - +11テスト)
+- `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED)
+- `src/lib/proof-pad/ProofWorkspace.test.tsx` (MODIFIED - +4テスト)
+- `src/lib/proof-pad/index.ts` (MODIFIED)
+- `tasks/prd-inserted-tasks.md` (MODIFIED)
+- `task-processing.md` (MODIFIED)
+
+### スクリーンショット
+- `.screenshots/role-badge-interactive.png` - Interactiveストーリーでのバッジ表示
+- `.screenshots/role-badge-valid-mp.png` - Valid MP Applicationストーリーでのバッジ表示
+- `.screenshots/role-badge-valid-mp-fullscreen.png` - フルスクリーンでROOT/DERIVEDバッジ確認
+
+### 今後のイテレーションへの学び:
+- nodeRoleLogic.ts は純粋ロジックとして workspaceState.ts から独立。3層分離パターン（pure logic → state → UI）を継続
+- NodeClassification の exhaustive switch で分類追加時のコンパイルエラー検出が可能
+- derived ノードはクリック無効（onClick=undefined）にし、防御コードは v8 ignore で除外
+- getRoleBadgeStyle/getRoleBadgeLabel は exhaustive switch でNodeClassification追加時に必ず対応が必要
+- ロールバッジのサイクル: root-unmarked → axiom → goal → undefined(root-unmarked) の3ステップ
 ---

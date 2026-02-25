@@ -232,6 +232,97 @@ describe("EditableProofNode", () => {
     });
   });
 
+  describe("role badge", () => {
+    it("classification未指定ではバッジが表示されない", () => {
+      renderNode();
+      expect(
+        screen.queryByTestId("test-node-role-badge"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("root-axiom分類で'AXIOM'バッジが表示される", () => {
+      renderNode({ classification: "root-axiom" });
+      const badge = screen.getByTestId("test-node-role-badge");
+      expect(badge).toHaveTextContent("AXIOM");
+    });
+
+    it("root-goal分類で'GOAL'バッジが表示される", () => {
+      renderNode({ classification: "root-goal" });
+      const badge = screen.getByTestId("test-node-role-badge");
+      expect(badge).toHaveTextContent("GOAL");
+    });
+
+    it("root-unmarked分類で'ROOT'バッジが表示される", () => {
+      renderNode({ classification: "root-unmarked" });
+      const badge = screen.getByTestId("test-node-role-badge");
+      expect(badge).toHaveTextContent("ROOT");
+    });
+
+    it("derived分類で'DERIVED'バッジが表示される", () => {
+      renderNode({ classification: "derived" });
+      const badge = screen.getByTestId("test-node-role-badge");
+      expect(badge).toHaveTextContent("DERIVED");
+    });
+
+    it("root-unmarkedバッジクリックでonRoleChange('axiom')が呼ばれる", async () => {
+      const user = userEvent.setup();
+      const onRoleChange = vi.fn();
+      renderNode({ classification: "root-unmarked", onRoleChange });
+      const badge = screen.getByTestId("test-node-role-badge");
+      await user.click(badge);
+      expect(onRoleChange).toHaveBeenCalledWith("node-1", "axiom");
+    });
+
+    it("root-axiomバッジクリックでonRoleChange('goal')が呼ばれる", async () => {
+      const user = userEvent.setup();
+      const onRoleChange = vi.fn();
+      renderNode({ classification: "root-axiom", onRoleChange });
+      const badge = screen.getByTestId("test-node-role-badge");
+      await user.click(badge);
+      expect(onRoleChange).toHaveBeenCalledWith("node-1", "goal");
+    });
+
+    it("root-goalバッジクリックでonRoleChange(undefined)が呼ばれる", async () => {
+      const user = userEvent.setup();
+      const onRoleChange = vi.fn();
+      renderNode({ classification: "root-goal", onRoleChange });
+      const badge = screen.getByTestId("test-node-role-badge");
+      await user.click(badge);
+      expect(onRoleChange).toHaveBeenCalledWith("node-1", undefined);
+    });
+
+    it("derivedバッジクリックではonRoleChangeが呼ばれない", async () => {
+      const user = userEvent.setup();
+      const onRoleChange = vi.fn();
+      renderNode({ classification: "derived", onRoleChange });
+      const badge = screen.getByTestId("test-node-role-badge");
+      await user.click(badge);
+      expect(onRoleChange).not.toHaveBeenCalled();
+    });
+
+    it("onRoleChangeが未定義の場合、バッジクリックでエラーにならない", async () => {
+      const user = userEvent.setup();
+      renderNode({ classification: "root-unmarked" });
+      const badge = screen.getByTestId("test-node-role-badge");
+      await user.click(badge);
+      // Should not throw
+    });
+
+    it("testIdなしでclassificationを指定してもrole-badge testIdは出ない", () => {
+      const { container } = render(
+        <EditableProofNode
+          id="node-1"
+          kind="axiom"
+          label="A1"
+          formulaText="φ"
+          onFormulaTextChange={() => {}}
+          classification="root-axiom"
+        />,
+      );
+      expect(container.textContent).toContain("AXIOM");
+    });
+  });
+
   describe("testIdなしのレンダリング", () => {
     it("testIdなしでも正常にレンダリングされる", () => {
       const { container } = render(

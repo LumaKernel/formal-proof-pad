@@ -10,6 +10,7 @@
 import type { LogicSystem } from "../logic-core/inferenceRule";
 import type { Point } from "../infinite-canvas/types";
 import type { ProofNodeKind } from "./proofNodeUI";
+import type { NodeRole } from "./nodeRoleLogic";
 import {
   validateMPApplication,
   type MPApplicationResult,
@@ -30,6 +31,8 @@ export type WorkspaceNode = {
   readonly position: Point;
   /** Gen規則で使用する量化変数名（genノードのみ） */
   readonly genVariableName?: string;
+  /** ユーザーが明示的に設定した役割（"axiom" | "goal" | undefined） */
+  readonly role?: NodeRole;
 };
 
 /** ワークスペース上の接続（ポートベース） */
@@ -138,6 +141,20 @@ export function updateNodeGenVariableName(
     ...state,
     nodes: state.nodes.map((node) =>
       node.id === nodeId ? { ...node, genVariableName } : node,
+    ),
+  };
+}
+
+/** ノードの役割を更新する */
+export function updateNodeRole(
+  state: WorkspaceState,
+  nodeId: string,
+  role: NodeRole | undefined,
+): WorkspaceState {
+  return {
+    ...state,
+    nodes: state.nodes.map((node) =>
+      node.id === nodeId ? { ...node, role } : node,
     ),
   };
 }

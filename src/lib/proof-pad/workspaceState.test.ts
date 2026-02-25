@@ -10,6 +10,7 @@ import {
   updateNodePosition,
   updateNodeFormulaText,
   updateNodeGenVariableName,
+  updateNodeRole,
   updateGoalFormulaText,
   findNode,
   removeNode,
@@ -466,6 +467,46 @@ describe("proofWorkspace", () => {
 
       expect(ws.nodes).toHaveLength(1);
       expect(ws.connections).toHaveLength(0);
+    });
+  });
+
+  describe("updateNodeRole", () => {
+    it("sets role to 'axiom'", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      const result = updateNodeRole(ws, "node-1", "axiom");
+      expect(result.nodes[0]!.role).toBe("axiom");
+    });
+
+    it("sets role to 'goal'", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      const result = updateNodeRole(ws, "node-1", "goal");
+      expect(result.nodes[0]!.role).toBe("goal");
+    });
+
+    it("clears role by setting to undefined", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = updateNodeRole(ws, "node-1", "axiom");
+      const result = updateNodeRole(ws, "node-1", undefined);
+      expect(result.nodes[0]!.role).toBeUndefined();
+    });
+
+    it("does not affect other nodes", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      ws = addNode(ws, "axiom", "A2", { x: 100, y: 0 }, "psi");
+      const result = updateNodeRole(ws, "node-1", "goal");
+      expect(result.nodes[0]!.role).toBe("goal");
+      expect(result.nodes[1]!.role).toBeUndefined();
+    });
+
+    it("does not mutate original state", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      updateNodeRole(ws, "node-1", "axiom");
+      expect(ws.nodes[0]!.role).toBeUndefined();
     });
   });
 

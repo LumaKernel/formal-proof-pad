@@ -14,6 +14,7 @@ import type { EditorMode } from "../formula-input/editorLogic";
 import { FormulaEditor } from "../formula-input/FormulaEditor";
 import type { ProofNodeKind } from "./proofNodeUI";
 import { getProofNodeStyle } from "./proofNodeUI";
+import type { NodeRole, NodeClassification } from "./nodeRoleLogic";
 
 // --- Props ---
 
@@ -38,6 +39,10 @@ export interface EditableProofNodeProps {
   readonly statusMessage?: string;
   /** ステータスメッセージの種類（エラー/成功） */
   readonly statusType?: "error" | "success";
+  /** ノードの分類（nodeRoleLogicで計算） */
+  readonly classification?: NodeClassification;
+  /** ノードの役割変更時のコールバック */
+  readonly onRoleChange?: (id: string, role: NodeRole | undefined) => void;
   /** data-testid */
   readonly testId?: string;
 }
@@ -83,6 +88,68 @@ const statusSuccessStyle: CSSProperties = {
   color: "#fff",
 };
 
+const roleBadgeBaseStyle: CSSProperties = {
+  fontSize: 9,
+  fontFamily: "sans-serif",
+  fontWeight: 600,
+  padding: "1px 6px",
+  borderRadius: 3,
+  cursor: "pointer",
+  userSelect: "none",
+  letterSpacing: 0.5,
+};
+
+const headerRowStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 6,
+  marginBottom: 2,
+};
+
+function getRoleBadgeStyle(classification: NodeClassification): CSSProperties {
+  switch (classification) {
+    case "root-axiom":
+      return {
+        ...roleBadgeBaseStyle,
+        background: "rgba(255,255,255,0.3)",
+        color: "#fff",
+      };
+    case "root-goal":
+      return {
+        ...roleBadgeBaseStyle,
+        background: "rgba(255,215,0,0.4)",
+        color: "#fff",
+      };
+    case "root-unmarked":
+      return {
+        ...roleBadgeBaseStyle,
+        background: "rgba(255,255,255,0.15)",
+        color: "rgba(255,255,255,0.7)",
+        border: "1px dashed rgba(255,255,255,0.3)",
+      };
+    case "derived":
+      return {
+        ...roleBadgeBaseStyle,
+        background: "rgba(255,255,255,0.15)",
+        color: "rgba(255,255,255,0.7)",
+      };
+  }
+}
+
+function getRoleBadgeLabel(classification: NodeClassification): string {
+  switch (classification) {
+    case "root-axiom":
+      return "AXIOM";
+    case "root-goal":
+      return "GOAL";
+    case "root-unmarked":
+      return "ROOT";
+    case "derived":
+      return "DERIVED";
+  }
+}
+
 // --- コンポーネント ---
 
 export function EditableProofNode({
@@ -96,6 +163,8 @@ export function EditableProofNode({
   editable = true,
   statusMessage,
   statusType,
+  classification,
+  onRoleChange,
   testId,
 }: EditableProofNodeProps) {
   const nodeStyle = useMemo(() => getProofNodeStyle(kind), [kind]);
@@ -137,9 +206,53 @@ export function EditableProofNode({
     [id, onModeChange],
   );
 
+  /** 役割バッジクリック時: axiom → goal → unmarked → axiom のサイクル */
+  const handleRoleBadgeClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!onRoleChange || !classification) return;
+      /* v8 ignore start -- 防御コード: onClick自体がderivedでundefinedなので到達不能 */
+      if (classification === "derived") return;
+      /* v8 ignore stop */
+
+      switch (classification) {
+        case "root-unmarked":
+          onRoleChange(id, "axiom");
+          break;
+        case "root-axiom":
+          onRoleChange(id, "goal");
+          break;
+        case "root-goal":
+          onRoleChange(id, undefined);
+          break;
+      }
+    },
+    [id, classification, onRoleChange],
+  );
+
   return (
     <div data-testid={testId} style={containerStyle}>
-      <div style={labelStyle}>{label}</div>
+      <div style={classification ? headerRowStyle : undefined}>
+        <div style={labelStyle}>{label}</div>
+        {classification ? (
+          <div
+            style={getRoleBadgeStyle(classification)}
+            onClick={
+              classification !== "derived" ? handleRoleBadgeClick : undefined
+            }
+            title={
+              classification !== "derived"
+                ? "Click to cycle role: Root → Axiom → Goal"
+                : "Derived node (role is automatic)"
+            }
+            data-testid={
+              testId ? `${testId satisfies string}-role-badge` : undefined
+            }
+          >
+            {getRoleBadgeLabel(classification)}
+          </div>
+        ) : null}
+      </div>
       {editable ? (
         <FormulaEditor
           value={formulaText}

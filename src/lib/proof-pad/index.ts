@@ -13,6 +13,7 @@ export {
   updateNodeFormulaText,
   updateGoalFormulaText,
   updateNodeGenVariableName,
+  updateNodeRole,
   findNode,
   removeNode,
   addConnection,
@@ -61,6 +62,14 @@ export {
   getProofEdgeColor,
 } from "./proofNodeUI";
 export type { ProofNodeKind, ProofNodeStyle } from "./proofNodeUI";
+export {
+  isRootNode,
+  classifyNode,
+  classifyAllNodes,
+  getGoalNodeIds,
+  getAxiomNodeIds,
+} from "./nodeRoleLogic";
+export type { NodeRole, NodeClassification } from "./nodeRoleLogic";
 export { parseGoalFormula, checkGoal } from "./goalCheckLogic";
 export type {
   GoalNotSet,

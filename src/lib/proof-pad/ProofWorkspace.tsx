@@ -28,6 +28,8 @@ import {
   getGenErrorMessage,
 } from "./genApplicationLogic";
 import { checkGoal } from "./goalCheckLogic";
+import { classifyAllNodes } from "./nodeRoleLogic";
+import type { NodeRole } from "./nodeRoleLogic";
 import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
 import {
   createEmptyWorkspace,
@@ -35,6 +37,7 @@ import {
   updateNodePosition,
   updateNodeFormulaText,
   updateGoalFormulaText,
+  updateNodeRole,
   findNode,
   applyMPAndConnect,
   applyGenAndConnect,
@@ -469,6 +472,20 @@ export function ProofWorkspace({
 
   const isGoalAchieved = goalCheckResult._tag === "GoalAchieved";
 
+  // --- ノード分類 ---
+
+  const nodeClassifications = useMemo(
+    () => classifyAllNodes(workspace.nodes, workspace.connections),
+    [workspace.nodes, workspace.connections],
+  );
+
+  const handleRoleChange = useCallback(
+    (nodeId: string, role: NodeRole | undefined) => {
+      setWorkspace(updateNodeRole(workspace, nodeId, role));
+    },
+    [workspace, setWorkspace],
+  );
+
   const handleGoalTextChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setWorkspace(updateGoalFormulaText(workspace, e.target.value));
@@ -652,6 +669,8 @@ export function ProofWorkspace({
               editable={node.kind !== "mp" && node.kind !== "gen"}
               statusMessage={nodeValidation?.message}
               statusType={nodeValidation?.type}
+              classification={nodeClassifications.get(node.id)}
+              onRoleChange={handleRoleChange}
               testId={`proof-node-${node.id satisfies string}`}
             />
           </div>
@@ -666,10 +685,12 @@ export function ProofWorkspace({
       genSelection,
       mpValidations,
       genValidations,
+      nodeClassifications,
       handlePositionChange,
       handleFormulaTextChange,
       handleFormulaParsed,
       handleModeChange,
+      handleRoleChange,
       handleNodeClickForSelection,
       getNodeSizeRef,
     ],
