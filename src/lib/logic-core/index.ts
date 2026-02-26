@@ -171,3 +171,42 @@ export type {
   ProofValidationResult,
   ProofNodeVisualization,
 } from "./proofTree";
+
+// ── Natural Deduction (自然演繹) ────────────────────────────
+export {
+  assumption,
+  weakening,
+  implicationIntro,
+  implicationElim,
+  conjunctionIntro,
+  conjunctionElimLeft,
+  conjunctionElimRight,
+  disjunctionIntroLeft,
+  disjunctionIntroRight,
+  disjunctionElim,
+  efqRule,
+  dneRule,
+  getNdConclusion,
+  getOpenAssumptions,
+  countNdNodes,
+  ndProofDepth,
+  validateNdProof,
+} from "./naturalDeduction";
+export type {
+  AssumptionId,
+  NdAssumption,
+  NdWeakening,
+  NdImplicationIntro,
+  NdImplicationElim,
+  NdConjunctionIntro,
+  NdConjunctionElimLeft,
+  NdConjunctionElimRight,
+  NdDisjunctionIntroLeft,
+  NdDisjunctionIntroRight,
+  NdDisjunctionElim,
+  NdEfq,
+  NdDne,
+  NdProofNode,
+  NdValidationError,
+  NdValidationResult,
+} from "./naturalDeduction";

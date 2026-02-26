@@ -82,6 +82,39 @@
 
 ---
 
+## 2026-02-26 - 自然演繹(Natural Deduction)のピュアロジック実装
+- naturalDeduction.ts: NM(最小論理)の自然演繹証明図モジュールを新規作成
+- 戸次大介『数理論理学』第8章に基づく完全な実装
+- NdProofNode discriminated union: 12種類のノード型
+  - NdAssumption (仮定), NdWeakening (弱化)
+  - NdImplicationIntro (→導入), NdImplicationElim (→除去=MP)
+  - NdConjunctionIntro (∧導入), NdConjunctionElimLeft/Right (∧除去)
+  - NdDisjunctionIntroLeft/Right (∨導入), NdDisjunctionElim (∨除去)
+  - NdEfq (爆発律=NJ拡張), NdDne (二重否定除去=NK拡張)
+- 仮定の打ち消し(discharge)追跡: getOpenAssumptions でAssumptionIdのSetを計算
+- バリデーション: validateNdProof で全規則の構造整合性を検証
+- ユーティリティ: countNdNodes, ndProofDepth
+- テスト: 61テスト全パス
+  - (K) φ→(ψ→φ) のNM証明（例8.12）
+  - (S) (φ→(ψ→χ))→((φ→ψ)→(φ→χ)) のNM証明
+  - 仮定の複数使用、vacuous discharge
+  - 全規則の正常パス＋全エラーパス
+- カバレッジ: Stmts 99.36%(+0.02), Lines 99.94%(+0.01), Branch 94.85%(-0.07, 防御コードのフォールバック)
+  - ベースライン: Stmts 99.34%, Branch 94.92%, Funcs 89.95%, Lines 99.93%
+  - naturalDeduction.ts: Stmts 100%, Funcs 100%, Lines 100%, Branch 92.55%
+- 変更ファイル:
+  - `src/lib/logic-core/naturalDeduction.ts` (NEW)
+  - `src/lib/logic-core/naturalDeduction.test.ts` (NEW)
+  - `src/lib/logic-core/index.ts` (MODIFIED - 自然演繹エクスポート追加)
+- **今後のイテレーションへの学び:**
+  - 自然演繹はHilbert流と独立したモジュールとして実装可能（proofTree.tsを変更せず共存）
+  - 打ち消し追跡はSet<AssumptionId>の和集合/差集合で純粋関数的に実装可能
+  - ファクトリ関数でのinstanceof分岐はフォールバックとして必要（バリデーションで検証するため構築時は緩い）
+  - NdProofNode unionに新ノード追加時は5つのswitch文（getNdConclusion以外の4関数+validateNdNode）を更新
+  - 戸次本の「仮定を複数回使える」「打ち消さなくてよい(vacuous discharge)」は重要な仕様
+  - NJ(直観主義) = NM + EFQ, NK(古典) = NM + DNE の構造は型で表現済み
+---
+
 ## 2026-02-26 - 論理体系: 体系SK(基本命題計算)プリセット追加・体系情報整理
 - inferenceRule.ts に skSystem エイリアス追加（minimalLogicSystem と同一参照）
 - notebookCreateLogic.ts にSKプリセット追加、全8体系の説明を充実化（包含関係 HM ⊆ HJ ⊆ HK を明記）
