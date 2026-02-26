@@ -16,8 +16,8 @@ describe("allReferenceEntries", () => {
   });
 
   it("エントリ数が期待通り", () => {
-    // 公理13 + 推論規則2 + 論理体系5 + 概念3 + 理論2 = 25
-    expect(allReferenceEntries).toHaveLength(25);
+    // 公理13 + 推論規則9 + 論理体系5 + 概念3 + 理論2 = 32
+    expect(allReferenceEntries).toHaveLength(32);
   });
 
   it("少なくとも1つのエントリが各カテゴリに存在する", () => {
@@ -148,6 +148,26 @@ describe("公理エントリの個別チェック", () => {
 });
 
 describe("推論規則エントリの個別チェック", () => {
+  const ruleIds = [
+    "rule-mp",
+    "rule-gen",
+    "rule-nd-overview",
+    "rule-nd-implication",
+    "rule-nd-conjunction",
+    "rule-nd-disjunction",
+    "rule-sc-overview",
+    "rule-sc-structural",
+    "rule-sc-logical",
+  ];
+
+  it("全推論規則エントリが存在する", () => {
+    for (const id of ruleIds) {
+      const entry = findEntryById(allReferenceEntries, id);
+      expect(entry).toBeDefined();
+      expect(entry?.category).toBe("inference-rule");
+    }
+  });
+
   it("MP エントリが存在する", () => {
     const entry = findEntryById(allReferenceEntries, "rule-mp");
     expect(entry).toBeDefined();
@@ -159,6 +179,68 @@ describe("推論規則エントリの個別チェック", () => {
     const entry = findEntryById(allReferenceEntries, "rule-gen");
     expect(entry).toBeDefined();
     expect(entry?.category).toBe("inference-rule");
+    expect(entry?.formalNotation).toBeTruthy();
+  });
+
+  it("自然演繹の概要エントリにNM/NJ/NKの記載がある", () => {
+    const entry = findEntryById(allReferenceEntries, "rule-nd-overview");
+    expect(entry?.body.en.some((p) => p.includes("NM"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("NJ"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("NK"))).toBe(true);
+  });
+
+  it("自然演繹の含意規則に→I/→Eが記載されている", () => {
+    const entry = findEntryById(allReferenceEntries, "rule-nd-implication");
+    expect(entry?.body.en.some((p) => p.includes("→I"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("→E"))).toBe(true);
+    expect(entry?.formalNotation).toBeTruthy();
+  });
+
+  it("自然演繹の連言規則に∧I/∧Eが記載されている", () => {
+    const entry = findEntryById(allReferenceEntries, "rule-nd-conjunction");
+    expect(entry?.body.en.some((p) => p.includes("∧I"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("∧E"))).toBe(true);
+    expect(entry?.formalNotation).toBeTruthy();
+  });
+
+  it("自然演繹の選言規則に∨I/∨Eが記載されている", () => {
+    const entry = findEntryById(allReferenceEntries, "rule-nd-disjunction");
+    expect(entry?.body.en.some((p) => p.includes("∨I"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("∨E"))).toBe(true);
+    expect(entry?.formalNotation).toBeTruthy();
+  });
+
+  it("シーケント計算の概要にLM/LJ/LKの記載がある", () => {
+    const entry = findEntryById(allReferenceEntries, "rule-sc-overview");
+    expect(entry?.body.en.some((p) => p.includes("LM"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("LJ"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("LK"))).toBe(true);
+  });
+
+  it("シーケント計算の概要にカット除去定理が記載されている", () => {
+    const entry = findEntryById(allReferenceEntries, "rule-sc-overview");
+    expect(entry?.body.en.some((p) => p.includes("cut elimination"))).toBe(
+      true,
+    );
+    expect(entry?.body.ja.some((p) => p.includes("カット除去"))).toBe(true);
+  });
+
+  it("構造規則にカット・弱化・縮約・交換が記載されている", () => {
+    const entry = findEntryById(allReferenceEntries, "rule-sc-structural");
+    expect(entry?.body.en.some((p) => p.includes("Cut"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("Weakening"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("Contraction"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("Exchange"))).toBe(true);
+    expect(entry?.formalNotation).toBeTruthy();
+  });
+
+  it("論理規則に全結合子の記載がある", () => {
+    const entry = findEntryById(allReferenceEntries, "rule-sc-logical");
+    expect(entry?.body.en.some((p) => p.includes("Implication"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("Conjunction"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("Disjunction"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("Universal"))).toBe(true);
+    expect(entry?.body.en.some((p) => p.includes("Existential"))).toBe(true);
     expect(entry?.formalNotation).toBeTruthy();
   });
 });
@@ -251,5 +333,32 @@ describe("検索の動作確認", () => {
   it("日本語で合同律を検索できる", () => {
     const result = searchEntries(allReferenceEntries, "合同律", "ja");
     expect(result.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("自然演繹を検索できる", () => {
+    const resultEn = searchEntries(
+      allReferenceEntries,
+      "natural deduction",
+      "en",
+    );
+    expect(resultEn.some((e) => e.id === "rule-nd-overview")).toBe(true);
+    const resultJa = searchEntries(allReferenceEntries, "自然演繹", "ja");
+    expect(resultJa.some((e) => e.id === "rule-nd-overview")).toBe(true);
+  });
+
+  it("シーケント計算を検索できる", () => {
+    const resultEn = searchEntries(
+      allReferenceEntries,
+      "sequent calculus",
+      "en",
+    );
+    expect(resultEn.some((e) => e.id === "rule-sc-overview")).toBe(true);
+    const resultJa = searchEntries(allReferenceEntries, "シーケント計算", "ja");
+    expect(resultJa.some((e) => e.id === "rule-sc-overview")).toBe(true);
+  });
+
+  it("カット除去を検索できる", () => {
+    const result = searchEntries(allReferenceEntries, "カット除去", "ja");
+    expect(result.length).toBeGreaterThanOrEqual(1);
   });
 });

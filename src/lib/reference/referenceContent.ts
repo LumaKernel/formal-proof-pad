@@ -598,6 +598,375 @@ const ruleGen: ReferenceEntry = {
   order: 2,
 };
 
+const ruleNdOverview: ReferenceEntry = {
+  id: "rule-nd-overview",
+  category: "inference-rule",
+  title: {
+    en: "Natural Deduction (Overview)",
+    ja: "自然演繹 (概要)",
+  },
+  summary: {
+    en: "A proof system using introduction and elimination rules for each connective.",
+    ja: "各結合子に対する導入規則と除去規則を用いる証明体系。",
+  },
+  body: {
+    en: [
+      "**Natural deduction** (ND) is a proof system introduced by Gentzen (1935) where each logical connective has *introduction* rules (how to prove it) and *elimination* rules (how to use it).",
+      "Three variants are supported: **NM** (minimal logic, no explosion or DNE), **NJ** (intuitionistic logic, adds EFQ), and **NK** (classical logic, adds DNE). NM ⊂ NJ ⊂ NK in terms of provable theorems.",
+      "Unlike Hilbert systems (which use only MP), natural deduction allows *assuming* a hypothesis and later *discharging* it — e.g., to prove φ → ψ, assume φ and derive ψ.",
+      "This application's implementation follows Bekki (戸次大介)『数理論理学』Chapter 8.",
+    ],
+    ja: [
+      "**自然演繹** (ND) はGentzen (1935) が導入した証明体系で、各論理結合子に*導入規則*（どう証明するか）と*除去規則*（どう使うか）があります。",
+      "3つの変種をサポートします: **NM**（最小論理、爆発律もDNEもなし）、**NJ**（直観主義論理、EFQを追加）、**NK**（古典論理、DNEを追加）。証明可能な定理の範囲は NM ⊂ NJ ⊂ NK です。",
+      "Hilbert系（MPのみ使用）と異なり、自然演繹では仮定を*仮定*して後で*解除*することができます — 例えば、φ → ψ を証明するには、φを仮定してψを導出します。",
+      "本アプリケーションの実装は戸次大介『数理論理学』第8章に基づいています。",
+    ],
+  },
+  relatedEntryIds: [
+    "rule-mp",
+    "rule-nd-implication",
+    "rule-nd-conjunction",
+    "rule-nd-disjunction",
+    "rule-sc-overview",
+  ],
+  externalLinks: [
+    {
+      type: "wikipedia-en",
+      url: "https://en.wikipedia.org/wiki/Natural_deduction",
+      label: {
+        en: "Natural deduction (Wikipedia)",
+        ja: "自然演繹 (Wikipedia)",
+      },
+    },
+    {
+      type: "wikipedia-ja",
+      url: "https://ja.wikipedia.org/wiki/%E8%87%AA%E7%84%B6%E6%BC%94%E7%B9%B9",
+      label: {
+        en: "Natural deduction (Wikipedia JA)",
+        ja: "自然演繹 (Wikipedia)",
+      },
+    },
+  ],
+  keywords: [
+    "natural deduction",
+    "ND",
+    "NM",
+    "NJ",
+    "NK",
+    "Gentzen",
+    "自然演繹",
+    "導入規則",
+    "除去規則",
+  ],
+  order: 3,
+};
+
+const ruleNdImplication: ReferenceEntry = {
+  id: "rule-nd-implication",
+  category: "inference-rule",
+  title: {
+    en: "ND: Implication Rules (→I / →E)",
+    ja: "ND: 含意規則 (→I / →E)",
+  },
+  summary: {
+    en: "→I discharges an assumption to form φ→ψ; →E is Modus Ponens.",
+    ja: "→Iは仮定を解除してφ→ψを形成し、→Eはモーダスポネンス。",
+  },
+  body: {
+    en: [
+      "**Implication Introduction (→I)**: Assume φ, derive ψ, then discharge the assumption to conclude φ → ψ. This is the core mechanism of natural deduction — hypothetical reasoning.",
+      "**Implication Elimination (→E)**: From φ and φ → ψ, derive ψ. This is exactly Modus Ponens (MP).",
+      "→I is the rule that most distinguishes natural deduction from Hilbert systems: instead of needing the deduction theorem as a metatheorem, it is built directly into the proof system.",
+    ],
+    ja: [
+      "**含意導入 (→I)**: φを仮定し、ψを導出し、その仮定を解除してφ → ψを結論します。これは自然演繹の核心的メカニズム — 仮説的推論です。",
+      "**含意除去 (→E)**: φとφ → ψからψを導出します。これはモーダスポネンス(MP)そのものです。",
+      "→Iは自然演繹をHilbert系から最も区別する規則です: 演繹定理をメタ定理として必要とする代わりに、証明体系に直接組み込まれています。",
+    ],
+  },
+  formalNotation:
+    "\\to\\text{I}: \\dfrac{[\\varphi] \\quad \\vdots \\quad \\psi}{\\varphi \\to \\psi} \\qquad \\to\\text{E}: \\dfrac{\\varphi \\quad \\varphi \\to \\psi}{\\psi}",
+  relatedEntryIds: [
+    "rule-mp",
+    "rule-nd-overview",
+    "rule-nd-conjunction",
+    "rule-nd-disjunction",
+  ],
+  externalLinks: [],
+  keywords: [
+    "implication introduction",
+    "implication elimination",
+    "→I",
+    "→E",
+    "含意導入",
+    "含意除去",
+    "deduction theorem",
+    "演繹定理",
+  ],
+  order: 4,
+};
+
+const ruleNdConjunction: ReferenceEntry = {
+  id: "rule-nd-conjunction",
+  category: "inference-rule",
+  title: {
+    en: "ND: Conjunction Rules (∧I / ∧E)",
+    ja: "ND: 連言規則 (∧I / ∧E)",
+  },
+  summary: {
+    en: "∧I combines two formulas into a conjunction; ∧E extracts a component.",
+    ja: "∧Iは2つの論理式を連言に結合し、∧Eは成分を取り出す。",
+  },
+  body: {
+    en: [
+      "**Conjunction Introduction (∧I)**: From φ and ψ, derive φ ∧ ψ. Both components must be proven independently.",
+      "**Conjunction Elimination (∧E)**: From φ ∧ ψ, derive φ (left projection) or ψ (right projection). There are two variants: ∧E-left and ∧E-right.",
+      "In Hilbert systems, conjunction is typically defined as φ ∧ ψ ≡ ¬(φ → ¬ψ), making these rules derivable rather than primitive.",
+    ],
+    ja: [
+      "**連言導入 (∧I)**: φとψからφ ∧ ψを導出します。両方の成分を独立に証明する必要があります。",
+      "**連言除去 (∧E)**: φ ∧ ψからφ（左射影）またはψ（右射影）を導出します。∧E-左と∧E-右の2つの変種があります。",
+      "Hilbert系では連言は通常 φ ∧ ψ ≡ ¬(φ → ¬ψ) と定義されるため、これらの規則は原始的ではなく導出可能です。",
+    ],
+  },
+  formalNotation:
+    "\\land\\text{I}: \\dfrac{\\varphi \\quad \\psi}{\\varphi \\land \\psi} \\qquad \\land\\text{E}: \\dfrac{\\varphi \\land \\psi}{\\varphi} \\quad \\dfrac{\\varphi \\land \\psi}{\\psi}",
+  relatedEntryIds: [
+    "rule-nd-overview",
+    "rule-nd-implication",
+    "rule-nd-disjunction",
+  ],
+  externalLinks: [],
+  keywords: [
+    "conjunction introduction",
+    "conjunction elimination",
+    "∧I",
+    "∧E",
+    "連言導入",
+    "連言除去",
+    "and",
+  ],
+  order: 5,
+};
+
+const ruleNdDisjunction: ReferenceEntry = {
+  id: "rule-nd-disjunction",
+  category: "inference-rule",
+  title: {
+    en: "ND: Disjunction Rules (∨I / ∨E)",
+    ja: "ND: 選言規則 (∨I / ∨E)",
+  },
+  summary: {
+    en: "∨I introduces a disjunction from one component; ∨E performs case analysis.",
+    ja: "∨Iは一方の成分から選言を導入し、∨Eは場合分けを行う。",
+  },
+  body: {
+    en: [
+      "**Disjunction Introduction (∨I)**: From φ, derive φ ∨ ψ (left injection) or ψ ∨ φ (right injection). Only one disjunct needs to be proven.",
+      "**Disjunction Elimination (∨E)**: From φ ∨ ψ, assuming φ yields χ, and assuming ψ also yields χ, then conclude χ. This is proof by cases — the most complex natural deduction rule, requiring two subproofs.",
+      "In Hilbert systems, disjunction is defined as φ ∨ ψ ≡ ¬φ → ψ, and case analysis must be reconstructed from this definition.",
+    ],
+    ja: [
+      "**選言導入 (∨I)**: φからφ ∨ ψ（左注入）またはψ ∨ φ（右注入）を導出します。選言肢の一方だけを証明すれば十分です。",
+      "**選言除去 (∨E)**: φ ∨ ψから、φを仮定してχを導出し、ψを仮定してもχを導出できるなら、χを結論します。これは場合分けによる証明 — 自然演繹で最も複雑な規則であり、2つの部分証明を必要とします。",
+      "Hilbert系では選言は φ ∨ ψ ≡ ¬φ → ψ と定義され、場合分けはこの定義から再構成する必要があります。",
+    ],
+  },
+  formalNotation:
+    "\\lor\\text{I}: \\dfrac{\\varphi}{\\varphi \\lor \\psi} \\qquad \\lor\\text{E}: \\dfrac{\\varphi \\lor \\psi \\quad [\\varphi] \\vdots \\chi \\quad [\\psi] \\vdots \\chi}{\\chi}",
+  relatedEntryIds: [
+    "rule-nd-overview",
+    "rule-nd-implication",
+    "rule-nd-conjunction",
+  ],
+  externalLinks: [],
+  keywords: [
+    "disjunction introduction",
+    "disjunction elimination",
+    "∨I",
+    "∨E",
+    "選言導入",
+    "選言除去",
+    "case analysis",
+    "場合分け",
+    "or",
+  ],
+  order: 6,
+};
+
+const ruleScOverview: ReferenceEntry = {
+  id: "rule-sc-overview",
+  category: "inference-rule",
+  title: {
+    en: "Sequent Calculus (Overview)",
+    ja: "シーケント計算 (概要)",
+  },
+  summary: {
+    en: "A proof system using sequents Γ ⇒ Δ with left/right rules for each connective.",
+    ja: "シーケント Γ ⇒ Δ を用い、各結合子に左右規則を持つ証明体系。",
+  },
+  body: {
+    en: [
+      "**Sequent calculus** (SC) is a proof system introduced by Gentzen (1935) alongside natural deduction. Proofs manipulate *sequents* of the form Γ ⇒ Δ, meaning 'from the multiset of assumptions Γ, at least one formula in Δ holds.'",
+      "Each logical connective has a **left rule** (how it behaves as an assumption) and a **right rule** (how it behaves as a conclusion). Structural rules (weakening, contraction, exchange) control the shape of sequents.",
+      "Three variants are supported: **LM** (minimal logic, right side exactly 1 formula), **LJ** (intuitionistic logic, right side at most 1 formula), and **LK** (classical logic, unrestricted right side).",
+      "The **cut elimination theorem** (Gentzen's Hauptsatz) proves that the cut rule can always be eliminated, yielding proofs in a canonical form — a fundamental result in proof theory.",
+    ],
+    ja: [
+      "**シーケント計算** (SC) はGentzen (1935) が自然演繹とともに導入した証明体系です。*シーケント* Γ ⇒ Δ を操作します。意味は「仮定の多重集合Γから、Δの論理式の少なくとも1つが成り立つ」です。",
+      "各論理結合子に**左規則**（仮定としてどう振る舞うか）と**右規則**（結論としてどう振る舞うか）があります。構造規則（弱化、縮約、交換）がシーケントの形を制御します。",
+      "3つの変種をサポートします: **LM**（最小論理、右辺はちょうど1つの論理式）、**LJ**（直観主義論理、右辺は高々1つ）、**LK**（古典論理、右辺の制約なし）。",
+      "**カット除去定理** (Gentzenの基本定理, Hauptsatz) は、カット規則が常に除去可能であることを証明し、正規形の証明が得られます — 証明論における基本的な結果です。",
+    ],
+  },
+  relatedEntryIds: [
+    "rule-nd-overview",
+    "rule-sc-structural",
+    "rule-sc-logical",
+    "rule-mp",
+  ],
+  externalLinks: [
+    {
+      type: "wikipedia-en",
+      url: "https://en.wikipedia.org/wiki/Sequent_calculus",
+      label: {
+        en: "Sequent calculus (Wikipedia)",
+        ja: "シーケント計算 (Wikipedia)",
+      },
+    },
+    {
+      type: "wikipedia-ja",
+      url: "https://ja.wikipedia.org/wiki/%E3%82%B7%E3%83%BC%E3%82%B1%E3%83%B3%E3%83%88%E8%A8%88%E7%AE%97",
+      label: {
+        en: "Sequent calculus (Wikipedia JA)",
+        ja: "シーケント計算 (Wikipedia)",
+      },
+    },
+  ],
+  keywords: [
+    "sequent calculus",
+    "SC",
+    "LM",
+    "LJ",
+    "LK",
+    "Gentzen",
+    "Hauptsatz",
+    "シーケント計算",
+    "カット除去",
+    "sequent",
+  ],
+  order: 7,
+};
+
+const ruleScStructural: ReferenceEntry = {
+  id: "rule-sc-structural",
+  category: "inference-rule",
+  title: {
+    en: "SC: Structural Rules",
+    ja: "SC: 構造規則",
+  },
+  summary: {
+    en: "Cut, weakening, contraction, and exchange rules that manipulate sequent structure.",
+    ja: "カット、弱化、縮約、交換 — シーケントの構造を操作する規則群。",
+  },
+  body: {
+    en: [
+      "**Identity (ID)**: φ ⇒ φ — the axiom of sequent calculus. Every formula implies itself.",
+      "**Cut**: From Γ ⇒ Δ,φ and φ,Γ' ⇒ Δ', derive Γ,Γ' ⇒ Δ,Δ'. Corresponds to lemma usage — the key rule that the cut elimination theorem shows is eliminable.",
+      "**Weakening (w)**: Add unused formulas to left (w⇒) or right (⇒w). Right weakening is not available in LM/LJ.",
+      "**Contraction (c)**: Merge duplicate formulas on left (c⇒) or right (⇒c). Right contraction is not available in LJ.",
+      "**Exchange (e)**: Reorder formulas on left (e⇒) or right (⇒e). Right exchange is not available in LJ. In practice, multiset-based formulations make exchange implicit.",
+    ],
+    ja: [
+      "**同一律 (ID)**: φ ⇒ φ — シーケント計算の公理。すべての論理式は自分自身を含意します。",
+      "**カット (Cut)**: Γ ⇒ Δ,φ と φ,Γ' ⇒ Δ' から Γ,Γ' ⇒ Δ,Δ' を導出します。補題の使用に対応し、カット除去定理が除去可能であることを示す核心的規則です。",
+      "**弱化 (w)**: 左(w⇒)または右(⇒w)に未使用の論理式を追加します。右弱化はLM/LJでは利用できません。",
+      "**縮約 (c)**: 左(c⇒)または右(⇒c)の重複する論理式を統合します。右縮約はLJでは利用できません。",
+      "**交換 (e)**: 左(e⇒)または右(⇒e)の論理式を並び替えます。右交換はLJでは利用できません。実用的には多重集合ベースの定式化で交換を暗黙化します。",
+    ],
+  },
+  formalNotation:
+    "\\text{Cut}: \\dfrac{\\Gamma \\Rightarrow \\Delta, \\varphi \\qquad \\varphi, \\Gamma' \\Rightarrow \\Delta'}{\\Gamma, \\Gamma' \\Rightarrow \\Delta, \\Delta'}",
+  relatedEntryIds: ["rule-sc-overview", "rule-sc-logical"],
+  externalLinks: [
+    {
+      type: "wikipedia-en",
+      url: "https://en.wikipedia.org/wiki/Cut-elimination_theorem",
+      label: {
+        en: "Cut-elimination theorem (Wikipedia)",
+        ja: "カット除去定理 (Wikipedia)",
+      },
+    },
+  ],
+  keywords: [
+    "cut",
+    "weakening",
+    "contraction",
+    "exchange",
+    "structural rule",
+    "カット",
+    "弱化",
+    "縮約",
+    "交換",
+    "構造規則",
+  ],
+  order: 8,
+};
+
+const ruleScLogical: ReferenceEntry = {
+  id: "rule-sc-logical",
+  category: "inference-rule",
+  title: {
+    en: "SC: Logical Rules",
+    ja: "SC: 論理規則",
+  },
+  summary: {
+    en: "Left/right introduction rules for →, ∧, ∨, ∀, ∃ in sequent calculus.",
+    ja: "シーケント計算における →, ∧, ∨, ∀, ∃ の左右導入規則。",
+  },
+  body: {
+    en: [
+      "**Implication**: (→⇒) decomposes φ→ψ on the left into two subgoals; (⇒→) moves φ from right to left assumptions to prove ψ.",
+      "**Conjunction**: (∧⇒) selects one conjunct from the left; (⇒∧) requires proving both conjuncts on the right.",
+      "**Disjunction**: (∨⇒) performs case analysis on the left; (⇒∨) selects which disjunct to prove on the right.",
+      "**Universal**: (∀⇒) instantiates with a term on the left; (⇒∀) introduces a fresh eigenvariable on the right.",
+      "**Existential**: (∃⇒) introduces a fresh eigenvariable on the left; (⇒∃) instantiates with a term on the right.",
+    ],
+    ja: [
+      "**含意**: (→⇒) 左のφ→ψを2つの部分目標に分解します; (⇒→) 右のφを左の仮定に移してψを証明します。",
+      "**連言**: (∧⇒) 左から連言の一方を選びます; (⇒∧) 右の両方の連言肢を証明する必要があります。",
+      "**選言**: (∨⇒) 左で場合分けを行います; (⇒∨) 右でどちらの選言肢を証明するか選びます。",
+      "**全称**: (∀⇒) 左で項によって例化します; (⇒∀) 右で新しい固有変数を導入します。",
+      "**存在**: (∃⇒) 左で新しい固有変数を導入します; (⇒∃) 右で項によって例化します。",
+    ],
+  },
+  formalNotation:
+    "\\to\\Rightarrow: \\dfrac{\\Gamma \\Rightarrow \\Delta, \\varphi \\qquad \\psi, \\Gamma' \\Rightarrow \\Delta'}{\\varphi \\to \\psi, \\Gamma, \\Gamma' \\Rightarrow \\Delta, \\Delta'}",
+  relatedEntryIds: [
+    "rule-sc-overview",
+    "rule-sc-structural",
+    "rule-nd-implication",
+    "rule-nd-conjunction",
+    "rule-nd-disjunction",
+  ],
+  externalLinks: [],
+  keywords: [
+    "logical rule",
+    "left rule",
+    "right rule",
+    "implication",
+    "conjunction",
+    "disjunction",
+    "universal",
+    "existential",
+    "論理規則",
+    "左規則",
+    "右規則",
+  ],
+  order: 9,
+};
+
 // ============================================================
 // 論理体系 (Logic Systems)
 // ============================================================
@@ -1060,6 +1429,13 @@ export const allReferenceEntries: readonly ReferenceEntry[] = [
   // Inference Rules
   ruleMP,
   ruleGen,
+  ruleNdOverview,
+  ruleNdImplication,
+  ruleNdConjunction,
+  ruleNdDisjunction,
+  ruleScOverview,
+  ruleScStructural,
+  ruleScLogical,
   // Logic Systems
   systemLukasiewicz,
   systemMendelson,
