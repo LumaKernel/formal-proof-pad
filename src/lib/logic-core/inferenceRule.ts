@@ -16,6 +16,8 @@ import {
   negation,
   metaVariable,
   universal,
+  existential,
+  disjunction,
   equality,
 } from "./formula";
 import {
@@ -298,6 +300,16 @@ export const axiomPA7Template: Formula = implication(
 // PA7 は構造的パターンマッチだけでは表現できないため、
 // 専用の matchTheoryAxiomPA7 関数で検証する。
 
+/**
+ * Q7: ∀x.(x = 0 ∨ ∃y.(x = S(y)))
+ * Robinson算術(Q)の追加公理。すべての自然数は0か、何かの後者。
+ * 帰納法(PA7)の代替として、数列の全体像を保証する。
+ */
+export const axiomQ7Template: Formula = universal(
+  xVar,
+  disjunction(equality(xVar, zero), existential(yVar, equality(xVar, succOfY))),
+);
+
 // ── ペアノ算術の理論公理定義 ────────────────────────────
 
 /**
@@ -345,6 +357,21 @@ export const peanoFixedAxioms: readonly TheoryAxiom[] = [
     displayName: "PA6 (乗法再帰)",
     template: axiomPA6Template,
     dslText: "all x. all y. x * S(y) = x * y + x",
+    matchMode: "exact",
+  },
+];
+
+/**
+ * Robinson算術(Q)の公理: PA1-PA6 + Q7。
+ * PA7(帰納法スキーマ)を含まない代わりに、Q7で自然数の全体像を保証。
+ */
+export const robinsonAxioms: readonly TheoryAxiom[] = [
+  ...peanoFixedAxioms,
+  {
+    id: "Q7",
+    displayName: "Q7 (後者の全射性)",
+    template: axiomQ7Template,
+    dslText: "all x. x = 0 | ex y. x = S(y)",
     matchMode: "exact",
   },
 ];
@@ -480,12 +507,70 @@ export const equalityLogicSystem: LogicSystem = {
 /**
  * ペアノ算術（PA）: 等号付き述語論理 + PA1-PA6
  * 帰納法スキーマ(PA7)は含まない（構造が特殊なため別途対応が必要）。
+ * 命題論理基盤: Łukasiewicz体系（A3: 対偶）
  *
  * シグネチャ: 定数 0, 関数 S(·), 二項演算 +, *
  */
 export const peanoArithmeticSystem: LogicSystem = {
   name: "Peano Arithmetic",
   propositionalAxioms: new Set(["A1", "A2", "A3"]),
+  predicateLogic: true,
+  equalityLogic: true,
+  generalization: true,
+  theoryAxioms: peanoFixedAxioms,
+};
+
+/**
+ * Robinson算術（Q）: 等号付き述語論理 + PA1-PA6 + Q7
+ * PAから帰納法スキーマを除き、Q7（後者の全射性）を追加した弱い算術体系。
+ * Gödelの不完全性定理の基礎として重要。
+ * 命題論理基盤: Łukasiewicz体系（A3: 対偶）
+ */
+export const robinsonArithmeticSystem: LogicSystem = {
+  name: "Robinson Arithmetic (Q)",
+  propositionalAxioms: new Set(["A1", "A2", "A3"]),
+  predicateLogic: true,
+  equalityLogic: true,
+  generalization: true,
+  theoryAxioms: robinsonAxioms,
+};
+
+/**
+ * ペアノ算術 - HK基盤: 古典論理(DNE) + 述語論理 + 等号 + PA1-PA6
+ * 二重否定除去を否定公理として採用するバリアント。
+ * 戸次大介『数理論理学』§7.8の体系HKに基づく。
+ */
+export const peanoArithmeticHKSystem: LogicSystem = {
+  name: "Peano Arithmetic (HK)",
+  propositionalAxioms: new Set(["A1", "A2", "DNE"]),
+  predicateLogic: true,
+  equalityLogic: true,
+  generalization: true,
+  theoryAxioms: peanoFixedAxioms,
+};
+
+/**
+ * ペアノ算術 - Mendelson基盤: Mendelson体系(M3) + 述語論理 + 等号 + PA1-PA6
+ * 背理法(M3)を否定公理として採用するバリアント。
+ * Mendelson "Introduction to Mathematical Logic" に基づく。
+ */
+export const peanoArithmeticMendelsonSystem: LogicSystem = {
+  name: "Peano Arithmetic (Mendelson)",
+  propositionalAxioms: new Set(["A1", "A2", "M3"]),
+  predicateLogic: true,
+  equalityLogic: true,
+  generalization: true,
+  theoryAxioms: peanoFixedAxioms,
+};
+
+/**
+ * ヘイティング算術（HA）: 直観主義論理(EFQ) + 述語論理 + 等号 + PA1-PA6
+ * 直観主義論理を基盤とする算術体系。二重否定除去は使えない。
+ * 帰納法スキーマ(PA7)なし版。
+ */
+export const heytingArithmeticSystem: LogicSystem = {
+  name: "Heyting Arithmetic (HA)",
+  propositionalAxioms: new Set(["A1", "A2", "EFQ"]),
   predicateLogic: true,
   equalityLogic: true,
   generalization: true,

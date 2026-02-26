@@ -29,6 +29,10 @@ import {
   predicateLogicSystem,
   equalityLogicSystem,
   peanoArithmeticSystem,
+  robinsonArithmeticSystem,
+  peanoArithmeticHKSystem,
+  peanoArithmeticMendelsonSystem,
+  heytingArithmeticSystem,
 } from "../logic-core/inferenceRule";
 
 // --- プリセット公理系 ---
@@ -128,8 +132,36 @@ export const systemPresets: readonly SystemPreset[] = [
     id: "peano",
     label: "ペアノ算術（PA）",
     description:
-      "Hilbert流: 等号付き述語論理 + PA1-PA6（後者関数・加法・乗法の公理）。一階算術の標準的な公理系。",
+      "Hilbert流: Łukasiewicz基盤（A3:対偶）+ 等号付き述語論理 + PA1-PA6。一階算術の標準的な公理系。",
     deductionSystem: hilbertDeduction(peanoArithmeticSystem),
+  },
+  {
+    id: "robinson",
+    label: "Robinson算術（Q）",
+    description:
+      "Hilbert流: PA1-PA6 + Q7（後者の全射性）。帰納法スキーマなしの弱い算術体系。Gödelの不完全性定理の基礎。",
+    deductionSystem: hilbertDeduction(robinsonArithmeticSystem),
+  },
+  {
+    id: "peano-hk",
+    label: "ペアノ算術（PA-HK）",
+    description:
+      "Hilbert流: HK基盤（DNE:二重否定除去）+ 等号付き述語論理 + PA1-PA6。戸次『数理論理学』§7.8の古典論理。",
+    deductionSystem: hilbertDeduction(peanoArithmeticHKSystem),
+  },
+  {
+    id: "peano-mendelson",
+    label: "ペアノ算術（PA-Mendelson）",
+    description:
+      "Hilbert流: Mendelson基盤（M3:背理法）+ 等号付き述語論理 + PA1-PA6。Mendelson教科書の体系。",
+    deductionSystem: hilbertDeduction(peanoArithmeticMendelsonSystem),
+  },
+  {
+    id: "heyting",
+    label: "ヘイティング算術（HA）",
+    description:
+      "Hilbert流: 直観主義論理（EFQ:爆発原理）+ 等号付き述語論理 + PA1-PA6。二重否定除去は使えない構成的算術。",
+    deductionSystem: hilbertDeduction(heytingArithmeticSystem),
   },
   {
     id: "nd-nm",

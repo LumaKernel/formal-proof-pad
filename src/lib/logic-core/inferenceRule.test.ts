@@ -26,7 +26,13 @@ import {
   axiomPA5Template,
   axiomPA6Template,
   peanoFixedAxioms,
+  robinsonAxioms,
+  axiomQ7Template,
   peanoArithmeticSystem,
+  robinsonArithmeticSystem,
+  peanoArithmeticHKSystem,
+  peanoArithmeticMendelsonSystem,
+  heytingArithmeticSystem,
   skSystem,
   minimalLogicSystem,
   intuitionisticSystem,
@@ -1677,6 +1683,136 @@ describe("identifyAxiom with theoryAxioms", () => {
     // ¬¬φ は A1, A2, A3, A4, A5, E1-E3, PA1-PA6 のいずれにもマッチしない
     const randomFormula = negation(negation(phi));
     const result = identifyAxiom(randomFormula, peanoArithmeticSystem);
+    expect(result._tag).toBe("Error");
+  });
+});
+
+describe("robinsonArithmeticSystem", () => {
+  it("述語論理・等号・汎化が有効", () => {
+    expect(robinsonArithmeticSystem.predicateLogic).toBe(true);
+    expect(robinsonArithmeticSystem.equalityLogic).toBe(true);
+    expect(robinsonArithmeticSystem.generalization).toBe(true);
+  });
+
+  it("理論公理(PA1-PA6 + Q7)が含まれる", () => {
+    const axioms = robinsonArithmeticSystem.theoryAxioms;
+    expect(axioms).toBeDefined();
+    expect(axioms?.length).toBe(7);
+    const ids = axioms?.map((a) => a.id);
+    expect(ids).toEqual(["PA1", "PA2", "PA3", "PA4", "PA5", "PA6", "Q7"]);
+  });
+
+  it("robinsonAxiomsはpeanoFixedAxiomsを含む", () => {
+    for (const pa of peanoFixedAxioms) {
+      expect(robinsonAxioms.some((a) => a.id === pa.id)).toBe(true);
+    }
+  });
+
+  it("Q7公理を識別する", () => {
+    const result = identifyAxiom(axiomQ7Template, robinsonArithmeticSystem);
+    expect(result._tag).toBe("TheoryAxiom");
+    if (result._tag === "TheoryAxiom") {
+      expect(result.theoryAxiomId).toBe("Q7");
+    }
+  });
+
+  it("PA公理もQ体系で識別される", () => {
+    const result = identifyAxiom(axiomPA1Template, robinsonArithmeticSystem);
+    expect(result._tag).toBe("TheoryAxiom");
+    if (result._tag === "TheoryAxiom") {
+      expect(result.theoryAxiomId).toBe("PA1");
+    }
+  });
+});
+
+describe("PA流儀バリアント", () => {
+  it("peanoArithmeticHKSystem: DNEベース + PA1-PA6", () => {
+    expect(peanoArithmeticHKSystem.propositionalAxioms).toEqual(
+      new Set(["A1", "A2", "DNE"]),
+    );
+    expect(peanoArithmeticHKSystem.predicateLogic).toBe(true);
+    expect(peanoArithmeticHKSystem.equalityLogic).toBe(true);
+    expect(peanoArithmeticHKSystem.generalization).toBe(true);
+    expect(peanoArithmeticHKSystem.theoryAxioms?.length).toBe(6);
+    expect(peanoArithmeticHKSystem.theoryAxioms).toBe(peanoFixedAxioms);
+  });
+
+  it("peanoArithmeticMendelsonSystem: M3ベース + PA1-PA6", () => {
+    expect(peanoArithmeticMendelsonSystem.propositionalAxioms).toEqual(
+      new Set(["A1", "A2", "M3"]),
+    );
+    expect(peanoArithmeticMendelsonSystem.predicateLogic).toBe(true);
+    expect(peanoArithmeticMendelsonSystem.equalityLogic).toBe(true);
+    expect(peanoArithmeticMendelsonSystem.generalization).toBe(true);
+    expect(peanoArithmeticMendelsonSystem.theoryAxioms).toBe(peanoFixedAxioms);
+  });
+
+  it("heytingArithmeticSystem: EFQベース + PA1-PA6", () => {
+    expect(heytingArithmeticSystem.propositionalAxioms).toEqual(
+      new Set(["A1", "A2", "EFQ"]),
+    );
+    expect(heytingArithmeticSystem.predicateLogic).toBe(true);
+    expect(heytingArithmeticSystem.equalityLogic).toBe(true);
+    expect(heytingArithmeticSystem.generalization).toBe(true);
+    expect(heytingArithmeticSystem.theoryAxioms).toBe(peanoFixedAxioms);
+  });
+
+  it("HKバリアントでPA公理を識別できる", () => {
+    const result = identifyAxiom(axiomPA3Template, peanoArithmeticHKSystem);
+    expect(result._tag).toBe("TheoryAxiom");
+    if (result._tag === "TheoryAxiom") {
+      expect(result.theoryAxiomId).toBe("PA3");
+    }
+  });
+
+  it("MendelsonバリアントでPA公理を識別できる", () => {
+    const result = identifyAxiom(
+      axiomPA5Template,
+      peanoArithmeticMendelsonSystem,
+    );
+    expect(result._tag).toBe("TheoryAxiom");
+    if (result._tag === "TheoryAxiom") {
+      expect(result.theoryAxiomId).toBe("PA5");
+    }
+  });
+
+  it("HAでPA公理を識別できる", () => {
+    const result = identifyAxiom(axiomPA6Template, heytingArithmeticSystem);
+    expect(result._tag).toBe("TheoryAxiom");
+    if (result._tag === "TheoryAxiom") {
+      expect(result.theoryAxiomId).toBe("PA6");
+    }
+  });
+
+  it("HKバリアントでDNE公理を識別できる", () => {
+    const result = identifyAxiom(axiomDNETemplate, peanoArithmeticHKSystem);
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(result.axiomId).toBe("DNE");
+    }
+  });
+
+  it("MendelsonバリアントでM3公理を識別できる", () => {
+    const result = identifyAxiom(
+      axiomM3Template,
+      peanoArithmeticMendelsonSystem,
+    );
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(result.axiomId).toBe("M3");
+    }
+  });
+
+  it("HAでEFQ公理を識別できる", () => {
+    const result = identifyAxiom(axiomEFQTemplate, heytingArithmeticSystem);
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(result.axiomId).toBe("EFQ");
+    }
+  });
+
+  it("HAでDNEは識別されない", () => {
+    const result = identifyAxiom(axiomDNETemplate, heytingArithmeticSystem);
     expect(result._tag).toBe("Error");
   });
 });

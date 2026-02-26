@@ -15,6 +15,10 @@ import {
   predicateLogicSystem,
   equalityLogicSystem,
   peanoArithmeticSystem,
+  robinsonArithmeticSystem,
+  peanoArithmeticHKSystem,
+  peanoArithmeticMendelsonSystem,
+  heytingArithmeticSystem,
 } from "../logic-core/inferenceRule";
 import {
   nmSystem,
@@ -153,6 +157,34 @@ describe("resolveSystemPreset", () => {
     expect(result).toBeDefined();
     expect(result?.deductionSystem.style).toBe("sequent-calculus");
     expect(result?.deductionSystem.system).toBe(lkSystem);
+  });
+
+  it("robinsonプリセットを解決できる", () => {
+    const result = resolveSystemPreset("robinson");
+    expect(result).toBeDefined();
+    expect(result?.deductionSystem.style).toBe("hilbert");
+    expect(result?.deductionSystem.system).toBe(robinsonArithmeticSystem);
+  });
+
+  it("peano-hkプリセットを解決できる", () => {
+    const result = resolveSystemPreset("peano-hk");
+    expect(result).toBeDefined();
+    expect(result?.deductionSystem.style).toBe("hilbert");
+    expect(result?.deductionSystem.system).toBe(peanoArithmeticHKSystem);
+  });
+
+  it("peano-mendelsonプリセットを解決できる", () => {
+    const result = resolveSystemPreset("peano-mendelson");
+    expect(result).toBeDefined();
+    expect(result?.deductionSystem.style).toBe("hilbert");
+    expect(result?.deductionSystem.system).toBe(peanoArithmeticMendelsonSystem);
+  });
+
+  it("heytingプリセットを解決できる", () => {
+    const result = resolveSystemPreset("heyting");
+    expect(result).toBeDefined();
+    expect(result?.deductionSystem.style).toBe("hilbert");
+    expect(result?.deductionSystem.system).toBe(heytingArithmeticSystem);
   });
 
   it("存在しないプリセットIDはundefinedを返す", () => {

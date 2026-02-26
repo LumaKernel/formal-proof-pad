@@ -58,6 +58,10 @@ describe("systemPresets", () => {
     expect(ids).toContain("predicate");
     expect(ids).toContain("equality");
     expect(ids).toContain("peano");
+    expect(ids).toContain("robinson");
+    expect(ids).toContain("peano-hk");
+    expect(ids).toContain("peano-mendelson");
+    expect(ids).toContain("heyting");
   });
 
   it("includes all natural deduction presets", () => {
@@ -100,11 +104,57 @@ describe("systemPresets", () => {
     }
   });
 
+  it("robinson preset includes PA1-PA6 + Q7", () => {
+    const robinson = systemPresets.find((p) => p.id === "robinson");
+    expect(robinson).toBeDefined();
+    expect(robinson?.deductionSystem.style).toBe("hilbert");
+    if (robinson?.deductionSystem.style === "hilbert") {
+      expect(robinson.deductionSystem.system.theoryAxioms?.length).toBe(7);
+      const ids = robinson.deductionSystem.system.theoryAxioms?.map(
+        (a) => a.id,
+      );
+      expect(ids).toContain("Q7");
+    }
+  });
+
+  it("peano-hk preset uses DNE propositional axioms", () => {
+    const preset = systemPresets.find((p) => p.id === "peano-hk");
+    expect(preset).toBeDefined();
+    if (preset?.deductionSystem.style === "hilbert") {
+      expect(preset.deductionSystem.system.propositionalAxioms).toEqual(
+        new Set(["A1", "A2", "DNE"]),
+      );
+      expect(preset.deductionSystem.system.theoryAxioms?.length).toBe(6);
+    }
+  });
+
+  it("peano-mendelson preset uses M3 propositional axioms", () => {
+    const preset = systemPresets.find((p) => p.id === "peano-mendelson");
+    expect(preset).toBeDefined();
+    if (preset?.deductionSystem.style === "hilbert") {
+      expect(preset.deductionSystem.system.propositionalAxioms).toEqual(
+        new Set(["A1", "A2", "M3"]),
+      );
+      expect(preset.deductionSystem.system.theoryAxioms?.length).toBe(6);
+    }
+  });
+
+  it("heyting preset uses EFQ propositional axioms", () => {
+    const preset = systemPresets.find((p) => p.id === "heyting");
+    expect(preset).toBeDefined();
+    if (preset?.deductionSystem.style === "hilbert") {
+      expect(preset.deductionSystem.system.propositionalAxioms).toEqual(
+        new Set(["A1", "A2", "EFQ"]),
+      );
+      expect(preset.deductionSystem.system.theoryAxioms?.length).toBe(6);
+    }
+  });
+
   it("hilbert presets have correct style", () => {
     const hilbertPresets = systemPresets.filter(
       (p) => !p.id.startsWith("nd-") && !p.id.startsWith("sc-"),
     );
-    expect(hilbertPresets.length).toBeGreaterThanOrEqual(9);
+    expect(hilbertPresets.length).toBeGreaterThanOrEqual(13);
     for (const p of hilbertPresets) {
       expect(p.deductionSystem.style).toBe("hilbert");
     }
@@ -239,6 +289,33 @@ describe("validateCreateForm", () => {
   it("valid form with sc-lk system", () => {
     expect(
       validateCreateForm({ ...validValues, systemPresetId: "sc-lk" }),
+    ).toEqual({ valid: true });
+  });
+
+  it("valid form with robinson system", () => {
+    expect(
+      validateCreateForm({ ...validValues, systemPresetId: "robinson" }),
+    ).toEqual({ valid: true });
+  });
+
+  it("valid form with peano-hk system", () => {
+    expect(
+      validateCreateForm({ ...validValues, systemPresetId: "peano-hk" }),
+    ).toEqual({ valid: true });
+  });
+
+  it("valid form with peano-mendelson system", () => {
+    expect(
+      validateCreateForm({
+        ...validValues,
+        systemPresetId: "peano-mendelson",
+      }),
+    ).toEqual({ valid: true });
+  });
+
+  it("valid form with heyting system", () => {
+    expect(
+      validateCreateForm({ ...validValues, systemPresetId: "heyting" }),
     ).toEqual({ valid: true });
   });
 
