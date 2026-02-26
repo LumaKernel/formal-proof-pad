@@ -3996,3 +3996,25 @@
   - axiom ID→reference entry IDマッピングは純粋関数として分離（axiomPaletteLogic.ts）。UIとロジックの分離パターンが引き続き有効
   - 次のタスク: NotebookCreateFormに体系リファレンスポップオーバーを統合
 ---
+
+## 2026-02-27 - リファレンス統合 (ProofWorkspace 推論規則リファレンスポップオーバー)
+- 実装した内容: ProofWorkspaceのMP/Genボタン付近に(?)マークを追加し、推論規則リファレンスポップオーバーを統合
+- ベースラインカバレッジ: Stmts 99.36%, Branch 94.95%, Funcs 90.17%, Lines 99.91%
+- 完了時カバレッジ: Stmts 99.36%, Branch 94.96%, Funcs 90.21%, Lines 99.92% ✅ 向上
+- 変更したファイル:
+  - `src/lib/proof-pad/inferenceRuleReferenceLogic.ts` (NEW - 推論規則ID→リファレンスエントリIDマッピング)
+  - `src/lib/proof-pad/inferenceRuleReferenceLogic.test.ts` (NEW - 4テスト)
+  - `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED - MP/GenボタンにReferencePopover統合)
+  - `src/lib/proof-pad/ProofWorkspace.test.tsx` (MODIFIED - 7テスト追加)
+  - `src/lib/proof-pad/ProofWorkspace.stories.tsx` (MODIFIED - WithReferencePopover更新 + WithPredicateReferencePopover新ストーリー追加)
+  - `src/lib/proof-pad/index.ts` (MODIFIED - getInferenceRuleReferenceEntryId export追加)
+  - `tasks/prd-theories.md` (MODIFIED - ProofWorkspaceサブタスク完了)
+- スクリーンショット:
+  - `.screenshots/proof-workspace-mp-reference-popover.png` (MP参照ポップオーバー)
+  - `.screenshots/proof-workspace-predicate-gen-reference-popover.png` (Gen参照ポップオーバー)
+- **今後のイテレーションへの学び:**
+  - 推論規則リファレンスマッピングは2エントリのみ（mp→rule-mp, gen→rule-gen）だが、AxiomPaletteと同じパターンで独立した純粋ロジックファイルに分離した
+  - ProofWorkspace.tsxは既にreferenceEntries/locale/onOpenReferenceDetailのpropsを持っていた（AxiomPaletteに渡すため）ので新しいprops追加は不要だった
+  - useMemoでfindEntryByIdを呼ぶ際、referenceEntriesの依存のみでOK（エントリIDは静的マッピングなので変化しない）
+  - Storybook URLのケバブケース: `proofpad-proofworkspace--with-reference-popover`（proof-pad → proofpad のようにハイフンが消える）
+---
