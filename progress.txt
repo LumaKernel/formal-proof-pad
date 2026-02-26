@@ -3520,3 +3520,36 @@
   - notebookCreateLogicのプリセットlabelにスタイル名を含めるとUIバッジと重複する。labelはスタイル名なしにすべき
   - prd-logic-selection.md を tasks-archived/ に移動（全タスク完了）
 ---
+
+## 2026-02-26 - [理論公理] Theory抽象化・ペアノ算術(PA)公理
+- 実装した内容:
+  - LogicSystem に `theoryAxioms?: readonly TheoryAxiom[]` を追加（非論理的公理のサポート）
+  - TheoryAxiom 型: `{ id, displayName, template, dslText, matchMode: "pattern" | "exact" }`
+  - ペアノ算術公理テンプレート PA1-PA6 を定義（PA7帰納法スキーマは将来対応）
+  - peanoArithmeticSystem プリセット追加（等号論理 + PA1-PA6）
+  - matchTheoryAxiom 関数: exact/pattern マッチング対応
+  - identifyAxiom を拡張して theoryAxioms をチェック（"TheoryAxiom" variant追加）
+  - axiomNameLogic: "TheoryAxiomIdentified" variant 追加
+  - axiomPaletteLogic: theoryAxioms をパレットに表示
+  - ProofWorkspace: TheoryAxiomIdentified ハンドリング追加
+  - notebookSerialization: theoryAxioms を除外して明示的フィールドリストでシリアライズ
+  - index.ts: 新エクスポート追加
+- 変更したファイル:
+  - src/lib/logic-core/inferenceRule.ts (TheoryAxiom型, PA公理, matchTheoryAxiom, identifyAxiom拡張)
+  - src/lib/logic-core/inferenceRule.test.ts (PA公理テスト248行追加)
+  - src/lib/logic-core/index.ts (新エクスポート追加)
+  - src/lib/proof-pad/axiomNameLogic.ts (TheoryAxiomIdentified variant)
+  - src/lib/proof-pad/axiomNameLogic.test.ts (theory axiom識別テスト)
+  - src/lib/proof-pad/axiomPaletteLogic.ts (theoryAxiomsパレット表示)
+  - src/lib/proof-pad/axiomPaletteLogic.test.ts (PAパレットテスト)
+  - src/lib/proof-pad/ProofWorkspace.tsx (TheoryAxiomIdentified対応)
+  - src/lib/notebook/notebookSerialization.ts (theoryAxioms除外)
+- カバレッジ: Stmts 99.38%, Branch 94.92%, Funcs 90.03%, Lines 99.94% (全て向上or維持)
+- テスト: 3629テスト全pass
+- **今後のイテレーションへの学び:**
+  - TheoryAxiomのmatchModeは2種類: "exact"(equalFormula)と"pattern"(matchFormulaPattern)。PA1-PA6はすべてexact
+  - PA7(帰納法スキーマ)は特殊マッチング(φ[0/x]とφ[S(x)/x]の検証)が必要で、将来の専用ロジックが必要
+  - LogicSystemのtheoryAxiomsはFormula ASTを含むため、JSON直列化から除外しプリセットから復元する設計
+  - AxiomIdentificationResultに"TheoryAxiom" variantを別途追加し、既存のAxiomIdの型安全性を維持
+  - UI統合(notebookCreateLogicのPAプリセット)は次のイテレーションで対応
+---
