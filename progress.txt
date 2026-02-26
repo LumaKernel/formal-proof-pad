@@ -82,6 +82,31 @@
 
 ---
 
+## 2026-02-26 - 群論: Storybookで実際に問題を解くデモストーリー追加
+- GroupTheoryDemo.stories.tsx を新規作成（PA体系デモと同パターン）
+- 4つのストーリー:
+  1. G1 Associativity Placement: 結合律公理をそのまま配置してゴール達成
+  2. Identity Times Identity Completed: G2L + A5 + MP で e*e=e の完成済み証明
+  3. Identity Times Identity Interactive: play関数でMP適用して e*e=e を導出
+  4. Inverse Identity Proof: G3L + A5 + MP で i(e)*e=e の完成済み証明
+- 群論の証明パターン（∀消去）を実演: 理論公理 → A5インスタンス → MP
+- テスト: 163ファイル、3724テスト全パス（+4テスト: Storybookストーリー）
+- カバレッジ: Stmts 99.33%(維持), Branch 94.87%(維持), Funcs 90.67%(維持), Lines 99.92%(維持)
+  - ベースライン: Stmts 99.33%, Branch 94.87%, Funcs 90.67%, Lines 99.92%
+- ブラウザ確認:
+  - .screenshots/group-theory-demo-g1-associativity.png
+  - .screenshots/group-theory-demo-identity-times-identity.png
+  - .screenshots/group-theory-demo-interactive.png
+  - .screenshots/group-theory-demo-inverse-identity.png
+- 変更ファイル:
+  - `src/lib/proof-pad/GroupTheoryDemo.stories.tsx` (NEW - 群論デモストーリー4本)
+  - `tasks/prd-theories.md` (MODIFIED - 自然数論・群論ツリー完了マーク)
+- **今後のイテレーションへの学び:**
+  - 理論デモストーリーはPA体系デモと同じパターンで量産可能（体系変数とDSLテキストの差し替えのみ）
+  - 群論では∀消去パターン（理論公理 → A5 → MP）が基本的な証明手段
+  - Storybookのストーリー名にG1等の数字が入るとスラッグが `g-1-` のように分割される（URLに注意）
+---
+
 ## 2026-02-26 - 理論公理: PA流儀バリアント追加（Robinson Q・PA-HK・PA-Mendelson・HA）
 - inferenceRule.ts に新体系を追加:
   - Robinson算術(Q): PA1-PA6 + Q7（∀x.(x=0 ∨ ∃y.x=S(y))）、帰納法なしの弱い算術
