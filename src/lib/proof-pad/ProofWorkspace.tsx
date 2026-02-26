@@ -29,7 +29,7 @@ import { useProofMessages } from "./ProofMessagesContext";
 import { checkGoal } from "./goalCheckLogic";
 import {
   computeStepCount,
-  checkQuestGoals,
+  checkQuestGoalsWithAxioms,
 } from "../quest/questCompletionLogic";
 import { classifyAllNodes } from "./nodeRoleLogic";
 import { identifyAxiomName } from "./axiomNameLogic";
@@ -643,26 +643,40 @@ export function ProofWorkspace({
     [workspace.goalFormulaText, workspace.nodes],
   );
 
-  // --- クエストゴールチェック（クエストモード: 保護ノードベース） ---
+  // --- クエストゴールチェック（クエストモード: 保護ノードベース、公理制限付き） ---
 
   const questGoalResult = useMemo(
     () =>
-      workspace.mode === "quest" ? checkQuestGoals(workspace.nodes) : undefined,
-    [workspace.mode, workspace.nodes],
+      workspace.mode === "quest"
+        ? checkQuestGoalsWithAxioms(
+            workspace.nodes,
+            workspace.connections,
+            workspace.system,
+          )
+        : undefined,
+    [workspace.mode, workspace.nodes, workspace.connections, workspace.system],
   );
 
   const isGoalAchieved =
     goalCheckResult._tag === "GoalAchieved" ||
     questGoalResult?._tag === "AllAchieved";
 
+  const isGoalAchievedButAxiomViolation =
+    questGoalResult?._tag === "AllAchievedButAxiomViolation";
+
   // --- ゴール達成コールバック（達成へ遷移した瞬間に1回だけ発火） ---
 
   const prevGoalAchievedRef = useRef(false);
 
+  const isAnyGoalComplete = isGoalAchieved || isGoalAchievedButAxiomViolation;
+
   useEffect(() => {
-    if (isGoalAchieved && !prevGoalAchievedRef.current) {
+    if (isAnyGoalComplete && !prevGoalAchievedRef.current) {
       if (onGoalAchieved) {
-        if (questGoalResult?._tag === "AllAchieved") {
+        if (
+          questGoalResult?._tag === "AllAchieved" ||
+          questGoalResult?._tag === "AllAchievedButAxiomViolation"
+        ) {
           onGoalAchieved({
             matchingNodeId: "",
             stepCount: questGoalResult.stepCount,
@@ -675,9 +689,9 @@ export function ProofWorkspace({
         }
       }
     }
-    prevGoalAchievedRef.current = isGoalAchieved;
+    prevGoalAchievedRef.current = isAnyGoalComplete;
   }, [
-    isGoalAchieved,
+    isAnyGoalComplete,
     goalCheckResult,
     questGoalResult,
     onGoalAchieved,
@@ -1814,6 +1828,31 @@ export function ProofWorkspace({
           }
         >
           {msg.proofComplete}
+        </div>
+      ) : isGoalAchievedButAxiomViolation ? (
+        <div
+          style={{
+            ...proofCompleteBannerStyle,
+            background: "linear-gradient(135deg, #e0a030, #d4940a)",
+            boxShadow: "0 4px 20px rgba(224,160,48,0.5)",
+          }}
+          data-testid={
+            testId
+              ? `${testId satisfies string}-proof-complete-banner-axiom-violation`
+              : undefined
+          }
+        >
+          <div>{msg.proofCompleteButAxiomViolation}</div>
+          {questGoalResult?._tag === "AllAchievedButAxiomViolation" ? (
+            <div style={{ fontSize: 13, fontWeight: 400, marginTop: 4 }}>
+              {formatMessage(msg.axiomViolationDetail, {
+                axiomIds: questGoalResult.goalResults
+                  .flatMap((r) => [...r.violatingAxiomIds])
+                  .filter((v, i, a) => a.indexOf(v) === i)
+                  .join(", "),
+              })}
+            </div>
+          ) : null}
         </div>
       ) : null}
 

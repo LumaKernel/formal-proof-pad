@@ -7,7 +7,7 @@
  * 変更時は workspaceState.test.ts, ProofWorkspace.tsx, index.ts も同期すること。
  */
 
-import type { LogicSystem } from "../logic-core/inferenceRule";
+import type { LogicSystem, AxiomId } from "../logic-core/inferenceRule";
 import type { Point } from "../infinite-canvas/types";
 import type { ProofNodeKind } from "./proofNodeUI";
 import type { NodeRole } from "./nodeRoleLogic";
@@ -66,6 +66,12 @@ export type WorkspaceNode = {
   readonly role?: NodeRole;
   /** ノードの保護状態（クエストモードのゴールノードなど） */
   readonly protection?: NodeProtection;
+  /**
+   * このゴールノードを達成するために使ってよい公理スキーマIDのリスト。
+   * ゴールノード（protection: "quest-goal"）でのみ使用。
+   * undefined の場合はシステムの全公理を許可する。
+   */
+  readonly allowedAxiomIds?: readonly AxiomId[];
 };
 
 /** ワークスペース上の接続（ポートベース） */
@@ -111,6 +117,11 @@ export type QuestGoalDefinition = {
   readonly label?: string;
   /** 配置位置 */
   readonly position: Point;
+  /**
+   * このゴールを達成するために使ってよい公理スキーマIDのリスト。
+   * undefined の場合はシステムの全公理を許可する。
+   */
+  readonly allowedAxiomIds?: readonly AxiomId[];
 };
 
 /**
@@ -140,6 +151,7 @@ export function createQuestWorkspace(
       position: goal.position,
       role: "goal",
       protection: "quest-goal",
+      allowedAxiomIds: goal.allowedAxiomIds,
     };
     state = {
       ...state,

@@ -117,6 +117,51 @@ describe("buildQuestStartParams", () => {
     const result = buildQuestStartParams(quest);
     expect(result?.goals).toHaveLength(2);
   });
+
+  it("クエストのallowedAxiomIdsがゴールに引き継がれる", () => {
+    const quest: QuestDefinition = {
+      ...testQuest,
+      allowedAxiomIds: ["A1", "A2"],
+    };
+    const result = buildQuestStartParams(quest);
+    expect(result?.goals[0]?.allowedAxiomIds).toEqual(["A1", "A2"]);
+  });
+
+  it("ゴール個別のallowedAxiomIdsがクエスト全体より優先される", () => {
+    const quest: QuestDefinition = {
+      ...testQuest,
+      allowedAxiomIds: ["A1", "A2"],
+      goals: [
+        {
+          formulaText: "phi -> phi",
+          position: { x: 300, y: 0 },
+          allowedAxiomIds: ["A1"],
+        },
+      ],
+    };
+    const result = buildQuestStartParams(quest);
+    expect(result?.goals[0]?.allowedAxiomIds).toEqual(["A1"]);
+  });
+
+  it("クエストにallowedAxiomIdsがなければゴールのallowedAxiomIdsはそのまま", () => {
+    const quest: QuestDefinition = {
+      ...testQuest,
+      goals: [
+        {
+          formulaText: "phi -> phi",
+          position: { x: 300, y: 0 },
+          allowedAxiomIds: ["A3"],
+        },
+      ],
+    };
+    const result = buildQuestStartParams(quest);
+    expect(result?.goals[0]?.allowedAxiomIds).toEqual(["A3"]);
+  });
+
+  it("クエストにもゴールにもallowedAxiomIdsがなければundefined", () => {
+    const result = buildQuestStartParams(testQuest);
+    expect(result?.goals[0]?.allowedAxiomIds).toBeUndefined();
+  });
 });
 
 describe("prepareQuestStart", () => {

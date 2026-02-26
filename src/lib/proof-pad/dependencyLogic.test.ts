@@ -3,8 +3,10 @@ import {
   getNodeDependencies,
   getAllNodeDependencies,
   getSubtreeNodeIds,
+  getNodeAxiomIds,
 } from "./dependencyLogic";
 import type { WorkspaceNode, WorkspaceConnection } from "./workspaceState";
+import type { LogicSystem } from "../logic-core/inferenceRule";
 
 // --- ヘルパー ---
 
@@ -310,6 +312,147 @@ describe("dependencyLogic", () => {
       ];
       const result = getSubtreeNodeIds("axiom-1", connections);
       expect(result).toEqual(new Set(["axiom-1", "mp-1"]));
+    });
+  });
+
+  describe("getNodeAxiomIds", () => {
+    const lukasiewiczSystem: LogicSystem = {
+      name: "Łukasiewicz",
+      propositionalAxioms: new Set(["A1", "A2", "A3"]),
+      predicateLogic: false,
+      equalityLogic: false,
+      generalization: false,
+    };
+
+    function makeAxiomNode(
+      id: string,
+      formulaText: string,
+    ): WorkspaceNode {
+      return {
+        id,
+        kind: "axiom",
+        label: id,
+        formulaText,
+        position: { x: 0, y: 0 },
+      };
+    }
+
+    it("A1公理インスタンスを含むルートノードを識別する", () => {
+      // phi -> (psi -> phi) は A1のインスタンス
+      const nodes = [makeAxiomNode("a1", "phi -> (psi -> phi)")];
+      const connections: readonly WorkspaceConnection[] = [];
+
+      const axiomIds = getNodeAxiomIds("a1", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set(["A1"]));
+    });
+
+    it("A2公理インスタンスを含むルートノードを識別する", () => {
+      // (phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi)) は A2のインスタンス
+      const nodes = [
+        makeAxiomNode(
+          "a2",
+          "(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))",
+        ),
+      ];
+      const connections: readonly WorkspaceConnection[] = [];
+
+      const axiomIds = getNodeAxiomIds("a2", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set(["A2"]));
+    });
+
+    it("A3公理インスタンスを含むルートノードを識別する", () => {
+      // (~phi -> ~psi) -> (psi -> phi) は A3のインスタンス
+      const nodes = [
+        makeAxiomNode("a3", "(~phi -> ~psi) -> (psi -> phi)"),
+      ];
+      const connections: readonly WorkspaceConnection[] = [];
+
+      const axiomIds = getNodeAxiomIds("a3", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set(["A3"]));
+    });
+
+    it("MP導出ノードは依存する公理すべてのIDを返す", () => {
+      // a1: A1インスタンス  →  mp1 (derived)
+      // a2: A2インスタンス  →
+      const nodes = [
+        makeAxiomNode("a1", "phi -> (psi -> phi)"),
+        makeAxiomNode(
+          "a2",
+          "(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))",
+        ),
+        { ...makeNode("mp1", "mp"), formulaText: "some derived formula" },
+      ];
+      const connections = [
+        makeConnection("a1", "mp1", "premise-left"),
+        makeConnection("a2", "mp1", "premise-right"),
+      ];
+
+      const axiomIds = getNodeAxiomIds("mp1", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set(["A1", "A2"]));
+    });
+
+    it("識別できない論理式のルートノードは結果に含まない", () => {
+      const nodes = [
+        makeAxiomNode("unknown", "phi"),
+        makeAxiomNode("a1", "phi -> (psi -> phi)"),
+        { ...makeNode("mp1", "mp"), formulaText: "" },
+      ];
+      const connections = [
+        makeConnection("unknown", "mp1", "premise-left"),
+        makeConnection("a1", "mp1", "premise-right"),
+      ];
+
+      const axiomIds = getNodeAxiomIds("mp1", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set(["A1"]));
+    });
+
+    it("空の論理式テキストのルートノードは無視される", () => {
+      const nodes = [makeAxiomNode("empty", "")];
+      const connections: readonly WorkspaceConnection[] = [];
+
+      const axiomIds = getNodeAxiomIds("empty", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set());
+    });
+
+    it("パース不能な論理式のルートノードは無視される", () => {
+      const nodes = [makeAxiomNode("bad", ">>>invalid<<<")];
+      const connections: readonly WorkspaceConnection[] = [];
+
+      const axiomIds = getNodeAxiomIds("bad", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set());
+    });
+
+    it("存在しないノードIDは空集合を返す", () => {
+      const nodes = [makeAxiomNode("a1", "phi -> (psi -> phi)")];
+      const connections: readonly WorkspaceConnection[] = [];
+
+      const axiomIds = getNodeAxiomIds("nonexistent", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set());
+    });
+
+    it("チェーン導出でも最初のルート公理のIDを返す", () => {
+      // a1 → mp1 → mp2
+      // a3 → mp1
+      // a2 → mp2
+      const nodes = [
+        makeAxiomNode("a1", "phi -> (psi -> phi)"),
+        makeAxiomNode("a3", "(~phi -> ~psi) -> (psi -> phi)"),
+        makeAxiomNode(
+          "a2",
+          "(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))",
+        ),
+        { ...makeNode("mp1", "mp"), formulaText: "" },
+        { ...makeNode("mp2", "mp"), formulaText: "" },
+      ];
+      const connections = [
+        makeConnection("a1", "mp1", "premise-left"),
+        makeConnection("a3", "mp1", "premise-right"),
+        makeConnection("mp1", "mp2", "premise-left"),
+        makeConnection("a2", "mp2", "premise-right"),
+      ];
+
+      const axiomIds = getNodeAxiomIds("mp2", nodes, connections, lukasiewiczSystem);
+      expect(axiomIds).toEqual(new Set(["A1", "A2", "A3"]));
     });
   });
 });

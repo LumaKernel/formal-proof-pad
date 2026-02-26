@@ -91,7 +91,11 @@ export {
 export {
   computeStepCount,
   checkQuestGoals,
+  checkQuestGoalsWithAxioms,
+  computeViolatingAxiomIds,
   type QuestGoalCheckResult,
+  type QuestGoalCheckWithAxiomsResult,
+  type GoalAxiomCheckResult,
 } from "./questCompletionLogic";
 
 export { QuestCatalog, type QuestCatalogProps } from "./QuestCatalogComponent";

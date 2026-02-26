@@ -54,6 +54,8 @@
     "exportSVG": "SVG エクスポート",
     "exportPNG": "PNG エクスポート",
     "importJSON": "JSON インポート",
-    "selectSubtree": "サブツリーを選択"
+    "selectSubtree": "サブツリーを選択",
+    "proofCompleteButAxiomViolation": "証明完了（公理制限違反あり）",
+    "axiomViolationDetail": "許可されていない公理が使用されています: {axiomIds}"
   }
 }

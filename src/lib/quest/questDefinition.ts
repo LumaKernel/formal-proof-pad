@@ -7,6 +7,7 @@
  * 変更時は questDefinition.test.ts, builtinQuests.ts も同期すること。
  */
 
+import type { AxiomId } from "../logic-core/inferenceRule";
 import type { QuestGoalDefinition } from "../proof-pad/workspaceState";
 
 // --- クエストID ---
@@ -128,6 +129,12 @@ export type QuestDefinition = {
   readonly learningPoint: string;
   /** カテゴリ内の表示順 */
   readonly order: number;
+  /**
+   * このクエストで使ってよい公理スキーマIDのリスト。
+   * undefined の場合はシステムの全公理を許可する。
+   * ゴール個別の allowedAxiomIds が設定されている場合はそちらが優先される。
+   */
+  readonly allowedAxiomIds?: readonly AxiomId[];
 };
 
 // --- ユーティリティ ---

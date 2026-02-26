@@ -1,6 +1,15 @@
 import { describe, test, expect } from "vitest";
-import { computeStepCount, checkQuestGoals } from "./questCompletionLogic";
-import type { WorkspaceNode } from "../proof-pad/workspaceState";
+import {
+  computeStepCount,
+  checkQuestGoals,
+  checkQuestGoalsWithAxioms,
+  computeViolatingAxiomIds,
+} from "./questCompletionLogic";
+import type {
+  WorkspaceNode,
+  WorkspaceConnection,
+} from "../proof-pad/workspaceState";
+import type { LogicSystem, AxiomId } from "../logic-core/inferenceRule";
 
 // --- ヘルパー ---
 
@@ -246,6 +255,218 @@ describe("checkQuestGoals", () => {
     if (result._tag === "NotAllAchieved") {
       expect(result.achievedCount).toBe(0);
       expect(result.totalCount).toBe(1);
+    }
+  });
+});
+
+// --- computeViolatingAxiomIds ---
+
+describe("computeViolatingAxiomIds", () => {
+  test("allowedAxiomIdsがundefinedなら空集合を返す", () => {
+    const used: ReadonlySet<AxiomId> = new Set(["A1", "A2"]);
+    const result = computeViolatingAxiomIds(used, undefined);
+    expect(result).toEqual(new Set());
+  });
+
+  test("使用公理がすべて許可されていれば空集合を返す", () => {
+    const used: ReadonlySet<AxiomId> = new Set(["A1", "A2"]);
+    const result = computeViolatingAxiomIds(used, ["A1", "A2", "A3"]);
+    expect(result).toEqual(new Set());
+  });
+
+  test("許可されていない公理を返す", () => {
+    const used: ReadonlySet<AxiomId> = new Set(["A1", "A2", "A3"]);
+    const result = computeViolatingAxiomIds(used, ["A1", "A2"]);
+    expect(result).toEqual(new Set(["A3"]));
+  });
+
+  test("使用公理が空なら空集合を返す", () => {
+    const used: ReadonlySet<AxiomId> = new Set();
+    const result = computeViolatingAxiomIds(used, ["A1"]);
+    expect(result).toEqual(new Set());
+  });
+
+  test("許可が空リストならすべて違反", () => {
+    const used: ReadonlySet<AxiomId> = new Set(["A1", "A2"]);
+    const result = computeViolatingAxiomIds(used, []);
+    expect(result).toEqual(new Set(["A1", "A2"]));
+  });
+});
+
+// --- checkQuestGoalsWithAxioms ---
+
+describe("checkQuestGoalsWithAxioms", () => {
+  const lukasiewiczSystem: LogicSystem = {
+    name: "Łukasiewicz",
+    propositionalAxioms: new Set(["A1", "A2", "A3"]),
+    predicateLogic: false,
+    equalityLogic: false,
+    generalization: false,
+  };
+
+  function makeConnection(
+    fromNodeId: string,
+    toNodeId: string,
+    toPortId: string = "premise-left",
+  ): WorkspaceConnection {
+    return {
+      id: `conn-${fromNodeId satisfies string}-${toNodeId satisfies string}`,
+      fromNodeId,
+      fromPortId: "out",
+      toNodeId,
+      toPortId,
+    };
+  }
+
+  test("ゴールノードがない場合はNoGoalsを返す", () => {
+    const result = checkQuestGoalsWithAxioms([], [], lukasiewiczSystem);
+    expect(result._tag).toBe("NoGoals");
+  });
+
+  test("ゴール達成・公理制限なしでAllAchievedを返す", () => {
+    const nodes = [
+      makeNode({
+        id: "g1",
+        kind: "axiom",
+        formulaText: "phi -> (psi -> phi)",
+        protection: "quest-goal",
+      }),
+      makeNode({
+        id: "a1",
+        kind: "axiom",
+        formulaText: "phi -> (psi -> phi)",
+      }),
+    ];
+    const result = checkQuestGoalsWithAxioms(nodes, [], lukasiewiczSystem);
+    expect(result._tag).toBe("AllAchieved");
+    if (result._tag === "AllAchieved") {
+      expect(result.goalResults).toHaveLength(1);
+      expect(result.goalResults[0]?.usedAxiomIds).toEqual(new Set(["A1"]));
+      expect(result.goalResults[0]?.violatingAxiomIds).toEqual(new Set());
+    }
+  });
+
+  test("ゴール達成・公理制限内でAllAchievedを返す", () => {
+    const nodes = [
+      makeNode({
+        id: "g1",
+        kind: "axiom",
+        formulaText: "phi -> (psi -> phi)",
+        protection: "quest-goal",
+        allowedAxiomIds: ["A1", "A2"],
+      }),
+      makeNode({
+        id: "a1",
+        kind: "axiom",
+        formulaText: "phi -> (psi -> phi)",
+      }),
+    ];
+    const result = checkQuestGoalsWithAxioms(nodes, [], lukasiewiczSystem);
+    expect(result._tag).toBe("AllAchieved");
+  });
+
+  test("ゴール達成・公理制限違反でAllAchievedButAxiomViolationを返す", () => {
+    const nodes = [
+      makeNode({
+        id: "g1",
+        kind: "axiom",
+        formulaText: "phi -> (psi -> phi)",
+        protection: "quest-goal",
+        allowedAxiomIds: ["A2", "A3"],
+      }),
+      makeNode({
+        id: "a1",
+        kind: "axiom",
+        formulaText: "phi -> (psi -> phi)",
+      }),
+    ];
+    const result = checkQuestGoalsWithAxioms(nodes, [], lukasiewiczSystem);
+    expect(result._tag).toBe("AllAchievedButAxiomViolation");
+    if (result._tag === "AllAchievedButAxiomViolation") {
+      expect(result.goalResults[0]?.violatingAxiomIds).toEqual(
+        new Set(["A1"]),
+      );
+    }
+  });
+
+  test("ゴール未達成の場合はNotAllAchievedを返す", () => {
+    const nodes = [
+      makeNode({
+        id: "g1",
+        kind: "axiom",
+        formulaText: "phi -> phi",
+        protection: "quest-goal",
+      }),
+    ];
+    const result = checkQuestGoalsWithAxioms(nodes, [], lukasiewiczSystem);
+    expect(result._tag).toBe("NotAllAchieved");
+    if (result._tag === "NotAllAchieved") {
+      expect(result.achievedCount).toBe(0);
+      expect(result.totalCount).toBe(1);
+    }
+  });
+
+  test("MP導出ノードが複数公理に依存する場合も正しくチェックする", () => {
+    // ゴール: psi -> phi  (A3の結論部分と一致するような式)
+    // a1 (A1インスタンス) + a3 (A3インスタンス) → mp1 (psi -> phi)
+    // ゴールは A1 のみ許可 → A3 が制限違反
+    const nodes = [
+      makeNode({
+        id: "g1",
+        kind: "axiom",
+        formulaText: "psi -> phi",
+        protection: "quest-goal",
+        allowedAxiomIds: ["A1"],
+      }),
+      makeNode({
+        id: "a1",
+        kind: "axiom",
+        formulaText: "phi -> (psi -> phi)",
+      }),
+      makeNode({
+        id: "a3",
+        kind: "axiom",
+        formulaText: "(~phi -> ~psi) -> (psi -> phi)",
+      }),
+      makeNode({
+        id: "mp1",
+        kind: "mp",
+        formulaText: "psi -> phi",
+      }),
+    ];
+    const connections = [
+      makeConnection("a1", "mp1", "premise-left"),
+      makeConnection("a3", "mp1", "premise-right"),
+    ];
+    const result = checkQuestGoalsWithAxioms(
+      nodes,
+      connections,
+      lukasiewiczSystem,
+    );
+    expect(result._tag).toBe("AllAchievedButAxiomViolation");
+    if (result._tag === "AllAchievedButAxiomViolation") {
+      expect(result.goalResults[0]?.usedAxiomIds).toEqual(
+        new Set(["A1", "A3"]),
+      );
+      expect(result.goalResults[0]?.violatingAxiomIds).toEqual(
+        new Set(["A3"]),
+      );
+    }
+  });
+
+  test("パース不能なゴールはmatchingNodeId: undefinedで結果に含まれる", () => {
+    const nodes = [
+      makeNode({
+        id: "g1",
+        kind: "axiom",
+        formulaText: ">>>invalid<<<",
+        protection: "quest-goal",
+      }),
+    ];
+    const result = checkQuestGoalsWithAxioms(nodes, [], lukasiewiczSystem);
+    expect(result._tag).toBe("NotAllAchieved");
+    if (result._tag === "NotAllAchieved") {
+      expect(result.goalResults[0]?.matchingNodeId).toBeUndefined();
     }
   });
 });

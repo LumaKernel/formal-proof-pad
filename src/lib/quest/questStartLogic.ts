@@ -44,10 +44,20 @@ export function buildQuestStartParams(
   const preset = resolveSystemPreset(quest.systemPresetId);
   if (preset === undefined) return undefined;
 
+  // クエスト全体の allowedAxiomIds をゴール個別に引き継ぐ
+  // ゴール個別に設定がある場合はそちらを優先
+  const goals =
+    quest.allowedAxiomIds !== undefined
+      ? quest.goals.map((g) => ({
+          ...g,
+          allowedAxiomIds: g.allowedAxiomIds ?? quest.allowedAxiomIds,
+        }))
+      : quest.goals;
+
   return {
     name: `${quest.title satisfies string}`,
     system: preset.system,
-    goals: quest.goals,
+    goals,
   };
 }
 

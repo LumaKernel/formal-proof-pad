@@ -7,10 +7,15 @@
  * 変更時は questCompletionLogic.test.ts も同期すること。
  */
 
-import type { WorkspaceNode } from "../proof-pad/workspaceState";
+import type {
+  WorkspaceNode,
+  WorkspaceConnection,
+} from "../proof-pad/workspaceState";
 import type { ProofNodeKind } from "../proof-pad/proofNodeUI";
+import type { LogicSystem, AxiomId } from "../logic-core/inferenceRule";
 import { equalFormula } from "../logic-core/equality";
 import { parseString } from "../logic-lang/parser";
+import { getNodeAxiomIds } from "../proof-pad/dependencyLogic";
 
 // --- ステップ数計算 ---
 
@@ -99,4 +104,181 @@ export function checkQuestGoals(
     achievedCount,
     totalCount: goalNodes.length,
   };
+}
+
+// --- 公理制限付きゴール達成チェック ---
+
+/** 公理制限チェック結果: ゴールごとの使用公理と制限違反 */
+export type GoalAxiomCheckResult = {
+  /** ゴールノードID */
+  readonly goalNodeId: string;
+  /** 一致したワークノードID（未達成の場合はundefined） */
+  readonly matchingNodeId: string | undefined;
+  /** 使用された公理スキーマIDの集合 */
+  readonly usedAxiomIds: ReadonlySet<AxiomId>;
+  /** このゴールで許可された公理スキーマID（undefinedは制限なし） */
+  readonly allowedAxiomIds: readonly AxiomId[] | undefined;
+  /** 制限違反の公理スキーマID（制限なしまたは制限内の場合は空） */
+  readonly violatingAxiomIds: ReadonlySet<AxiomId>;
+};
+
+/** 公理制限付きゴールチェック結果 */
+export type QuestGoalCheckWithAxiomsResult =
+  | { readonly _tag: "NoGoals" }
+  | {
+      readonly _tag: "NotAllAchieved";
+      readonly achievedCount: number;
+      readonly totalCount: number;
+      readonly goalResults: readonly GoalAxiomCheckResult[];
+    }
+  | {
+      readonly _tag: "AllAchieved";
+      readonly stepCount: number;
+      readonly goalResults: readonly GoalAxiomCheckResult[];
+    }
+  | {
+      readonly _tag: "AllAchievedButAxiomViolation";
+      readonly stepCount: number;
+      readonly goalResults: readonly GoalAxiomCheckResult[];
+    };
+
+/**
+ * 公理制限付きでクエストゴールの達成状況をチェックする。
+ *
+ * 基本的な達成判定に加えて、各ゴールに対して:
+ * 1. 一致するワークノードを探す
+ * 2. 一致したノードが依存する公理スキーマIDを特定
+ * 3. ゴールの allowedAxiomIds と比較して制限違反をチェック
+ *
+ * @param nodes ワークスペース上のノード一覧
+ * @param connections ワークスペース上の接続一覧
+ * @param system 論理体系設定
+ * @returns 公理制限付きゴールチェック結果
+ */
+export function checkQuestGoalsWithAxioms(
+  nodes: readonly WorkspaceNode[],
+  connections: readonly WorkspaceConnection[],
+  system: LogicSystem,
+): QuestGoalCheckWithAxiomsResult {
+  const goalNodes = nodes.filter((n) => n.protection === "quest-goal");
+  if (goalNodes.length === 0) {
+    return { _tag: "NoGoals" };
+  }
+
+  const workNodes = nodes.filter((n) => n.protection !== "quest-goal");
+
+  const goalResults: GoalAxiomCheckResult[] = [];
+  let achievedCount = 0;
+  let hasAxiomViolation = false;
+
+  for (const goal of goalNodes) {
+    const goalParsed = parseString(goal.formulaText.trim());
+    if (!goalParsed.ok) {
+      goalResults.push({
+        goalNodeId: goal.id,
+        matchingNodeId: undefined,
+        usedAxiomIds: new Set(),
+        allowedAxiomIds: goal.allowedAxiomIds,
+        violatingAxiomIds: new Set(),
+      });
+      continue;
+    }
+
+    // 一致するワークノードを探す
+    let matchingNode: WorkspaceNode | undefined;
+    for (const work of workNodes) {
+      const workParsed = parseString(work.formulaText.trim());
+      if (!workParsed.ok) continue;
+      if (equalFormula(goalParsed.formula, workParsed.formula)) {
+        matchingNode = work;
+        break;
+      }
+    }
+
+    if (matchingNode === undefined) {
+      goalResults.push({
+        goalNodeId: goal.id,
+        matchingNodeId: undefined,
+        usedAxiomIds: new Set(),
+        allowedAxiomIds: goal.allowedAxiomIds,
+        violatingAxiomIds: new Set(),
+      });
+      continue;
+    }
+
+    achievedCount += 1;
+
+    // 使用された公理を特定
+    const usedAxiomIds = getNodeAxiomIds(
+      matchingNode.id,
+      nodes,
+      connections,
+      system,
+    );
+
+    // 制限違反をチェック
+    const violatingAxiomIds = computeViolatingAxiomIds(
+      usedAxiomIds,
+      goal.allowedAxiomIds,
+    );
+
+    if (violatingAxiomIds.size > 0) {
+      hasAxiomViolation = true;
+    }
+
+    goalResults.push({
+      goalNodeId: goal.id,
+      matchingNodeId: matchingNode.id,
+      usedAxiomIds,
+      allowedAxiomIds: goal.allowedAxiomIds,
+      violatingAxiomIds,
+    });
+  }
+
+  if (achievedCount < goalNodes.length) {
+    return {
+      _tag: "NotAllAchieved",
+      achievedCount,
+      totalCount: goalNodes.length,
+      goalResults,
+    };
+  }
+
+  if (hasAxiomViolation) {
+    return {
+      _tag: "AllAchievedButAxiomViolation",
+      stepCount: computeStepCount(nodes),
+      goalResults,
+    };
+  }
+
+  return {
+    _tag: "AllAchieved",
+    stepCount: computeStepCount(nodes),
+    goalResults,
+  };
+}
+
+/**
+ * 使用された公理IDのうち、許可されていないものを返す。
+ *
+ * @param usedAxiomIds 使用された公理スキーマIDの集合
+ * @param allowedAxiomIds 許可された公理スキーマIDのリスト（undefinedは制限なし）
+ * @returns 制限違反の公理スキーマIDの集合
+ */
+export function computeViolatingAxiomIds(
+  usedAxiomIds: ReadonlySet<AxiomId>,
+  allowedAxiomIds: readonly AxiomId[] | undefined,
+): ReadonlySet<AxiomId> {
+  if (allowedAxiomIds === undefined) {
+    return new Set();
+  }
+  const allowedSet = new Set(allowedAxiomIds);
+  const violations = new Set<AxiomId>();
+  for (const axiomId of usedAxiomIds) {
+    if (!allowedSet.has(axiomId)) {
+      violations.add(axiomId);
+    }
+  }
+  return violations;
 }

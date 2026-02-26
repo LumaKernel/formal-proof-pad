@@ -131,6 +131,8 @@ function useProofMessagesFromIntl(): ProofMessages {
     exportPNG: t("exportPNG"),
     importJSON: t("importJSON"),
     selectSubtree: t("selectSubtree"),
+    proofCompleteButAxiomViolation: t("proofCompleteButAxiomViolation"),
+    axiomViolationDetail: t("axiomViolationDetail"),
   }), [t]);
 }
 

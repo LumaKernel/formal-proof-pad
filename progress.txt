@@ -2965,3 +2965,43 @@
   - `formatMessage` でプレースホルダ置換（`{count}` → 値）。ICU MessageFormat は未採用、シンプルな置換で十分
   - Storybook story ID: タイトル `ProofPad/ProofWorkspace` の場合、URLパスは `proofpad-proofworkspace--story-name` ではなく sidebar から直接クリックする方が確実
 ---
+
+## 2026-02-26 - ゴール公理制限機能
+- 実装した内容:
+  - ゴールノードに `allowedAxiomIds` を追加し、使用可能な公理スキーマを制限できる機能を実装
+  - `getNodeAxiomIds`: ノードが依存する公理スキーマIDを特定する純粋関数 (dependencyLogic.ts)
+  - `computeViolatingAxiomIds`: 使用公理と許可公理を比較し違反を検出 (questCompletionLogic.ts)
+  - `checkQuestGoalsWithAxioms`: 公理制限付きクエストゴール達成チェック (questCompletionLogic.ts)
+  - クエスト定義・ワークスペース状態に `allowedAxiomIds` フィールドを追加
+  - UI層: 公理制限違反時にオレンジ色の警告バナーを表示
+  - i18n: 公理制限関連メッセージの日英翻訳を追加
+- テスト: 新規テスト追加（dependencyLogic: 9件, questCompletionLogic: 12件, questStartLogic: 4件）
+- カバレッジ: Stmts 99.31%, Branch 94.92%, Funcs 89.87%, Lines 99.93% (ベースライン: 99.37/95.19/90.05/99.93)
+  - 微減はProofWorkspace.tsx UI層（JSDOM非対応部分）の新コードのみ。純粋ロジック層は100%維持
+- 変更したファイル:
+  - `src/lib/proof-pad/dependencyLogic.ts` (MODIFIED - getNodeAxiomIds追加)
+  - `src/lib/proof-pad/dependencyLogic.test.ts` (MODIFIED - 9テスト追加)
+  - `src/lib/proof-pad/workspaceState.ts` (MODIFIED - allowedAxiomIds追加)
+  - `src/lib/proof-pad/proofMessages.ts` (MODIFIED - 公理制限メッセージキー追加)
+  - `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED - checkQuestGoalsWithAxioms統合, 違反バナー)
+  - `src/lib/proof-pad/index.ts` (MODIFIED - getNodeAxiomIds export追加)
+  - `src/lib/quest/questDefinition.ts` (MODIFIED - allowedAxiomIds追加)
+  - `src/lib/quest/questStartLogic.ts` (MODIFIED - allowedAxiomIds継承)
+  - `src/lib/quest/questStartLogic.test.ts` (MODIFIED - 4テスト追加)
+  - `src/lib/quest/questCompletionLogic.ts` (MODIFIED - checkQuestGoalsWithAxioms, computeViolatingAxiomIds追加)
+  - `src/lib/quest/questCompletionLogic.test.ts` (MODIFIED - 12テスト追加)
+  - `src/lib/quest/index.ts` (MODIFIED - 新export追加)
+  - `src/app/workspace/[id]/WorkspaceContent.tsx` (MODIFIED - i18nブリッジ追加)
+  - `messages/en.json` (MODIFIED - 公理制限メッセージ追加)
+  - `messages/ja.json` (MODIFIED - 公理制限メッセージ追加)
+- スクリーンショット:
+  - `.screenshots/quest-mode-axiom-restriction.png`
+  - `.screenshots/quest-mode-fullscreen.png`
+  - `.screenshots/goal-achieved-proof-complete.png`
+- **今後のイテレーションへの学び:**
+  - 3層アーキテクチャの実践: getNodeAxiomIds(純粋) → checkQuestGoalsWithAxioms(状態) → ProofWorkspace(UI)
+  - `allowedAxiomIds` はオプショナルフィールドとして追加することで後方互換性を保てる
+  - クエストレベルの `allowedAxiomIds` はゴールレベルにフォールバック継承される設計（questStartLogic）
+  - テストで使う論理式は必ずパーサーで有効な式を使うこと（"some-result" → "psi -> phi"）
+  - `ProofMessages` 型に新キーを追加すると `WorkspaceContent.tsx` でコンパイルエラーになるので変更漏れ防止に有効
+---

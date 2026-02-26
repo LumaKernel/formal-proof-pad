@@ -82,6 +82,11 @@ export type ProofMessages = {
 
   // --- コンテキストメニュー ---
   readonly selectSubtree: string;
+
+  // --- 公理制限 ---
+  readonly proofCompleteButAxiomViolation: string;
+  /** `{axiomIds}` プレースホルダーを含む */
+  readonly axiomViolationDetail: string;
 };
 
 // --- デフォルトメッセージ（英語） ---
@@ -147,6 +152,10 @@ export const defaultProofMessages: ProofMessages = {
 
   // Context menu
   selectSubtree: "Select Subtree",
+
+  // Axiom restriction
+  proofCompleteButAxiomViolation: "Proof Complete (axiom restriction violated)",
+  axiomViolationDetail: "Disallowed axiom(s) used: {axiomIds}",
 };
 
 // --- エラー → メッセージキー変換（純粋関数） ---

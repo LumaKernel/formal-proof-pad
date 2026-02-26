@@ -54,6 +54,8 @@
     "exportSVG": "Export SVG",
     "exportPNG": "Export PNG",
     "importJSON": "Import JSON",
-    "selectSubtree": "Select Subtree"
+    "selectSubtree": "Select Subtree",
+    "proofCompleteButAxiomViolation": "Proof Complete (axiom restriction violated)",
+    "axiomViolationDetail": "Disallowed axiom(s) used: {axiomIds}"
   }
 }

@@ -124,6 +124,7 @@ export {
   getNodeDependencies,
   getAllNodeDependencies,
   getSubtreeNodeIds,
+  getNodeAxiomIds,
 } from "./dependencyLogic";
 export {
   computeTreeLayout,

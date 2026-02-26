@@ -3,10 +3,14 @@
  *
  * - getNodeDependencies: 接続グラフを逆方向に遡り、ルートノード（公理）を特定
  * - getSubtreeNodeIds: 接続グラフを順方向に辿り、子孫ノードを収集
+ * - getNodeAxiomIds: ノードが依存する公理スキーマIDを特定
  *
  * 変更時は dependencyLogic.test.ts, ProofWorkspace.tsx, index.ts も同期すること。
  */
 
+import type { LogicSystem, AxiomId } from "../logic-core/inferenceRule";
+import { identifyAxiom } from "../logic-core/inferenceRule";
+import { parseString } from "../logic-lang/parser";
 import type { WorkspaceNode, WorkspaceConnection } from "./workspaceState";
 import { isRootNode } from "./nodeRoleLogic";
 
@@ -105,5 +109,48 @@ export function getSubtreeNodeIds(
   }
 
   traverse(nodeId);
+  return result;
+}
+
+// --- 公理スキーマID依存関係 ---
+
+/**
+ * あるノードが依存する公理スキーマID（A1, A2, A3, ...）の集合を返す。
+ *
+ * 1. getNodeDependencies でルートノードIDを取得
+ * 2. 各ルートノードの formulaText をパースして identifyAxiom で公理スキーマIDを特定
+ * 3. 特定できなかったノードは結果に含まない
+ *
+ * @param nodeId 対象ノードのID
+ * @param nodes ワークスペースの全ノード
+ * @param connections ワークスペースの全接続
+ * @param system 論理体系設定
+ * @returns 依存する公理スキーマIDの集合
+ */
+export function getNodeAxiomIds(
+  nodeId: string,
+  nodes: readonly WorkspaceNode[],
+  connections: readonly WorkspaceConnection[],
+  system: LogicSystem,
+): ReadonlySet<AxiomId> {
+  const rootNodeIds = getNodeDependencies(nodeId, nodes, connections);
+  const result = new Set<AxiomId>();
+
+  for (const rootId of rootNodeIds) {
+    const node = nodes.find((n) => n.id === rootId);
+    if (node === undefined) continue;
+
+    const trimmed = node.formulaText.trim();
+    if (trimmed === "") continue;
+
+    const parsed = parseString(trimmed);
+    if (!parsed.ok) continue;
+
+    const identification = identifyAxiom(parsed.formula, system);
+    if (identification._tag === "Ok") {
+      result.add(identification.axiomId);
+    }
+  }
+
   return result;
 }
