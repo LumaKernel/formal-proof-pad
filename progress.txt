@@ -4037,3 +4037,30 @@
   - ReferenceModalの"External Resources"セクションはリンクが存在する場合のみ表示される（referenceUILogic.tsで制御）
   - データのみの変更なのでカバレッジに影響なし
 ---
+
+## 2026-02-27 - リファレンス外部リソースリンク・流儀情報追加充実化
+- 実装した内容:
+  - referenceContent.tsに14件の新規外部リンクを追加（9エントリに対して）
+  - axiom-e4: Wikipedia-ja（合同関係）+ nLab（congruence）
+  - axiom-e5: Wikipedia-ja（合同関係）+ nLab（Leibniz equality）
+  - rule-sc-logical: Wikipedia-ja（シーケント計算）+ nLab（sequent calculus）
+  - notation-metavariables: Wikipedia-en（axiom schema）+ nLab（metavariable）
+  - notation-term-operations: Wikipedia-ja（置換）+ MathWorld（substitution）
+  - system-lukasiewicz: Wikipedia-ja（命題論理）+ nLab + 教科書参照body追加
+  - system-mendelson: Wikipedia-ja（一階述語論理）+ nLab + 教科書参照body追加
+  - rule-gen: Wikipedia-ja（全称汎化）
+  - rule-nd-implication: Wikipedia-ja（演繹定理）
+  - axiom-a5: Wikipedia-ja（一階述語論理）
+- 変更したファイル:
+  - `src/lib/reference/referenceContent.ts` (MODIFIED - 14リンク追加 + 2 body段落追加)
+  - `tasks/prd-theories.md` (MODIFIED - タスク完了マーク)
+  - `task-processing.md` (MODIFIED→クリア)
+- カバレッジ: 99.36% Statements (変化なし), 94.96% Branch, 90.21% Functions, 99.92% Lines
+- スクリーンショット:
+  - `.screenshots/` に保存済み（ReferenceModal外部リンク表示確認）
+- **今後のイテレーションへの学び:**
+  - 流儀情報（教科書参照等）はbody段落として追加するのが適切。summaryは簡潔に保つ
+  - Wikipedia-jaのURLは日本語記事名をパーセントエンコードしたもの。手動確認が必要
+  - notation-input-methods（入力方法）はアプリ固有コンテンツなので外部リンク不要と判断
+  - prd-theories.mdの外部リソースリンク関連タスクは2イテレーションで完了（前回: 全エントリ一斉追加、今回: 追加充実化+流儀情報）
+---
