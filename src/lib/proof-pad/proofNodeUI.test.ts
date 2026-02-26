@@ -24,12 +24,28 @@ describe("getProofNodeStyle", () => {
     },
   );
 
-  it("returns different background colors for each kind", () => {
+  it("returns different stripe colors for each kind", () => {
     const colors = PROOF_NODE_KINDS.map(
-      (k) => getProofNodeStyle(k).backgroundColor,
+      (k) => getProofNodeStyle(k).stripeColor,
     );
     const unique = new Set(colors);
     expect(unique.size).toBe(PROOF_NODE_KINDS.length);
+  });
+
+  it("all kinds use paper card background", () => {
+    for (const kind of PROOF_NODE_KINDS) {
+      expect(getProofNodeStyle(kind).backgroundColor).toBe(
+        "var(--color-node-card-bg, #fffdf8)",
+      );
+    }
+  });
+
+  it("all kinds use card text color", () => {
+    for (const kind of PROOF_NODE_KINDS) {
+      expect(getProofNodeStyle(kind).textColor).toBe(
+        "var(--color-node-card-text, #2d2a24)",
+      );
+    }
   });
 
   it("conclusion has a special border radius (12)", () => {
@@ -40,6 +56,14 @@ describe("getProofNodeStyle", () => {
     expect(getProofNodeStyle("axiom").borderRadius).toBe(8);
     expect(getProofNodeStyle("mp").borderRadius).toBe(8);
     expect(getProofNodeStyle("gen").borderRadius).toBe(8);
+  });
+
+  it("includes stripeColor and boxShadowHover", () => {
+    for (const kind of PROOF_NODE_KINDS) {
+      const style = getProofNodeStyle(kind);
+      expect(style.stripeColor).toBeTruthy();
+      expect(style.boxShadowHover).toBeTruthy();
+    }
   });
 });
 

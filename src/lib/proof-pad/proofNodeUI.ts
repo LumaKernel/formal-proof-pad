@@ -36,6 +36,10 @@ export interface ProofNodeStyle {
   readonly borderRadius: number;
   readonly border: string;
   readonly boxShadow: string;
+  /** 左辺ストライプの色（カテゴリアクセント色） */
+  readonly stripeColor: string;
+  /** ホバー時のbox-shadow */
+  readonly boxShadowHover: string;
 }
 
 /**
@@ -54,44 +58,48 @@ function cssVar(entry: { readonly varName: string; readonly fallback: string }):
   return `var(${entry.varName satisfies string}, ${entry.fallback satisfies string})`;
 }
 
+/** 共通のカードスタイル基盤 */
+const CARD_BASE = {
+  backgroundColor: "var(--color-node-card-bg, #fffdf8)",
+  textColor: "var(--color-node-card-text, #2d2a24)",
+  borderRadius: 8,
+  border: "1px solid var(--color-node-card-border, rgba(0,0,0,0.08))",
+  boxShadow: "0 1px 4px var(--color-node-card-shadow, rgba(0,0,0,0.08))",
+  boxShadowHover: "0 4px 12px var(--color-node-card-shadow-hover, rgba(0,0,0,0.16))",
+} as const;
+
 /**
  * ノード種別に対応するスタイルを返す。
  * exhaustive switchで網羅性を保証。
+ *
+ * 紙カード風: 白/クリーム背景 + 左辺にカテゴリ色ストライプ + paper drop-shadow。
  * 色はCSS変数を参照し、フォールバック値を持つ。
  */
 export function getProofNodeStyle(kind: ProofNodeKind): ProofNodeStyle {
   switch (kind) {
     case "axiom":
       return {
-        backgroundColor: cssVar(NODE_COLORS.axiom),
-        textColor: "var(--color-node-text, #fff)",
-        borderRadius: 8,
-        border: "1px solid var(--color-node-border, rgba(255,255,255,0.2))",
-        boxShadow: "0 2px 8px var(--color-node-shadow, rgba(0,0,0,0.2))",
+        ...CARD_BASE,
+        stripeColor: cssVar(NODE_COLORS.axiom),
       };
     case "mp":
       return {
-        backgroundColor: cssVar(NODE_COLORS.mp),
-        textColor: "var(--color-node-text, #fff)",
-        borderRadius: 8,
-        border: "1px solid var(--color-node-border, rgba(255,255,255,0.2))",
-        boxShadow: "0 2px 8px var(--color-node-shadow, rgba(0,0,0,0.2))",
+        ...CARD_BASE,
+        stripeColor: cssVar(NODE_COLORS.mp),
       };
     case "gen":
       return {
-        backgroundColor: cssVar(NODE_COLORS.gen),
-        textColor: "var(--color-node-text, #fff)",
-        borderRadius: 8,
-        border: "1px solid var(--color-node-border, rgba(255,255,255,0.2))",
-        boxShadow: "0 2px 8px var(--color-node-shadow, rgba(0,0,0,0.2))",
+        ...CARD_BASE,
+        stripeColor: cssVar(NODE_COLORS.gen),
       };
     case "conclusion":
       return {
-        backgroundColor: cssVar(NODE_COLORS.conclusion),
-        textColor: "var(--color-node-text, #fff)",
+        ...CARD_BASE,
         borderRadius: 12,
         border: "2px solid var(--color-node-conclusion-border, #2ecc71)",
-        boxShadow: "0 4px 16px var(--color-node-conclusion-shadow, rgba(74,217,122,0.4))",
+        boxShadow: "0 2px 8px var(--color-node-conclusion-shadow, rgba(74,217,122,0.25))",
+        boxShadowHover: "0 6px 20px var(--color-node-conclusion-shadow, rgba(74,217,122,0.25))",
+        stripeColor: cssVar(NODE_COLORS.conclusion),
       };
   }
 }

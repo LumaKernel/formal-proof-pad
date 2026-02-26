@@ -3063,3 +3063,36 @@
   - paperTexture追加でSVG rect数が増えるため、rect数をチェックしているテストの更新が必要
   - Storybook iframe内のdata-theme属性はデコレーターで設定されるため、JS評価でテーマ切り替えする際は全data-theme要素を更新する
 ---
+
+## 2026-02-26 - UIスタイル: 証明ノードの紙カード風スタイル (US-S03)
+- 証明ノード（公理・MP・Gen・結論）を紙カード風スタイルに変更
+  - 白/クリーム背景 + 左辺にカテゴリ色ストライプ（4px）
+  - テキスト色を白→暗色（#2d2a24）に変更
+  - paper drop-shadow（1px 4px blur）
+  - ホバー時: translateY(-1px) + 影強化アニメーション
+  - ダークモード対応（暗色カード背景 #262320 + 色ストライプ）
+- SVGエクスポートも紙カード風に更新（白背景カード + ストライプrect）
+- テスト: 158ファイル全パス。全体3289テスト通過
+- カバレッジ: Stmts 99.32%(維持), Branch 94.93%(-0.03), Funcs 89.91%(+0.02), Lines 99.91%(維持)
+  - ベースライン: Stmts 99.32%, Branch 94.96%, Funcs 89.89%, Lines 99.91%
+  - Branch微減はworkspaceImageExport.tsの新コードパス追加による（許容範囲）
+- ブラウザ確認:
+  - `.screenshots/paper-card-nodes-readonly-light.png`
+  - `.screenshots/paper-card-nodes-readonly-dark.png`
+  - `.screenshots/paper-card-workspace-light.png`
+  - `.screenshots/paper-card-with-nodes-light.png`
+  - `.screenshots/paper-card-with-nodes-dark.png`
+- 変更ファイル:
+  - `src/app/globals.css` (MODIFIED - 紙カード用CSS変数追加: card-bg, card-text, card-border, card-shadow等)
+  - `src/lib/proof-pad/proofNodeUI.ts` (MODIFIED - ProofNodeStyle: stripeColor/boxShadowHover追加, CARD_BASE共通定数, getProofNodeStyle紙カード化)
+  - `src/lib/proof-pad/EditableProofNode.tsx` (MODIFIED - borderLeftストライプ, ホバーアニメーション, バッジ/ステータスCSS変数化)
+  - `src/lib/proof-pad/workspaceImageExport.ts` (MODIFIED - SVGエクスポート紙カード化: 白背景rect + ストライプrect)
+  - `src/lib/proof-pad/proofNodeUI.test.ts` (MODIFIED - stripeColor一意性テスト, カードスタイルテスト追加)
+  - `src/lib/proof-pad/EditableProofNode.test.tsx` (MODIFIED - カード背景/ストライプ/暗色テキストのアサーション)
+  - `src/lib/proof-pad/workspaceImageExport.test.ts` (MODIFIED - カード背景色/ストライプ色チェック更新)
+  - `tasks/prd-ui-style.md` (MODIFIED - US-S03完了)
+- **今後のイテレーションへの学び:**
+  - JSDOMではCSS変数を含むショートハンドプロパティ（borderLeft等）のtoHaveStyleは動作しない。getAttribute("style") + toContain() で代替
+  - proofNodeUI.tsのProofNodeStyleインターフェースを拡張する際は、CARD_BASE定数/getProofNodeStyle全分岐/テスト/SVGエクスポートの4箇所を同期
+  - SVGエクスポートではCSS変数が使えないため、フォールバック値をハードコード定数（EXPORT_CARD_BG等）として別途管理する
+---

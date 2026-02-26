@@ -8,7 +8,7 @@
  */
 
 import type { CSSProperties } from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { Formula } from "../logic-core/formula";
 import type { EditorMode } from "../formula-input/editorLogic";
 import { FormulaDisplay } from "../formula-input/FormulaDisplay";
@@ -92,9 +92,9 @@ const statusErrorStyle: CSSProperties = {
   fontStyle: "normal",
   marginTop: 4,
   padding: "2px 6px",
-  background: "rgba(255,60,60,0.25)",
+  background: "var(--color-error-bg, rgba(255,60,60,0.25))",
   borderRadius: 4,
-  color: "#fff",
+  color: "var(--color-error, #e06060)",
 };
 
 const statusSuccessStyle: CSSProperties = {
@@ -103,9 +103,9 @@ const statusSuccessStyle: CSSProperties = {
   fontStyle: "normal",
   marginTop: 4,
   padding: "2px 6px",
-  background: "rgba(60,255,60,0.25)",
+  background: "var(--color-success-bg, rgba(60,255,60,0.25))",
   borderRadius: 4,
-  color: "#fff",
+  color: "var(--color-success, #2ecc71)",
 };
 
 const roleBadgeBaseStyle: CSSProperties = {
@@ -135,9 +135,9 @@ const protectedBadgeStyle: CSSProperties = {
   borderRadius: 3,
   userSelect: "none",
   letterSpacing: 0.5,
-  background: "rgba(255,215,0,0.5)",
-  color: "#fff",
-  border: "1px solid rgba(255,215,0,0.6)",
+  background: "var(--color-warning-bg, rgba(255,215,0,0.3))",
+  color: "var(--color-warning, #d9944a)",
+  border: "1px solid var(--color-warning-border, rgba(255,215,0,0.5))",
 };
 
 const axiomNameBadgeStyle: CSSProperties = {
@@ -148,9 +148,9 @@ const axiomNameBadgeStyle: CSSProperties = {
   borderRadius: 3,
   userSelect: "none",
   letterSpacing: 0.5,
-  background: "rgba(255,255,255,0.25)",
-  color: "#fff",
-  border: "1px solid rgba(255,255,255,0.3)",
+  background: "var(--color-badge-bg, #e8eaf0)",
+  color: "var(--color-badge-text, #718096)",
+  border: "1px solid var(--color-node-card-border, rgba(0,0,0,0.08))",
 };
 
 const dependencyContainerStyle: CSSProperties = {
@@ -159,9 +159,9 @@ const dependencyContainerStyle: CSSProperties = {
   fontStyle: "normal",
   marginTop: 4,
   padding: "3px 6px",
-  background: "rgba(255,255,255,0.1)",
+  background: "var(--color-badge-bg, #e8eaf0)",
   borderRadius: 4,
-  color: "rgba(255,255,255,0.8)",
+  color: "var(--color-badge-text, #718096)",
   textAlign: "left",
 };
 
@@ -176,7 +176,7 @@ const dependencyItemStyle: CSSProperties = {
   display: "inline-block",
   padding: "1px 4px",
   margin: "1px 2px",
-  background: "rgba(255,255,255,0.15)",
+  background: "var(--color-node-card-border, rgba(0,0,0,0.08))",
   borderRadius: 3,
   fontSize: 9,
 };
@@ -186,27 +186,27 @@ function getRoleBadgeStyle(classification: NodeClassification): CSSProperties {
     case "root-axiom":
       return {
         ...roleBadgeBaseStyle,
-        background: "rgba(255,255,255,0.3)",
-        color: "#fff",
+        background: "var(--color-badge-bg, #e8eaf0)",
+        color: "var(--color-badge-text, #718096)",
       };
     case "root-goal":
       return {
         ...roleBadgeBaseStyle,
-        background: "rgba(255,215,0,0.4)",
-        color: "#fff",
+        background: "var(--color-warning-bg, rgba(255,215,0,0.3))",
+        color: "var(--color-warning, #d9944a)",
       };
     case "root-unmarked":
       return {
         ...roleBadgeBaseStyle,
-        background: "rgba(255,255,255,0.15)",
-        color: "rgba(255,255,255,0.7)",
-        border: "1px dashed rgba(255,255,255,0.3)",
+        background: "transparent",
+        color: "var(--color-badge-text, #718096)",
+        border: "1px dashed var(--color-node-card-border, rgba(0,0,0,0.08))",
       };
     case "derived":
       return {
         ...roleBadgeBaseStyle,
-        background: "rgba(255,255,255,0.15)",
-        color: "rgba(255,255,255,0.7)",
+        background: "var(--color-badge-bg, #e8eaf0)",
+        color: "var(--color-badge-text, #718096)",
       };
   }
 }
@@ -247,21 +247,25 @@ export function EditableProofNode({
 }: EditableProofNodeProps) {
   const nodeStyle = useMemo(() => getProofNodeStyle(kind), [kind]);
   const visibility = useMemo(() => getDetailVisibility(detailLevel), [detailLevel]);
+  const [isHovered, setIsHovered] = useState(false);
 
   const containerStyle: CSSProperties = useMemo(
     () => ({
-      padding: "8px 12px",
+      padding: "8px 12px 8px 16px",
       background: nodeStyle.backgroundColor,
       color: nodeStyle.textColor,
       borderRadius: nodeStyle.borderRadius,
       fontFamily: "serif, 'Times New Roman', Times",
       fontSize: 13,
-      boxShadow: nodeStyle.boxShadow,
+      boxShadow: isHovered ? nodeStyle.boxShadowHover : nodeStyle.boxShadow,
       minWidth: 80,
       textAlign: "center" as const,
       border: nodeStyle.border,
+      borderLeft: `4px solid ${nodeStyle.stripeColor satisfies string}`,
+      transition: "box-shadow 0.15s ease, transform 0.15s ease",
+      transform: isHovered ? "translateY(-1px)" : "none",
     }),
-    [nodeStyle],
+    [nodeStyle, isHovered],
   );
 
   const handleFormulaChange = useCallback(
@@ -322,8 +326,16 @@ export function EditableProofNode({
     return parsed.status === "success" ? parsed.formula : null;
   }, [effectiveEditable, formulaText]);
 
+  const handleMouseEnter = useCallback(() => { setIsHovered(true); }, []);
+  const handleMouseLeave = useCallback(() => { setIsHovered(false); }, []);
+
   return (
-    <div data-testid={testId} style={containerStyle}>
+    <div
+      data-testid={testId}
+      style={containerStyle}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div
         style={
           (visibility.showRoleBadge && classification) ||

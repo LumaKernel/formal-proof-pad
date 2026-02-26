@@ -66,16 +66,20 @@
   --color-minimap-viewport: rgba(59, 130, 246, 0.15);
   --color-minimap-viewport-border: rgba(59, 130, 246, 0.6);
 
-  /* Proof Node Colors */
+  /* Proof Node Colors (category accent) */
   --color-node-axiom: #5b8bd9;
   --color-node-mp: #d9944a;
   --color-node-gen: #9b59b6;
   --color-node-conclusion: #4ad97a;
-  --color-node-text: #fff;
-  --color-node-border: rgba(255, 255, 255, 0.2);
-  --color-node-shadow: rgba(0, 0, 0, 0.2);
+
+  /* Proof Node Card Style */
+  --color-node-card-bg: #fffdf8;
+  --color-node-card-text: #2d2a24;
+  --color-node-card-border: rgba(0, 0, 0, 0.08);
+  --color-node-card-shadow: rgba(0, 0, 0, 0.08);
+  --color-node-card-shadow-hover: rgba(0, 0, 0, 0.16);
   --color-node-conclusion-border: #2ecc71;
-  --color-node-conclusion-shadow: rgba(74, 217, 122, 0.4);
+  --color-node-conclusion-shadow: rgba(74, 217, 122, 0.25);
 
   /* Proof Edge Colors (connection lines) */
   --color-edge-axiom: #7aa3e0;
@@ -161,16 +165,20 @@
   --color-minimap-viewport: rgba(99, 150, 246, 0.2);
   --color-minimap-viewport-border: rgba(99, 150, 246, 0.7);
 
-  /* Proof Node Colors */
+  /* Proof Node Colors (category accent) */
   --color-node-axiom: #6b9be5;
   --color-node-mp: #e0a05a;
   --color-node-gen: #ab6dc6;
   --color-node-conclusion: #5ae08a;
-  --color-node-text: #fff;
-  --color-node-border: rgba(255, 255, 255, 0.15);
-  --color-node-shadow: rgba(0, 0, 0, 0.4);
+
+  /* Proof Node Card Style */
+  --color-node-card-bg: #262320;
+  --color-node-card-text: #e0dcd6;
+  --color-node-card-border: rgba(255, 255, 255, 0.08);
+  --color-node-card-shadow: rgba(0, 0, 0, 0.3);
+  --color-node-card-shadow-hover: rgba(0, 0, 0, 0.5);
   --color-node-conclusion-border: #4ad97a;
-  --color-node-conclusion-shadow: rgba(74, 217, 122, 0.3);
+  --color-node-conclusion-shadow: rgba(74, 217, 122, 0.2);
 
   /* Proof Edge Colors (connection lines) */
   --color-edge-axiom: #8ab3f0;

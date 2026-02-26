@@ -70,18 +70,42 @@ describe("EditableProofNode", () => {
     });
   });
 
-  describe("種別ごとのスタイル", () => {
-    it.each<{ readonly kind: ProofNodeKind; readonly cssVar: string }>([
-      { kind: "axiom", cssVar: "var(--color-node-axiom, #5b8bd9)" },
-      { kind: "mp", cssVar: "var(--color-node-mp, #d9944a)" },
-      {
-        kind: "conclusion",
-        cssVar: "var(--color-node-conclusion, #4ad97a)",
-      },
-    ])("kind=$kind でbackgroundにCSS変数が適用される", ({ kind, cssVar }) => {
-      renderNode({ kind, label: kind.toUpperCase() });
+  describe("種別ごとのスタイル（紙カード風）", () => {
+    it("全種別で紙カード背景色が適用される", () => {
+      for (const kind of ["axiom", "mp", "gen", "conclusion"] as const) {
+        cleanup();
+        renderNode({ kind, label: kind.toUpperCase() });
+        const node = screen.getByTestId("test-node");
+        expect(node).toHaveStyle({
+          background: "var(--color-node-card-bg, #fffdf8)",
+        });
+      }
+    });
+
+    it("全種別でカテゴリ色の左辺ストライプが適用される", () => {
+      const stripeColors: Record<ProofNodeKind, string> = {
+        axiom: "var(--color-node-axiom, #5b8bd9)",
+        mp: "var(--color-node-mp, #d9944a)",
+        gen: "var(--color-node-gen, #9b59b6)",
+        conclusion: "var(--color-node-conclusion, #4ad97a)",
+      };
+      for (const kind of ["axiom", "mp", "gen", "conclusion"] as const) {
+        cleanup();
+        renderNode({ kind, label: kind.toUpperCase() });
+        const node = screen.getByTestId("test-node");
+        // JSDOMではCSS変数を含むborderLeftを正確に解釈できないため、
+        // style属性の文字列で確認する
+        const styleAttr = node.getAttribute("style") ?? "";
+        expect(styleAttr).toContain(`border-left: 4px solid ${stripeColors[kind] satisfies string}`);
+      }
+    });
+
+    it("暗色テキスト色が適用される", () => {
+      renderNode();
       const node = screen.getByTestId("test-node");
-      expect(node).toHaveStyle({ background: cssVar });
+      expect(node).toHaveStyle({
+        color: "var(--color-node-card-text, #2d2a24)",
+      });
     });
   });
 

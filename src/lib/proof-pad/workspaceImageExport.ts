@@ -101,7 +101,12 @@ function escapeXml(text: string): string {
 
 // --- SVG ノード描画 ---
 
-/** 単一ノードのSVG要素文字列を生成する */
+/** SVGエクスポート用: CSS変数は使えないため、フォールバック色を定義 */
+const EXPORT_CARD_BG = "#fffdf8";
+const EXPORT_CARD_TEXT = "#2d2a24";
+const EXPORT_CARD_BORDER = "rgba(0,0,0,0.08)";
+
+/** 単一ノードのSVG要素文字列を生成する（紙カード風: 白背景 + 左辺ストライプ） */
 function renderNodeSVG(
   node: WorkspaceNode,
   nodeSizes: NodeSizeMap,
@@ -115,15 +120,21 @@ function renderNodeSVG(
   const lines: string[] = [];
   lines.push(`  <g>`);
 
-  // 背景矩形
+  // 背景矩形（紙カード）
   lines.push(
-    `    <rect x="${x satisfies number}" y="${y satisfies number}" width="${w satisfies number}" height="${h satisfies number}" rx="${style.borderRadius satisfies number}" ry="${style.borderRadius satisfies number}" fill="${escapeXml(style.backgroundColor) satisfies string}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`,
+    `    <rect x="${x satisfies number}" y="${y satisfies number}" width="${w satisfies number}" height="${h satisfies number}" rx="${style.borderRadius satisfies number}" ry="${style.borderRadius satisfies number}" fill="${EXPORT_CARD_BG satisfies string}" stroke="${EXPORT_CARD_BORDER satisfies string}" stroke-width="1"/>`,
+  );
+
+  // 左辺ストライプ（カテゴリ色、CSS変数のfallback値を抽出）
+  const stripeWidth = 4;
+  lines.push(
+    `    <rect x="${x satisfies number}" y="${y satisfies number}" width="${stripeWidth satisfies number}" height="${h satisfies number}" rx="${style.borderRadius satisfies number}" ry="0" fill="${escapeXml(style.stripeColor) satisfies string}"/>`,
   );
 
   // ラベルテキスト
   const labelY = y + 16;
   lines.push(
-    `    <text x="${(x + w / 2) satisfies number}" y="${labelY satisfies number}" text-anchor="middle" fill="${escapeXml(style.textColor) satisfies string}" font-size="11" font-family="sans-serif" font-weight="bold">${escapeXml(node.label) satisfies string}</text>`,
+    `    <text x="${(x + w / 2) satisfies number}" y="${labelY satisfies number}" text-anchor="middle" fill="${EXPORT_CARD_TEXT satisfies string}" font-size="11" font-family="sans-serif" font-weight="bold">${escapeXml(node.label) satisfies string}</text>`,
   );
 
   // 式テキスト
@@ -136,7 +147,7 @@ function renderNodeSVG(
         ? `${node.formulaText.slice(0, maxChars - 1) satisfies string}…`
         : node.formulaText;
     lines.push(
-      `    <text x="${(x + w / 2) satisfies number}" y="${formulaY satisfies number}" text-anchor="middle" fill="${escapeXml(style.textColor) satisfies string}" font-size="13" font-family="monospace">${escapeXml(displayText) satisfies string}</text>`,
+      `    <text x="${(x + w / 2) satisfies number}" y="${formulaY satisfies number}" text-anchor="middle" fill="${EXPORT_CARD_TEXT satisfies string}" font-size="13" font-family="monospace">${escapeXml(displayText) satisfies string}</text>`,
     );
   }
 

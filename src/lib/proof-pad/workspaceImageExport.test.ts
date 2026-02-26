@@ -250,11 +250,14 @@ describe("generateExportSVG", () => {
     const ws = createMultiNodeWorkspace();
     const svg = generateExportSVG(ws);
 
-    // 各種ノードの色が含まれる
-    expect(svg).toContain("#5b8bd9"); // axiom
-    expect(svg).toContain("#d9944a"); // mp
-    expect(svg).toContain("#9b59b6"); // gen
-    expect(svg).toContain("#4ad97a"); // conclusion
+    // 紙カード背景色が使われる
+    expect(svg).toContain("#fffdf8");
+
+    // 各種ストライプ色（CSS変数のfallback）がSVGに含まれる
+    expect(svg).toContain("#5b8bd9"); // axiom stripe
+    expect(svg).toContain("#d9944a"); // mp stripe
+    expect(svg).toContain("#9b59b6"); // gen stripe
+    expect(svg).toContain("#4ad97a"); // conclusion stripe
 
     // 各種ラベル
     expect(svg).toContain("A1");
