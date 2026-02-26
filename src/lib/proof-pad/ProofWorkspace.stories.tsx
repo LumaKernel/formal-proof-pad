@@ -532,13 +532,57 @@ export const WithReferencePopover: Story = {
       canvas.getByTestId("workspace-axiom-palette-item-A3-ref-trigger"),
     ).toBeInTheDocument();
 
-    // Click (?) to open popover
-    await userEvent.click(
-      canvas.getByTestId("workspace-axiom-palette-item-A1-ref-trigger"),
-    );
+    // MP reference (?) should be visible
+    await expect(
+      canvas.getByTestId("workspace-mp-ref-trigger"),
+    ).toBeInTheDocument();
+
+    // Click MP (?) to open popover
+    await userEvent.click(canvas.getByTestId("workspace-mp-ref-trigger"));
     // Popover should be visible
     await expect(
-      canvas.getByTestId("workspace-axiom-palette-item-A1-ref-popover"),
+      canvas.getByTestId("workspace-mp-ref-popover"),
+    ).toBeInTheDocument();
+  },
+};
+
+// --- 述語論理体系でのリファレンスポップオーバー（MP+Gen） ---
+
+function WorkspaceWithPredicateReference() {
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <ProofWorkspace
+        system={predicateLogicSystem}
+        referenceEntries={allReferenceEntries}
+        locale="ja"
+        testId="workspace"
+      />
+    </div>
+  );
+}
+
+/** 述語論理体系でMP+Gen両方のリファレンスポップオーバー(?)付き */
+export const WithPredicateReferencePopover: Story = {
+  render: () => <WorkspaceWithPredicateReference />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+
+    // MP reference (?) should be visible
+    await expect(
+      canvas.getByTestId("workspace-mp-ref-trigger"),
+    ).toBeInTheDocument();
+
+    // Gen reference (?) should be visible
+    await expect(
+      canvas.getByTestId("workspace-gen-ref-trigger"),
+    ).toBeInTheDocument();
+
+    // Click Gen (?) to open popover
+    await userEvent.click(canvas.getByTestId("workspace-gen-ref-trigger"));
+    // Popover should be visible
+    await expect(
+      canvas.getByTestId("workspace-gen-ref-popover"),
     ).toBeInTheDocument();
   },
 };

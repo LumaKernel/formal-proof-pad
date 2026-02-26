@@ -7,6 +7,7 @@ import {
   predicateLogicSystem,
   equalityLogicSystem,
 } from "../logic-core/inferenceRule";
+import { allReferenceEntries } from "../reference/referenceContent";
 import type { Formula } from "../logic-core/formula";
 import { ProofWorkspace } from "./ProofWorkspace";
 import type { WorkspaceState } from "./workspaceState";
@@ -1784,9 +1785,7 @@ describe("ProofWorkspace", () => {
       await user.click(node);
 
       // Click duplicate button
-      const duplicateButton = screen.getByTestId(
-        "workspace-duplicate-button",
-      );
+      const duplicateButton = screen.getByTestId("workspace-duplicate-button");
       await user.click(duplicateButton);
 
       // New node should appear (node-2)
@@ -1813,7 +1812,9 @@ describe("ProofWorkspace", () => {
 
       // node-1 should be removed
       await waitFor(() => {
-        expect(screen.queryByTestId("proof-node-node-1")).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId("proof-node-node-1"),
+        ).not.toBeInTheDocument();
       });
 
       // node-2 should remain
@@ -1968,9 +1969,7 @@ describe("ProofWorkspace", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       ws = addNode(ws, "axiom", "A1", { x: 100, y: 100 }, "phi");
 
-      render(
-        <StatefulWorkspace initialWorkspace={ws} testId="workspace" />,
-      );
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
 
       // Enable auto layout
       const toggle = screen.getByTestId("workspace-auto-layout-toggle");
@@ -1984,6 +1983,106 @@ describe("ProofWorkspace", () => {
       if (paletteItems.length > 0) {
         await user.click(paletteItems[0]!);
       }
+    });
+  });
+
+  describe("推論規則リファレンスポップオーバー統合", () => {
+    it("referenceEntries指定時にMPボタン横に(?)が表示される", () => {
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          referenceEntries={allReferenceEntries}
+          locale="ja"
+          testId="workspace"
+        />,
+      );
+      const trigger = screen.getByTestId("workspace-mp-ref-trigger");
+      expect(trigger).toBeInTheDocument();
+      expect(trigger.textContent).toBe("?");
+    });
+
+    it("referenceEntries指定時にGenボタン横に(?)が表示される（述語論理体系）", () => {
+      render(
+        <ProofWorkspace
+          system={predicateLogicSystem}
+          referenceEntries={allReferenceEntries}
+          locale="ja"
+          testId="workspace"
+        />,
+      );
+      const trigger = screen.getByTestId("workspace-gen-ref-trigger");
+      expect(trigger).toBeInTheDocument();
+      expect(trigger.textContent).toBe("?");
+    });
+
+    it("命題論理体系ではGenリファレンスが非表示", () => {
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          referenceEntries={allReferenceEntries}
+          locale="ja"
+          testId="workspace"
+        />,
+      );
+      expect(screen.queryByTestId("workspace-gen-ref-trigger")).toBeNull();
+    });
+
+    it("referenceEntries未指定時はMP(?)が非表示", () => {
+      render(<ProofWorkspace system={lukasiewiczSystem} testId="workspace" />);
+      expect(screen.queryByTestId("workspace-mp-ref-trigger")).toBeNull();
+    });
+
+    it("(?)クリックでポップオーバーが開く（MP選択モードに入らない）", async () => {
+      const user = userEvent.setup();
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          referenceEntries={allReferenceEntries}
+          locale="ja"
+          testId="workspace"
+        />,
+      );
+      await user.click(screen.getByTestId("workspace-mp-ref-trigger"));
+      // ポップオーバーが表示される
+      expect(
+        screen.getByTestId("workspace-mp-ref-popover"),
+      ).toBeInTheDocument();
+      // MP選択モードに入っていない（MPボタンのテキストがApplyのまま）
+      expect(screen.getByTestId("workspace-mp-button")).toHaveTextContent("MP");
+    });
+
+    it("onOpenReferenceDetailが呼ばれる", async () => {
+      const user = userEvent.setup();
+      const handleDetail = vi.fn();
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          referenceEntries={allReferenceEntries}
+          locale="ja"
+          onOpenReferenceDetail={handleDetail}
+          testId="workspace"
+        />,
+      );
+      // ポップオーバーを開く
+      await user.click(screen.getByTestId("workspace-mp-ref-trigger"));
+      // 「詳しく見る」ボタンをクリック
+      const detailBtn = screen.getByTestId("workspace-mp-ref-detail-btn");
+      await user.click(detailBtn);
+      expect(handleDetail).toHaveBeenCalledWith("rule-mp");
+    });
+
+    it("英語ロケールでもリファレンスが表示される", () => {
+      render(
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          referenceEntries={allReferenceEntries}
+          locale="en"
+          testId="workspace"
+        />,
+      );
+      expect(
+        screen.getByTestId("workspace-mp-ref-trigger"),
+      ).toBeInTheDocument();
     });
   });
 });

@@ -93,6 +93,9 @@ import {
   generateImageExportFileName,
 } from "./workspaceImageExport";
 import type { ReferenceEntry, Locale } from "../reference/referenceEntry";
+import { findEntryById } from "../reference/referenceEntry";
+import { ReferencePopover } from "../reference/ReferencePopover";
+import { getInferenceRuleReferenceEntryId } from "./inferenceRuleReferenceLogic";
 
 // --- Props ---
 
@@ -510,6 +513,22 @@ export function ProofWorkspace({
     () => getAvailableAxioms(workspace.system),
     [workspace.system],
   );
+
+  // --- 推論規則リファレンス ---
+
+  const mpReferenceEntry = useMemo(() => {
+    const entryId = getInferenceRuleReferenceEntryId("mp");
+    return entryId !== undefined && referenceEntries !== undefined
+      ? findEntryById(referenceEntries, entryId)
+      : undefined;
+  }, [referenceEntries]);
+
+  const genReferenceEntry = useMemo(() => {
+    const entryId = getInferenceRuleReferenceEntryId("gen");
+    return entryId !== undefined && referenceEntries !== undefined
+      ? findEntryById(referenceEntries, entryId)
+      : undefined;
+  }, [referenceEntries]);
 
   /** 新しいノードの配置位置を計算する（パレット右側にオフセット配置） */
   const computeNewNodePosition = useCallback(
@@ -1488,6 +1507,20 @@ export function ProofWorkspace({
         >
           {mpSelection.phase !== "idle" ? msg.mpCancel : msg.mpApply}
         </button>
+        {mpReferenceEntry !== undefined && locale !== undefined && (
+          <span role="presentation" onClick={(e) => e.stopPropagation()}>
+            <ReferencePopover
+              entry={mpReferenceEntry}
+              locale={locale}
+              onOpenDetail={onOpenReferenceDetail}
+              testId={
+                testId !== undefined
+                  ? `${testId satisfies string}-mp-ref`
+                  : undefined
+              }
+            />
+          </span>
+        )}
         {workspace.system.generalization ? (
           <>
             <input
@@ -1525,6 +1558,20 @@ export function ProofWorkspace({
             >
               {genSelection.phase !== "idle" ? msg.genCancel : msg.genApply}
             </button>
+            {genReferenceEntry !== undefined && locale !== undefined && (
+              <span role="presentation" onClick={(e) => e.stopPropagation()}>
+                <ReferencePopover
+                  entry={genReferenceEntry}
+                  locale={locale}
+                  onOpenDetail={onOpenReferenceDetail}
+                  testId={
+                    testId !== undefined
+                      ? `${testId satisfies string}-gen-ref`
+                      : undefined
+                  }
+                />
+              </span>
+            )}
           </>
         ) : null}
         {/* 自動レイアウトトグル */}

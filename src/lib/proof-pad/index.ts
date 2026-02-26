@@ -10,6 +10,7 @@ export {
   getAxiomReferenceEntryId,
 } from "./axiomPaletteLogic";
 export type { AxiomPaletteItem } from "./axiomPaletteLogic";
+export { getInferenceRuleReferenceEntryId } from "./inferenceRuleReferenceLogic";
 export { ProofWorkspace } from "./ProofWorkspace";
 export type { ProofWorkspaceProps, GoalAchievedInfo } from "./ProofWorkspace";
 export {
