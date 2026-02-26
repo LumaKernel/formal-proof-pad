@@ -2610,3 +2610,24 @@
   - `buildGuide`はスナップ軸に直交する方向にガイド線を描画。全参加矩形のmin/maxで範囲決定
   - Tier 2.1の残り: 選択アイテムの整列操作、等間隔分配
 ---
+
+## 2026-02-26 - InfiniteCanvas: 選択アイテム整列・等間隔分配機能を追加
+- `alignment.ts`: 純粋ロジック。alignHorizontal(left/center/right), alignVertical(top/middle/bottom), distribute(horizontal/vertical)
+- `alignment.test.ts`: 19テスト。全整列パターン、等間隔分配、エッジケース（空・1個・2個・既に整列済み）を検証
+- `AlignmentDemo.stories.tsx`: インタラクティブデモ。ツールバーで6方向整列+2方向分配。Select All/Resetボタン付き
+- `index.ts`: alignment関連のエクスポートを追加
+- カバレッジ: Stmts 99.35%(↑0.02), Branch 94.83%(↑0.05), Funcs 90.46%(同), Lines 99.97%(同)
+  - ベースライン: Stmts 99.33%, Branch 94.78%, Funcs 90.46%, Lines 99.97%
+- ブラウザ確認: .screenshots/alignment-demo-initial.png, .screenshots/alignment-demo-iframe.png, .screenshots/alignment-demo-align-left.png, .screenshots/alignment-demo-distribute-v.png
+- 変更ファイル:
+  - `src/lib/infinite-canvas/alignment.ts` (NEW)
+  - `src/lib/infinite-canvas/alignment.test.ts` (NEW)
+  - `src/lib/infinite-canvas/AlignmentDemo.stories.tsx` (NEW)
+  - `src/lib/infinite-canvas/index.ts` (MODIFIED)
+  - `tasks/prd-infinite-canvas-enhancements.md` (MODIFIED)
+- **今後のイテレーションへの学び:**
+  - 整列ロジックはシンプルな純粋関数で実装可能。SelectableItemと同じ{id, position, size}型を使用（AlignableItemとして定義）
+  - 整列操作はReadonlyMap<string, Point>を返す。変更がないアイテムはMapに含めない（最小差分パターン）
+  - 分配はアイテムの中心座標でソートし、最初と最後の端座標から等間隔ギャップを計算
+  - Tier 2.1 スナップ・整列は全項目完了
+---

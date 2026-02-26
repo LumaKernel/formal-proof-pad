@@ -1,3 +1,10 @@
+export { alignHorizontal, alignVertical, distribute } from "./alignment";
+export type {
+  AlignableItem,
+  DistributeDirection,
+  HorizontalAlignment,
+  VerticalAlignment,
+} from "./alignment";
 export { CanvasItem } from "./CanvasItem";
 export type { CanvasItemProps } from "./CanvasItem";
 export {
