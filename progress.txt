@@ -2715,3 +2715,36 @@
   - エッジスクロールの速度は二次イージング（penetration^2 * maxSpeed）で自然な加速感を実現
   - containerEl.getBoundingClientRect()でclientX/Yをcontainer相対座標に変換する必要がある
 ---
+
+## 2026-02-26 - InfiniteCanvas 接続プレビュー・バリデーション
+- Tier 2.3 接続プレビュー・バリデーション機能を実装完了
+  - ポートからドラッグ中にゴースト接続線を表示
+  - ホバー中のポートにスナップ（距離閾値ベース）
+  - 接続が有効/無効かをリアルタイムで視覚的にフィードバック（青/赤）
+- 3層分離パターンで実装:
+  - 純粋ロジック: `connectionPreview.ts` (findNearestPort, computePreviewTarget, buildPortCandidates等)
+  - React hook: `useConnectionPreview.ts` (startDrag/updateDrag/endDrag/cancelDrag)
+  - UIコンポーネント: `ConnectionPreviewLine.tsx` (SVGゴースト線描画)
+- 変更したファイル:
+  - `src/lib/infinite-canvas/connectionPreview.ts` (NEW) - 純粋ロジック層
+  - `src/lib/infinite-canvas/connectionPreview.test.ts` (NEW) - 19テスト
+  - `src/lib/infinite-canvas/useConnectionPreview.ts` (NEW) - React hook層
+  - `src/lib/infinite-canvas/useConnectionPreview.test.tsx` (NEW) - 20テスト
+  - `src/lib/infinite-canvas/ConnectionPreviewLine.tsx` (NEW) - UIコンポーネント
+  - `src/lib/infinite-canvas/ConnectionPreviewLine.test.tsx` (NEW) - 9テスト
+  - `src/lib/infinite-canvas/ConnectionPreviewDemo.stories.tsx` (NEW) - play関数付きデモ
+  - `src/lib/infinite-canvas/ConnectorPortComponent.tsx` (MODIFIED) - onPortDragStart prop追加
+  - `src/lib/infinite-canvas/ConnectorPortComponent.test.tsx` (MODIFIED) - 4テスト追加
+  - `src/lib/infinite-canvas/index.ts` (MODIFIED) - エクスポート追加
+  - `tasks/prd-infinite-canvas-enhancements.md` (MODIFIED) - Tier 2.3 完了
+- カバレッジ: Stmts 99.39%(↑0.02), Branch 94.94%(↑0.05), Funcs 90.73%(↓0.03), Lines 99.97%(同)
+  - ベースライン: Stmts 99.37%, Branch 94.89%, Funcs 90.76%, Lines 99.97%
+  - Funcs微減はuseConnectionPreview.ts内のuseEffectコールバック（ref同期用）が5つ追加されたため
+- ブラウザ確認: .screenshots/connection-preview-default.png
+- **今後のイテレーションへの学び:**
+  - React 19のrefs規則: render中に `ref.current = value` は禁止。useEffectでref更新する必要がある
+  - useConnectionPreviewのref同期パターン: `useEffect(() => { ref.current = value; }, [value])` で5つのref（viewport, candidates, validate, onComplete, snapDistance）を更新
+  - findNearestPortはsource item自身のポートを除外する（自己接続防止）
+  - ゴースト接続線はSVG直線（M...L...）で描画。ベジェ曲線でなく直線にすることでドラッグ中のレスポンスが良い
+  - previewStateがnullかどうかでpanEnabled/dragEnabledを制御し、プレビュー中のキャンバス操作を無効化
+---

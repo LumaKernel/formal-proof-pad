@@ -191,3 +191,24 @@ export {
 export type { EdgeScrollConfig, EdgeScrollDelta } from "./edgeScrollLogic";
 export { useEdgeScroll } from "./useEdgeScroll";
 export type { UseEdgeScrollResult } from "./useEdgeScroll";
+export {
+  buildPortCandidates,
+  computePreviewStyle,
+  computePreviewTarget,
+  DEFAULT_SNAP_DISTANCE,
+  distanceSquared,
+  findNearestPort,
+} from "./connectionPreview";
+export type {
+  ConnectionPreviewState,
+  PortCandidate,
+  PreviewStyle,
+} from "./connectionPreview";
+export { useConnectionPreview } from "./useConnectionPreview";
+export type {
+  OnConnectionComplete,
+  UseConnectionPreviewResult,
+  ValidateConnection,
+} from "./useConnectionPreview";
+export { ConnectionPreviewLine } from "./ConnectionPreviewLine";
+export type { ConnectionPreviewLineProps } from "./ConnectionPreviewLine";

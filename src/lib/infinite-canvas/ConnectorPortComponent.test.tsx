@@ -186,4 +186,80 @@ describe("ConnectorPortComponent", () => {
     fireEvent.click(port);
     expect(port).toBeInTheDocument();
   });
+
+  it("calls onPortDragStart on pointerDown with left button", () => {
+    const onPortDragStart = vi.fn();
+    render(
+      <ConnectorPortComponent
+        port={{ id: "top", edge: "top", position: 0.5 }}
+        itemPosition={{ x: 0, y: 0 }}
+        itemWidth={100}
+        itemHeight={50}
+        viewport={viewport}
+        onPortDragStart={onPortDragStart}
+      />,
+    );
+
+    const port = screen.getByTestId("connector-port-top");
+    fireEvent.pointerDown(port, { button: 0, clientX: 50, clientY: 0 });
+    expect(onPortDragStart).toHaveBeenCalledWith("top", 50, 0);
+  });
+
+  it("does not call onPortDragStart on right-click", () => {
+    const onPortDragStart = vi.fn();
+    render(
+      <ConnectorPortComponent
+        port={{ id: "top", edge: "top", position: 0.5 }}
+        itemPosition={{ x: 0, y: 0 }}
+        itemWidth={100}
+        itemHeight={50}
+        viewport={viewport}
+        onPortDragStart={onPortDragStart}
+      />,
+    );
+
+    const port = screen.getByTestId("connector-port-top");
+    fireEvent.pointerDown(port, { button: 2 });
+    expect(onPortDragStart).not.toHaveBeenCalled();
+  });
+
+  it("stops propagation on pointerDown when onPortDragStart is set", () => {
+    const parentHandler = vi.fn();
+    const onPortDragStart = vi.fn();
+    render(
+      <div onPointerDown={parentHandler}>
+        <ConnectorPortComponent
+          port={{ id: "top", edge: "top", position: 0.5 }}
+          itemPosition={{ x: 0, y: 0 }}
+          itemWidth={100}
+          itemHeight={50}
+          viewport={viewport}
+          onPortDragStart={onPortDragStart}
+        />
+      </div>,
+    );
+
+    const port = screen.getByTestId("connector-port-top");
+    fireEvent.pointerDown(port, { button: 0 });
+    expect(parentHandler).not.toHaveBeenCalled();
+  });
+
+  it("does not stop propagation when onPortDragStart is not set", () => {
+    const parentHandler = vi.fn();
+    render(
+      <div onPointerDown={parentHandler}>
+        <ConnectorPortComponent
+          port={{ id: "top", edge: "top", position: 0.5 }}
+          itemPosition={{ x: 0, y: 0 }}
+          itemWidth={100}
+          itemHeight={50}
+          viewport={viewport}
+        />
+      </div>,
+    );
+
+    const port = screen.getByTestId("connector-port-top");
+    fireEvent.pointerDown(port, { button: 0 });
+    expect(parentHandler).toHaveBeenCalled();
+  });
 });

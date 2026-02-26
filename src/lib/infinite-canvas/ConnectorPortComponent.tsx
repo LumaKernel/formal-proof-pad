@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { computePortPosition, type ConnectorPort } from "./connector";
 import { worldToScreen } from "./coordinate";
 import type { Point, ViewportState } from "./types";
@@ -23,6 +24,12 @@ export interface ConnectorPortComponentProps {
   readonly highlighted?: boolean;
   /** Callback when the port is clicked */
   readonly onPortClick?: (portId: string) => void;
+  /** Callback when drag starts from this port (for connection preview) */
+  readonly onPortDragStart?: (
+    portId: string,
+    screenX: number,
+    screenY: number,
+  ) => void;
 }
 
 /**
@@ -40,6 +47,7 @@ export function ConnectorPortComponent({
   borderColor = "#666",
   highlighted = false,
   onPortClick,
+  onPortDragStart,
 }: ConnectorPortComponentProps) {
   const worldPos = computePortPosition({
     port,
@@ -50,6 +58,17 @@ export function ConnectorPortComponent({
   const screenPos = worldToScreen(viewport, worldPos);
   const scaledRadius = radius * viewport.scale;
   const displayRadius = highlighted ? scaledRadius * 1.4 : scaledRadius;
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLElement>) => {
+      if (e.button !== 0) return;
+      if (onPortDragStart === undefined) return;
+      e.stopPropagation();
+      e.preventDefault();
+      onPortDragStart(port.id, e.clientX, e.clientY);
+    },
+    [onPortDragStart, port.id],
+  );
 
   return (
     <div
@@ -70,6 +89,7 @@ export function ConnectorPortComponent({
           "width 0.15s ease, height 0.15s ease, background-color 0.15s ease",
         boxSizing: "border-box",
       }}
+      onPointerDown={handlePointerDown}
       onClick={(e) => {
         e.stopPropagation();
         onPortClick?.(port.id);
