@@ -9,6 +9,7 @@
  * 変更時は ProofWorkspace.test.tsx, ProofWorkspace.stories.tsx, workspaceState.ts, goalCheckLogic.ts, index.ts も同期すること。
  */
 
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LogicSystem } from "../logic-core/inferenceRule";
 import type { Formula } from "../logic-core/formula";
@@ -282,23 +283,34 @@ const goalInputErrorStyle = {
   background: "var(--color-error-bg, rgba(255,96,96,0.05))",
 };
 
-const proofCompleteBannerStyle = {
-  position: "absolute" as const,
+const proofCompleteBannerStyle: CSSProperties = {
+  position: "absolute",
   bottom: 40,
-  left: "50%" as const,
-  transform: "translateX(-50%)",
+  left: "50%",
+  transform: "translateX(-50%) rotate(-3deg)",
   zIndex: 30,
-  padding: "12px 28px",
-  background: `linear-gradient(135deg, var(--color-proof-complete-gradient-start, #4ad97a), var(--color-proof-complete-gradient-end, #2ecc71))`,
-  color: "var(--color-node-text, #fff)",
-  borderRadius: 12,
-  fontSize: 18,
-  fontFamily: "sans-serif",
-  fontWeight: 700 as const,
-  boxShadow: `0 4px 20px var(--color-proof-complete-shadow, rgba(74,217,122,0.5))`,
-  pointerEvents: "none" as const,
-  textAlign: "center" as const,
-  letterSpacing: 1,
+  padding: "10px 32px",
+  background: "var(--color-proof-complete-bg, rgba(255,253,248,0.95))",
+  color: "var(--color-proof-complete-text, #1a7a3a)",
+  borderRadius: 4,
+  fontSize: 20,
+  fontFamily: "'Georgia', 'Times New Roman', serif",
+  fontWeight: 700,
+  fontVariant: "small-caps",
+  border: "3px solid var(--color-proof-complete-border, #2ecc71)",
+  boxShadow: `2px 3px 8px var(--color-proof-complete-shadow, rgba(46,204,113,0.2))`,
+  pointerEvents: "none",
+  textAlign: "center",
+  letterSpacing: 2,
+  animation: "stamp-appear 0.4s cubic-bezier(0.22, 1, 0.36, 1) both",
+};
+
+const proofCompleteAxiomViolationBannerStyle: CSSProperties = {
+  ...proofCompleteBannerStyle,
+  color: "var(--color-proof-complete-axiom-text, #8a5a1e)",
+  background: "var(--color-proof-complete-axiom-bg, rgba(255,253,248,0.95))",
+  border: "3px solid var(--color-proof-complete-axiom-border, #d9944a)",
+  boxShadow: `2px 3px 8px var(--color-proof-complete-axiom-shadow, rgba(217,148,74,0.2))`,
 };
 
 const questModeBadgeStyle = {
@@ -1768,7 +1780,17 @@ export function ProofWorkspace({
         />
         {goalCheckResult._tag === "GoalAchieved" ? (
           <span
-            style={{ color: "var(--color-success, #2ecc71)", fontWeight: 700 }}
+            style={{
+              color: "var(--color-proof-complete-text, #1a7a3a)",
+              fontWeight: 700,
+              fontFamily: "'Georgia', serif",
+              border: "2px solid var(--color-proof-complete-border, #2ecc71)",
+              borderRadius: 3,
+              padding: "1px 8px",
+              fontSize: 12,
+              fontVariant: "small-caps" as const,
+              letterSpacing: 1,
+            }}
             data-testid={
               testId ? `${testId satisfies string}-goal-achieved` : undefined
             }
@@ -1798,7 +1820,7 @@ export function ProofWorkspace({
         ) : null}
       </div>
 
-      {/* 証明完了バナー */}
+      {/* 証明完了バナー（スタンプ風） */}
       {isGoalAchieved ? (
         <div
           style={proofCompleteBannerStyle}
@@ -1812,11 +1834,7 @@ export function ProofWorkspace({
         </div>
       ) : isGoalAchievedButAxiomViolation ? (
         <div
-          style={{
-            ...proofCompleteBannerStyle,
-            background: "linear-gradient(135deg, var(--color-warning, #e0a030), var(--color-warning-hover, #d4940a))",
-            boxShadow: "0 4px 20px var(--color-mp-button-shadow, rgba(224,160,48,0.5))",
-          }}
+          style={proofCompleteAxiomViolationBannerStyle}
           data-testid={
             testId
               ? `${testId satisfies string}-proof-complete-banner-axiom-violation`
@@ -1825,7 +1843,7 @@ export function ProofWorkspace({
         >
           <div>{msg.proofCompleteButAxiomViolation}</div>
           {questGoalResult?._tag === "AllAchievedButAxiomViolation" ? (
-            <div style={{ fontSize: 13, fontWeight: 400, marginTop: 4 }}>
+            <div style={{ fontSize: 13, fontWeight: 400, marginTop: 4, fontVariant: "normal" as const }}>
               {formatMessage(msg.axiomViolationDetail, {
                 axiomIds: questGoalResult.goalResults
                   .flatMap((r) => [...r.violatingAxiomIds])

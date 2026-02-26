@@ -3149,3 +3149,33 @@
   - LOD制御はdetailLevel計算と同じ閾値（DEFAULT_THRESHOLDS.fullAbove = 0.5）を使うことで一貫性を保つ
   - Storybook iframe直接URLの場合、 `globals=theme:dark` でダークモードが適用される
 ---
+
+## 2026-02-26 - UIスタイル: バナーとステータス表示の改善（US-S06）
+- 実装した内容:
+  - 「Proof Complete!」バナーを紙のスタンプ風に変更（セリフフォント、small-caps、ボーダー、rotate(-3deg)、stamp-appearアニメーション）
+  - 公理制限違反バナーも同様にスタンプ風（オレンジ系ボーダー・テキスト）
+  - ゴール達成表示「Proved!」もミニスタンプ風に変更（セリフフォント、ボーダー付き）
+  - stamp-appear キーフレームアニメーション追加（スケール+回転で「ドン！」と押す演出）
+  - `prefers-reduced-motion` 尊重（アニメーション簡略化）
+  - CSS変数: `--color-proof-complete-border/text/bg/shadow` + axiom版をlight/darkモードに追加
+  - 旧 `--color-proof-complete-gradient-start/end` を新しいスタンプ用変数に置換
+  - エラー/成功ステータスの色は既にCSS変数化済み（確認のみ）
+- 変更したファイル:
+  - `src/app/globals.css` (MODIFIED - スタンプ用CSS変数追加、stamp-appear keyframes追加)
+  - `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED - CSSProperties import追加、バナースタイルをスタンプ風に変更、Proved!表示スタンプ風に変更)
+  - `tasks/prd-ui-style.md` (MODIFIED - US-S06完了)
+- テスト: 158ファイル全パス。全体3298テスト通過
+- カバレッジ: Stmts 99.32%(維持), Branch 94.95%(維持), Funcs 89.91%(+0.01), Lines 99.93%(+0.04)
+  - ベースライン: Stmts 99.32%, Branch 94.95%, Funcs 89.9%, Lines 99.89%
+- ブラウザ確認:
+  - `.screenshots/us-s06-proof-complete-banner-light.png`
+  - `.screenshots/us-s06-proof-complete-banner-dark.png`
+  - `.screenshots/us-s06-empty-workspace-light.png`
+  - `.screenshots/us-s06-invalid-mp-error-status-light.png`
+  - `.screenshots/us-s06-valid-mp-success-status-light.png`
+- **今後のイテレーションへの学び:**
+  - CSSキーフレームアニメーションはglobals.cssに定義し、コンポーネントからは `animation` プロパティで参照する
+  - `prefers-reduced-motion` は `@media` クエリ内でキーフレーム自体を上書きするパターンが確実
+  - 旧CSS変数（gradient-start/end）を新CSS変数（border/text/bg）に置換する際は、テストのフォールバック値も更新確認が必要
+  - `fontVariant: "small-caps"` はCSS変数ではなくインラインスタイルで適用（テーマ依存しないため）
+---

@@ -97,9 +97,14 @@
   --color-gen-button-shadow: rgba(155, 89, 182, 0.5);
   --color-gen-banner: rgba(155, 89, 182, 0.95);
   --color-selection-banner: rgba(59, 130, 246, 0.95);
-  --color-proof-complete-gradient-start: #4ad97a;
-  --color-proof-complete-gradient-end: #2ecc71;
-  --color-proof-complete-shadow: rgba(74, 217, 122, 0.5);
+  --color-proof-complete-border: #2ecc71;
+  --color-proof-complete-text: #1a7a3a;
+  --color-proof-complete-bg: rgba(255, 253, 248, 0.95);
+  --color-proof-complete-shadow: rgba(46, 204, 113, 0.2);
+  --color-proof-complete-axiom-border: #d9944a;
+  --color-proof-complete-axiom-text: #8a5a1e;
+  --color-proof-complete-axiom-bg: rgba(255, 253, 248, 0.95);
+  --color-proof-complete-axiom-shadow: rgba(217, 148, 74, 0.2);
 
   /* Paper Panel (toolbar, palette, popups) */
   --color-panel-bg: rgba(252, 249, 243, 0.96);
@@ -209,9 +214,14 @@
   --color-gen-button-shadow: rgba(171, 109, 198, 0.5);
   --color-gen-banner: rgba(171, 109, 198, 0.95);
   --color-selection-banner: rgba(79, 150, 246, 0.95);
-  --color-proof-complete-gradient-start: #5ae08a;
-  --color-proof-complete-gradient-end: #3dd97a;
-  --color-proof-complete-shadow: rgba(90, 224, 138, 0.4);
+  --color-proof-complete-border: #4ad97a;
+  --color-proof-complete-text: #6be8a0;
+  --color-proof-complete-bg: rgba(36, 33, 30, 0.95);
+  --color-proof-complete-shadow: rgba(74, 217, 122, 0.15);
+  --color-proof-complete-axiom-border: #e0a05a;
+  --color-proof-complete-axiom-text: #eabb78;
+  --color-proof-complete-axiom-bg: rgba(36, 33, 30, 0.95);
+  --color-proof-complete-axiom-shadow: rgba(224, 160, 90, 0.15);
 
   /* Paper Panel (toolbar, palette, popups) */
   --color-panel-bg: rgba(36, 33, 30, 0.96);
@@ -286,4 +296,36 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* ============================================
+ * Proof Complete Stamp Animation
+ * ============================================ */
+
+@keyframes stamp-appear {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1.4) rotate(-4deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-50%) scale(0.95) rotate(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) rotate(-3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes stamp-appear {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) rotate(-3deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) rotate(-3deg);
+    }
+  }
 }
