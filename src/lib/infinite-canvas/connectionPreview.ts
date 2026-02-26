@@ -80,9 +80,7 @@ export function findNearestPort(
  * If snapped to a port, returns the port's world-space position.
  * Otherwise returns the mouse position.
  */
-export function computePreviewTarget(
-  state: ConnectionPreviewState,
-): Point {
+export function computePreviewTarget(state: ConnectionPreviewState): Point {
   if (state.snappedTarget !== null) {
     return computePortPosition(state.snappedTarget.portOnItem);
   }

@@ -87,21 +87,13 @@ describe("computePresetZoomViewport", () => {
 
   it("zooms to preset scale", () => {
     const viewport = { offsetX: 0, offsetY: 0, scale: 1 };
-    const result = computePresetZoomViewport(
-      viewport,
-      containerSize,
-      2,
-    );
+    const result = computePresetZoomViewport(viewport, containerSize, 2);
     expect(result.scale).toBe(2);
   });
 
   it("clamps preset to allowed range", () => {
     const viewport = { offsetX: 0, offsetY: 0, scale: 1 };
-    const result = computePresetZoomViewport(
-      viewport,
-      containerSize,
-      100,
-    );
+    const result = computePresetZoomViewport(viewport, containerSize, 100);
     expect(result.scale).toBe(MAX_SCALE);
   });
 });

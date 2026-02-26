@@ -1945,10 +1945,7 @@ describe("群論公理テンプレート", () => {
 
     it("右単位元とマッチしない", () => {
       // x * e = x
-      const wrong = universal(
-        x,
-        equality(binaryOperation("*", x, e), x),
-      );
+      const wrong = universal(x, equality(binaryOperation("*", x, e), x));
       const result = matchTheoryAxiom(groupLeftAxioms[1], wrong);
       expect(result._tag).toBe("Error");
     });
@@ -1982,10 +1979,7 @@ describe("群論公理テンプレート", () => {
 
     it("右逆元とマッチしない", () => {
       // x * i(x) = e
-      const wrong = universal(
-        x,
-        equality(binaryOperation("*", x, invX), e),
-      );
+      const wrong = universal(x, equality(binaryOperation("*", x, invX), e));
       const result = matchTheoryAxiom(groupLeftAxioms[2], wrong);
       expect(result._tag).toBe("Error");
     });
@@ -2025,10 +2019,7 @@ describe("群論公理テンプレート", () => {
         x,
         universal(
           y,
-          equality(
-            binaryOperation("*", x, y),
-            binaryOperation("*", x, y),
-          ),
+          equality(binaryOperation("*", x, y), binaryOperation("*", x, y)),
         ),
       );
       const g4 = abelianGroupAxioms.find((a) => a.id === "G4");

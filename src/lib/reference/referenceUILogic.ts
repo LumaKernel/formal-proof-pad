@@ -126,11 +126,13 @@ export function buildModalData(
       title: getLocalizedText(e.title, locale),
     }));
 
-  const externalLinks: readonly { readonly url: string; readonly label: string }[] =
-    entry.externalLinks.map((link: ExternalLink) => ({
-      url: link.url,
-      label: getLocalizedText(link.label, locale),
-    }));
+  const externalLinks: readonly {
+    readonly url: string;
+    readonly label: string;
+  }[] = entry.externalLinks.map((link: ExternalLink) => ({
+    url: link.url,
+    label: getLocalizedText(link.label, locale),
+  }));
 
   return {
     title: getLocalizedText(entry.title, locale),

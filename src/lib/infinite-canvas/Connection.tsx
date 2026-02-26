@@ -60,7 +60,9 @@ export function Connection({
   const clickable = onClick !== undefined;
   const hasLabel = label !== undefined;
 
-  const filterUrl = handDrawn ? `url(#${filterId satisfies string})` : undefined;
+  const filterUrl = handDrawn
+    ? `url(#${filterId satisfies string})`
+    : undefined;
 
   const labelPos = hasLabel
     ? computeLabelScreenPosition(

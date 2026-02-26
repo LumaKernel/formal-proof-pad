@@ -28,9 +28,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: true,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={defaultViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={defaultViewport} />);
 
     const svg = screen.getByTestId("connection-preview-line");
     expect(svg).toBeDefined();
@@ -45,9 +43,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: true,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={defaultViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={defaultViewport} />);
 
     const path = screen.getByTestId("connection-preview-path");
     expect(path).toBeDefined();
@@ -66,9 +62,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: true,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={defaultViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={defaultViewport} />);
 
     const path = screen.getByTestId("connection-preview-path");
     expect(path.getAttribute("stroke")).toBe("#3b82f6");
@@ -83,9 +77,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: false,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={defaultViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={defaultViewport} />);
 
     const path = screen.getByTestId("connection-preview-path");
     expect(path.getAttribute("stroke")).toBe("#ef4444");
@@ -100,9 +92,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: true,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={defaultViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={defaultViewport} />);
 
     expect(
       screen.queryByTestId("connection-preview-snap-indicator"),
@@ -128,9 +118,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: true,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={defaultViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={defaultViewport} />);
 
     const indicator = screen.getByTestId("connection-preview-snap-indicator");
     expect(indicator).toBeDefined();
@@ -154,9 +142,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: true,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={scaledViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={scaledViewport} />);
 
     const path = screen.getByTestId("connection-preview-path");
     const d = path.getAttribute("d") ?? "";
@@ -185,9 +171,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: true,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={defaultViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={defaultViewport} />);
 
     const path = screen.getByTestId("connection-preview-path");
     const d = path.getAttribute("d") ?? "";
@@ -222,9 +206,7 @@ describe("ConnectionPreviewLine", () => {
       isValid: true,
     };
 
-    render(
-      <ConnectionPreviewLine state={state} viewport={defaultViewport} />,
-    );
+    render(<ConnectionPreviewLine state={state} viewport={defaultViewport} />);
 
     const svg = screen.getByTestId("connection-preview-line");
     expect(svg.style.pointerEvents).toBe("none");

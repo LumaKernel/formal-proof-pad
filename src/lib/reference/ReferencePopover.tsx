@@ -194,7 +194,11 @@ export function ReferencePopover({
         style={{ ...triggerButtonStyle, ...customTriggerStyle }}
         aria-label={`${data.title satisfies string} ${(locale === "ja" ? "のリファレンスを表示" : "reference") satisfies string}`}
         aria-expanded={isOpen}
-        data-testid={testId !== undefined ? `${testId satisfies string}-trigger` : undefined}
+        data-testid={
+          testId !== undefined
+            ? `${testId satisfies string}-trigger`
+            : undefined
+        }
       >
         ?
       </button>
@@ -204,7 +208,11 @@ export function ReferencePopover({
           ref={popoverRef}
           role="tooltip"
           style={popoverStyle}
-          data-testid={testId !== undefined ? `${testId satisfies string}-popover` : undefined}
+          data-testid={
+            testId !== undefined
+              ? `${testId satisfies string}-popover`
+              : undefined
+          }
         >
           <div style={categoryBadgeStyle}>{data.categoryLabel}</div>
           <div style={titleStyle}>{data.title}</div>
@@ -216,7 +224,9 @@ export function ReferencePopover({
               style={formulaStyle}
               dangerouslySetInnerHTML={{ __html: formulaHtml }}
               data-testid={
-                testId !== undefined ? `${testId satisfies string}-formula` : undefined
+                testId !== undefined
+                  ? `${testId satisfies string}-formula`
+                  : undefined
               }
             />
           )}
@@ -226,7 +236,9 @@ export function ReferencePopover({
               style={detailButtonStyle}
               onClick={handleDetailClick}
               data-testid={
-                testId !== undefined ? `${testId satisfies string}-detail-btn` : undefined
+                testId !== undefined
+                  ? `${testId satisfies string}-detail-btn`
+                  : undefined
               }
             >
               {locale === "ja" ? "詳しく見る →" : "See details →"}

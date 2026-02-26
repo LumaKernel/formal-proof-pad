@@ -214,7 +214,7 @@ describe("generateExportSVG", () => {
     const svg = generateExportSVG(ws);
 
     expect(svg).toContain("<svg");
-    expect(svg).toContain("xmlns=\"http://www.w3.org/2000/svg\"");
+    expect(svg).toContain('xmlns="http://www.w3.org/2000/svg"');
     expect(svg).toContain("</svg>");
     expect(svg).toContain("viewBox=");
   });
@@ -336,7 +336,8 @@ describe("generateExportSVG", () => {
   });
 
   it("長い式テキストが切り詰められる", () => {
-    const longFormula = "phi -> (psi -> (chi -> (alpha -> (beta -> (gamma -> (delta -> epsilon))))))";
+    const longFormula =
+      "phi -> (psi -> (chi -> (alpha -> (beta -> (gamma -> (delta -> epsilon))))))";
     const ws: WorkspaceState = {
       system: lukasiewiczSystem,
       nodes: [

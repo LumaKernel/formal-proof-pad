@@ -4,7 +4,10 @@
 
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { ProofMessagesProvider, useProofMessages } from "./ProofMessagesContext";
+import {
+  ProofMessagesProvider,
+  useProofMessages,
+} from "./ProofMessagesContext";
 import { defaultProofMessages, type ProofMessages } from "./proofMessages";
 
 /** テスト用のメッセージ表示コンポーネント */

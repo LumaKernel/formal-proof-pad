@@ -8,11 +8,11 @@
 - [x] http://localhost:13006/?path=/story/proofpad-proofworkspace--invalid-mp-application&globals=theme:side-by-side → ProofWorkspace/AxiomPaletteのCSS変数化で修正
       ダークモードで Logic System: Lukasiewicz と上側に固定されている部分は、コントラストによって見えにくい。 pw mcp,chrome devtools, computed values,スクショを活用せよ。
 - [x] http://localhost:13006/?path=/story/notebook-notebooklist--open-action&globals=theme:side-by-side → TestIdStripperデコレータで dark pane の testid 除去
-    side by sideで開くと、interactionsが失敗する。抽象化、DI化が足りていなくて干渉してるのではないか?
-    check with pw mcp!
+      side by sideで開くと、interactionsが失敗する。抽象化、DI化が足りていなくて干渉してるのではないか?
+      check with pw mcp!
 - [x] http://localhost:13006/?path=/story/notebook-notebookcreateform--default&globals=theme:dark → --color-surface-selected, --color-accent 等の既存テーマトークンに置き換え
-    ダークモードでselectedなやつのタイトル部分がコントラストが悪い。
+      ダークモードでselectedなやつのタイトル部分がコントラストが悪い。
 - [x] http://localhost:13006/?path=/story/notebook-notebookcreateform--default → モード選択UIを削除、CreateFormValuesからmode除去
-    クエストはあくまでもクエストのマップから選ぶときにクエストモードで自動的に開始されるというだけで、ユーザーがこのような画面で自分で選ぶものではない。
+      クエストはあくまでもクエストのマップから選ぶときにクエストモードで自動的に開始されるというだけで、ユーザーがこのような画面で自分で選ぶものではない。
 - [x] http://localhost:13006/?path=/story/infinitecanvas-formulanodeintegration--interactive&globals=theme:dark → ノードカードのCSS変数化
-        文字だけ白くなるから見えにくいけど合ってるのかな？
+      文字だけ白くなるから見えにくいけど合ってるのかな？

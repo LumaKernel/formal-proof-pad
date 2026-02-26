@@ -5,7 +5,9 @@ import { ReferencePopover } from "./ReferencePopover";
 
 afterEach(cleanup);
 
-const makeEntry = (overrides: Partial<ReferenceEntry> = {}): ReferenceEntry => ({
+const makeEntry = (
+  overrides: Partial<ReferenceEntry> = {},
+): ReferenceEntry => ({
   id: "test-entry",
   category: "axiom",
   title: { en: "Test Axiom", ja: "テスト公理" },
@@ -28,11 +30,7 @@ const makeEntry = (overrides: Partial<ReferenceEntry> = {}): ReferenceEntry => (
 describe("ReferencePopover", () => {
   it("トリガーボタンが表示される", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     const trigger = screen.getByTestId("ref-pop-trigger");
     expect(trigger).toBeDefined();
@@ -41,11 +39,7 @@ describe("ReferencePopover", () => {
 
   it("クリックでポップオーバーが開く", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     const trigger = screen.getByTestId("ref-pop-trigger");
     fireEvent.click(trigger);
@@ -55,11 +49,7 @@ describe("ReferencePopover", () => {
 
   it("ポップオーバーにタイトルと要約が表示される", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     fireEvent.click(screen.getByTestId("ref-pop-trigger"));
     const popover = screen.getByTestId("ref-pop-popover");
@@ -69,11 +59,7 @@ describe("ReferencePopover", () => {
 
   it("日本語で表示される", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="ja"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="ja" testId="ref-pop" />,
     );
     fireEvent.click(screen.getByTestId("ref-pop-trigger"));
     const popover = screen.getByTestId("ref-pop-popover");
@@ -83,11 +69,7 @@ describe("ReferencePopover", () => {
 
   it("カテゴリバッジが表示される", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     fireEvent.click(screen.getByTestId("ref-pop-trigger"));
     const popover = screen.getByTestId("ref-pop-popover");
@@ -96,11 +78,7 @@ describe("ReferencePopover", () => {
 
   it("形式表記がKaTeXでレンダリングされる", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     fireEvent.click(screen.getByTestId("ref-pop-trigger"));
     const formula = screen.getByTestId("ref-pop-formula");
@@ -138,11 +116,7 @@ describe("ReferencePopover", () => {
 
   it("onOpenDetailがない場合は「詳しく見る」ボタンが表示されない", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     fireEvent.click(screen.getByTestId("ref-pop-trigger"));
     expect(screen.queryByTestId("ref-pop-detail-btn")).toBeNull();
@@ -150,11 +124,7 @@ describe("ReferencePopover", () => {
 
   it("再クリックでポップオーバーが閉じる", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     const trigger = screen.getByTestId("ref-pop-trigger");
     fireEvent.click(trigger);
@@ -165,11 +135,7 @@ describe("ReferencePopover", () => {
 
   it("Escapeキーで閉じる", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     fireEvent.click(screen.getByTestId("ref-pop-trigger"));
     expect(screen.getByTestId("ref-pop-popover")).toBeDefined();
@@ -180,11 +146,7 @@ describe("ReferencePopover", () => {
   it("外部クリックで閉じる", () => {
     render(
       <div>
-        <ReferencePopover
-          entry={makeEntry()}
-          locale="en"
-          testId="ref-pop"
-        />
+        <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />
         <div data-testid="outside">outside</div>
       </div>,
     );
@@ -196,11 +158,7 @@ describe("ReferencePopover", () => {
 
   it("太字マークダウンがstrongタグとしてレンダリングされる", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     fireEvent.click(screen.getByTestId("ref-pop-trigger"));
     const popover = screen.getByTestId("ref-pop-popover");
@@ -211,11 +169,7 @@ describe("ReferencePopover", () => {
 
   it("aria-expanded属性が正しく更新される", () => {
     render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-        testId="ref-pop"
-      />,
+      <ReferencePopover entry={makeEntry()} locale="en" testId="ref-pop" />,
     );
     const trigger = screen.getByTestId("ref-pop-trigger");
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
@@ -224,12 +178,7 @@ describe("ReferencePopover", () => {
   });
 
   it("testIdなしでもレンダリングされる", () => {
-    render(
-      <ReferencePopover
-        entry={makeEntry()}
-        locale="en"
-      />,
-    );
+    render(<ReferencePopover entry={makeEntry()} locale="en" />);
     const buttons = screen.getAllByRole("button");
     expect(buttons.length).toBeGreaterThan(0);
     const triggerBtn = buttons.find((b) => b.textContent === "?");

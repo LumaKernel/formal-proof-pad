@@ -73,8 +73,7 @@ const separatorStyle: React.CSSProperties = {
   height: "20px",
   backgroundColor: "var(--color-zoom-controls-separator, rgba(0, 0, 0, 0.15))",
   margin: "0 2px",
-  transition:
-    "background-color var(--theme-transition-duration, 0s) ease",
+  transition: "background-color var(--theme-transition-duration, 0s) ease",
 };
 
 const dropdownStyle: React.CSSProperties = {
@@ -152,7 +151,14 @@ export function ZoomControlsComponent({
       maxScale,
     );
     onViewportChange(next);
-  }, [viewport, containerSize, minScale, maxScale, zoomInDisabled, onViewportChange]);
+  }, [
+    viewport,
+    containerSize,
+    minScale,
+    maxScale,
+    zoomInDisabled,
+    onViewportChange,
+  ]);
 
   const handleZoomOut = useCallback(() => {
     if (zoomOutDisabled) return;
@@ -163,7 +169,14 @@ export function ZoomControlsComponent({
       maxScale,
     );
     onViewportChange(next);
-  }, [viewport, containerSize, minScale, maxScale, zoomOutDisabled, onViewportChange]);
+  }, [
+    viewport,
+    containerSize,
+    minScale,
+    maxScale,
+    zoomOutDisabled,
+    onViewportChange,
+  ]);
 
   const handleReset = useCallback(() => {
     onViewportChange(computeResetZoomViewport());
@@ -242,7 +255,13 @@ export function ZoomControlsComponent({
         aria-label="Zoom out"
         title="Zoom out"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
+        >
           <path
             d="M3 8h10"
             stroke="currentColor"
@@ -271,7 +290,11 @@ export function ZoomControlsComponent({
           }}
           onClick={showPresets ? togglePresets : undefined}
           aria-label={`Current zoom: ${zoomLabel satisfies string}`}
-          title={showPresets ? "Select zoom preset" : `Zoom: ${zoomLabel satisfies string}`}
+          title={
+            showPresets
+              ? "Select zoom preset"
+              : `Zoom: ${zoomLabel satisfies string}`
+          }
         >
           {zoomLabel}
         </button>
@@ -299,9 +322,7 @@ export function ZoomControlsComponent({
                   style={{
                     ...dropdownItemStyle,
                     fontWeight:
-                      Math.abs(preset - viewport.scale) < 0.01
-                        ? 600
-                        : 400,
+                      Math.abs(preset - viewport.scale) < 0.01 ? 600 : 400,
                   }}
                   onClick={() => handlePresetSelect(preset)}
                 >
@@ -329,7 +350,13 @@ export function ZoomControlsComponent({
         aria-label="Zoom in"
         title="Zoom in"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
+        >
           <path
             d="M8 3v10M3 8h10"
             stroke="currentColor"
@@ -351,7 +378,13 @@ export function ZoomControlsComponent({
             aria-label="Reset zoom to 100%"
             title="Reset zoom to 100%"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
               <path
                 d="M2 8a6 6 0 1 1 1.76 4.24"
                 stroke="currentColor"
@@ -382,7 +415,13 @@ export function ZoomControlsComponent({
             aria-label="Fit to content"
             title="Fit to content"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
               <path
                 d="M2 6V3a1 1 0 0 1 1-1h3M10 2h3a1 1 0 0 1 1 1v3M14 10v3a1 1 0 0 1-1 1h-3M6 14H3a1 1 0 0 1-1-1v-3"
                 stroke="currentColor"

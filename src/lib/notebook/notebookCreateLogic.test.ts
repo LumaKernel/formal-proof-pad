@@ -159,9 +159,7 @@ describe("systemPresets", () => {
     expect(preset).toBeDefined();
     if (preset?.deductionSystem.style === "hilbert") {
       expect(preset.deductionSystem.system.theoryAxioms?.length).toBe(3);
-      const ids = preset.deductionSystem.system.theoryAxioms?.map(
-        (a) => a.id,
-      );
+      const ids = preset.deductionSystem.system.theoryAxioms?.map((a) => a.id);
       expect(ids).toEqual(["G1", "G2L", "G3L"]);
     }
   });
@@ -179,9 +177,7 @@ describe("systemPresets", () => {
     expect(preset).toBeDefined();
     if (preset?.deductionSystem.style === "hilbert") {
       expect(preset.deductionSystem.system.theoryAxioms?.length).toBe(6);
-      const ids = preset.deductionSystem.system.theoryAxioms?.map(
-        (a) => a.id,
-      );
+      const ids = preset.deductionSystem.system.theoryAxioms?.map((a) => a.id);
       expect(ids).toContain("G4");
     }
   });

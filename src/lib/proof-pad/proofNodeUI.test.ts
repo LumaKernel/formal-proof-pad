@@ -110,9 +110,7 @@ describe("getProofEdgeColor", () => {
   });
 
   it("axiom edges use CSS variable with fallback", () => {
-    expect(getProofEdgeColor("axiom")).toBe(
-      "var(--color-edge-axiom, #7aa3e0)",
-    );
+    expect(getProofEdgeColor("axiom")).toBe("var(--color-edge-axiom, #7aa3e0)");
   });
 
   it("mp edges use CSS variable with fallback", () => {

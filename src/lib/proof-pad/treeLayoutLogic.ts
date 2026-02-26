@@ -65,9 +65,7 @@ type TreeNode = {
 /** Build adjacency lists from edges.
  *  Returns forward adjacency (parent → children) and inverse (child → parents).
  *  Pure function. */
-export function buildAdjacencyLists(
-  edges: readonly LayoutEdge[],
-): {
+export function buildAdjacencyLists(edges: readonly LayoutEdge[]): {
   readonly forward: ReadonlyMap<string, readonly string[]>;
   readonly inverse: ReadonlyMap<string, readonly string[]>;
 } {
@@ -100,9 +98,7 @@ export function findRootNodes(
   nodeIds: readonly string[],
   inverse: ReadonlyMap<string, readonly string[]>,
 ): readonly string[] {
-  return nodeIds.filter(
-    (id) => (inverse.get(id) ?? []).length === 0,
-  );
+  return nodeIds.filter((id) => (inverse.get(id) ?? []).length === 0);
 }
 
 /** Find leaf nodes (nodes with no outgoing edges).
@@ -112,9 +108,7 @@ export function findLeafNodes(
   nodeIds: readonly string[],
   forward: ReadonlyMap<string, readonly string[]>,
 ): readonly string[] {
-  return nodeIds.filter(
-    (id) => (forward.get(id) ?? []).length === 0,
-  );
+  return nodeIds.filter((id) => (forward.get(id) ?? []).length === 0);
 }
 
 /** Build a tree structure from the graph.
@@ -212,10 +206,7 @@ export function calculateSubtreeWidths(
   return { ...node, children: updatedChildren, subtreeWidth };
 }
 
-function totalChildrenWidth(
-  node: TreeNode,
-  horizontalGap: number,
-): number {
+function totalChildrenWidth(node: TreeNode, horizontalGap: number): number {
   if (node.children.length === 0) {
     return 0;
   }
@@ -242,7 +233,8 @@ export function assignXPositions(
   const x = offsetX + node.subtreeWidth / 2 - node.size.width / 2;
 
   // Position children within this subtree's space
-  let childOffsetX = offsetX + (node.subtreeWidth - totalChildrenWidth(node, horizontalGap)) / 2;
+  let childOffsetX =
+    offsetX + (node.subtreeWidth - totalChildrenWidth(node, horizontalGap)) / 2;
   const updatedChildren = node.children.map((child) => {
     const updated = assignXPositions(child, childOffsetX, horizontalGap);
     childOffsetX += child.subtreeWidth + horizontalGap;
@@ -299,10 +291,7 @@ export function computeLevelHeights(
 
 /** Collect all positions from a tree into a flat map.
  *  Pure function. */
-function collectPositions(
-  node: TreeNode,
-  positions: Map<string, Point>,
-): void {
+function collectPositions(node: TreeNode, positions: Map<string, Point>): void {
   positions.set(node.id, { x: node.x, y: node.y });
   for (const child of node.children) {
     collectPositions(child, positions);
@@ -371,9 +360,7 @@ export function computeTreeLayout(
   }
 
   // Build data structures
-  const nodeMap = new Map<string, LayoutNode>(
-    nodes.map((n) => [n.id, n]),
-  );
+  const nodeMap = new Map<string, LayoutNode>(nodes.map((n) => [n.id, n]));
   const nodeIds = nodes.map((n) => n.id);
   const { forward, inverse } = buildAdjacencyLists(edges);
 

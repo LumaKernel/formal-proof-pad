@@ -11,8 +11,18 @@ const items: readonly CommandItem[] = [
     description: "(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))",
     category: "公理",
   },
-  { id: "a3", label: "A3", description: "(¬φ → ¬ψ) → (ψ → φ)", category: "公理" },
-  { id: "mp", label: "MP", description: "Modus Ponens を適用", category: "操作" },
+  {
+    id: "a3",
+    label: "A3",
+    description: "(¬φ → ¬ψ) → (ψ → φ)",
+    category: "公理",
+  },
+  {
+    id: "mp",
+    label: "MP",
+    description: "Modus Ponens を適用",
+    category: "操作",
+  },
   { id: "gen", label: "Gen", description: "汎化規則を適用", category: "操作" },
 ];
 

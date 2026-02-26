@@ -104,7 +104,9 @@ export const WithoutFormula: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByTestId("ref-pop-trigger"));
-    await expect(canvas.queryByTestId("ref-pop-formula")).not.toBeInTheDocument();
+    await expect(
+      canvas.queryByTestId("ref-pop-formula"),
+    ).not.toBeInTheDocument();
   },
 };
 
@@ -141,7 +143,9 @@ export const CloseOnEscape: Story = {
     await userEvent.click(canvas.getByTestId("ref-pop-trigger"));
     await expect(canvas.getByTestId("ref-pop-popover")).toBeInTheDocument();
     await userEvent.keyboard("{Escape}");
-    await expect(canvas.queryByTestId("ref-pop-popover")).not.toBeInTheDocument();
+    await expect(
+      canvas.queryByTestId("ref-pop-popover"),
+    ).not.toBeInTheDocument();
   },
 };
 
@@ -152,6 +156,8 @@ export const ToggleOpen: Story = {
     await userEvent.click(trigger);
     await expect(canvas.getByTestId("ref-pop-popover")).toBeInTheDocument();
     await userEvent.click(trigger);
-    await expect(canvas.queryByTestId("ref-pop-popover")).not.toBeInTheDocument();
+    await expect(
+      canvas.queryByTestId("ref-pop-popover"),
+    ).not.toBeInTheDocument();
   },
 };

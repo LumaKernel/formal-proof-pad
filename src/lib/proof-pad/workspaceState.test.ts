@@ -1035,7 +1035,13 @@ describe("proofWorkspace", () => {
   describe("duplicateSelectedNodes", () => {
     it("選択ノードをオフセット付きで複製する", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
-      ws = addNode(ws, "axiom", "A1", { x: 100, y: 100 }, "phi -> (psi -> phi)");
+      ws = addNode(
+        ws,
+        "axiom",
+        "A1",
+        { x: 100, y: 100 },
+        "phi -> (psi -> phi)",
+      );
       ws = addNode(ws, "axiom", "A2", { x: 200, y: 200 }, "psi -> phi");
       ws = addConnection(ws, "node-1", "out", "node-2", "premise-left");
 
@@ -1053,9 +1059,13 @@ describe("proofWorkspace", () => {
         expect(selected.has(id)).toBe(false);
       }
       // 複製ノードは元の位置から30pxオフセット
-      const newNodes = result.workspace.nodes.filter((n) => result.newNodeIds.has(n.id));
+      const newNodes = result.workspace.nodes.filter((n) =>
+        result.newNodeIds.has(n.id),
+      );
       const origNode1 = result.workspace.nodes.find((n) => n.id === "node-1")!;
-      const dupeOfNode1 = newNodes.find((n) => n.formulaText === origNode1.formulaText)!;
+      const dupeOfNode1 = newNodes.find(
+        (n) => n.formulaText === origNode1.formulaText,
+      )!;
       expect(dupeOfNode1.position.x - origNode1.position.x).toBe(30);
       expect(dupeOfNode1.position.y - origNode1.position.y).toBe(30);
     });
@@ -1098,7 +1108,9 @@ describe("proofWorkspace", () => {
       const result = duplicateSelectedNodes(ws, new Set(["node-1"]));
       expect(result.workspace.nodes).toHaveLength(2);
       expect(result.newNodeIds.size).toBe(1);
-      const newNode = result.workspace.nodes.find((n) => result.newNodeIds.has(n.id))!;
+      const newNode = result.workspace.nodes.find((n) =>
+        result.newNodeIds.has(n.id),
+      )!;
       expect(newNode.formulaText).toBe("phi -> (psi -> phi)");
       expect(newNode.position.x).toBe(80); // 50 + 30
       expect(newNode.position.y).toBe(80); // 50 + 30

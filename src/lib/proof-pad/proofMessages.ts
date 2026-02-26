@@ -101,7 +101,8 @@ export const defaultProofMessages: ProofMessages = {
   mpErrorRightMissing: "Right premise (\u03C6\u2192\u03C8) not connected",
   mpErrorLeftParse: "Left premise has invalid formula",
   mpErrorRightParse: "Right premise has invalid formula",
-  mpErrorNotImplication: "Right premise must be an implication (\u03C6\u2192\u03C8)",
+  mpErrorNotImplication:
+    "Right premise must be an implication (\u03C6\u2192\u03C8)",
   mpErrorPremiseMismatch:
     "Left premise does not match antecedent of right premise",
   mpErrorGeneric: "MP application failed",

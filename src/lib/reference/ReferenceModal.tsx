@@ -214,7 +214,9 @@ export function ReferenceModal({
     <div
       style={overlayStyle}
       onClick={handleOverlayClick}
-      data-testid={testId !== undefined ? `${testId satisfies string}-overlay` : undefined}
+      data-testid={
+        testId !== undefined ? `${testId satisfies string}-overlay` : undefined
+      }
     >
       <div
         ref={modalRef}
@@ -234,7 +236,11 @@ export function ReferenceModal({
             style={closeButtonStyle}
             onClick={onClose}
             aria-label={locale === "ja" ? "閉じる" : "Close"}
-            data-testid={testId !== undefined ? `${testId satisfies string}-close` : undefined}
+            data-testid={
+              testId !== undefined
+                ? `${testId satisfies string}-close`
+                : undefined
+            }
           >
             ✕
           </button>
@@ -253,7 +259,9 @@ export function ReferenceModal({
               style={formulaStyle}
               dangerouslySetInnerHTML={{ __html: formulaHtml }}
               data-testid={
-                testId !== undefined ? `${testId satisfies string}-formula` : undefined
+                testId !== undefined
+                  ? `${testId satisfies string}-formula`
+                  : undefined
               }
             />
           )}

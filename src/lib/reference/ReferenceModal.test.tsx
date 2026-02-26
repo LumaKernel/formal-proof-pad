@@ -5,7 +5,9 @@ import { ReferenceModal } from "./ReferenceModal";
 
 afterEach(cleanup);
 
-const makeEntry = (overrides: Partial<ReferenceEntry> = {}): ReferenceEntry => ({
+const makeEntry = (
+  overrides: Partial<ReferenceEntry> = {},
+): ReferenceEntry => ({
   id: "test-entry",
   category: "axiom",
   title: { en: "Test Axiom", ja: "テスト公理" },
@@ -14,14 +16,8 @@ const makeEntry = (overrides: Partial<ReferenceEntry> = {}): ReferenceEntry => (
     ja: "テスト要約。",
   },
   body: {
-    en: [
-      "First paragraph with **bold** text.",
-      "Second paragraph.",
-    ],
-    ja: [
-      "**太字**を含む第1パラグラフ。",
-      "第2パラグラフ。",
-    ],
+    en: ["First paragraph with **bold** text.", "Second paragraph."],
+    ja: ["**太字**を含む第1パラグラフ。", "第2パラグラフ。"],
   },
   formalNotation: "\\varphi \\to \\psi",
   relatedEntryIds: ["related-1"],

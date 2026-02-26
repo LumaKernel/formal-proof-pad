@@ -14,7 +14,11 @@ import {
 import { computePortConnectionPath } from "../infinite-canvas/connectionPath";
 import type { ViewportState } from "../infinite-canvas/types";
 import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
-import { getProofNodeStyle, getProofNodePorts, getProofEdgeColor } from "./proofNodeUI";
+import {
+  getProofNodeStyle,
+  getProofNodePorts,
+  getProofEdgeColor,
+} from "./proofNodeUI";
 import type { DateComponents } from "./workspaceExport";
 
 // --- 定数 ---
@@ -44,7 +48,10 @@ export type BoundingBox = {
 };
 
 /** ノードサイズ情報（エクスポート時に利用） */
-export type NodeSizeMap = ReadonlyMap<string, { readonly width: number; readonly height: number }>;
+export type NodeSizeMap = ReadonlyMap<
+  string,
+  { readonly width: number; readonly height: number }
+>;
 
 /**
  * ワークスペースの全ノードを包含するバウンディングボックスを計算する。
@@ -107,10 +114,7 @@ const EXPORT_CARD_TEXT = "#2d2a24";
 const EXPORT_CARD_BORDER = "rgba(0,0,0,0.08)";
 
 /** 単一ノードのSVG要素文字列を生成する（紙カード風: 白背景 + 左辺ストライプ） */
-function renderNodeSVG(
-  node: WorkspaceNode,
-  nodeSizes: NodeSizeMap,
-): string {
+function renderNodeSVG(node: WorkspaceNode, nodeSizes: NodeSizeMap): string {
   const style = getProofNodeStyle(node.kind);
   const size = nodeSizes.get(node.id);
   const w = size?.width ?? DEFAULT_NODE_WIDTH;

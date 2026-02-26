@@ -154,9 +154,7 @@ describe("ZoomControlsComponent", () => {
   });
 
   it("hides reset button when showResetButton is false", () => {
-    render(
-      <ZoomControlsComponent {...defaultProps} showResetButton={false} />,
-    );
+    render(<ZoomControlsComponent {...defaultProps} showResetButton={false} />);
     expect(screen.queryByTestId("zoom-reset-button")).toBeNull();
   });
 
@@ -192,10 +190,7 @@ describe("ZoomControlsComponent", () => {
 
   it("closes dropdown after selecting a preset", () => {
     render(
-      <ZoomControlsComponent
-        {...defaultProps}
-        onViewportChange={vi.fn()}
-      />,
+      <ZoomControlsComponent {...defaultProps} onViewportChange={vi.fn()} />,
     );
     fireEvent.click(screen.getByTestId("zoom-percentage"));
     fireEvent.click(screen.getByTestId("zoom-preset-100"));
@@ -203,9 +198,7 @@ describe("ZoomControlsComponent", () => {
   });
 
   it("does not open dropdown when showPresets is false", () => {
-    render(
-      <ZoomControlsComponent {...defaultProps} showPresets={false} />,
-    );
+    render(<ZoomControlsComponent {...defaultProps} showPresets={false} />);
     fireEvent.click(screen.getByTestId("zoom-percentage"));
     expect(screen.queryByTestId("zoom-preset-dropdown")).toBeNull();
   });
@@ -251,10 +244,7 @@ describe("ZoomControlsComponent", () => {
 
   it("hides zoom-to-selection button when selectedItems is not provided", () => {
     render(
-      <ZoomControlsComponent
-        {...defaultProps}
-        onZoomToSelection={vi.fn()}
-      />,
+      <ZoomControlsComponent {...defaultProps} onZoomToSelection={vi.fn()} />,
     );
     expect(screen.queryByTestId("zoom-to-selection-button")).toBeNull();
   });

@@ -383,9 +383,7 @@ describe("checkQuestGoalsWithAxioms", () => {
     const result = checkQuestGoalsWithAxioms(nodes, [], lukasiewiczSystem);
     expect(result._tag).toBe("AllAchievedButAxiomViolation");
     if (result._tag === "AllAchievedButAxiomViolation") {
-      expect(result.goalResults[0]?.violatingAxiomIds).toEqual(
-        new Set(["A1"]),
-      );
+      expect(result.goalResults[0]?.violatingAxiomIds).toEqual(new Set(["A1"]));
     }
   });
 
@@ -448,9 +446,7 @@ describe("checkQuestGoalsWithAxioms", () => {
       expect(result.goalResults[0]?.usedAxiomIds).toEqual(
         new Set(["A1", "A3"]),
       );
-      expect(result.goalResults[0]?.violatingAxiomIds).toEqual(
-        new Set(["A3"]),
-      );
+      expect(result.goalResults[0]?.violatingAxiomIds).toEqual(new Set(["A3"]));
     }
   });
 

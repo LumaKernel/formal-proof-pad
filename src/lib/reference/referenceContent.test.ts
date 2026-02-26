@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { allReferenceEntries } from "./referenceContent";
 import {
-  allCategories,
   allLocales,
   filterByCategory,
   findEntryById,

@@ -8,7 +8,9 @@ import {
 
 // --- テスト用ヘルパー ---
 
-const makeEntry = (overrides: Partial<ReferenceEntry> = {}): ReferenceEntry => ({
+const makeEntry = (
+  overrides: Partial<ReferenceEntry> = {},
+): ReferenceEntry => ({
   id: "test-entry",
   category: "axiom",
   title: { en: "Test Entry", ja: "テストエントリ" },

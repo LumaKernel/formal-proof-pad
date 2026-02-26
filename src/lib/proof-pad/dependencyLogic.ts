@@ -97,9 +97,7 @@ export function getSubtreeNodeIds(
   const result = new Set<string>([nodeId]);
 
   function traverse(currentId: string): void {
-    const outgoing = connections.filter(
-      (c) => c.fromNodeId === currentId,
-    );
+    const outgoing = connections.filter((c) => c.fromNodeId === currentId);
     for (const conn of outgoing) {
       if (!result.has(conn.toNodeId)) {
         result.add(conn.toNodeId);

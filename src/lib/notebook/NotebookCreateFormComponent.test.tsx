@@ -232,9 +232,10 @@ describe("NotebookCreateForm", () => {
       });
 
       // lukasiewiczがデフォルト選択
-      expect(
-        screen.getByTestId("system-preset-lukasiewicz"),
-      ).toHaveAttribute("aria-checked", "true");
+      expect(screen.getByTestId("system-preset-lukasiewicz")).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
 
       await user.click(
         screen.getByTestId("form-preset-lukasiewicz-ref-trigger"),
@@ -246,9 +247,10 @@ describe("NotebookCreateForm", () => {
       ).toBeInTheDocument();
 
       // 選択状態は変わらない（stopPropagation確認）
-      expect(
-        screen.getByTestId("system-preset-lukasiewicz"),
-      ).toHaveAttribute("aria-checked", "true");
+      expect(screen.getByTestId("system-preset-lukasiewicz")).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
     });
 
     it("onOpenReferenceDetailが呼ばれる", async () => {

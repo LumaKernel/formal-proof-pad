@@ -29,9 +29,7 @@ describe("buildAdjacencyLists", () => {
   });
 
   it("単一エッジで正しい隣接リスト", () => {
-    const edges: readonly LayoutEdge[] = [
-      { fromNodeId: "a", toNodeId: "b" },
-    ];
+    const edges: readonly LayoutEdge[] = [{ fromNodeId: "a", toNodeId: "b" }];
     const { forward, inverse } = buildAdjacencyLists(edges);
     expect(forward.get("a")).toEqual(["b"]);
     expect(inverse.get("b")).toEqual(["a"]);
@@ -264,11 +262,15 @@ describe("computeTreeLayout", () => {
 
   it("bottom-to-topでy座標が反転", () => {
     const nodes = [node("a"), node("b")];
-    const edges: readonly LayoutEdge[] = [
-      { fromNodeId: "a", toNodeId: "b" },
-    ];
-    const configTB: LayoutConfig = { ...DEFAULT_LAYOUT_CONFIG, direction: "top-to-bottom" };
-    const configBT: LayoutConfig = { ...DEFAULT_LAYOUT_CONFIG, direction: "bottom-to-top" };
+    const edges: readonly LayoutEdge[] = [{ fromNodeId: "a", toNodeId: "b" }];
+    const configTB: LayoutConfig = {
+      ...DEFAULT_LAYOUT_CONFIG,
+      direction: "top-to-bottom",
+    };
+    const configBT: LayoutConfig = {
+      ...DEFAULT_LAYOUT_CONFIG,
+      direction: "bottom-to-top",
+    };
 
     const resultTB = computeTreeLayout(nodes, edges, configTB);
     const resultBT = computeTreeLayout(nodes, edges, configBT);
@@ -375,9 +377,7 @@ describe("computeTreeLayout", () => {
 
   it("カスタムギャップ設定", () => {
     const nodes = [node("a"), node("b")];
-    const edges: readonly LayoutEdge[] = [
-      { fromNodeId: "a", toNodeId: "b" },
-    ];
+    const edges: readonly LayoutEdge[] = [{ fromNodeId: "a", toNodeId: "b" }];
     const config: LayoutConfig = {
       horizontalGap: 100,
       verticalGap: 200,
@@ -395,9 +395,7 @@ describe("computeTreeLayout", () => {
 describe("computeLayoutDiff", () => {
   it("すべてのノードが新規の場合すべて返す", () => {
     const nodes = [node("a"), node("b")];
-    const edges: readonly LayoutEdge[] = [
-      { fromNodeId: "a", toNodeId: "b" },
-    ];
+    const edges: readonly LayoutEdge[] = [{ fromNodeId: "a", toNodeId: "b" }];
     const diff = computeLayoutDiff(nodes, edges, new Map());
     expect(diff.size).toBe(2);
   });
@@ -411,9 +409,7 @@ describe("computeLayoutDiff", () => {
 
   it("閾値以上移動したノードのみ返す", () => {
     const nodes = [node("a"), node("b")];
-    const edges: readonly LayoutEdge[] = [
-      { fromNodeId: "a", toNodeId: "b" },
-    ];
+    const edges: readonly LayoutEdge[] = [{ fromNodeId: "a", toNodeId: "b" }];
     const layout = computeTreeLayout(nodes, edges);
 
     // aを少しだけ移動
@@ -421,7 +417,13 @@ describe("computeLayoutDiff", () => {
     const origA = modified.get("a")!;
     modified.set("a", { x: origA.x + 0.5, y: origA.y });
 
-    const diff = computeLayoutDiff(nodes, edges, modified, DEFAULT_LAYOUT_CONFIG, 1);
+    const diff = computeLayoutDiff(
+      nodes,
+      edges,
+      modified,
+      DEFAULT_LAYOUT_CONFIG,
+      1,
+    );
     // aは0.5しか動いてないので閾値以下、含まれない
     // bは元の位置なので変化なし
     expect(diff.size).toBe(0);
@@ -442,9 +444,7 @@ describe("computeLayoutDiff", () => {
 
   it("閾値以上移動したノードは含まれる", () => {
     const nodes = [node("a"), node("b")];
-    const edges: readonly LayoutEdge[] = [
-      { fromNodeId: "a", toNodeId: "b" },
-    ];
+    const edges: readonly LayoutEdge[] = [{ fromNodeId: "a", toNodeId: "b" }];
     const layout = computeTreeLayout(nodes, edges);
 
     // aを大きく移動
@@ -452,7 +452,13 @@ describe("computeLayoutDiff", () => {
     const origA = modified.get("a")!;
     modified.set("a", { x: origA.x + 10, y: origA.y });
 
-    const diff = computeLayoutDiff(nodes, edges, modified, DEFAULT_LAYOUT_CONFIG, 1);
+    const diff = computeLayoutDiff(
+      nodes,
+      edges,
+      modified,
+      DEFAULT_LAYOUT_CONFIG,
+      1,
+    );
     // aは10移動しているので閾値以上、含まれる
     expect(diff.has("a")).toBe(true);
   });

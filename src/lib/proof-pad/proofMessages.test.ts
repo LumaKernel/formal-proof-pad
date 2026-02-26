@@ -174,9 +174,9 @@ describe("formatMessage", () => {
   });
 
   it("should replace multiple placeholders", () => {
-    expect(
-      formatMessage("{a} and {b}", { a: "foo", b: "bar" }),
-    ).toBe("foo and bar");
+    expect(formatMessage("{a} and {b}", { a: "foo", b: "bar" })).toBe(
+      "foo and bar",
+    );
   });
 
   it("should return template unchanged if no matching placeholders", () => {
@@ -190,19 +190,17 @@ describe("formatMessage", () => {
   });
 
   it("should format genBannerSelectPremise correctly", () => {
-    const result = formatMessage(
-      defaultProofMessages.genBannerSelectPremise,
-      { variableName: "x" },
-    );
+    const result = formatMessage(defaultProofMessages.genBannerSelectPremise, {
+      variableName: "x",
+    });
     expect(result).toContain("x");
     expect(result).not.toContain("{variableName}");
   });
 
   it("should format selectionCount correctly", () => {
-    const result = formatMessage(
-      defaultProofMessages.selectionCount,
-      { count: "3" },
-    );
+    const result = formatMessage(defaultProofMessages.selectionCount, {
+      count: "3",
+    });
     expect(result).toContain("3");
     expect(result).not.toContain("{count}");
   });

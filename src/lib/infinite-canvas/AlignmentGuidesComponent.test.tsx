@@ -18,9 +18,7 @@ describe("AlignmentGuidesComponent", () => {
     const guides: readonly AlignmentGuide[] = [
       { axis: "vertical", value: 100, from: 50, to: 300 },
     ];
-    render(
-      <AlignmentGuidesComponent guides={guides} viewport={viewport} />,
-    );
+    render(<AlignmentGuidesComponent guides={guides} viewport={viewport} />);
     const svg = screen.getByTestId("alignment-guides");
     expect(svg).toBeInTheDocument();
     const lines = svg.querySelectorAll("line");
@@ -36,9 +34,7 @@ describe("AlignmentGuidesComponent", () => {
     const guides: readonly AlignmentGuide[] = [
       { axis: "horizontal", value: 200, from: 10, to: 400 },
     ];
-    render(
-      <AlignmentGuidesComponent guides={guides} viewport={viewport} />,
-    );
+    render(<AlignmentGuidesComponent guides={guides} viewport={viewport} />);
     const svg = screen.getByTestId("alignment-guides");
     const lines = svg.querySelectorAll("line");
     expect(lines).toHaveLength(1);
@@ -54,9 +50,7 @@ describe("AlignmentGuidesComponent", () => {
       { axis: "vertical", value: 100, from: 0, to: 200 },
       { axis: "horizontal", value: 150, from: 0, to: 300 },
     ];
-    render(
-      <AlignmentGuidesComponent guides={guides} viewport={viewport} />,
-    );
+    render(<AlignmentGuidesComponent guides={guides} viewport={viewport} />);
     const svg = screen.getByTestId("alignment-guides");
     const lines = svg.querySelectorAll("line");
     expect(lines).toHaveLength(2);
@@ -72,10 +66,7 @@ describe("AlignmentGuidesComponent", () => {
       { axis: "vertical", value: 100, from: 50, to: 200 },
     ];
     render(
-      <AlignmentGuidesComponent
-        guides={guides}
-        viewport={scaledViewport}
-      />,
+      <AlignmentGuidesComponent guides={guides} viewport={scaledViewport} />,
     );
     const svg = screen.getByTestId("alignment-guides");
     const line = svg.querySelector("line")!;

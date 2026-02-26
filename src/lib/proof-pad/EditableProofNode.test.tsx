@@ -96,7 +96,9 @@ describe("EditableProofNode", () => {
         // JSDOMではCSS変数を含むborderLeftを正確に解釈できないため、
         // style属性の文字列で確認する
         const styleAttr = node.getAttribute("style") ?? "";
-        expect(styleAttr).toContain(`border-left: 4px solid ${stripeColors[kind] satisfies string}`);
+        expect(styleAttr).toContain(
+          `border-left: 4px solid ${stripeColors[kind] satisfies string}`,
+        );
       }
     });
 

@@ -1029,8 +1029,7 @@ const qG06Commutativity: QuestDefinition = {
   id: "group-06",
   category: "group-basics",
   title: "可換律 (G4)",
-  description:
-    "∀x.∀y. x * y = y * x を証明せよ。アーベル群の追加公理。",
+  description: "∀x.∀y. x * y = y * x を証明せよ。アーベル群の追加公理。",
   difficulty: 1,
   systemPresetId: "abelian-group",
   goals: [

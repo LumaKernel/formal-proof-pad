@@ -237,9 +237,7 @@ describe("dependencyLogic", () => {
         makeConnection("mp-2", "mp-3", "premise-left"),
       ];
       const result = getSubtreeNodeIds("axiom-1", connections);
-      expect(result).toEqual(
-        new Set(["axiom-1", "mp-1", "mp-2", "mp-3"]),
-      );
+      expect(result).toEqual(new Set(["axiom-1", "mp-1", "mp-2", "mp-3"]));
     });
 
     it("分岐するサブツリーを正しく返す", () => {
@@ -275,9 +273,7 @@ describe("dependencyLogic", () => {
         makeConnection("mp-2", "mp-3", "premise-right"),
       ];
       const result = getSubtreeNodeIds("axiom-1", connections);
-      expect(result).toEqual(
-        new Set(["axiom-1", "mp-1", "mp-2", "mp-3"]),
-      );
+      expect(result).toEqual(new Set(["axiom-1", "mp-1", "mp-2", "mp-3"]));
     });
 
     it("複雑なグラフで共有ノードを重複なく返す", () => {
@@ -324,10 +320,7 @@ describe("dependencyLogic", () => {
       generalization: false,
     };
 
-    function makeAxiomNode(
-      id: string,
-      formulaText: string,
-    ): WorkspaceNode {
+    function makeAxiomNode(id: string, formulaText: string): WorkspaceNode {
       return {
         id,
         kind: "axiom",
@@ -342,7 +335,12 @@ describe("dependencyLogic", () => {
       const nodes = [makeAxiomNode("a1", "phi -> (psi -> phi)")];
       const connections: readonly WorkspaceConnection[] = [];
 
-      const axiomIds = getNodeAxiomIds("a1", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "a1",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set(["A1"]));
     });
 
@@ -356,18 +354,26 @@ describe("dependencyLogic", () => {
       ];
       const connections: readonly WorkspaceConnection[] = [];
 
-      const axiomIds = getNodeAxiomIds("a2", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "a2",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set(["A2"]));
     });
 
     it("A3公理インスタンスを含むルートノードを識別する", () => {
       // (~phi -> ~psi) -> (psi -> phi) は A3のインスタンス
-      const nodes = [
-        makeAxiomNode("a3", "(~phi -> ~psi) -> (psi -> phi)"),
-      ];
+      const nodes = [makeAxiomNode("a3", "(~phi -> ~psi) -> (psi -> phi)")];
       const connections: readonly WorkspaceConnection[] = [];
 
-      const axiomIds = getNodeAxiomIds("a3", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "a3",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set(["A3"]));
     });
 
@@ -387,7 +393,12 @@ describe("dependencyLogic", () => {
         makeConnection("a2", "mp1", "premise-right"),
       ];
 
-      const axiomIds = getNodeAxiomIds("mp1", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "mp1",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set(["A1", "A2"]));
     });
 
@@ -402,7 +413,12 @@ describe("dependencyLogic", () => {
         makeConnection("a1", "mp1", "premise-right"),
       ];
 
-      const axiomIds = getNodeAxiomIds("mp1", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "mp1",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set(["A1"]));
     });
 
@@ -410,7 +426,12 @@ describe("dependencyLogic", () => {
       const nodes = [makeAxiomNode("empty", "")];
       const connections: readonly WorkspaceConnection[] = [];
 
-      const axiomIds = getNodeAxiomIds("empty", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "empty",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set());
     });
 
@@ -418,7 +439,12 @@ describe("dependencyLogic", () => {
       const nodes = [makeAxiomNode("bad", ">>>invalid<<<")];
       const connections: readonly WorkspaceConnection[] = [];
 
-      const axiomIds = getNodeAxiomIds("bad", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "bad",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set());
     });
 
@@ -426,7 +452,12 @@ describe("dependencyLogic", () => {
       const nodes = [makeAxiomNode("a1", "phi -> (psi -> phi)")];
       const connections: readonly WorkspaceConnection[] = [];
 
-      const axiomIds = getNodeAxiomIds("nonexistent", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "nonexistent",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set());
     });
 
@@ -451,7 +482,12 @@ describe("dependencyLogic", () => {
         makeConnection("a2", "mp2", "premise-right"),
       ];
 
-      const axiomIds = getNodeAxiomIds("mp2", nodes, connections, lukasiewiczSystem);
+      const axiomIds = getNodeAxiomIds(
+        "mp2",
+        nodes,
+        connections,
+        lukasiewiczSystem,
+      );
       expect(axiomIds).toEqual(new Set(["A1", "A2", "A3"]));
     });
   });

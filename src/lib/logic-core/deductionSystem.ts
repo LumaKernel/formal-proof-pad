@@ -247,11 +247,7 @@ export const ljSystem: SequentCalculusSystem = {
  */
 export const lkSystem: SequentCalculusSystem = {
   name: "Sequent Calculus LK",
-  rules: new Set([
-    ...lmBaseRules,
-    "bottom-left",
-    "weakening-right",
-  ]),
+  rules: new Set([...lmBaseRules, "bottom-left", "weakening-right"]),
   maxSuccedentLength: undefined,
 };
 

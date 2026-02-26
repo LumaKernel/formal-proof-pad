@@ -51,10 +51,16 @@ const NODE_COLORS = {
   mp: { varName: "--color-node-mp", fallback: "#d9944a" },
   gen: { varName: "--color-node-gen", fallback: "#9b59b6" },
   conclusion: { varName: "--color-node-conclusion", fallback: "#4ad97a" },
-} as const satisfies Record<ProofNodeKind, { readonly varName: string; readonly fallback: string }>;
+} as const satisfies Record<
+  ProofNodeKind,
+  { readonly varName: string; readonly fallback: string }
+>;
 
 /** CSS変数参照文字列を生成するヘルパー */
-function cssVar(entry: { readonly varName: string; readonly fallback: string }): string {
+function cssVar(entry: {
+  readonly varName: string;
+  readonly fallback: string;
+}): string {
   return `var(${entry.varName satisfies string}, ${entry.fallback satisfies string})`;
 }
 
@@ -65,7 +71,8 @@ const CARD_BASE = {
   borderRadius: 8,
   border: "1px solid var(--color-node-card-border, rgba(0,0,0,0.08))",
   boxShadow: "0 1px 4px var(--color-node-card-shadow, rgba(0,0,0,0.08))",
-  boxShadowHover: "0 4px 12px var(--color-node-card-shadow-hover, rgba(0,0,0,0.16))",
+  boxShadowHover:
+    "0 4px 12px var(--color-node-card-shadow-hover, rgba(0,0,0,0.16))",
 } as const;
 
 /**
@@ -97,8 +104,10 @@ export function getProofNodeStyle(kind: ProofNodeKind): ProofNodeStyle {
         ...CARD_BASE,
         borderRadius: 12,
         border: "2px solid var(--color-node-conclusion-border, #2ecc71)",
-        boxShadow: "0 2px 8px var(--color-node-conclusion-shadow, rgba(74,217,122,0.25))",
-        boxShadowHover: "0 6px 20px var(--color-node-conclusion-shadow, rgba(74,217,122,0.25))",
+        boxShadow:
+          "0 2px 8px var(--color-node-conclusion-shadow, rgba(74,217,122,0.25))",
+        boxShadowHover:
+          "0 6px 20px var(--color-node-conclusion-shadow, rgba(74,217,122,0.25))",
         stripeColor: cssVar(NODE_COLORS.conclusion),
       };
   }
@@ -160,7 +169,10 @@ const EDGE_COLORS = {
   mp: { varName: "--color-edge-mp", fallback: "#e0a87a" },
   gen: { varName: "--color-edge-gen", fallback: "#c39bd3" },
   conclusion: { varName: "--color-edge-conclusion", fallback: "#7ae0a3" },
-} as const satisfies Record<ProofNodeKind, { readonly varName: string; readonly fallback: string }>;
+} as const satisfies Record<
+  ProofNodeKind,
+  { readonly varName: string; readonly fallback: string }
+>;
 
 /**
  * ノード種別に対応するエッジ（接続線）の色を返す。
