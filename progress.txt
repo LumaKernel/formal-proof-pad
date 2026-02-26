@@ -82,6 +82,30 @@
 
 ---
 
+## 2026-02-26 - 論理体系: 体系SK(基本命題計算)プリセット追加・体系情報整理
+- inferenceRule.ts に skSystem エイリアス追加（minimalLogicSystem と同一参照）
+- notebookCreateLogic.ts にSKプリセット追加、全8体系の説明を充実化（包含関係 HM ⊆ HJ ⊆ HK を明記）
+- questDefinition.ts の SystemPresetId に "sk", "classical" 追加
+- index.ts で全体系（skSystem, minimalLogicSystem, intuitionisticSystem, classicalLogicSystem, mendelsonSystem）のエクスポート追加
+- テスト: 158ファイル、3384テスト全パス（+7テスト追加）
+- カバレッジ: Stmts 99.34%(維持), Branch 94.92%(維持), Funcs 89.95%(+0.01), Lines 99.93%(維持)
+  - ベースライン: Stmts 99.34%, Branch 94.92%, Funcs 89.94%, Lines 99.93%
+- ブラウザ確認: .screenshots/sk-preset-notebook-create-form.png
+- 変更ファイル:
+  - `src/lib/logic-core/inferenceRule.ts` (MODIFIED - skSystemエイリアス追加)
+  - `src/lib/logic-core/inferenceRule.test.ts` (MODIFIED - skSystem参照一致テスト追加)
+  - `src/lib/logic-core/index.ts` (MODIFIED - 全体系エクスポート追加)
+  - `src/lib/notebook/notebookCreateLogic.ts` (MODIFIED - SKプリセット追加+体系説明充実化)
+  - `src/lib/notebook/notebookCreateLogic.test.ts` (MODIFIED - SKバリデーション+プリセット存在テスト追加)
+  - `src/lib/quest/questDefinition.ts` (MODIFIED - SystemPresetIdに"sk","classical"追加)
+  - `src/lib/quest/questStartLogic.test.ts` (MODIFIED - 全プリセット解決テスト追加)
+- **今後のイテレーションへの学び:**
+  - SKとHMは戸次本では別体系として扱われるが、公理的には同一（S+K+MP）。教育的文脈でプリセットとして分離提供する
+  - 新プリセット追加時の同期ポイント: inferenceRule.ts → index.ts → notebookCreateLogic.ts → questDefinition.ts → テスト4ファイル
+  - SystemPresetIdは型として定義されているため、新プリセット追加時は型エラーで検出可能
+  - 自然演繹(NM,NJ,NK)やシーケント計算(LM,LJ,LK)は証明構造が根本的に異なり、現在のHilbert式アーキテクチャでは大きな拡張が必要
+---
+
 ## 2026-02-26 - UIスタイル: クエストカタログの改善（US-S08）
 - globals.css にクエストカタログ用CSS変数を追加（--color-quest-card-*, --color-quest-chapter-*, --color-quest-filter-*, --color-quest-progress-bar-*, --color-quest-star-*, --color-quest-rating-*, --color-quest-start-*, --color-quest-difficulty-*, --color-quest-empty-*）
 - QuestCatalogComponent.tsx のスタイルを教科書の目次風デザインに変更
