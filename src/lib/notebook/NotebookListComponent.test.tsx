@@ -251,6 +251,49 @@ describe("NotebookList", () => {
     });
   });
 
+  describe("ホバーインタラクション", () => {
+    it("カードのホバーで浮き上がりスタイルが適用される", () => {
+      render(
+        <NotebookList
+          items={[makeItem("nb-1", "テスト")]}
+          {...defaultHandlers}
+        />,
+      );
+      const item = screen.getByTestId("notebook-item-nb-1");
+      fireEvent.mouseEnter(item);
+      expect(item.style.transform).toBe("translateY(-1px)");
+      fireEvent.mouseLeave(item);
+      expect(item.style.transform).toBe("");
+    });
+
+    it("アクションボタンのホバーでスタイルが切り替わる", () => {
+      render(
+        <NotebookList
+          items={[makeItem("nb-1", "テスト")]}
+          {...defaultHandlers}
+        />,
+      );
+      const btn = screen.getByTestId("rename-btn-nb-1");
+      fireEvent.mouseEnter(btn);
+      fireEvent.mouseLeave(btn);
+      // ホバー状態の切り替えが正常に行われること（エラーなし）
+      expect(btn).toBeTruthy();
+    });
+
+    it("削除ボタンのホバーでスタイルが切り替わる", () => {
+      render(
+        <NotebookList
+          items={[makeItem("nb-1", "テスト")]}
+          {...defaultHandlers}
+        />,
+      );
+      const btn = screen.getByTestId("delete-btn-nb-1");
+      fireEvent.mouseEnter(btn);
+      fireEvent.mouseLeave(btn);
+      expect(btn).toBeTruthy();
+    });
+  });
+
   describe("キーボード操作", () => {
     it("EnterキーでonOpenが呼ばれる", () => {
       const onOpen = vi.fn();

@@ -27,7 +27,7 @@ export type NotebookListProps = {
 const containerStyle: CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  gap: 8,
+  gap: 12,
   padding: 16,
   fontFamily:
     "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
@@ -38,23 +38,37 @@ const emptyStyle: CSSProperties = {
   padding: 40,
   color: "var(--color-text-secondary, #666)",
   fontSize: 14,
+  background: "var(--color-notebook-card-bg, #fffdf8)",
+  borderRadius: 8,
+  border: "1px solid var(--color-notebook-card-border, rgba(180,160,130,0.25))",
+  boxShadow:
+    "0 1px 3px var(--color-notebook-card-shadow, rgba(120,100,70,0.08))",
 };
 
 const itemStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
-  padding: "12px 16px",
+  padding: "14px 18px",
   borderRadius: 8,
-  border: "1px solid var(--color-border, #e0e0e0)",
-  background: "var(--color-surface, #fff)",
+  border:
+    "1px solid var(--color-notebook-card-border, rgba(180,160,130,0.25))",
+  background: "var(--color-notebook-card-bg, #fffdf8)",
   cursor: "pointer",
-  transition: "background 0.15s",
+  transition:
+    "box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease",
   gap: 12,
+  boxShadow:
+    "0 1px 3px var(--color-notebook-card-shadow, rgba(120,100,70,0.08))",
+  position: "relative" as const,
 };
 
 const itemHoverStyle: CSSProperties = {
   ...itemStyle,
-  background: "var(--color-surface-hover, #f5f5f5)",
+  background:
+    "var(--color-notebook-card-hover-bg, rgba(252,249,243,0.98))",
+  boxShadow:
+    "0 3px 8px var(--color-notebook-card-shadow-hover, rgba(120,100,70,0.18))",
+  transform: "translateY(-1px)",
 };
 
 const itemInfoStyle: CSSProperties = {
@@ -74,29 +88,31 @@ const itemNameStyle: CSSProperties = {
 const itemMetaStyle: CSSProperties = {
   fontSize: 12,
   color: "var(--color-text-secondary, #888)",
-  marginTop: 2,
+  marginTop: 4,
   display: "flex",
+  alignItems: "center",
   gap: 8,
 };
 
 const badgeStyle: CSSProperties = {
   display: "inline-block",
   fontSize: 10,
-  padding: "2px 6px",
-  borderRadius: 4,
+  padding: "2px 8px",
+  borderRadius: 10,
   fontWeight: 600,
+  letterSpacing: "0.02em",
 };
 
 const freeBadgeStyle: CSSProperties = {
   ...badgeStyle,
-  background: "var(--color-badge-free-bg, #e8f5e9)",
-  color: "var(--color-badge-free-text, #2e7d32)",
+  background: "var(--color-badge-free-bg)",
+  color: "var(--color-badge-free-text)",
 };
 
 const questBadgeStyle: CSSProperties = {
   ...badgeStyle,
-  background: "var(--color-badge-quest-bg, #fff3e0)",
-  color: "var(--color-badge-quest-text, #e65100)",
+  background: "var(--color-badge-quest-bg)",
+  color: "var(--color-badge-quest-text)",
 };
 
 const actionsStyle: CSSProperties = {
@@ -106,19 +122,34 @@ const actionsStyle: CSSProperties = {
 };
 
 const actionButtonStyle: CSSProperties = {
-  padding: "4px 8px",
+  padding: "4px 10px",
   fontSize: 12,
-  borderRadius: 4,
-  border: "1px solid var(--color-border, #ccc)",
-  background: "var(--color-surface, #fff)",
+  borderRadius: 6,
+  border:
+    "1px solid var(--color-notebook-action-border, rgba(180,160,130,0.3))",
+  background: "var(--color-notebook-action-bg, rgba(255,253,248,0.9))",
   color: "var(--color-text-primary, #333)",
   cursor: "pointer",
+  transition: "background 0.15s ease",
+};
+
+const actionButtonHoverStyle: CSSProperties = {
+  ...actionButtonStyle,
+  background:
+    "var(--color-notebook-action-hover-bg, rgba(245,240,230,0.95))",
 };
 
 const deleteButtonStyle: CSSProperties = {
   ...actionButtonStyle,
-  color: "var(--color-danger, #d32f2f)",
-  borderColor: "var(--color-danger-border, #ffcdd2)",
+  color: "var(--color-notebook-delete-text, #c62828)",
+  borderColor:
+    "var(--color-notebook-delete-border, rgba(198,40,40,0.25))",
+};
+
+const deleteButtonHoverStyle: CSSProperties = {
+  ...deleteButtonStyle,
+  background:
+    "var(--color-notebook-delete-hover-bg, rgba(198,40,40,0.06))",
 };
 
 const renameInputStyle: CSSProperties = {
@@ -129,15 +160,49 @@ const renameInputStyle: CSSProperties = {
   borderRadius: 4,
   outline: "none",
   width: "100%",
+  background: "var(--color-notebook-card-bg, #fffdf8)",
+  color: "var(--color-text-primary, #333)",
 };
 
 const renameErrorStyle: CSSProperties = {
   fontSize: 11,
-  color: "var(--color-danger, #d32f2f)",
+  color: "var(--color-error, #e06060)",
   marginTop: 2,
 };
 
 // --- Sub-components ---
+
+function ActionButton({
+  children,
+  onClick,
+  title,
+  "data-testid": testId,
+  variant = "default",
+}: {
+  readonly children: React.ReactNode;
+  readonly onClick: (e: React.MouseEvent) => void;
+  readonly title: string;
+  readonly "data-testid": string;
+  readonly variant?: "default" | "danger";
+}) {
+  const [hovered, setHovered] = useState(false);
+  const baseStyle =
+    variant === "danger" ? deleteButtonStyle : actionButtonStyle;
+  const hoverStyle =
+    variant === "danger" ? deleteButtonHoverStyle : actionButtonHoverStyle;
+  return (
+    <button
+      data-testid={testId}
+      style={hovered ? hoverStyle : baseStyle}
+      onClick={onClick}
+      title={title}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {children}
+    </button>
+  );
+}
 
 function ModeBadge({ mode }: { readonly mode: "free" | "quest" }) {
   return (
@@ -253,40 +318,37 @@ function NotebookItem({
         )}
       </div>
       <div style={actionsStyle} onClick={(e) => e.stopPropagation()}>
-        <button
+        <ActionButton
           data-testid={`rename-btn-${item.id satisfies string}`}
-          style={actionButtonStyle}
           onClick={handleRenameStart}
           title="名前変更"
         >
           名前変更
-        </button>
-        <button
+        </ActionButton>
+        <ActionButton
           data-testid={`duplicate-btn-${item.id satisfies string}`}
-          style={actionButtonStyle}
           onClick={handleDuplicate}
           title="複製"
         >
           複製
-        </button>
+        </ActionButton>
         {item.mode === "quest" && onConvertToFree !== undefined && (
-          <button
+          <ActionButton
             data-testid={`convert-btn-${item.id satisfies string}`}
-            style={actionButtonStyle}
             onClick={handleConvertToFree}
             title="自由帳に変換"
           >
             自由帳化
-          </button>
+          </ActionButton>
         )}
-        <button
+        <ActionButton
           data-testid={`delete-btn-${item.id satisfies string}`}
-          style={deleteButtonStyle}
           onClick={handleDelete}
           title="削除"
+          variant="danger"
         >
           削除
-        </button>
+        </ActionButton>
       </div>
     </div>
   );

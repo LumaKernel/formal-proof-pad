@@ -119,6 +119,28 @@
   --color-paper-button-hover-bg: rgba(245, 240, 230, 0.95);
   --color-paper-button-hover-shadow: rgba(120, 100, 70, 0.15);
 
+  /* Notebook Card */
+  --color-notebook-card-bg: #fffdf8;
+  --color-notebook-card-border: rgba(180, 160, 130, 0.25);
+  --color-notebook-card-shadow: rgba(120, 100, 70, 0.08);
+  --color-notebook-card-shadow-hover: rgba(120, 100, 70, 0.18);
+  --color-notebook-card-hover-bg: rgba(252, 249, 243, 0.98);
+  --color-notebook-card-rule-line: rgba(180, 160, 130, 0.12);
+
+  /* Notebook Badge */
+  --color-badge-free-bg: rgba(76, 175, 80, 0.12);
+  --color-badge-free-text: #2e7d32;
+  --color-badge-quest-bg: rgba(230, 81, 0, 0.10);
+  --color-badge-quest-text: #e65100;
+
+  /* Notebook Action Button */
+  --color-notebook-action-bg: rgba(255, 253, 248, 0.9);
+  --color-notebook-action-border: rgba(180, 160, 130, 0.3);
+  --color-notebook-action-hover-bg: rgba(245, 240, 230, 0.95);
+  --color-notebook-delete-text: #c62828;
+  --color-notebook-delete-border: rgba(198, 40, 40, 0.25);
+  --color-notebook-delete-hover-bg: rgba(198, 40, 40, 0.06);
+
   /* Legacy compat (used by page.module.css) */
   --background: #ffffff;
   --foreground: #171717;
@@ -235,6 +257,28 @@
   --color-paper-button-shadow: rgba(0, 0, 0, 0.15);
   --color-paper-button-hover-bg: rgba(52, 48, 42, 0.95);
   --color-paper-button-hover-shadow: rgba(0, 0, 0, 0.25);
+
+  /* Notebook Card */
+  --color-notebook-card-bg: #262320;
+  --color-notebook-card-border: rgba(100, 90, 75, 0.3);
+  --color-notebook-card-shadow: rgba(0, 0, 0, 0.2);
+  --color-notebook-card-shadow-hover: rgba(0, 0, 0, 0.4);
+  --color-notebook-card-hover-bg: rgba(42, 38, 34, 0.98);
+  --color-notebook-card-rule-line: rgba(100, 90, 75, 0.12);
+
+  /* Notebook Badge */
+  --color-badge-free-bg: rgba(76, 175, 80, 0.15);
+  --color-badge-free-text: #66bb6a;
+  --color-badge-quest-bg: rgba(255, 152, 0, 0.15);
+  --color-badge-quest-text: #ffb74d;
+
+  /* Notebook Action Button */
+  --color-notebook-action-bg: rgba(42, 38, 34, 0.9);
+  --color-notebook-action-border: rgba(100, 90, 75, 0.35);
+  --color-notebook-action-hover-bg: rgba(52, 48, 42, 0.95);
+  --color-notebook-delete-text: #ef5350;
+  --color-notebook-delete-border: rgba(239, 83, 80, 0.3);
+  --color-notebook-delete-hover-bg: rgba(239, 83, 80, 0.08);
 
   /* Legacy compat (used by page.module.css) */
   --background: #0a0a0a;

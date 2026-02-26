@@ -82,6 +82,28 @@
 
 ---
 
+## 2026-02-26 - UIスタイル: ノートブック一覧のカード化（US-S07）
+- globals.css にノートブックカード用CSS変数を追加（--color-notebook-card-*, --color-badge-free-*, --color-badge-quest-*, --color-notebook-action-*, --color-notebook-delete-*）
+- NotebookListComponent.tsx のスタイルを紙カード風に変更（クリーム系背景、微細な影、ホバーで浮き上がるアニメーション）
+- カテゴリバッジのスタイルをCSS変数に統一（pill型バッジ）
+- アクションボタンを紙風スタイルに統一、ホバーステート追加（ActionButtonサブコンポーネント）
+- 空状態メッセージも紙カード風に変更
+- ライト/ダークモード両対応
+- テスト: 158ファイル、3301テスト全パス（+3テスト追加: ホバーインタラクション）
+- カバレッジ: Stmts 99.34%(+0.02向上), Branch 94.96%(+0.01向上), Funcs 89.98%(+0.07向上), Lines 99.93%(維持)
+  - ベースライン: Stmts 99.32%, Branch 94.95%, Funcs 89.91%, Lines 99.93%
+- ブラウザ確認: .screenshots/us-s07-notebook-list-cards-light.png, .screenshots/us-s07-notebook-list-cards-dark.png, .screenshots/us-s07-notebook-list-empty-light.png, .screenshots/us-s07-notebook-list-single-light.png
+- 変更ファイル:
+  - `src/app/globals.css` (MODIFIED - ノートブックカード・バッジ・アクションボタンCSS変数追加 light/dark)
+  - `src/lib/notebook/NotebookListComponent.tsx` (MODIFIED - 紙カード風スタイル + ActionButtonサブコンポーネント追加)
+  - `src/lib/notebook/NotebookListComponent.test.tsx` (MODIFIED - ホバーインタラクションテスト3件追加)
+  - `tasks/prd-ui-style.md` (MODIFIED - US-S07完了)
+- **今後のイテレーションへの学び:**
+  - ノートブックカード用CSS変数（--color-notebook-card-*）は紙パネル（--color-panel-*）と類似だが別系統。用途に応じて分離
+  - ホバーステートのあるボタンはActionButtonのようなサブコンポーネントに切り出すとテスタブル
+  - バッジのborderRadiusを10にしてpill型にするとモダンな印象に
+---
+
 ## 2026-02-26 - UIスタイル: ツールバーとパレットの紙パネル化（US-S04）
 - globals.css に紙パネル用CSS変数を追加（--color-panel-bg, --color-panel-border, --color-panel-shadow, --color-panel-rule-line, --color-paper-button-*）
 - ProofWorkspace.tsx のヘッダー・ゴールコンテナを紙パネルスタイルに変更
