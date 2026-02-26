@@ -82,6 +82,36 @@
 
 ---
 
+## 2026-02-26 - 理論公理: PA流儀バリアント追加（Robinson Q・PA-HK・PA-Mendelson・HA）
+- inferenceRule.ts に新体系を追加:
+  - Robinson算術(Q): PA1-PA6 + Q7（∀x.(x=0 ∨ ∃y.x=S(y))）、帰納法なしの弱い算術
+  - PA-HK: 古典論理(DNE) + PA1-PA6
+  - PA-Mendelson: Mendelson体系(M3) + PA1-PA6
+  - ヘイティング算術(HA): 直観主義論理(EFQ) + PA1-PA6
+- Q7公理テンプレート（axiomQ7Template）を新規追加、disjunction/existentialを使用
+- robinsonAxioms配列はpeanoFixedAxiomsのspread + Q7で構成
+- index.ts に全新体系のエクスポートを追加
+- notebookCreateLogic.ts に5つの新プリセット追加（robinson, peano-hk, peano-mendelson, heyting）
+- questDefinition.ts の SystemPresetId に4つのID追加
+- テスト: 161ファイル、3667テスト全パス（+27テスト追加）
+- カバレッジ: Stmts 99.38%(維持), Branch 94.92%(維持), Funcs 89.99%(+0.01向上), Lines 99.94%(維持)
+  - ベースライン: Stmts 99.38%, Branch 94.92%, Funcs 89.98%, Lines 99.94%
+- 変更ファイル:
+  - `src/lib/logic-core/inferenceRule.ts` (MODIFIED - Q7テンプレート, robinsonAxioms, 4新体系追加)
+  - `src/lib/logic-core/inferenceRule.test.ts` (MODIFIED - Robinson体系+PA流儀バリアントテスト追加)
+  - `src/lib/logic-core/index.ts` (MODIFIED - 新体系エクスポート追加)
+  - `src/lib/notebook/notebookCreateLogic.ts` (MODIFIED - 4新プリセット追加)
+  - `src/lib/notebook/notebookCreateLogic.test.ts` (MODIFIED - プリセット存在・バリデーションテスト追加)
+  - `src/lib/quest/questDefinition.ts` (MODIFIED - SystemPresetId拡張)
+  - `src/lib/quest/questStartLogic.test.ts` (MODIFIED - 新プリセット解決テスト追加)
+- **今後のイテレーションへの学び:**
+  - PA流儀バリアントは命題論理基盤(propositionalAxioms)のみ差し替えでtheoryAxiomsは共有する設計が効率的
+  - Robinson算術(Q)はPAから帰納法を除いてQ7を追加した体系。spread構文でpeanoFixedAxiomsを再利用可能
+  - Q7公理にはdisjunctionとexistentialが必要（inferenceRule.tsのimportに追加が必要）
+  - 新プリセット追加時の同期ポイント: inferenceRule.ts → index.ts → notebookCreateLogic.ts → questDefinition.ts → テスト4ファイル
+  - StorybookのHMRは大きな変更後に動作しないことがある。テスト（vitest storybook）で補完可能
+---
+
 ## 2026-02-26 - 自然演繹(Natural Deduction)のピュアロジック実装
 - naturalDeduction.ts: NM(最小論理)の自然演繹証明図モジュールを新規作成
 - 戸次大介『数理論理学』第8章に基づく完全な実装
