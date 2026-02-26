@@ -179,3 +179,15 @@ export type {
   KeyboardShortcutCallbacks,
   UseKeyboardShortcutsResult,
 } from "./useKeyboardShortcuts";
+export {
+  applyEdgeScrollDelta,
+  computeEdgePenetration,
+  computeEdgeScrollDelta,
+  computeEdgeScrollDirection,
+  isEdgeScrollIdle,
+  DEFAULT_EDGE_SCROLL_CONFIG,
+  ZERO_DELTA,
+} from "./edgeScrollLogic";
+export type { EdgeScrollConfig, EdgeScrollDelta } from "./edgeScrollLogic";
+export { useEdgeScroll } from "./useEdgeScroll";
+export type { UseEdgeScrollResult } from "./useEdgeScroll";

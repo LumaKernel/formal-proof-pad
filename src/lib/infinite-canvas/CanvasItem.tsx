@@ -29,6 +29,10 @@ export interface CanvasItemProps {
   /** Callback when the item is clicked (not dragged).
    *  Receives screen coordinates (clientX, clientY). */
   readonly onClick?: (screenX: number, screenY: number) => void;
+  /** Callback during drag move with screen-space cursor position (for edge scroll integration) */
+  readonly onDragMove?: (screenPoint: Point) => void;
+  /** Callback when drag ends (for edge scroll cleanup) */
+  readonly onDragEnd?: () => void;
 }
 
 const NOOP = () => {};
@@ -47,6 +51,8 @@ export function CanvasItem({
   contextMenuItems = EMPTY_ITEMS,
   onContextMenuSelect = NOOP,
   onClick,
+  onDragMove,
+  onDragEnd,
 }: CanvasItemProps) {
   const screenPos = worldToScreen(viewport, position);
   const hasDragCallback = onPositionChange !== NOOP;
@@ -101,9 +107,10 @@ export function CanvasItem({
       }
       if (draggable) {
         onPointerMove(e);
+        onDragMove?.({ x: e.clientX, y: e.clientY });
       }
     },
-    [hasContextMenu, longPress, draggable, onPointerMove],
+    [hasContextMenu, longPress, draggable, onPointerMove, onDragMove],
   );
 
   const handlePointerUp = useCallback(
@@ -120,9 +127,10 @@ export function CanvasItem({
       }
       if (draggable) {
         onPointerUp(e);
+        onDragEnd?.();
       }
     },
-    [hasContextMenu, longPress, draggable, onPointerUp, onClick],
+    [hasContextMenu, longPress, draggable, onPointerUp, onClick, onDragEnd],
   );
 
   const hasInteraction =

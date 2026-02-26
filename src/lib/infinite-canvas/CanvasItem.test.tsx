@@ -695,4 +695,96 @@ describe("CanvasItem snapConfig", () => {
 
     expect(onPositionChange).toHaveBeenCalledWith({ x: 12, y: 18 });
   });
+
+  it("calls onDragMove with screen coordinates during drag", () => {
+    const onDragMove = vi.fn();
+    const onPositionChange = vi.fn();
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={onPositionChange}
+        onDragMove={onDragMove}
+      >
+        <span>Draggable</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+
+    fireEvent.pointerDown(item, {
+      button: 0,
+      clientX: 50,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(item, {
+      clientX: 100,
+      clientY: 150,
+      pointerId: 1,
+    });
+
+    expect(onDragMove).toHaveBeenCalledWith({ x: 100, y: 150 });
+  });
+
+  it("calls onDragEnd when drag finishes", () => {
+    const onDragEnd = vi.fn();
+    const onPositionChange = vi.fn();
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onPositionChange={onPositionChange}
+        onDragEnd={onDragEnd}
+      >
+        <span>Draggable</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+
+    fireEvent.pointerDown(item, {
+      button: 0,
+      clientX: 50,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerUp(item, {
+      clientX: 60,
+      clientY: 60,
+      pointerId: 1,
+    });
+
+    expect(onDragEnd).toHaveBeenCalledOnce();
+  });
+
+  it("does not call onDragMove when not dragging", () => {
+    const onDragMove = vi.fn();
+    render(
+      <CanvasItem
+        position={{ x: 0, y: 0 }}
+        viewport={{ offsetX: 0, offsetY: 0, scale: 1 }}
+        onDragMove={onDragMove}
+      >
+        <span>No drag</span>
+      </CanvasItem>,
+    );
+
+    const item = screen.getByTestId("canvas-item");
+
+    // No onPositionChange provided, so drag is disabled
+    fireEvent.pointerDown(item, {
+      button: 0,
+      clientX: 50,
+      clientY: 50,
+      pointerId: 1,
+    });
+    fireEvent.pointerMove(item, {
+      clientX: 100,
+      clientY: 150,
+      pointerId: 1,
+    });
+
+    expect(onDragMove).not.toHaveBeenCalled();
+  });
 });
