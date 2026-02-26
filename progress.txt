@@ -4064,3 +4064,16 @@
   - notation-input-methods（入力方法）はアプリ固有コンテンツなので外部リンク不要と判断
   - prd-theories.mdの外部リソースリンク関連タスクは2イテレーションで完了（前回: 全エントリ一斉追加、今回: 追加充実化+流儀情報）
 ---
+
+## 2026-02-27 - CI修復: Prettierフォーマット修正
+- CIが直近2回失敗（prettier . --check で39ファイルがスタイル違反）
+- `npx prettier --write .` で一括修正
+- referenceContent.test.ts の未使用import `allCategories` を削除（ESLint warning修正）
+- 変更ファイル: 39ファイル（prettier自動修正） + 1ファイル（未使用import削除）
+- CI: push後グリーン確認済み ✅ (run #22454855518)
+- カバレッジ: 99.36% Statements (変化なし)
+- **今後のイテレーションへの学び:**
+  - Prettierのバージョンアップやルール変更後は `npx prettier --write .` を実行してからコミットすること
+  - CIがfailしている場合は次のストーリーより先に修正を優先する（CLAUDE.mdの指示通り）
+  - 未使用importのwarningもCI環境ではエラー扱いになる可能性があるため、warningも修正すべき
+---
