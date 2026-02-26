@@ -101,6 +101,19 @@
   --color-proof-complete-gradient-end: #2ecc71;
   --color-proof-complete-shadow: rgba(74, 217, 122, 0.5);
 
+  /* Paper Panel (toolbar, palette, popups) */
+  --color-panel-bg: rgba(252, 249, 243, 0.96);
+  --color-panel-border: rgba(180, 160, 130, 0.2);
+  --color-panel-shadow: rgba(120, 100, 70, 0.1);
+  --color-panel-rule-line: rgba(180, 160, 130, 0.15);
+
+  /* Paper-like Button */
+  --color-paper-button-bg: rgba(255, 253, 248, 0.9);
+  --color-paper-button-border: rgba(180, 160, 130, 0.3);
+  --color-paper-button-shadow: rgba(120, 100, 70, 0.08);
+  --color-paper-button-hover-bg: rgba(245, 240, 230, 0.95);
+  --color-paper-button-hover-shadow: rgba(120, 100, 70, 0.15);
+
   /* Legacy compat (used by page.module.css) */
   --background: #ffffff;
   --foreground: #171717;
@@ -199,6 +212,19 @@
   --color-proof-complete-gradient-start: #5ae08a;
   --color-proof-complete-gradient-end: #3dd97a;
   --color-proof-complete-shadow: rgba(90, 224, 138, 0.4);
+
+  /* Paper Panel (toolbar, palette, popups) */
+  --color-panel-bg: rgba(36, 33, 30, 0.96);
+  --color-panel-border: rgba(100, 90, 75, 0.3);
+  --color-panel-shadow: rgba(0, 0, 0, 0.3);
+  --color-panel-rule-line: rgba(100, 90, 75, 0.15);
+
+  /* Paper-like Button */
+  --color-paper-button-bg: rgba(42, 38, 34, 0.9);
+  --color-paper-button-border: rgba(100, 90, 75, 0.35);
+  --color-paper-button-shadow: rgba(0, 0, 0, 0.15);
+  --color-paper-button-hover-bg: rgba(52, 48, 42, 0.95);
+  --color-paper-button-hover-shadow: rgba(0, 0, 0, 0.25);
 
   /* Legacy compat (used by page.module.css) */
   --background: #0a0a0a;

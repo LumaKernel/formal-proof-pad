@@ -28,9 +28,10 @@ const panelStyle: CSSProperties = {
   top: 48,
   left: 12,
   zIndex: 10,
-  background: "var(--color-surface-translucent, rgba(255, 255, 255, 0.95))",
+  background: "var(--color-panel-bg, rgba(252, 249, 243, 0.96))",
   borderRadius: 8,
-  boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+  border: "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
+  boxShadow: "0 2px 12px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
   padding: "8px 0",
   fontFamily: "sans-serif",
   fontSize: 12,
@@ -47,7 +48,7 @@ const headerStyle: CSSProperties = {
   textTransform: "uppercase",
   letterSpacing: 1,
   color: "var(--color-text-secondary, #666)",
-  borderBottom: "1px solid var(--color-border, #eee)",
+  borderBottom: "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
   marginBottom: 4,
 };
 
@@ -57,12 +58,13 @@ const itemStyle: CSSProperties = {
   display: "flex",
   flexDirection: "column",
   gap: 2,
-  transition: "background 0.15s",
+  transition: "background 0.15s, box-shadow 0.15s",
+  borderBottom: "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
 };
 
 const itemHoverStyle: CSSProperties = {
   ...itemStyle,
-  background: "rgba(91, 139, 217, 0.1)",
+  background: "var(--color-paper-button-hover-bg, rgba(245, 240, 230, 0.95))",
 };
 
 const itemLabelStyle: CSSProperties = {

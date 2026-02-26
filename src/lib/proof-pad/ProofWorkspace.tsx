@@ -144,9 +144,10 @@ const headerStyle = {
   alignItems: "center",
   gap: 8,
   padding: "6px 12px",
-  background: "var(--color-surface-translucent, rgba(255, 255, 255, 0.9))",
+  background: "var(--color-panel-bg, rgba(252, 249, 243, 0.96))",
   borderRadius: 8,
-  boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+  border: "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
+  boxShadow: "0 1px 6px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
   fontSize: 13,
   fontFamily: "sans-serif",
   pointerEvents: "auto" as const,
@@ -155,11 +156,13 @@ const headerStyle = {
 
 const systemBadgeStyle = {
   padding: "2px 8px",
-  background: "var(--color-badge-bg, #e8eaf0)",
+  background: "var(--color-paper-button-bg, rgba(255, 253, 248, 0.9))",
   color: "var(--color-badge-text, #718096)",
-  borderRadius: 4,
+  borderRadius: 6,
   fontWeight: 600 as const,
   fontSize: 12,
+  border: "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
+  boxShadow: "0 1px 2px var(--color-paper-button-shadow, rgba(120, 100, 70, 0.08))",
 };
 
 const mpButtonStyle = {
@@ -250,9 +253,10 @@ const goalContainerStyle = {
   alignItems: "center",
   gap: 8,
   padding: "6px 12px",
-  background: "var(--color-surface-translucent, rgba(255, 255, 255, 0.9))",
+  background: "var(--color-panel-bg, rgba(252, 249, 243, 0.96))",
   borderRadius: 8,
-  boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+  border: "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
+  boxShadow: "0 1px 6px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
   fontSize: 13,
   fontFamily: "sans-serif",
   pointerEvents: "auto" as const,
@@ -261,14 +265,14 @@ const goalContainerStyle = {
 
 const goalInputStyle = {
   padding: "3px 8px",
-  border: "1px solid var(--color-border, #ccc)",
-  borderRadius: 4,
+  border: "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
+  borderRadius: 6,
   fontSize: 13,
   fontFamily: "serif, 'Times New Roman', Times",
   fontStyle: "italic" as const,
   width: 180,
   outline: "none",
-  background: "var(--color-surface, #fff)",
+  background: "var(--color-paper-button-bg, rgba(255, 253, 248, 0.9))",
   color: "var(--color-text-primary, #171717)",
 };
 
@@ -307,15 +311,21 @@ const questModeBadgeStyle = {
   border: "1px solid var(--color-warning-border, rgba(255,215,0,0.5))",
 };
 
-const convertToFreeButtonStyle = {
-  padding: "4px 10px",
-  background: "transparent",
-  color: "var(--color-text-secondary, #666)",
-  border: "1px solid var(--color-border, #ccc)",
-  borderRadius: 4,
+const paperButtonStyle = {
+  padding: "3px 8px",
+  background: "var(--color-paper-button-bg, rgba(255, 253, 248, 0.9))",
+  color: "var(--color-text-primary, #171717)",
+  border: "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
+  borderRadius: 6,
   cursor: "pointer",
   fontSize: 11,
   fontFamily: "sans-serif",
+  boxShadow: "0 1px 2px var(--color-paper-button-shadow, rgba(120, 100, 70, 0.08))",
+};
+
+const convertToFreeButtonStyle = {
+  ...paperButtonStyle,
+  padding: "4px 10px",
 };
 
 const selectionBannerStyle = {
@@ -1473,7 +1483,7 @@ export function ProofWorkspace({
         {/* 自動レイアウトトグル */}
         <span
           style={{
-            borderLeft: "1px solid var(--color-border, #ccc)",
+            borderLeft: "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
             paddingLeft: 8,
             marginLeft: 4,
             display: "inline-flex",
@@ -1516,9 +1526,11 @@ export function ProofWorkspace({
               style={{
                 fontSize: 11,
                 padding: "1px 4px",
-                borderRadius: 3,
-                border: "1px solid var(--color-border, #ccc)",
-                background: "var(--color-surface, #fff)",
+                borderRadius: 6,
+                border:
+                  "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
+                background:
+                  "var(--color-paper-button-bg, rgba(255, 253, 248, 0.9))",
                 color: "var(--color-text-primary, #171717)",
               }}
               data-testid={
@@ -1535,7 +1547,7 @@ export function ProofWorkspace({
         {/* エクスポート/インポート */}
         <span
           style={{
-            borderLeft: "1px solid var(--color-border, #ccc)",
+            borderLeft: "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
             paddingLeft: 8,
             marginLeft: 4,
             display: "inline-flex",
@@ -1545,16 +1557,7 @@ export function ProofWorkspace({
         >
           <button
             type="button"
-            style={{
-              padding: "3px 8px",
-              background: "var(--color-badge-bg, #e8eaf0)",
-              color: "var(--color-text-primary, #171717)",
-              border: "1px solid var(--color-border, #ccc)",
-              borderRadius: 4,
-              cursor: "pointer",
-              fontSize: 11,
-              fontFamily: "sans-serif",
-            }}
+            style={paperButtonStyle}
             onClick={handleExportJSON}
             data-testid={
               testId
@@ -1566,16 +1569,7 @@ export function ProofWorkspace({
           </button>
           <button
             type="button"
-            style={{
-              padding: "3px 8px",
-              background: "var(--color-badge-bg, #e8eaf0)",
-              color: "var(--color-text-primary, #171717)",
-              border: "1px solid var(--color-border, #ccc)",
-              borderRadius: 4,
-              cursor: "pointer",
-              fontSize: 11,
-              fontFamily: "sans-serif",
-            }}
+            style={paperButtonStyle}
             onClick={handleExportSVG}
             data-testid={
               testId
@@ -1587,16 +1581,7 @@ export function ProofWorkspace({
           </button>
           <button
             type="button"
-            style={{
-              padding: "3px 8px",
-              background: "var(--color-badge-bg, #e8eaf0)",
-              color: "var(--color-text-primary, #171717)",
-              border: "1px solid var(--color-border, #ccc)",
-              borderRadius: 4,
-              cursor: "pointer",
-              fontSize: 11,
-              fontFamily: "sans-serif",
-            }}
+            style={paperButtonStyle}
             onClick={handleExportPNG}
             data-testid={
               testId
@@ -1608,16 +1593,7 @@ export function ProofWorkspace({
           </button>
           <button
             type="button"
-            style={{
-              padding: "3px 8px",
-              background: "var(--color-badge-bg, #e8eaf0)",
-              color: "var(--color-text-primary, #171717)",
-              border: "1px solid var(--color-border, #ccc)",
-              borderRadius: 4,
-              cursor: "pointer",
-              fontSize: 11,
-              fontFamily: "sans-serif",
-            }}
+            style={paperButtonStyle}
             onClick={handleImportJSON}
             data-testid={
               testId
@@ -1878,10 +1854,13 @@ export function ProofWorkspace({
             top: nodeMenuState.screenPosition.y,
             zIndex: 2000,
             minWidth: 140,
-            background: "var(--color-surface, #fff)",
-            border: "1px solid var(--color-border, #d0d0d0)",
-            borderRadius: 6,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+            background:
+              "var(--color-panel-bg, rgba(252, 249, 243, 0.96))",
+            border:
+              "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
+            borderRadius: 8,
+            boxShadow:
+              "0 4px 16px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
             padding: "4px 0",
             fontFamily: "sans-serif",
             fontSize: 13,
