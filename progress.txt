@@ -3460,3 +3460,34 @@
   - HK(古典論理)はA1+A2+DNEで定義。EFQではなくDNEを使う点がHJ(直観主義)との違い
   - `prd-logic-selection.md`はまだ完了していない（シークエント計算、自然演繹等が残っている）
 ---
+
+## 2026-02-26 - 論理体系: DeductionSystem統一型 + 自然演繹NM/NJ/NKプリセット追加
+- 実装した内容: 演繹体系の統一管理型(DeductionSystem)定義と自然演繹3体系のプリセット追加
+  - DeductionStyle型: "hilbert" | "natural-deduction" (将来 "sequent-calculus" 追加可能)
+  - DeductionSystem判別共用体型: Hilbert流(LogicSystem) / 自然演繹(NaturalDeductionSystem)
+  - NaturalDeductionSystem型: name + rules(ReadonlySet<NdRuleId>), 11種の推論規則ID
+  - NM(最小論理)=9基本規則, NJ(直観主義)=NM+EFQ, NK(古典)=NM+DNE
+  - SystemPreset.system → SystemPreset.deductionSystem への移行
+  - ノートブック作成フォームに「Hilbert流」「自然演繹」スタイルバッジ表示
+  - クエスト/ワークスペースはHilbert流のみ対応のガードを追加
+- 変更したファイル:
+  - src/lib/logic-core/deductionSystem.ts (NEW: 統一型+NM/NJ/NK定義+ヘルパー)
+  - src/lib/logic-core/deductionSystem.test.ts (NEW: 42テスト)
+  - src/lib/logic-core/index.ts (exports追加)
+  - src/lib/notebook/notebookCreateLogic.ts (SystemPreset.deductionSystem, 11プリセット)
+  - src/lib/notebook/notebookCreateLogic.test.ts (ND検証テスト追加)
+  - src/lib/notebook/NotebookCreateFormComponent.tsx (DeductionSystem対応+バッジ)
+  - src/lib/notebook/NotebookCreateFormComponent.test.tsx (assertions更新)
+  - src/lib/quest/questDefinition.ts (SystemPresetId拡張)
+  - src/lib/quest/questStartLogic.ts (Hilbert-onlyガード)
+  - src/lib/quest/questStartLogic.test.ts (NDプリセットテスト追加)
+  - src/app/HubContent.tsx (DeductionSystem対応)
+- カバレッジ: Stmts 99.36%, Branch 94.80%, Funcs 90.01%, Lines 99.94% (低下なし)
+- スクリーンショット: `.screenshots/notebook-create-form-fullscreen-top.png`, `.screenshots/notebook-create-form-nd-presets.png`, `.screenshots/notebook-create-form-interactions-pass.png`
+- **今後のイテレーションへの学び:**
+  - DeductionSystem型はdiscriminated unionで設計。新しいスタイル追加はバリアント追加+exhaustive checkで検出可能
+  - WorkspaceState.systemはLogicSystem(Hilbert)のまま。自然演繹ワークスペースUIは別途実装が必要
+  - SystemPreset.system→deductionSystemの移行時、resolveSystemPreset(返すSystemPreset)とbuildQuestStartParams(返すQuestStartParams)でプロパティ名が異なる点に注意
+  - 自然演繹プリセットでのクエスト/ノートブック作成は未対応（ガードでブロック中）。将来のUI対応が必要
+  - シーケント計算(LM/LJ/LK)のプリセット追加が残タスク
+---

@@ -54,9 +54,12 @@ export function buildQuestStartParams(
         }))
       : quest.goals;
 
+  // クエストは現在Hilbert流のみ対応
+  if (preset.deductionSystem.style !== "hilbert") return undefined;
+
   return {
     name: `${quest.title satisfies string}`,
-    system: preset.system,
+    system: preset.deductionSystem.system,
     goals,
   };
 }

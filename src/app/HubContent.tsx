@@ -16,7 +16,7 @@ import {
 } from "../lib/quest";
 import { ThemeProvider } from "../lib/theme/ThemeProvider";
 import { ThemeToggle } from "../components/ThemeToggle/ThemeToggle";
-import type { LogicSystem } from "../lib/logic-core/inferenceRule";
+import type { DeductionSystem } from "../lib/logic-core/deductionSystem";
 import { prepareQuestStart } from "../lib/quest/questStartLogic";
 
 // --- Types ---
@@ -181,9 +181,16 @@ function HubInner() {
 
   // Create notebook
   const handleCreateNotebook = useCallback(
-    (params: { readonly name: string; readonly system: LogicSystem }) => {
+    (params: {
+      readonly name: string;
+      readonly deductionSystem: DeductionSystem;
+    }) => {
+      // 現在はHilbert流のみワークスペース対応
+      if (params.deductionSystem.style !== "hilbert") {
+        return;
+      }
       const nextId = predictNextNotebookId();
-      notebookCollection.create(params.name, params.system);
+      notebookCollection.create(params.name, params.deductionSystem.system);
       setView("list");
       router.push(`/workspace/${nextId satisfies string}`);
     },

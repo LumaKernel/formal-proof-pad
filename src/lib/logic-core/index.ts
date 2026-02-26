@@ -210,3 +210,23 @@ export type {
   NdValidationError,
   NdValidationResult,
 } from "./naturalDeduction";
+
+// ── Deduction System (統一体系管理) ─────────────────────────
+export {
+  nmSystem,
+  njSystem,
+  nkSystem,
+  hilbertDeduction,
+  naturalDeduction,
+  getDeductionSystemName,
+  getDeductionStyleLabel,
+  isNdRuleEnabled,
+  allNdRuleIds,
+  getNdRuleDisplayName,
+} from "./deductionSystem";
+export type {
+  DeductionStyle,
+  NdRuleId,
+  NaturalDeductionSystem,
+  DeductionSystem,
+} from "./deductionSystem";

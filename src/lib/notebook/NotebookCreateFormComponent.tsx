@@ -17,7 +17,8 @@ import {
   findPresetById,
   type CreateFormValues,
 } from "./notebookCreateLogic";
-import type { LogicSystem } from "../logic-core/inferenceRule";
+import type { DeductionSystem } from "../logic-core/deductionSystem";
+import { getDeductionStyleLabel } from "../logic-core/deductionSystem";
 
 // --- Props ---
 
@@ -25,7 +26,7 @@ export type NotebookCreateFormProps = {
   /** フォーム送信時のコールバック */
   readonly onSubmit: (params: {
     readonly name: string;
-    readonly system: LogicSystem;
+    readonly deductionSystem: DeductionSystem;
   }) => void;
   /** キャンセル時のコールバック */
   readonly onCancel: () => void;
@@ -158,7 +159,7 @@ export function NotebookCreateForm({
 
     onSubmit({
       name: values.name.trim(),
-      system: preset.system,
+      deductionSystem: preset.deductionSystem,
     });
   };
 
@@ -190,9 +191,9 @@ export function NotebookCreateForm({
         )}
       </div>
 
-      {/* 公理系選択 */}
+      {/* 体系選択 */}
       <div style={fieldGroupStyle}>
-        <span style={labelStyle}>公理系</span>
+        <span style={labelStyle}>体系</span>
         <div
           style={{ display: "flex", flexDirection: "column", gap: 8 }}
           data-testid="create-system-list"
@@ -219,7 +220,28 @@ export function NotebookCreateForm({
                 }
               }}
             >
-              <div style={systemCardLabelStyle}>{preset.label}</div>
+              <div style={systemCardLabelStyle}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 500,
+                    padding: "1px 6px",
+                    borderRadius: 4,
+                    background:
+                      preset.deductionSystem.style === "hilbert"
+                        ? "var(--color-accent-light, #e8e9f5)"
+                        : "var(--color-warning-light, #fff3e0)",
+                    color:
+                      preset.deductionSystem.style === "hilbert"
+                        ? "var(--color-accent, #555ab9)"
+                        : "var(--color-warning, #e65100)",
+                    marginRight: 6,
+                  }}
+                >
+                  {getDeductionStyleLabel(preset.deductionSystem.style)}
+                </span>
+                {preset.label}
+              </div>
               <div style={systemCardDescStyle}>{preset.description}</div>
             </div>
           ))}

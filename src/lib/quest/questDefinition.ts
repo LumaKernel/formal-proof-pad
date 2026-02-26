@@ -109,7 +109,10 @@ export type SystemPresetId =
   | "lukasiewicz"
   | "mendelson"
   | "predicate"
-  | "equality";
+  | "equality"
+  | "nd-nm"
+  | "nd-nj"
+  | "nd-nk";
 
 // --- クエスト定義 ---
 

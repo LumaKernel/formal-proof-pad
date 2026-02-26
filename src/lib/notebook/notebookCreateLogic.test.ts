@@ -26,14 +26,23 @@ describe("systemPresets", () => {
     }
   });
 
-  it("each preset has a valid LogicSystem", () => {
+  it("each preset has a valid DeductionSystem", () => {
     for (const preset of systemPresets) {
-      expect(preset.system.name).toBeTruthy();
-      expect(preset.system.propositionalAxioms).toBeInstanceOf(Set);
+      const ds = preset.deductionSystem;
+      expect(ds.style === "hilbert" || ds.style === "natural-deduction").toBe(
+        true,
+      );
+      expect(ds.system.name).toBeTruthy();
+      if (ds.style === "hilbert") {
+        expect(ds.system.propositionalAxioms).toBeInstanceOf(Set);
+      }
+      if (ds.style === "natural-deduction") {
+        expect(ds.system.rules).toBeInstanceOf(Set);
+      }
     }
   });
 
-  it("includes sk, minimal, intuitionistic, classical, lukasiewicz, mendelson, predicate, and equality presets", () => {
+  it("includes all Hilbert presets", () => {
     const ids = systemPresets.map((p) => p.id);
     expect(ids).toContain("sk");
     expect(ids).toContain("minimal");
@@ -43,6 +52,29 @@ describe("systemPresets", () => {
     expect(ids).toContain("mendelson");
     expect(ids).toContain("predicate");
     expect(ids).toContain("equality");
+  });
+
+  it("includes all natural deduction presets", () => {
+    const ids = systemPresets.map((p) => p.id);
+    expect(ids).toContain("nd-nm");
+    expect(ids).toContain("nd-nj");
+    expect(ids).toContain("nd-nk");
+  });
+
+  it("natural deduction presets have correct style", () => {
+    const ndPresets = systemPresets.filter((p) => p.id.startsWith("nd-"));
+    expect(ndPresets).toHaveLength(3);
+    for (const p of ndPresets) {
+      expect(p.deductionSystem.style).toBe("natural-deduction");
+    }
+  });
+
+  it("hilbert presets have correct style", () => {
+    const hilbertPresets = systemPresets.filter((p) => !p.id.startsWith("nd-"));
+    expect(hilbertPresets.length).toBeGreaterThanOrEqual(8);
+    for (const p of hilbertPresets) {
+      expect(p.deductionSystem.style).toBe("hilbert");
+    }
   });
 });
 
@@ -132,6 +164,24 @@ describe("validateCreateForm", () => {
   it("valid form with equality system", () => {
     expect(
       validateCreateForm({ ...validValues, systemPresetId: "equality" }),
+    ).toEqual({ valid: true });
+  });
+
+  it("valid form with nd-nm system", () => {
+    expect(
+      validateCreateForm({ ...validValues, systemPresetId: "nd-nm" }),
+    ).toEqual({ valid: true });
+  });
+
+  it("valid form with nd-nj system", () => {
+    expect(
+      validateCreateForm({ ...validValues, systemPresetId: "nd-nj" }),
+    ).toEqual({ valid: true });
+  });
+
+  it("valid form with nd-nk system", () => {
+    expect(
+      validateCreateForm({ ...validValues, systemPresetId: "nd-nk" }),
     ).toEqual({ valid: true });
   });
 

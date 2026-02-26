@@ -7,7 +7,14 @@
  * 変更時は notebookCreateLogic.test.ts も同期すること。
  */
 
-import type { LogicSystem } from "../logic-core/inferenceRule";
+import type { DeductionSystem } from "../logic-core/deductionSystem";
+import {
+  hilbertDeduction,
+  naturalDeduction,
+  nmSystem,
+  njSystem,
+  nkSystem,
+} from "../logic-core/deductionSystem";
 import {
   skSystem,
   minimalLogicSystem,
@@ -21,80 +28,113 @@ import {
 
 // --- プリセット公理系 ---
 
-/** プリセット公理系の定義 */
+/**
+ * プリセット体系の定義。
+ *
+ * `deductionSystem` は Hilbert流・自然演繹など統一的な体系情報を持つ。
+ *
+ * 新しいプリセット追加時の同期ポイント:
+ * - ここに追加
+ * - questDefinition.ts の SystemPresetId に追加
+ * - questStartLogic.test.ts に全プリセット解決テスト追加
+ * - notebookCreateLogic.test.ts のテスト追加
+ */
 export type SystemPreset = {
   readonly id: string;
   readonly label: string;
   readonly description: string;
-  readonly system: LogicSystem;
+  readonly deductionSystem: DeductionSystem;
 };
 
 /**
- * 利用可能なプリセット公理系一覧。
+ * 利用可能なプリセット体系一覧。
  *
- * ヒルベルト流証明論の体系を包含関係に基づいて整理:
+ * ヒルベルト流証明論:
  *   SK = HM ⊆ HJ ⊆ HK
  *   SK = HM ⊆ Łukasiewicz = HK（古典論理として等価）
  *   SK = HM ⊆ Mendelson = HK（古典論理として等価）
  *
- * @see 戸次大介『数理論理学』第7章
+ * 自然演繹:
+ *   NM ⊆ NJ (NM + EFQ)
+ *   NM ⊆ NK (NM + DNE)
+ *
+ * @see 戸次大介『数理論理学』第7章, 第8章
  */
 export const systemPresets: readonly SystemPreset[] = [
   {
     id: "sk",
     label: "体系SK（基本命題計算）",
     description:
-      "(S)(K) + MP。含意→のみの最も基本的な体系。戸次『数理論理学』§7.2。",
-    system: skSystem,
+      "Hilbert流: (S)(K) + MP。含意→のみの最も基本的な体系。戸次『数理論理学』§7.2。",
+    deductionSystem: hilbertDeduction(skSystem),
   },
   {
     id: "minimal",
     label: "最小論理（HM）",
     description:
-      "A1(K), A2(S) + MP。否定公理なしの最小体系。SK と同一。HM ⊆ HJ ⊆ HK。",
-    system: minimalLogicSystem,
+      "Hilbert流: A1(K), A2(S) + MP。否定公理なしの最小体系。SK と同一。HM ⊆ HJ ⊆ HK。",
+    deductionSystem: hilbertDeduction(minimalLogicSystem),
   },
   {
     id: "intuitionistic",
     label: "直観主義論理（HJ）",
     description:
-      "HM + EFQ（爆発原理）。¬φ → (φ → ψ)。二重否定除去は成り立たない。",
-    system: intuitionisticSystem,
+      "Hilbert流: HM + EFQ（爆発原理）。¬φ → (φ → ψ)。二重否定除去は成り立たない。",
+    deductionSystem: hilbertDeduction(intuitionisticSystem),
   },
   {
     id: "classical",
     label: "古典論理（HK）",
     description:
-      "HM + DNE（二重否定除去）。¬¬φ → φ。最も広い命題論理体系。",
-    system: classicalLogicSystem,
+      "Hilbert流: HM + DNE（二重否定除去）。¬¬φ → φ。最も広い命題論理体系。",
+    deductionSystem: hilbertDeduction(classicalLogicSystem),
   },
   {
     id: "lukasiewicz",
     label: "Łukasiewicz体系",
     description:
-      "A1, A2, A3（対偶）+ MP。古典論理(HK)と等価。戸次『数理論理学』§7.2。",
-    system: lukasiewiczSystem,
+      "Hilbert流: A1, A2, A3（対偶）+ MP。古典論理(HK)と等価。戸次『数理論理学』§7.2。",
+    deductionSystem: hilbertDeduction(lukasiewiczSystem),
   },
   {
     id: "mendelson",
     label: "Mendelson体系",
     description:
-      "A1, A2, M3（背理法）+ MP。古典論理(HK)と等価。異なる公理化。",
-    system: mendelsonSystem,
+      "Hilbert流: A1, A2, M3（背理法）+ MP。古典論理(HK)と等価。異なる公理化。",
+    deductionSystem: hilbertDeduction(mendelsonSystem),
   },
   {
     id: "predicate",
     label: "述語論理",
-    description:
-      "A1-A5 + MP + Gen。量化子（∀, ∃）を含む述語論理。",
-    system: predicateLogicSystem,
+    description: "Hilbert流: A1-A5 + MP + Gen。量化子（∀, ∃）を含む述語論理。",
+    deductionSystem: hilbertDeduction(predicateLogicSystem),
   },
   {
     id: "equality",
     label: "等号付き述語論理",
+    description: "Hilbert流: A1-A5 + E1-E5 + MP + Gen。等号公理を含む体系。",
+    deductionSystem: hilbertDeduction(equalityLogicSystem),
+  },
+  {
+    id: "nd-nm",
+    label: "自然演繹 NM（最小論理）",
     description:
-      "A1-A5 + E1-E5 + MP + Gen。等号公理を含む体系。",
-    system: equalityLogicSystem,
+      "自然演繹: 基本規則のみ（→I/→E, ∧I/∧E, ∨I/∨E, 弱化）。戸次『数理論理学』§8.2。",
+    deductionSystem: naturalDeduction(nmSystem),
+  },
+  {
+    id: "nd-nj",
+    label: "自然演繹 NJ（直観主義論理）",
+    description:
+      "自然演繹: NM + EFQ（爆発律）。矛盾から任意の命題を導出可能。戸次『数理論理学』§8.3。",
+    deductionSystem: naturalDeduction(njSystem),
+  },
+  {
+    id: "nd-nk",
+    label: "自然演繹 NK（古典論理）",
+    description:
+      "自然演繹: NM + DNE（二重否定除去）。最も広い古典論理の自然演繹体系。戸次『数理論理学』§8.3。",
+    deductionSystem: naturalDeduction(nkSystem),
   },
 ] as const;
 

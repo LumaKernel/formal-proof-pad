@@ -15,6 +15,7 @@ import {
   predicateLogicSystem,
   equalityLogicSystem,
 } from "../logic-core/inferenceRule";
+import { nmSystem, njSystem, nkSystem } from "../logic-core/deductionSystem";
 
 // --- テスト用クエスト定義 ---
 
@@ -52,49 +53,70 @@ describe("resolveSystemPreset", () => {
   it("skプリセットを解決できる", () => {
     const result = resolveSystemPreset("sk");
     expect(result).toBeDefined();
-    expect(result?.system).toBe(skSystem);
+    expect(result?.deductionSystem.system).toBe(skSystem);
   });
 
   it("minimalプリセットを解決できる", () => {
     const result = resolveSystemPreset("minimal");
     expect(result).toBeDefined();
-    expect(result?.system).toBe(minimalLogicSystem);
+    expect(result?.deductionSystem.system).toBe(minimalLogicSystem);
   });
 
   it("intuitionisticプリセットを解決できる", () => {
     const result = resolveSystemPreset("intuitionistic");
     expect(result).toBeDefined();
-    expect(result?.system).toBe(intuitionisticSystem);
+    expect(result?.deductionSystem.system).toBe(intuitionisticSystem);
   });
 
   it("classicalプリセットを解決できる", () => {
     const result = resolveSystemPreset("classical");
     expect(result).toBeDefined();
-    expect(result?.system).toBe(classicalLogicSystem);
+    expect(result?.deductionSystem.system).toBe(classicalLogicSystem);
   });
 
   it("lukasiewiczプリセットを解決できる", () => {
     const result = resolveSystemPreset("lukasiewicz");
     expect(result).toBeDefined();
-    expect(result?.system).toBe(lukasiewiczSystem);
+    expect(result?.deductionSystem.system).toBe(lukasiewiczSystem);
   });
 
   it("mendelsonプリセットを解決できる", () => {
     const result = resolveSystemPreset("mendelson");
     expect(result).toBeDefined();
-    expect(result?.system).toBe(mendelsonSystem);
+    expect(result?.deductionSystem.system).toBe(mendelsonSystem);
   });
 
   it("predicateプリセットを解決できる", () => {
     const result = resolveSystemPreset("predicate");
     expect(result).toBeDefined();
-    expect(result?.system).toBe(predicateLogicSystem);
+    expect(result?.deductionSystem.system).toBe(predicateLogicSystem);
   });
 
   it("equalityプリセットを解決できる", () => {
     const result = resolveSystemPreset("equality");
     expect(result).toBeDefined();
-    expect(result?.system).toBe(equalityLogicSystem);
+    expect(result?.deductionSystem.system).toBe(equalityLogicSystem);
+  });
+
+  it("nd-nmプリセットを解決できる", () => {
+    const result = resolveSystemPreset("nd-nm");
+    expect(result).toBeDefined();
+    expect(result?.deductionSystem.style).toBe("natural-deduction");
+    expect(result?.deductionSystem.system).toBe(nmSystem);
+  });
+
+  it("nd-njプリセットを解決できる", () => {
+    const result = resolveSystemPreset("nd-nj");
+    expect(result).toBeDefined();
+    expect(result?.deductionSystem.style).toBe("natural-deduction");
+    expect(result?.deductionSystem.system).toBe(njSystem);
+  });
+
+  it("nd-nkプリセットを解決できる", () => {
+    const result = resolveSystemPreset("nd-nk");
+    expect(result).toBeDefined();
+    expect(result?.deductionSystem.style).toBe("natural-deduction");
+    expect(result?.deductionSystem.system).toBe(nkSystem);
   });
 
   it("存在しないプリセットIDはundefinedを返す", () => {
@@ -136,6 +158,15 @@ describe("buildQuestStartParams", () => {
     const quest: QuestDefinition = {
       ...testQuest,
       systemPresetId: "invalid" as SystemPresetId,
+    };
+    const result = buildQuestStartParams(quest);
+    expect(result).toBeUndefined();
+  });
+
+  it("自然演繹プリセットのクエストはundefinedを返す（Hilbert流のみ対応）", () => {
+    const quest: QuestDefinition = {
+      ...testQuest,
+      systemPresetId: "nd-nm",
     };
     const result = buildQuestStartParams(quest);
     expect(result).toBeUndefined();
@@ -205,7 +236,7 @@ describe("prepareQuestStart", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.params.name).toBe("テストクエスト");
-      expect(result.params.system).toBe(lukasiewiczSystem);
+      expect(result.params.system).toStrictEqual(lukasiewiczSystem);
     }
   });
 
@@ -236,7 +267,7 @@ describe("prepareQuestStart", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.params.name).toBe("述語テスト");
-      expect(result.params.system).toBe(predicateLogicSystem);
+      expect(result.params.system).toStrictEqual(predicateLogicSystem);
     }
   });
 
@@ -245,7 +276,7 @@ describe("prepareQuestStart", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.params.name).toBe("等号テスト");
-      expect(result.params.system).toBe(equalityLogicSystem);
+      expect(result.params.system).toStrictEqual(equalityLogicSystem);
     }
   });
 

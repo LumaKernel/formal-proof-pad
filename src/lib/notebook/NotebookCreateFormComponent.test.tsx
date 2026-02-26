@@ -6,6 +6,7 @@ import {
   lukasiewiczSystem,
   predicateLogicSystem,
 } from "../logic-core/inferenceRule";
+import { hilbertDeduction } from "../logic-core/deductionSystem";
 
 describe("NotebookCreateForm", () => {
   const defaultProps = {
@@ -122,7 +123,7 @@ describe("NotebookCreateForm", () => {
 
       expect(onSubmit).toHaveBeenCalledWith({
         name: "テストノート",
-        system: lukasiewiczSystem,
+        deductionSystem: hilbertDeduction(lukasiewiczSystem),
       });
     });
 
@@ -140,7 +141,7 @@ describe("NotebookCreateForm", () => {
 
       expect(onSubmit).toHaveBeenCalledWith({
         name: "述語論理ノート",
-        system: predicateLogicSystem,
+        deductionSystem: hilbertDeduction(predicateLogicSystem),
       });
     });
 
