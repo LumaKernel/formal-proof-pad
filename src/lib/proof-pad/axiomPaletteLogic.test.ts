@@ -5,6 +5,7 @@ import {
   intuitionisticSystem,
   lukasiewiczSystem,
   mendelsonSystem,
+  classicalLogicSystem,
   predicateLogicSystem,
   equalityLogicSystem,
 } from "../logic-core/inferenceRule";
@@ -60,6 +61,25 @@ describe("axiomPalette", () => {
       const items = getAvailableAxioms(intuitionisticSystem);
       const efq = items.find((i) => i.id === "EFQ");
       expect(efq?.dslText).toBe("~phi -> (phi -> psi)");
+    });
+
+    it("returns A1, A2, DNE for classical logic system", () => {
+      const items = getAvailableAxioms(classicalLogicSystem);
+      const ids = items.map((i) => i.id);
+      expect(ids).toEqual(["A1", "A2", "DNE"]);
+    });
+
+    it("provides correct displayName for classical axioms", () => {
+      const items = getAvailableAxioms(classicalLogicSystem);
+      expect(items[0].displayName).toBe("A1 (K)");
+      expect(items[1].displayName).toBe("A2 (S)");
+      expect(items[2].displayName).toBe("DNE");
+    });
+
+    it("provides dslText for DNE", () => {
+      const items = getAvailableAxioms(classicalLogicSystem);
+      const dne = items.find((i) => i.id === "DNE");
+      expect(dne?.dslText).toBe("~~phi -> phi");
     });
 
     it("returns A1-A5 for predicate logic system", () => {

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { identifyAxiomName, getAxiomDisplayName } from "./axiomNameLogic";
 import {
   intuitionisticSystem,
+  classicalLogicSystem,
   lukasiewiczSystem,
   mendelsonSystem,
   equalityLogicSystem,
@@ -108,6 +109,25 @@ describe("axiomNameLogic", () => {
 
       it("does not identify EFQ in lukasiewicz system", () => {
         const formula = parseFormula("~phi -> (phi -> psi)");
+        const result = identifyAxiomName(formula, lukasiewiczSystem);
+        expect(result._tag).toBe("NotIdentified");
+      });
+    });
+
+    // --- DNE (二重否定除去) ---
+    describe("DNE", () => {
+      it("identifies DNE template in classical logic system", () => {
+        const formula = parseFormula("~~phi -> phi");
+        const result = identifyAxiomName(formula, classicalLogicSystem);
+        expect(result._tag).toBe("Identified");
+        if (result._tag === "Identified") {
+          expect(result.axiomId).toBe("DNE");
+          expect(result.displayName).toBe("DNE");
+        }
+      });
+
+      it("does not identify DNE in lukasiewicz system", () => {
+        const formula = parseFormula("~~phi -> phi");
         const result = identifyAxiomName(formula, lukasiewiczSystem);
         expect(result._tag).toBe("NotIdentified");
       });
@@ -236,6 +256,10 @@ describe("axiomNameLogic", () => {
 
     it("returns display name for EFQ", () => {
       expect(getAxiomDisplayName("EFQ")).toBe("EFQ");
+    });
+
+    it("returns display name for DNE", () => {
+      expect(getAxiomDisplayName("DNE")).toBe("DNE");
     });
 
     it("returns display name for A4", () => {

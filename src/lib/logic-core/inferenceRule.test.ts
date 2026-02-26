@@ -14,6 +14,7 @@ import {
   axiomA3Template,
   axiomM3Template,
   axiomEFQTemplate,
+  axiomDNETemplate,
   axiomE1Template,
   axiomE2Template,
   axiomE3Template,
@@ -21,6 +22,7 @@ import {
   intuitionisticSystem,
   lukasiewiczSystem,
   mendelsonSystem,
+  classicalLogicSystem,
   predicateLogicSystem,
   equalityLogicSystem,
 } from "./inferenceRule";
@@ -307,6 +309,38 @@ describe("matchPropositionalAxiom", () => {
       // φ → (¬φ → ψ) ≠ ¬φ → (φ → ψ)
       const nonInstance = implication(phi, implication(negation(phi), psi));
       const result = matchPropositionalAxiom("EFQ", nonInstance);
+      expect(result._tag).toBe("Error");
+    });
+  });
+
+  describe("DNE: 二重否定除去 ¬¬φ → φ", () => {
+    it("should match the template itself", () => {
+      const result = matchPropositionalAxiom("DNE", axiomDNETemplate);
+      expect(result._tag).toBe("Ok");
+    });
+
+    it("should match a concrete instance", () => {
+      const p = predicate("P", []);
+      // ¬¬P → P
+      const instance = implication(negation(negation(p)), p);
+      const result = matchPropositionalAxiom("DNE", instance);
+      expect(result._tag).toBe("Ok");
+    });
+
+    it("should not match EFQ template", () => {
+      const result = matchPropositionalAxiom("DNE", axiomEFQTemplate);
+      expect(result._tag).toBe("Error");
+    });
+
+    it("EFQ should not match DNE template", () => {
+      const result = matchPropositionalAxiom("EFQ", axiomDNETemplate);
+      expect(result._tag).toBe("Error");
+    });
+
+    it("should not match when structure differs", () => {
+      // φ → ¬¬φ ≠ ¬¬φ → φ
+      const nonInstance = implication(phi, negation(negation(phi)));
+      const result = matchPropositionalAxiom("DNE", nonInstance);
       expect(result._tag).toBe("Error");
     });
   });
@@ -748,6 +782,37 @@ describe("identifyAxiom", () => {
       expect(a1Result.axiomId).toBe("A1");
     }
     const a2Result = identifyAxiom(axiomA2Template, intuitionisticSystem);
+    expect(a2Result._tag).toBe("Ok");
+    if (a2Result._tag === "Ok") {
+      expect(a2Result.axiomId).toBe("A2");
+    }
+  });
+
+  it("should identify DNE instance in classical logic system", () => {
+    const result = identifyAxiom(axiomDNETemplate, classicalLogicSystem);
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(result.axiomId).toBe("DNE");
+    }
+  });
+
+  it("should not identify DNE in lukasiewicz system", () => {
+    const result = identifyAxiom(axiomDNETemplate, lukasiewiczSystem);
+    expect(result._tag).toBe("Error");
+  });
+
+  it("should not identify EFQ in classical logic system", () => {
+    const result = identifyAxiom(axiomEFQTemplate, classicalLogicSystem);
+    expect(result._tag).toBe("Error");
+  });
+
+  it("should identify A1 and A2 in classical logic system", () => {
+    const a1Result = identifyAxiom(axiomA1Template, classicalLogicSystem);
+    expect(a1Result._tag).toBe("Ok");
+    if (a1Result._tag === "Ok") {
+      expect(a1Result.axiomId).toBe("A1");
+    }
+    const a2Result = identifyAxiom(axiomA2Template, classicalLogicSystem);
     expect(a2Result._tag).toBe("Ok");
     if (a2Result._tag === "Ok") {
       expect(a2Result.axiomId).toBe("A2");

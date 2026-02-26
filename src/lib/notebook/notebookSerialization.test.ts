@@ -13,6 +13,7 @@ import {
   intuitionisticSystem,
   lukasiewiczSystem,
   mendelsonSystem,
+  classicalLogicSystem,
 } from "../logic-core/inferenceRule";
 
 describe("notebookSerialization", () => {
@@ -130,6 +131,33 @@ describe("notebookSerialization", () => {
       ).toBe(true);
       expect(
         restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A3"),
+      ).toBe(false);
+    });
+
+    it("古典論理体系のノートブックをラウンドトリップできる", () => {
+      const col = createNotebook(createEmptyCollection(), {
+        name: "古典論理ノート",
+        system: classicalLogicSystem,
+        now: 1000,
+      });
+      const json = serializeCollection(col);
+      const restored = deserializeCollection(json);
+
+      expect(restored.notebooks.length).toBe(1);
+      expect(restored.notebooks[0]?.workspace.system.name).toBe(
+        "Classical Logic (HK)",
+      );
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A1"),
+      ).toBe(true);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A2"),
+      ).toBe(true);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("DNE"),
+      ).toBe(true);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("EFQ"),
       ).toBe(false);
     });
 

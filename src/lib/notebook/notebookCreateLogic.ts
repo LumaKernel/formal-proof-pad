@@ -11,6 +11,7 @@ import type { LogicSystem } from "../logic-core/inferenceRule";
 import {
   minimalLogicSystem,
   intuitionisticSystem,
+  classicalLogicSystem,
   lukasiewiczSystem,
   mendelsonSystem,
   predicateLogicSystem,
@@ -42,6 +43,13 @@ export const systemPresets: readonly SystemPreset[] = [
     description:
       "A1, A2, EFQ + Modus Ponens。爆発原理を含む直観主義命題論理体系。",
     system: intuitionisticSystem,
+  },
+  {
+    id: "classical",
+    label: "古典論理（Classical Logic / HK）",
+    description:
+      "A1, A2, DNE + Modus Ponens。二重否定除去を含む古典命題論理体系。",
+    system: classicalLogicSystem,
   },
   {
     id: "lukasiewicz",

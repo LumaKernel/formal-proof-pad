@@ -41,6 +41,7 @@ import { freeVariablesInFormula } from "./freeVariables";
  * - A3 (対偶): (¬φ → ¬ψ) → (ψ → φ) — Łukasiewicz体系
  * - M3 (背理法): (¬φ → ¬ψ) → ((¬φ → ψ) → φ) — Mendelson体系
  * - EFQ (爆発): ¬φ → (φ → ψ) — 直観主義論理
+ * - DNE (二重否定除去): ¬¬φ → φ — 古典論理(HK)
  *
  * 新しい命題論理公理を追加する場合:
  *   1. ここに ID を追加
@@ -50,7 +51,7 @@ import { freeVariablesInFormula } from "./freeVariables";
  *   5. axiomPaletteLogic.ts の propositionalAxiomMetas に追加
  *   6. notebookSerialization.ts の VALID_AXIOM_IDS に追加
  */
-export type PropositionalAxiomId = "A1" | "A2" | "A3" | "M3" | "EFQ";
+export type PropositionalAxiomId = "A1" | "A2" | "A3" | "M3" | "EFQ" | "DNE";
 
 /**
  * 述語論理の追加公理スキーマID。
@@ -118,6 +119,17 @@ export const axiomM3Template: Formula = implication(
 export const axiomEFQTemplate: Formula = implication(
   negation(phi),
   implication(phi, psi),
+);
+
+/**
+ * DNE: 二重否定除去 (Double Negation Elimination) ¬¬φ → φ
+ * 古典論理(HK)で使用。最小論理(HM) + DNE = HK。
+ * 戸次大介『数理論理学』定義7.21, §7.8 参照。
+ * @see dev/logic-reference/07-axiom-systems-survey.md
+ */
+export const axiomDNETemplate: Formula = implication(
+  negation(negation(phi)),
+  phi,
 );
 
 /**
@@ -223,6 +235,22 @@ export const lukasiewiczSystem: LogicSystem = {
 export const mendelsonSystem: LogicSystem = {
   name: "Mendelson",
   propositionalAxioms: new Set(["A1", "A2", "M3"]),
+  predicateLogic: false,
+  equalityLogic: false,
+  generalization: false,
+};
+
+/**
+ * 古典論理（Classical Logic / HK）: A1, A2, DNE + MP
+ * 最小論理(HM) + DNE（二重否定除去）。
+ * 戸次大介『数理論理学』§7.8 に基づく。
+ * EFQ は DNE から導出可能なため公理として含めない。
+ * Łukasiewicz(A3)やMendelson(M3)とは異なる古典論理の公理化。
+ * @see dev/logic-reference/07-axiom-systems-survey.md
+ */
+export const classicalLogicSystem: LogicSystem = {
+  name: "Classical Logic (HK)",
+  propositionalAxioms: new Set(["A1", "A2", "DNE"]),
   predicateLogic: false,
   equalityLogic: false,
   generalization: false,
@@ -496,7 +524,7 @@ const axiomMatchErr = (error: RuleApplicationError): AxiomMatchResult => ({
 });
 
 /**
- * 命題論理公理 (A1, A2, A3, M3, EFQ) のインスタンスか判定。
+ * 命題論理公理 (A1, A2, A3, M3, EFQ, DNE) のインスタンスか判定。
  */
 export const matchPropositionalAxiom = (
   axiomId: PropositionalAxiomId,
@@ -524,6 +552,8 @@ const getPropositionalAxiomTemplate = (
       return axiomM3Template;
     case "EFQ":
       return axiomEFQTemplate;
+    case "DNE":
+      return axiomDNETemplate;
   }
   /* v8 ignore start */
   axiomId satisfies never;
@@ -776,6 +806,7 @@ export const identifyAxiom = (
     "A3",
     "M3",
     "EFQ",
+    "DNE",
   ];
   for (const axiomId of propAxiomIds) {
     if (system.propositionalAxioms.has(axiomId)) {
