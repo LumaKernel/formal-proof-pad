@@ -212,3 +212,17 @@ export type {
 } from "./useConnectionPreview";
 export { ConnectionPreviewLine } from "./ConnectionPreviewLine";
 export type { ConnectionPreviewLineProps } from "./ConnectionPreviewLine";
+export {
+  computeViewportBounds,
+  isItemVisible,
+  isConnectionVisible,
+  computeVisibleItemIds,
+  DEFAULT_CULLING_CONFIG,
+} from "./viewportCulling";
+export type {
+  ViewportBounds,
+  CullingConfig,
+  CullableItem,
+  CullableConnection,
+  CullableItemWithId,
+} from "./viewportCulling";

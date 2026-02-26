@@ -35,10 +35,7 @@ import {
 import { classifyAllNodes } from "./nodeRoleLogic";
 import { identifyAxiomName } from "./axiomNameLogic";
 import { parseNodeFormula } from "./mpApplicationLogic";
-import {
-  getAllNodeDependencies,
-  getSubtreeNodeIds,
-} from "./dependencyLogic";
+import { getAllNodeDependencies, getSubtreeNodeIds } from "./dependencyLogic";
 import type { DependencyInfo } from "./EditableProofNode";
 import type { NodeRole } from "./nodeRoleLogic";
 import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
@@ -77,6 +74,11 @@ import {
 } from "./copyPasteLogic";
 import type { ClipboardData } from "./copyPasteLogic";
 import { computeDetailLevel } from "./levelOfDetail";
+import {
+  computeViewportBounds,
+  isItemVisible,
+  isConnectionVisible,
+} from "../infinite-canvas/viewportCulling";
 
 // --- Props ---
 
@@ -397,6 +399,31 @@ export function ProofWorkspace({
   // コンテナref（キーボードイベント用）
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // コンテナサイズ（Viewport Culling用）
+  const [containerSize, setContainerSize] = useState<Size>({
+    width: 0,
+    height: 0,
+  });
+
+  /* v8 ignore start -- ResizeObserver: ブラウザAPIのためJSDOMでは検証不可 */
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      setContainerSize({
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      });
+    });
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+  /* v8 ignore stop */
+
   // 自動レイアウト機能
   const [autoLayout, setAutoLayout] = useState(false);
   const [autoLayoutDirection, setAutoLayoutDirection] =
@@ -413,11 +440,7 @@ export function ProofWorkspace({
       const connectionCountChanged =
         ws.connections.length !== workspace.connections.length;
       if (nodeCountChanged || connectionCountChanged) {
-        const laid = applyIncrementalLayout(
-          ws,
-          autoLayoutDirection,
-          nodeSizes,
-        );
+        const laid = applyIncrementalLayout(ws, autoLayoutDirection, nodeSizes);
         setWorkspace(laid);
       } else {
         setWorkspace(ws);
@@ -987,6 +1010,30 @@ export function ProofWorkspace({
     [viewport.scale],
   );
 
+  // --- Viewport Culling ---
+
+  const viewportBounds = useMemo(
+    () => computeViewportBounds(viewport, containerSize),
+    [viewport, containerSize],
+  );
+
+  /** コンテナサイズが取得できているか（未取得ならカリング無効） */
+  const cullingEnabled = containerSize.width > 0 && containerSize.height > 0;
+
+  /** カリング対象（非表示にする）ノードかどうか判定。サイズ未取得のノードは安全のため常に表示。 */
+  // 純粋ロジックは viewportCulling.test.ts で検証済み。JSDOM では ResizeObserver が動作しないためカリングは無効
+  const isNodeCulled = useCallback(
+    (node: WorkspaceNode): boolean => {
+      if (!cullingEnabled) return false;
+      /* v8 ignore start -- JSDOM: ResizeObserver未対応のためcullingEnabled=falseで到達不能 */
+      const size = nodeSizes.get(node.id);
+      if (!size) return false; // サイズ不明なら常に表示
+      return !isItemVisible({ position: node.position, size }, viewportBounds);
+      /* v8 ignore stop */
+    },
+    [cullingEnabled, nodeSizes, viewportBounds],
+  );
+
   // --- 接続線のレンダリングデータ ---
 
   const connectionElements = useMemo(
@@ -998,6 +1045,26 @@ export function ProofWorkspace({
 
         const fromSize = nodeSizes.get(conn.fromNodeId) ?? DEFAULT_NODE_SIZE;
         const toSize = nodeSizes.get(conn.toNodeId) ?? DEFAULT_NODE_SIZE;
+
+        // Viewport Culling: 接続の両端ノードAABBがビューポート外なら非表示
+        // 純粋ロジックは viewportCulling.test.ts で検証済み。JSDOM では ResizeObserver が動作しないためカリングは無効
+        /* v8 ignore start -- JSDOM: ResizeObserver未対応のためcullingEnabled=false */
+        if (
+          cullingEnabled &&
+          !isConnectionVisible(
+            {
+              fromPosition: fromNode.position,
+              fromSize,
+              toPosition: toNode.position,
+              toSize,
+            },
+            viewportBounds,
+          )
+        ) {
+          return null;
+        }
+        /* v8 ignore stop */
+
         const fromPorts = getProofNodePorts(fromNode.kind);
         const toPorts = getProofNodePorts(toNode.kind);
         const fromPort = findPort(fromPorts, conn.fromPortId);
@@ -1034,7 +1101,15 @@ export function ProofWorkspace({
           />
         );
       }),
-    [workspace, nodeSizes, viewport, mpValidations, genValidations],
+    [
+      workspace,
+      nodeSizes,
+      viewport,
+      cullingEnabled,
+      viewportBounds,
+      mpValidations,
+      genValidations,
+    ],
   );
 
   // --- Level-of-Detail ---
@@ -1258,25 +1333,61 @@ export function ProofWorkspace({
           </>
         ) : null}
         {/* 自動レイアウトトグル */}
-        <span style={{ borderLeft: "1px solid var(--color-border, #ccc)", paddingLeft: 8, marginLeft: 4, display: "inline-flex", alignItems: "center", gap: 4 }}>
+        <span
+          style={{
+            borderLeft: "1px solid var(--color-border, #ccc)",
+            paddingLeft: 8,
+            marginLeft: 4,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
           <label
-            style={{ display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", fontSize: 12 }}
-            data-testid={testId ? `${testId satisfies string}-auto-layout-label` : undefined}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              cursor: "pointer",
+              fontSize: 12,
+            }}
+            data-testid={
+              testId
+                ? `${testId satisfies string}-auto-layout-label`
+                : undefined
+            }
           >
             <input
               type="checkbox"
               checked={autoLayout}
               onChange={(e) => setAutoLayout(e.target.checked)}
-              data-testid={testId ? `${testId satisfies string}-auto-layout-toggle` : undefined}
+              data-testid={
+                testId
+                  ? `${testId satisfies string}-auto-layout-toggle`
+                  : undefined
+              }
             />
             Auto Layout
           </label>
           {autoLayout ? (
             <select
               value={autoLayoutDirection}
-              onChange={(e) => setAutoLayoutDirection(e.target.value as LayoutDirection)}
-              style={{ fontSize: 11, padding: "1px 4px", borderRadius: 3, border: "1px solid var(--color-border, #ccc)", background: "var(--color-surface, #fff)", color: "var(--color-text-primary, #171717)" }}
-              data-testid={testId ? `${testId satisfies string}-auto-layout-direction` : undefined}
+              onChange={(e) =>
+                setAutoLayoutDirection(e.target.value as LayoutDirection)
+              }
+              style={{
+                fontSize: 11,
+                padding: "1px 4px",
+                borderRadius: 3,
+                border: "1px solid var(--color-border, #ccc)",
+                background: "var(--color-surface, #fff)",
+                color: "var(--color-text-primary, #171717)",
+              }}
+              data-testid={
+                testId
+                  ? `${testId satisfies string}-auto-layout-direction`
+                  : undefined
+              }
             >
               <option value="top-to-bottom">Top→Bottom</option>
               <option value="bottom-to-top">Bottom→Top</option>
@@ -1516,8 +1627,7 @@ export function ProofWorkspace({
             onClick={handleSelectSubtree}
             /* v8 ignore start - hover visual effect only */
             onMouseEnter={(e) => {
-              e.currentTarget.style.background =
-                "var(--color-hover, #f0f0f0)";
+              e.currentTarget.style.background = "var(--color-hover, #f0f0f0)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = "transparent";
@@ -1544,7 +1654,7 @@ export function ProofWorkspace({
       {/* InfiniteCanvas */}
       <InfiniteCanvas viewport={viewport} onViewportChange={setViewport}>
         {connectionElements}
-        {workspace.nodes.map(renderNode)}
+        {workspace.nodes.filter((node) => !isNodeCulled(node)).map(renderNode)}
       </InfiniteCanvas>
     </div>
   );
