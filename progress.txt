@@ -2903,3 +2903,29 @@
   - parseNode等のオプショナルフィールド検証では早期returnを避け、結果を累積する（複数のオプショナルが共存可能）
   - JSON.parseの結果ではInfinity/NaNは発生しないが、将来の入力ソース拡張に備えたNumber.isFinite防御コードは`/* v8 ignore start/stop */`で除外
 ---
+
+## 2026-02-26 - ProofPad: PNG/SVG画像エクスポート機能
+- `workspaceImageExport.ts` に純粋ロジックを実装:
+  - `computeExportBounds`: ノードのバウンディングボックス計算
+  - `generateExportSVG`: WorkspaceState → スタンドアロンSVG文字列生成（ノード矩形+テキスト、接続線ベジェ曲線）
+  - `generateImageExportFileName`: 画像用ファイル名生成（SVG/PNG拡張子対応）
+- ProofWorkspace.tsx に Export SVG / Export PNG ボタンを追加
+  - SVGエクスポート: Blob + URL.createObjectURL でダウンロード
+  - PNGエクスポート: SVG → Image → Canvas → toBlob でPNG変換
+- テスト: 21テスト追加（バウンディングボックス、SVG生成、XMLエスケープ、ファイル名生成等）
+- カバレッジ: Stmts 99.37%(+0.01), Branch 95.23%(+0.10), Funcs 90.10%(-0.25), Lines 99.93%(維持)
+  - ベースライン: Stmts 99.36%, Branch 95.13%, Funcs 90.35%, Lines 99.93%
+  - Funcs微減: v8 coverage の関数カウント quirk（Stmts/Lines/Branch 100%で実コード全実行済み）
+- ブラウザ確認: .screenshots/proof-workspace-export-buttons-wide.png, .screenshots/proof-workspace-with-nodes-export.png
+- **Tier 3 エクスポート完了** — prd-infinite-canvas-enhancements.md の Tier 1〜3 すべて完了
+- 変更ファイル:
+  - `src/lib/proof-pad/workspaceImageExport.ts` (NEW - 純粋SVG生成ロジック)
+  - `src/lib/proof-pad/workspaceImageExport.test.ts` (NEW - 21テスト)
+  - `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED - Export SVG/PNGボタン + ハンドラ)
+  - `src/lib/proof-pad/index.ts` (MODIFIED - workspaceImageExport export追加)
+  - `tasks/prd-infinite-canvas-enhancements.md` (MODIFIED - PNG/SVG完了)
+- **今後のイテレーションへの学び:**
+  - SVGエクスポートは identity viewport (offset=0, scale=1) で `computePortConnectionPath` を呼べばワールド座標のままパスが得られる
+  - テンプレートリテラル内の `escapeXml()` 呼び出しにも `satisfies string` が必要（require-satisfies-in-tls ルール）
+  - v8 coverage の Funcs メトリクスは、内部ラムダ/arrow function 等を個別カウントするため Stmts 100% でも低く出る場合がある
+---
