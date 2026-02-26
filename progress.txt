@@ -2929,3 +2929,39 @@
   - テンプレートリテラル内の `escapeXml()` 呼び出しにも `satisfies string` が必要（require-satisfies-in-tls ルール）
   - v8 coverage の Funcs メトリクスは、内部ラムダ/arrow function 等を個別カウントするため Stmts 100% でも低く出る場合がある
 ---
+
+## 2026-02-26 - ProofWorkspace i18n対応
+- 実装した内容:
+  - ProofWorkspace UIの全ハードコード文字列をi18n対応
+  - 純粋ロジック層: `proofMessages.ts` — `ProofMessages` 型、`defaultProofMessages` (英語デフォルト)、`getMPErrorMessageKey`/`getGenErrorMessageKey` 純粋関数、`formatMessage` テンプレート置換
+  - React Context層: `ProofMessagesContext.tsx` — Provider + `useProofMessages` フック（英語デフォルトでStorybook互換）
+  - App層ブリッジ: `WorkspaceContent.tsx` に `useProofMessagesFromIntl()` フック — next-intl `useTranslations` → `ProofMessages` を明示的key-by-keyで構築（型安全、`as` 不使用）
+  - `messages/en.json`, `messages/ja.json` に `ProofWorkspace` 名前空間の全46キーを追加
+  - `ProofWorkspace.tsx` 内の全UI文字列を `msg.*` 参照に置換
+- テスト:
+  - `proofMessages.test.ts` — 22テスト（getMPErrorMessageKey全エラーパターン、getGenErrorMessageKey全エラーパターン、formatMessage）
+  - `ProofMessagesContext.test.tsx` — 3テスト（デフォルトメッセージ、Provider経由カスタムメッセージ、ネストProvider）
+  - 既存テスト更新: selectionCount テキスト変更に合わせて5箇所修正
+- カバレッジ: Stmts 99.37% (維持), Branch 95.19% (-0.04%), Funcs 90.05% (-0.05%), Lines 99.93% (維持)
+- 変更ファイル:
+  - `src/lib/proof-pad/proofMessages.ts` (NEW - 純粋i18nメッセージ型+関数)
+  - `src/lib/proof-pad/proofMessages.test.ts` (NEW - 22テスト)
+  - `src/lib/proof-pad/ProofMessagesContext.tsx` (NEW - React Context)
+  - `src/lib/proof-pad/ProofMessagesContext.test.tsx` (NEW - 3テスト)
+  - `src/lib/proof-pad/ProofWorkspace.tsx` (MODIFIED - 全UI文字列i18n化)
+  - `src/lib/proof-pad/ProofWorkspace.test.tsx` (MODIFIED - selectionCount更新)
+  - `src/lib/proof-pad/ProofWorkspace.stories.tsx` (MODIFIED - selectionCount更新)
+  - `src/lib/proof-pad/index.ts` (MODIFIED - 新export追加)
+  - `src/app/workspace/[id]/WorkspaceContent.tsx` (MODIFIED - i18nブリッジ追加)
+  - `messages/en.json` (MODIFIED - ProofWorkspace名前空間追加)
+  - `messages/ja.json` (MODIFIED - ProofWorkspace名前空間追加)
+- スクリーンショット:
+  - `.screenshots/i18n-proofworkspace-empty-lukasiewicz.png`
+  - `.screenshots/i18n-goal-achieved.png`
+  - `.screenshots/i18n-quest-mode.png`
+- **今後のイテレーションへの学び:**
+  - i18nアーキテクチャ: 純粋ロジック層はmessage keyを返し、React Context層で翻訳を提供、App層でnext-intlブリッジ。Storybook/テストでは英語デフォルトで動作
+  - `ProofMessages` 型に新キーを追加すると `WorkspaceContent.tsx` の明示的構築でコンパイルエラーになるため変更漏れが防げる
+  - `formatMessage` でプレースホルダ置換（`{count}` → 値）。ICU MessageFormat は未採用、シンプルな置換で十分
+  - Storybook story ID: タイトル `ProofPad/ProofWorkspace` の場合、URLパスは `proofpad-proofworkspace--story-name` ではなく sidebar から直接クリックする方が確実
+---
