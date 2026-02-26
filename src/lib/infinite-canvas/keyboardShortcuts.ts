@@ -18,6 +18,7 @@ export type KeyboardAction =
   | { readonly type: "pan"; readonly viewport: ViewportState }
   | { readonly type: "zoom-in"; readonly viewport: ViewportState }
   | { readonly type: "zoom-out"; readonly viewport: ViewportState }
+  | { readonly type: "zoom-to-selection" }
   | { readonly type: "enter-space-pan" }
   | { readonly type: "exit-space-pan" }
   | { readonly type: "none" };
@@ -75,7 +76,7 @@ export function classifyKeyDown(
   minScale?: number,
   maxScale?: number,
 ): KeyboardAction {
-  const { key, ctrlKey, metaKey, shiftKey, repeat } = event;
+  const { key, code, ctrlKey, metaKey, shiftKey, repeat } = event;
   const mod = ctrlKey || metaKey;
 
   // Delete/Backspace → delete selected items
@@ -110,6 +111,12 @@ export function classifyKeyDown(
       maxScale,
     );
     return { type: "zoom-out", viewport: newViewport };
+  }
+
+  // Shift+2 → zoom to selection (only when items are selected)
+  // Use code="Digit2" for keyboard-layout independence (Shift+2 produces "@" on US layout but varies by locale)
+  if (shiftKey && code === "Digit2" && !mod && hasSelection) {
+    return { type: "zoom-to-selection" };
   }
 
   // Space key → toggle space-pan mode (only on initial press, not repeat)

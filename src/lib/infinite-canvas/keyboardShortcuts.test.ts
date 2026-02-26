@@ -314,6 +314,53 @@ describe("classifyKeyDown", () => {
     });
   });
 
+  describe("Shift+2（選択範囲にズーム）", () => {
+    it("Shift+Digit2 で zoom-to-selection（選択あり）", () => {
+      const action = classifyKeyDown(
+        makeKeyEvent({ key: "@", code: "Digit2", shiftKey: true }),
+        DEFAULT_VIEWPORT,
+        CONTAINER_SIZE,
+        true,
+      );
+      expect(action).toEqual({ type: "zoom-to-selection" });
+    });
+
+    it("選択なしでは none", () => {
+      const action = classifyKeyDown(
+        makeKeyEvent({ key: "@", code: "Digit2", shiftKey: true }),
+        DEFAULT_VIEWPORT,
+        CONTAINER_SIZE,
+        false,
+      );
+      expect(action).toEqual({ type: "none" });
+    });
+
+    it("Ctrl+Shift+2 は none（修飾キー付き）", () => {
+      const action = classifyKeyDown(
+        makeKeyEvent({
+          key: "@",
+          code: "Digit2",
+          shiftKey: true,
+          ctrlKey: true,
+        }),
+        DEFAULT_VIEWPORT,
+        CONTAINER_SIZE,
+        true,
+      );
+      expect(action).toEqual({ type: "none" });
+    });
+
+    it("Shift なしの Digit2 は none", () => {
+      const action = classifyKeyDown(
+        makeKeyEvent({ key: "2", code: "Digit2" }),
+        DEFAULT_VIEWPORT,
+        CONTAINER_SIZE,
+        true,
+      );
+      expect(action).toEqual({ type: "none" });
+    });
+  });
+
   describe("スペースキー（パンモード）", () => {
     it("Space で enter-space-pan", () => {
       const action = classifyKeyDown(

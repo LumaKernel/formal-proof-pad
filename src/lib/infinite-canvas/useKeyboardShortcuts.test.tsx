@@ -19,6 +19,7 @@ const CONTAINER_SIZE: Size = { width: 800, height: 600 };
 function createKeyboardEvent(
   key: string,
   opts: {
+    code?: string;
     ctrlKey?: boolean;
     metaKey?: boolean;
     shiftKey?: boolean;
@@ -27,7 +28,7 @@ function createKeyboardEvent(
 ): KeyboardEventLike {
   return {
     key,
-    code: "",
+    code: opts.code ?? "",
     ctrlKey: opts.ctrlKey ?? false,
     metaKey: opts.metaKey ?? false,
     shiftKey: opts.shiftKey ?? false,
@@ -259,6 +260,40 @@ describe("useKeyboardShortcuts", () => {
     expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
+  it("Shift+2 で onZoomToSelection が呼ばれる（選択あり）", () => {
+    const onZoomToSelection = vi.fn();
+    const { result } = renderHook(() =>
+      useKeyboardShortcuts(DEFAULT_VIEWPORT, CONTAINER_SIZE, true, {
+        onZoomToSelection,
+      }),
+    );
+
+    act(() => {
+      result.current.onKeyDown(
+        createKeyboardEvent("@", { code: "Digit2", shiftKey: true }),
+      );
+    });
+
+    expect(onZoomToSelection).toHaveBeenCalledTimes(1);
+  });
+
+  it("選択なしでは Shift+2 で onZoomToSelection が呼ばれない", () => {
+    const onZoomToSelection = vi.fn();
+    const { result } = renderHook(() =>
+      useKeyboardShortcuts(DEFAULT_VIEWPORT, CONTAINER_SIZE, false, {
+        onZoomToSelection,
+      }),
+    );
+
+    act(() => {
+      result.current.onKeyDown(
+        createKeyboardEvent("@", { code: "Digit2", shiftKey: true }),
+      );
+    });
+
+    expect(onZoomToSelection).not.toHaveBeenCalled();
+  });
+
   it("コールバック未設定でもエラーにならない", () => {
     const { result } = renderHook(() =>
       useKeyboardShortcuts(DEFAULT_VIEWPORT, CONTAINER_SIZE, true, {}),
@@ -275,6 +310,12 @@ describe("useKeyboardShortcuts", () => {
     // zoom with no callback
     act(() => {
       result.current.onKeyDown(createKeyboardEvent("+", { ctrlKey: true }));
+    });
+    // zoom-to-selection with no callback
+    act(() => {
+      result.current.onKeyDown(
+        createKeyboardEvent("@", { code: "Digit2", shiftKey: true }),
+      );
     });
     // space pan with no pan callback
     act(() => {

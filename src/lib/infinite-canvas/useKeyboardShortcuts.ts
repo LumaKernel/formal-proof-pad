@@ -14,6 +14,8 @@ export type KeyboardShortcutCallbacks = {
   readonly onViewportChange?: (viewport: ViewportState) => void;
   /** Called when space-pan mode is entered/exited */
   readonly onSpacePanChange?: (active: boolean) => void;
+  /** Called when zoom-to-selection is triggered (Shift+2) */
+  readonly onZoomToSelection?: () => void;
 };
 
 /** Minimal keyboard event interface used by the hook.
@@ -67,6 +69,9 @@ export function useKeyboardShortcuts(
         case "zoom-in":
         case "zoom-out":
           callbacks.onViewportChange?.(action.viewport);
+          return true;
+        case "zoom-to-selection":
+          callbacks.onZoomToSelection?.();
           return true;
         case "enter-space-pan":
           setIsSpacePanActive(true);

@@ -216,6 +216,62 @@ describe("ZoomControlsComponent", () => {
     expect(screen.getByTestId("zoom-fit-button")).toBeTruthy();
   });
 
+  it("shows zoom-to-selection button when selectedItems and onZoomToSelection are provided", () => {
+    const onZoomToSelection = vi.fn();
+    render(
+      <ZoomControlsComponent
+        {...defaultProps}
+        selectedItems={[{ x: 0, y: 0, width: 100, height: 100 }]}
+        onZoomToSelection={onZoomToSelection}
+      />,
+    );
+    expect(screen.getByTestId("zoom-to-selection-button")).toBeTruthy();
+  });
+
+  it("hides zoom-to-selection button when selectedItems is empty", () => {
+    render(
+      <ZoomControlsComponent
+        {...defaultProps}
+        selectedItems={[]}
+        onZoomToSelection={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId("zoom-to-selection-button")).toBeNull();
+  });
+
+  it("hides zoom-to-selection button when onZoomToSelection is not provided", () => {
+    render(
+      <ZoomControlsComponent
+        {...defaultProps}
+        selectedItems={[{ x: 0, y: 0, width: 100, height: 100 }]}
+      />,
+    );
+    expect(screen.queryByTestId("zoom-to-selection-button")).toBeNull();
+  });
+
+  it("hides zoom-to-selection button when selectedItems is not provided", () => {
+    render(
+      <ZoomControlsComponent
+        {...defaultProps}
+        onZoomToSelection={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId("zoom-to-selection-button")).toBeNull();
+  });
+
+  it("calls onZoomToSelection when zoom-to-selection button is clicked", () => {
+    const onZoomToSelection = vi.fn();
+    render(
+      <ZoomControlsComponent
+        {...defaultProps}
+        selectedItems={[{ x: 50, y: 50, width: 200, height: 150 }]}
+        onZoomToSelection={onZoomToSelection}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("zoom-to-selection-button"));
+    expect(onZoomToSelection).toHaveBeenCalledOnce();
+  });
+
   it("stops pointer events from propagating to canvas", () => {
     render(<ZoomControlsComponent {...defaultProps} />);
     const controls = screen.getByTestId("zoom-controls");

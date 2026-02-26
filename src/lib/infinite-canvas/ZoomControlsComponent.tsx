@@ -37,6 +37,10 @@ export interface ZoomControlsProps {
   readonly showResetButton?: boolean;
   /** Whether to show preset dropdown */
   readonly showPresets?: boolean;
+  /** Selected item bounds (for zoom-to-selection) */
+  readonly selectedItems?: readonly ZoomItemBounds[];
+  /** Callback when zoom-to-selection is triggered */
+  readonly onZoomToSelection?: () => void;
 }
 
 const NOOP = () => {};
@@ -118,6 +122,8 @@ export function ZoomControlsComponent({
   showFitButton = true,
   showResetButton = true,
   showPresets = true,
+  selectedItems,
+  onZoomToSelection,
 }: ZoomControlsProps) {
   const [isPresetOpen, setIsPresetOpen] = useState(false);
   const presetRef = useRef<HTMLDivElement>(null);
@@ -388,6 +394,49 @@ export function ZoomControlsComponent({
           </button>
         </>
       )}
+
+      {/* Zoom to selection button (shown when items are selected) */}
+      {selectedItems !== undefined &&
+        selectedItems.length > 0 &&
+        onZoomToSelection !== undefined && (
+          <>
+            <div style={separatorStyle} aria-hidden="true" />
+            <button
+              data-testid="zoom-to-selection-button"
+              type="button"
+              style={buttonBaseStyle}
+              onClick={onZoomToSelection}
+              aria-label="Zoom to selection (Shift+2)"
+              title="Zoom to selection (Shift+2)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <rect
+                  x="4"
+                  y="4"
+                  width="8"
+                  height="8"
+                  rx="1"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeDasharray="2 1.5"
+                />
+                <path
+                  d="M2 6V3a1 1 0 0 1 1-1h3M10 2h3a1 1 0 0 1 1 1v3M14 10v3a1 1 0 0 1-1 1h-3M6 14H3a1 1 0 0 1-1-1v-3"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </>
+        )}
     </div>
   );
 }

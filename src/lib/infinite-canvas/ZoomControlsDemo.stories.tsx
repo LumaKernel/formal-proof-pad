@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, within, userEvent } from "storybook/test";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CanvasItem } from "./CanvasItem";
 import { InfiniteCanvas } from "./InfiniteCanvas";
 import { ZoomControlsComponent } from "./ZoomControlsComponent";
+import { computeFitToContentViewport } from "./zoom";
 import type { ZoomItemBounds } from "./zoom";
 import type { Point, Size, ViewportState } from "./types";
 
@@ -297,5 +298,154 @@ export const MinimalControls: Story = {
     await expect(
       canvas.queryByTestId("zoom-reset-button"),
     ).not.toBeInTheDocument();
+  },
+};
+
+function ZoomToSelectionDemo() {
+  const [viewport, setViewport] = useState<ViewportState>({
+    offsetX: 0,
+    offsetY: 0,
+    scale: 1,
+  });
+  const [nodes, setNodes] = useState<readonly NodeData[]>(INITIAL_NODES);
+  const [containerSize, setContainerSize] = useState<Size>({
+    width: 800,
+    height: 600,
+  });
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
+    new Set(),
+  );
+
+  const handlePositionChange = useCallback(
+    (id: string, newPosition: Point) => {
+      setNodes((prev) =>
+        prev.map((node) =>
+          node.id === id ? { ...node, position: newPosition } : node,
+        ),
+      );
+    },
+    [],
+  );
+
+  const containerCallbackRef = useCallback((el: HTMLDivElement | null) => {
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      setContainerSize({ width: rect.width, height: rect.height });
+    }
+  }, []);
+
+  const zoomItems = toZoomItems(nodes);
+  const selectedItems = useMemo(
+    () =>
+      zoomItems.filter((_, i) => selectedIds.has(INITIAL_NODES[i]!.id)),
+    [zoomItems, selectedIds],
+  );
+
+  const handleZoomToSelection = useCallback(() => {
+    if (selectedItems.length === 0) return;
+    const newViewport = computeFitToContentViewport(
+      selectedItems,
+      containerSize,
+    );
+    setViewport(newViewport);
+  }, [selectedItems, containerSize]);
+
+  const toggleSelection = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  return (
+    <div
+      ref={containerCallbackRef}
+      data-testid="zoom-controls-demo-container"
+      style={{ width: "100vw", height: "100vh" }}
+    >
+      <InfiniteCanvas viewport={viewport} onViewportChange={setViewport}>
+        {nodes.map((node) => (
+          <CanvasItem
+            key={node.id}
+            position={node.position}
+            viewport={viewport}
+            onPositionChange={(pos) => {
+              handlePositionChange(node.id, pos);
+            }}
+          >
+            <div
+              data-testid={`demo-node-${node.id satisfies string}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSelection(node.id);
+              }}
+              style={{
+                padding: "10px 16px",
+                background: node.color,
+                color: "#fff",
+                borderRadius: 8,
+                fontFamily: "sans-serif",
+                fontSize: 14,
+                fontWeight: 600,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                whiteSpace: "nowrap",
+                userSelect: "none",
+                outline: selectedIds.has(node.id)
+                  ? "3px solid #3b82f6"
+                  : "none",
+                outlineOffset: "2px",
+              }}
+            >
+              {node.label}
+            </div>
+          </CanvasItem>
+        ))}
+        <ZoomControlsComponent
+          viewport={viewport}
+          containerSize={containerSize}
+          items={zoomItems}
+          onViewportChange={setViewport}
+          selectedItems={selectedItems}
+          onZoomToSelection={handleZoomToSelection}
+        />
+      </InfiniteCanvas>
+    </div>
+  );
+}
+
+export const ZoomToSelection: Story = {
+  render: () => <ZoomToSelectionDemo />,
+  args: {} as Record<string, never>,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const user = userEvent.setup();
+
+    // Initially, zoom-to-selection button should not be visible (no selection)
+    await expect(
+      canvas.queryByTestId("zoom-to-selection-button"),
+    ).not.toBeInTheDocument();
+
+    // Click on a node to select it
+    await user.click(canvas.getByTestId("demo-node-node1"));
+
+    // Now the zoom-to-selection button should appear
+    await expect(
+      canvas.getByTestId("zoom-to-selection-button"),
+    ).toBeInTheDocument();
+
+    // Click zoom-to-selection
+    await user.click(canvas.getByTestId("zoom-to-selection-button"));
+
+    // Zoom percentage should have changed (fitted to the selected node)
+    const percentText =
+      canvas.getByTestId("zoom-percentage").textContent ?? "";
+    const num = parseInt(percentText, 10);
+    // Should zoom in significantly since we fit to a single small node
+    await expect(num).toBeGreaterThan(100);
   },
 };
