@@ -30,6 +30,8 @@ export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
  * - "propositional-advanced": 命題論理の挑戦問題（連言・選言の定義展開）
  * - "predicate-basics": 述語論理の基礎
  * - "equality-basics": 等号付き述語論理の基礎
+ * - "peano-basics": ペアノ算術の基礎（PA公理の直接利用）
+ * - "peano-arithmetic": ペアノ算術の算術的推論（PA公理の組み合わせ）
  */
 export type QuestCategory =
   | "propositional-basics"
@@ -37,7 +39,9 @@ export type QuestCategory =
   | "propositional-negation"
   | "propositional-advanced"
   | "predicate-basics"
-  | "equality-basics";
+  | "equality-basics"
+  | "peano-basics"
+  | "peano-arithmetic";
 
 /** カテゴリのメタデータ */
 export type QuestCategoryMeta = {
@@ -85,6 +89,18 @@ export const questCategories: readonly QuestCategoryMeta[] = [
     label: "等号付き述語論理",
     description: "等号公理を含む証明。",
     order: 6,
+  },
+  {
+    id: "peano-basics",
+    label: "ペアノ算術の基礎",
+    description: "PA公理（PA1-PA6）を直接利用する基本的な証明。",
+    order: 7,
+  },
+  {
+    id: "peano-arithmetic",
+    label: "ペアノ算術の推論",
+    description: "PA公理を組み合わせた算術的性質の証明。",
+    order: 8,
   },
 ] as const;
 

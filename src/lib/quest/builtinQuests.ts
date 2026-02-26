@@ -600,6 +600,307 @@ const q24DeMorgan: QuestDefinition = {
   order: 3,
 };
 
+// --- ペアノ算術の基礎 ---
+
+const qPA01SuccessorNotZero: QuestDefinition = {
+  id: "peano-01",
+  category: "peano-basics",
+  title: "0は後者ではない (PA1)",
+  description:
+    "∀x. ¬(S(x) = 0) を証明せよ。ペアノ算術の最初の公理PA1を公理パレットから配置する。",
+  difficulty: 1,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "all x. ~(S(x) = 0)",
+      label: "Goal: ∀x. ¬(S(x) = 0)",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA1はペアノ算術の公理です。公理パレットから直接配置できます。",
+    "PA1: ∀x. ¬(S(x) = 0) — 0はどの自然数の後者でもない。",
+  ],
+  estimatedSteps: 1,
+  learningPoint:
+    "PA1は「0は後者関数の値域にない」という自然数の基本性質。公理はそのまま定理として使える。",
+  order: 1,
+};
+
+const qPA02AdditionBase: QuestDefinition = {
+  id: "peano-02",
+  category: "peano-basics",
+  title: "加法の基底 (PA3)",
+  description: "∀x. x + 0 = x を証明せよ。加法の再帰定義の基底ケース。",
+  difficulty: 1,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "all x. x + 0 = x",
+      label: "Goal: ∀x. x + 0 = x",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA3は加法の基底を定義する公理です。",
+    "公理パレットからPA3を配置すればゴールと一致します。",
+  ],
+  estimatedSteps: 1,
+  learningPoint:
+    "PA3は「任意の自然数に0を加えても変わらない」という加法の基底ケース。算術の再帰定義の出発点。",
+  order: 2,
+};
+
+const qPA03MultiplicationBase: QuestDefinition = {
+  id: "peano-03",
+  category: "peano-basics",
+  title: "乗法の基底 (PA5)",
+  description: "∀x. x * 0 = 0 を証明せよ。乗法の再帰定義の基底ケース。",
+  difficulty: 1,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "all x. x * 0 = 0",
+      label: "Goal: ∀x. x × 0 = 0",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA5は乗法の基底を定義する公理です。",
+    "公理パレットからPA5を配置すればゴールと一致します。",
+  ],
+  estimatedSteps: 1,
+  learningPoint:
+    "PA5は「任意の自然数と0の積は0」という乗法の基底ケース。PA3（加法基底）と対を成す。",
+  order: 3,
+};
+
+const qPA04Reflexivity: QuestDefinition = {
+  id: "peano-04",
+  category: "peano-basics",
+  title: "等号の反射律",
+  description:
+    "∀x. x = x を証明せよ。等号公理E1を使い、全称量化と組み合わせる。",
+  difficulty: 1,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "all x. x = x",
+      label: "Goal: ∀x. x = x",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "等号の反射律 E1 は公理パレットにあります。",
+    "E1: ∀x. x = x をそのまま配置すれば完成です。",
+  ],
+  estimatedSteps: 1,
+  learningPoint:
+    "E1（反射律）はPA体系の等号公理の一つ。ペアノ算術では等号が基本的な道具になる。",
+  order: 4,
+};
+
+const qPA05SuccessorInjective: QuestDefinition = {
+  id: "peano-05",
+  category: "peano-basics",
+  title: "後者関数の単射性 (PA2)",
+  description:
+    "∀x.∀y. S(x) = S(y) → x = y を証明せよ。後者関数が単射であることを示す。",
+  difficulty: 1,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "all x. all y. S(x) = S(y) -> x = y",
+      label: "Goal: ∀x.∀y. S(x) = S(y) → x = y",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA2は後者関数の単射性を保証する公理です。",
+    "公理パレットからPA2を配置すればゴールと一致します。",
+  ],
+  estimatedSteps: 1,
+  learningPoint:
+    "PA2は「S(x) = S(y) ならば x = y」を保証。PA1（0≠後者）と合わせて自然数の構造を規定する。",
+  order: 5,
+};
+
+const qPA06AdditionRecursion: QuestDefinition = {
+  id: "peano-06",
+  category: "peano-basics",
+  title: "加法の再帰 (PA4)",
+  description:
+    "∀x.∀y. x + S(y) = S(x + y) を証明せよ。加法の再帰ステップの定義。",
+  difficulty: 1,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "all x. all y. x + S(y) = S(x + y)",
+      label: "Goal: ∀x.∀y. x + S(y) = S(x + y)",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA4は加法の再帰ステップを定義する公理です。",
+    "公理パレットからPA4を配置すればゴールと一致します。",
+  ],
+  estimatedSteps: 1,
+  learningPoint:
+    "PA4は「x + S(y) = S(x + y)」で加法の再帰ステップを定義。PA3（基底）とペアで加法を完全に定義する。",
+  order: 6,
+};
+
+// --- ペアノ算術の推論 ---
+
+const qPA07ZeroPlusZero: QuestDefinition = {
+  id: "peano-07",
+  category: "peano-arithmetic",
+  title: "0 + 0 = 0",
+  description:
+    "0 + 0 = 0 を証明せよ。PA3の全称量化をA5で除去し、具体的な計算結果を導く。",
+  difficulty: 2,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "0 + 0 = 0",
+      label: "Goal: 0 + 0 = 0",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA3: ∀x. x + 0 = x から出発します。",
+    "A5（∀x.φ(x) → φ(t)）でxに0を代入して 0 + 0 = 0 を得ます。",
+    "PA3をA5でインスタンス化し、MPで適用します。",
+  ],
+  estimatedSteps: 3,
+  learningPoint:
+    "∀消去（A5 + MP）でPA公理を具体的な数に適用する基本技法。形式証明では「計算」もこの操作が必要。",
+  order: 1,
+};
+
+const qPA08OnePlusZero: QuestDefinition = {
+  id: "peano-08",
+  category: "peano-arithmetic",
+  title: "S(0) + 0 = S(0)",
+  description: "S(0) + 0 = S(0) を証明せよ。PA3から1+0=1を導く。",
+  difficulty: 2,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "S(0) + 0 = S(0)",
+      label: "Goal: S(0) + 0 = S(0)",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA3: ∀x. x + 0 = x を使います。",
+    "A5でxにS(0)を代入して S(0) + 0 = S(0) を得ます。",
+  ],
+  estimatedSteps: 3,
+  learningPoint:
+    "S(0)は自然数1を表す。PA3をS(0)にインスタンス化するだけで1+0=1が証明できる。",
+  order: 2,
+};
+
+const qPA09ZeroTimesZero: QuestDefinition = {
+  id: "peano-09",
+  category: "peano-arithmetic",
+  title: "0 × 0 = 0",
+  description:
+    "0 * 0 = 0 を証明せよ。PA5の全称量化を除去して具体的に計算する。",
+  difficulty: 2,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "0 * 0 = 0",
+      label: "Goal: 0 × 0 = 0",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA5: ∀x. x * 0 = 0 を使います。",
+    "A5でxに0を代入して 0 * 0 = 0 を得ます。",
+  ],
+  estimatedSteps: 3,
+  learningPoint:
+    "乗法の基底ケースPA5も同じ∀消去パターンで具体化。加法と乗法の基底は対称的。",
+  order: 3,
+};
+
+const qPA10SuccessorNotZeroInstance: QuestDefinition = {
+  id: "peano-10",
+  category: "peano-arithmetic",
+  title: "¬(S(0) = 0)",
+  description: "¬(S(0) = 0) を証明せよ。PA1から「1≠0」を導く。",
+  difficulty: 2,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "~(S(0) = 0)",
+      label: "Goal: ¬(S(0) = 0)",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "PA1: ∀x. ¬(S(x) = 0) を使います。",
+    "A5でxに0を代入して ¬(S(0) = 0) を得ます。",
+  ],
+  estimatedSteps: 3,
+  learningPoint:
+    "PA1のインスタンス化で「1 ≠ 0」が導ける。自然数論の最も基本的な事実。",
+  order: 4,
+};
+
+const qPA11OnePlusOne: QuestDefinition = {
+  id: "peano-11",
+  category: "peano-arithmetic",
+  title: "S(0) + S(0) = S(S(0))",
+  description:
+    "S(0) + S(0) = S(S(0)) を証明せよ。1+1=2の形式的証明。PA3とPA4を組み合わせる。",
+  difficulty: 3,
+  systemPresetId: "peano",
+  goals: [
+    {
+      formulaText: "S(0) + S(0) = S(S(0))",
+      label: "Goal: 1 + 1 = 2",
+      position: { x: 400, y: 600 },
+    },
+  ],
+  hints: [
+    "PA4: ∀x.∀y. x + S(y) = S(x + y) をx=S(0), y=0でインスタンス化します。",
+    "すると S(0) + S(0) = S(S(0) + 0) が得られます。",
+    "PA3: ∀x. x + 0 = x をx=S(0)でインスタンス化し、等号推論で S(0) + 0 = S(0) を使います。",
+  ],
+  estimatedSteps: 10,
+  learningPoint:
+    "「1+1=2」の形式証明にはPA3、PA4、等号公理の組み合わせが必要。算術の「計算」は複数の公理の連鎖。",
+  order: 5,
+};
+
+const qPA12RobinsonSurjectivity: QuestDefinition = {
+  id: "peano-12",
+  category: "peano-arithmetic",
+  title: "後者の全射性 (Q7)",
+  description: "∀x.(x = 0 ∨ ∃y.(x = S(y))) を証明せよ。Robinson算術Q7の公理。",
+  difficulty: 1,
+  systemPresetId: "robinson",
+  goals: [
+    {
+      formulaText: "all x. x = 0 \\/ ex y. x = S(y)",
+      label: "Goal: ∀x.(x = 0 ∨ ∃y.(x = S(y)))",
+      position: { x: 400, y: 500 },
+    },
+  ],
+  hints: [
+    "Q7はRobinson算術の公理です。公理パレットから直接配置できます。",
+    "Q7: ∀x.(x = 0 ∨ ∃y.(x = S(y))) — すべての自然数は0か、何かの後者。",
+  ],
+  estimatedSteps: 1,
+  learningPoint:
+    "Q7はRobinson算術固有の公理。PAの帰納法スキーマの代わりに自然数の構造を保証する。",
+  order: 6,
+};
+
 // --- 全ビルトインクエスト ---
 
 /** 全ビルトインクエスト定義 */
@@ -627,4 +928,16 @@ export const builtinQuests: readonly QuestDefinition[] = [
   q22ConjunctionIntro,
   q23ConjunctionElim,
   q24DeMorgan,
+  qPA01SuccessorNotZero,
+  qPA02AdditionBase,
+  qPA03MultiplicationBase,
+  qPA04Reflexivity,
+  qPA05SuccessorInjective,
+  qPA06AdditionRecursion,
+  qPA07ZeroPlusZero,
+  qPA08OnePlusZero,
+  qPA09ZeroTimesZero,
+  qPA10SuccessorNotZeroInstance,
+  qPA11OnePlusOne,
+  qPA12RobinsonSurjectivity,
 ];

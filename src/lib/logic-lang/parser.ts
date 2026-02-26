@@ -303,9 +303,31 @@ export const parse = (tokens: readonly Token[]): ParseResult => {
       return parseEqualityOrMetaVariable();
     }
 
-    // 大文字識別子 → 述語
+    // 大文字識別子 → 述語 or 等号式の左辺（項関数適用, 例: S(x) = 0）
+    // バックトラッキングで述語を先に試し、等号/項演算子が続く場合は項として再パース
     if (token.kind === "UPPER_IDENT") {
-      return parsePredicate();
+      const savedPos = pos;
+      const savedErrors = errors.length;
+
+      const pred = parsePredicate();
+      if (pred !== undefined) {
+        const afterPred = peek();
+        if (
+          termInfixBP(afterPred.kind) !== undefined ||
+          afterPred.kind === "EQUALS"
+        ) {
+          // 述語の後に等号/項演算子 → 項として再パース
+          pos = savedPos;
+          errors.length = savedErrors;
+          return parseEqualityOrTerm();
+        }
+        return pred;
+      }
+
+      // 述語パースに失敗 → 項として試行
+      pos = savedPos;
+      errors.length = savedErrors;
+      return parseEqualityOrTerm();
     }
 
     // 小文字識別子 or 数字 → 等号式の左辺（項）の可能性
@@ -521,6 +543,22 @@ export const parse = (tokens: readonly Token[]): ParseResult => {
       return termVariable(name);
     }
 
+    // 大文字識別子 → 項コンテキストでは関数適用 or 定数（例: S(x), O）
+    if (token.kind === "UPPER_IDENT") {
+      advance();
+      const name = token.value!;
+
+      if (peek().kind === "LPAREN") {
+        advance();
+        const args = parseTermList();
+        if (args === undefined) return undefined;
+        if (expect("RPAREN") === undefined) return undefined;
+        return functionApplication(name, args);
+      }
+
+      return constant(name);
+    }
+
     // 数字 → 定数
     if (token.kind === "NUMBER") {
       advance();
@@ -708,6 +746,22 @@ export const parseTokensAsTerm = (
       }
 
       return termVariable(name);
+    }
+
+    // 大文字識別子 → 項コンテキストでは関数適用 or 定数（例: S(x), O）
+    if (token.kind === "UPPER_IDENT") {
+      advance();
+      const name = token.value!;
+
+      if (peek().kind === "LPAREN") {
+        advance();
+        const args = parseTermList();
+        if (args === undefined) return undefined;
+        if (expect("RPAREN") === undefined) return undefined;
+        return functionApplication(name, args);
+      }
+
+      return constant(name);
     }
 
     // 数字 → 定数

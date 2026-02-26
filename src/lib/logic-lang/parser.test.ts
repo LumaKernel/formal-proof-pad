@@ -962,5 +962,193 @@ describe("parseTermString", () => {
         expect(result.errors.length).toBeGreaterThan(0);
       }
     });
+
+    it("大文字識別子を項コンテキストで関数適用としてパースする", () => {
+      const result = parseTermString("S(x)");
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(
+          equalTerm(result.term, functionApplication("S", [termVariable("x")])),
+        ).toBe(true);
+      }
+    });
+
+    it("大文字識別子を項コンテキストで定数としてパースする", () => {
+      const result = parseTermString("N");
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(equalTerm(result.term, constant("N"))).toBe(true);
+      }
+    });
+
+    it("大文字識別子のネストした関数適用をパースする", () => {
+      const result = parseTermString("S(S(0))");
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(
+          equalTerm(
+            result.term,
+            functionApplication("S", [
+              functionApplication("S", [constant("0")]),
+            ]),
+          ),
+        ).toBe(true);
+      }
+    });
+  });
+});
+
+// --- PA公理式のパーステスト ---
+
+describe("PA formula parsing", () => {
+  it("PA1: all x. ~(S(x) = 0)", () => {
+    const result = parseString("all x. ~(S(x) = 0)");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        equalFormula(
+          result.formula,
+          universal(
+            termVariable("x"),
+            negation(
+              equality(
+                functionApplication("S", [termVariable("x")]),
+                constant("0"),
+              ),
+            ),
+          ),
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("PA3: all x. x + 0 = x", () => {
+    const result = parseString("all x. x + 0 = x");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        equalFormula(
+          result.formula,
+          universal(
+            termVariable("x"),
+            equality(
+              binaryOperation("+", termVariable("x"), constant("0")),
+              termVariable("x"),
+            ),
+          ),
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("PA4: all x. all y. x + S(y) = S(x + y)", () => {
+    const result = parseString("all x. all y. x + S(y) = S(x + y)");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        equalFormula(
+          result.formula,
+          universal(
+            termVariable("x"),
+            universal(
+              termVariable("y"),
+              equality(
+                binaryOperation(
+                  "+",
+                  termVariable("x"),
+                  functionApplication("S", [termVariable("y")]),
+                ),
+                functionApplication("S", [
+                  binaryOperation("+", termVariable("x"), termVariable("y")),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("S(0) + 0 = S(0)", () => {
+    const result = parseString("S(0) + 0 = S(0)");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        equalFormula(
+          result.formula,
+          equality(
+            binaryOperation(
+              "+",
+              functionApplication("S", [constant("0")]),
+              constant("0"),
+            ),
+            functionApplication("S", [constant("0")]),
+          ),
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("S(0) + S(0) = S(S(0)) (1+1=2)", () => {
+    const result = parseString("S(0) + S(0) = S(S(0))");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        equalFormula(
+          result.formula,
+          equality(
+            binaryOperation(
+              "+",
+              functionApplication("S", [constant("0")]),
+              functionApplication("S", [constant("0")]),
+            ),
+            functionApplication("S", [
+              functionApplication("S", [constant("0")]),
+            ]),
+          ),
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("~(S(0) = 0)", () => {
+    const result = parseString("~(S(0) = 0)");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        equalFormula(
+          result.formula,
+          negation(
+            equality(functionApplication("S", [constant("0")]), constant("0")),
+          ),
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it("大文字述語P(x)は引き続き述語としてパースされる", () => {
+    const result = parseString("P(x)");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        equalFormula(result.formula, predicate("P", [termVariable("x")])),
+      ).toBe(true);
+    }
+  });
+
+  it("大文字の後に等号が続く場合は等号式として解釈する", () => {
+    const result = parseString("S(x) = S(y)");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(
+        equalFormula(
+          result.formula,
+          equality(
+            functionApplication("S", [termVariable("x")]),
+            functionApplication("S", [termVariable("y")]),
+          ),
+        ),
+      ).toBe(true);
+    }
   });
 });
