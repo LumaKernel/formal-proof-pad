@@ -1,0 +1,151 @@
+/**
+ * Workspace ページのプレゼンテーション層。
+ *
+ * ルーター・localStorage 等の不純な依存を持たず、
+ * props で状態とコールバックを受け取る。
+ * Storybook でモックデータを注入して各状態を表示・テスト可能。
+ *
+ * 変更時は WorkspaceContent.tsx, WorkspacePageView.stories.tsx も同期すること。
+ */
+
+import type { CSSProperties } from "react";
+import { ProofWorkspace } from "../../../lib/proof-pad";
+import type { GoalAchievedInfo } from "../../../lib/proof-pad";
+import { ProofMessagesProvider } from "../../../lib/proof-pad";
+import type { ProofMessages } from "../../../lib/proof-pad";
+import type { WorkspaceState } from "../../../lib/proof-pad/workspaceState";
+import { ThemeToggle } from "../../../components/ThemeToggle/ThemeToggle";
+
+// --- Types ---
+
+export type WorkspacePageViewProps =
+  | {
+      /** ノートブックが見つかった場合 */
+      readonly found: true;
+      /** ノートブック名 */
+      readonly notebookName: string;
+      /** ワークスペース状態 */
+      readonly workspace: WorkspaceState;
+      /** i18nメッセージ */
+      readonly messages: ProofMessages;
+      /** 戻るボタン押下 */
+      readonly onBack: () => void;
+      /** ワークスペース状態変更 */
+      readonly onWorkspaceChange: (workspace: WorkspaceState) => void;
+      /** ゴール達成時 */
+      readonly onGoalAchieved: (info: GoalAchievedInfo) => void;
+    }
+  | {
+      /** ノートブックが見つからない場合 */
+      readonly found: false;
+      /** 戻るボタン押下 */
+      readonly onBack: () => void;
+    };
+
+// --- Styles ---
+
+const pageStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  height: "100vh",
+  background: "var(--color-bg-primary)",
+  color: "var(--color-text-primary)",
+  fontFamily: "var(--font-ui)",
+};
+
+const headerStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "8px 16px",
+  borderBottom: "1px solid var(--color-border, #e0e0e0)",
+  background: "var(--color-surface, #fff)",
+  flexShrink: 0,
+};
+
+const backButtonStyle: CSSProperties = {
+  padding: "6px 14px",
+  fontSize: 13,
+  fontWeight: 600,
+  border: "1px solid var(--color-border, #e0e0e0)",
+  borderRadius: 6,
+  cursor: "pointer",
+  background: "transparent",
+  color: "var(--color-text-primary, #333)",
+  transition: "background 0.15s",
+};
+
+const notebookNameStyle: CSSProperties = {
+  fontSize: 16,
+  fontWeight: 600,
+  flex: 1,
+  textAlign: "center",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  padding: "0 12px",
+};
+
+const headerActionsStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+};
+
+const workspaceContainerStyle: CSSProperties = {
+  flex: 1,
+  position: "relative",
+  overflow: "hidden",
+};
+
+const notFoundStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100vh",
+  gap: 16,
+  color: "var(--color-text-secondary, #666)",
+};
+
+// --- Component ---
+
+export function WorkspacePageView(props: WorkspacePageViewProps) {
+  if (!props.found) {
+    return (
+      <div style={notFoundStyle} data-testid="workspace-not-found">
+        <div style={{ fontSize: 18, fontWeight: 600 }}>Notebook not found</div>
+        <button type="button" style={backButtonStyle} onClick={props.onBack}>
+          Back to Hub
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={pageStyle} data-testid="workspace-page">
+      {/* Header */}
+      <header style={headerStyle}>
+        <button type="button" style={backButtonStyle} onClick={props.onBack}>
+          Back
+        </button>
+        <span style={notebookNameStyle}>{props.notebookName}</span>
+        <div style={headerActionsStyle}>
+          <ThemeToggle />
+        </div>
+      </header>
+
+      {/* Workspace */}
+      <div style={workspaceContainerStyle}>
+        <ProofMessagesProvider messages={props.messages}>
+          <ProofWorkspace
+            system={props.workspace.system}
+            workspace={props.workspace}
+            onWorkspaceChange={props.onWorkspaceChange}
+            onGoalAchieved={props.onGoalAchieved}
+          />
+        </ProofMessagesProvider>
+      </div>
+    </div>
+  );
+}

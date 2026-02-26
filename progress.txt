@@ -3697,3 +3697,67 @@
   - 新プリセット追加時の同期ポイント: inferenceRule.ts → index.ts → notebookCreateLogic.ts → questDefinition.ts → questStartLogic.ts → builtinQuests.ts（全6箇所）
   - 残タスク: storybookで実際に群論の問題を解くデモストーリー (PeanoArithmeticDemoと同パターン)
 ---
+
+## 2026-02-26 - Hub ページStorybook化（HubContentプレゼンテーション層分離）
+- 実装した内容:
+  - HubContentからHubPageViewを抽出（プレゼンテーション層分離）
+  - HubPageView: props駆動、ルーター・localStorage等の不純な依存なし
+  - HubContent: HubPageView + hooks + router のグルーコード（不純部分）
+  - Storybookストーリー5つ作成（play関数付き）:
+    1. EmptyNotebooks: 空のノートブック一覧（ヒーローメッセージ表示）
+    2. WithNotebooks: 3つのサンプルノートブック表示
+    3. QuestsTab: クエストタブ表示（initialTab prop使用）
+    4. TabSwitch: タブ切り替えインタラクション
+    5. CreateNotebookForm: 新規作成フォームへの遷移
+- テスト: 164ファイル、3729テスト全パス（+5テスト追加）
+- カバレッジ: Stmts 99.33%(維持), Branch 94.87%(維持), Lines 99.92%(維持)
+  - ベースライン: Stmts 99.33%, Branch 94.87%, Lines 99.92%
+- 品質チェック: typecheck ✅, lint ✅, test ✅
+- ブラウザ確認: Playwright MCPで全5ストーリーを確認済み
+- スクリーンショット:
+  - screenshots.local/hub-empty-notebooks-iframe.png
+  - screenshots.local/hub-with-notebooks.png
+  - screenshots.local/hub-quests-tab.png
+  - screenshots.local/hub-create-form.png
+- 変更ファイル:
+  - `src/app/HubPageView.tsx` (NEW - プレゼンテーション層コンポーネント)
+  - `src/app/HubPageView.stories.tsx` (NEW - Storybookストーリー5つ)
+  - `src/app/HubContent.tsx` (MODIFIED - HubPageViewを使うようにリファクタ)
+  - `tasks/prd-theories.md` (MODIFIED - タスク完了マーク)
+- **今後のイテレーションへの学び:**
+  - ページレベルのStorybook化はプレゼンテーション層（HubPageView）を分離してprops駆動にすることで実現
+  - ThemeToggleを含むコンポーネントはThemeProviderデコレーターが必要
+  - NotebookCreateFormのキャンセルボタンは「キャンセル」（日本語）— テストではdata-testidを使う方が安定
+  - builtinQuests + buildCatalogByCategory + createEmptyProgress() でサンプルのクエストカタログデータを生成可能
+  - 次のタスク: WorkspaceContentのプレゼンテーション層分離 + Storybookストーリー作成
+---
+
+## 2026-02-26 - Workspace: プレゼンテーション層分離 + Storybookストーリー追加
+- WorkspacePageView.tsx を新規作成（HubPageViewと同パターンでプレゼンテーション層分離）
+  - discriminated union props（found: true/false）でノート表示/404状態を切り替え
+  - ルーター・localStorage等の不純な依存なし、propsでデータとコールバックを受け取る
+- WorkspaceContent.tsx をWorkspacePageViewを使うようにリファクタ
+  - コンテナ層（hooks、router、i18n）とプレゼンテーション層を分離
+  - スタイル定義をWorkspacePageViewに移動、WorkspaceContentはロジックのみ
+- WorkspacePageView.stories.tsx を新規作成（4ストーリー）:
+  1. NotFound: 404状態（Notebook not found + Back to Hubボタン）
+  2. EmptyLukasiewicz: 空のLukasiewicz体系ワークスペース
+  3. WithAxiomNodes: A1, A2公理ノード付きワークスペース
+  4. EmptyPredicateLogic: 空の述語論理体系ワークスペース
+- テスト: 165ファイル、3733テスト全パス（+1ファイル, +4テスト）
+- カバレッジ: Stmts 99.33%(維持), Branch 94.93%(微増), Funcs 89.98%(維持), Lines 99.92%(維持)
+  - ベースライン: Stmts 99.33%, Branch 94.87%, Funcs 89.98%, Lines 99.92%
+- ブラウザ確認:
+  - .screenshots/workspace-not-found.png
+  - .screenshots/workspace-empty-lukasiewicz.png
+  - .screenshots/workspace-with-axiom-nodes.png
+- 変更ファイル:
+  - src/app/workspace/[id]/WorkspacePageView.tsx (新規)
+  - src/app/workspace/[id]/WorkspacePageView.stories.tsx (新規)
+  - src/app/workspace/[id]/WorkspaceContent.tsx (リファクタ)
+  - tasks/prd-theories.md (タスク完了マーク)
+- **今後のイテレーションへの学び:**
+  - WorkspacePageViewPropsはdiscriminated unionのため、StorybookのMeta<typeof Component>型推論がうまくいかない。Meta（型引数なし）+ render-basedストーリーで対応する
+  - HubPageViewパターン: 純粋コンポーネント(propsのみ) + コンテナ(hooks/router) の2層分離はStorybook testabilityに効果的
+  - src/app/** はカバレッジ除外対象（vitest.config.ts設定済み）。新しいプレゼンテーションコンポーネントもこの範囲内なのでカバレッジに影響しない
+---
