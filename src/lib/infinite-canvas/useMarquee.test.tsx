@@ -20,12 +20,34 @@ const ITEMS: readonly SelectableItem[] = [
   { id: "c", position: { x: 50, y: 20 }, size: { width: 60, height: 30 } },
 ];
 
+/**
+ * useMarquee が PointerEvent から読み取るフィールドのみを持つ型。
+ * テスト用に最小限のフィールドだけモックする。
+ */
+type PointerEventSubset = Pick<
+  React.PointerEvent<HTMLElement>,
+  "clientX" | "clientY" | "button" | "shiftKey" | "pointerId"
+> & {
+  readonly currentTarget: {
+    readonly setPointerCapture: (id: number) => void;
+    readonly releasePointerCapture: (id: number) => void;
+  };
+};
+
+/** テストモック用: PointerEventSubset を React.PointerEvent として扱う */
+function asPointerEvent(
+  subset: PointerEventSubset,
+): React.PointerEvent<HTMLElement> {
+  // テスト用モック: hookが使うフィールドのみ含む部分オブジェクト
+  return subset as never;
+}
+
 function createPointerEvent(
   clientX: number,
   clientY: number,
   opts: { button?: number; shiftKey?: boolean } = {},
 ): React.PointerEvent<HTMLElement> {
-  return {
+  return asPointerEvent({
     clientX,
     clientY,
     button: opts.button ?? 0,
@@ -35,7 +57,7 @@ function createPointerEvent(
       setPointerCapture: vi.fn(),
       releasePointerCapture: vi.fn(),
     },
-  } as unknown as React.PointerEvent<HTMLElement>;
+  });
 }
 
 function createContainerRef(

@@ -18,10 +18,10 @@ const THEME_TOOLBAR_ITEMS = [
  * pane so play functions only find elements in the primary (light) pane.
  */
 function TestIdStripper({ children }: { readonly children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = ref.current;
+    const container = containerRef.current;
     if (!container) return;
 
     const stripTestIds = (root: Element) => {
@@ -63,12 +63,11 @@ function TestIdStripper({ children }: { readonly children: React.ReactNode }) {
       attributeFilter: ["data-testid"],
     });
 
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, []);
 
-  return React.createElement("div", { ref }, children);
+  // eslint-disable-next-line react-hooks/refs -- ref is passed to a DOM element, not read during render
+  return React.createElement("div", { ref: containerRef }, children);
 }
 
 /**
@@ -107,9 +106,7 @@ const withTheme: Decorator = (Story, context) => {
           display: "flex",
           gap: isFullscreen ? "0px" : "16px",
           width: "100%",
-          ...(isFullscreen
-            ? { height: "100%" }
-            : { minHeight: "100%" }),
+          ...(isFullscreen ? { height: "100%" } : { minHeight: "100%" }),
         },
       },
       React.createElement(

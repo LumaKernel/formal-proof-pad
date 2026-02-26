@@ -338,12 +338,7 @@ describe("useConnectionPreview", () => {
     const onComplete = vi.fn();
 
     const { result } = renderHook(() =>
-      useConnectionPreview(
-        defaultViewport,
-        [],
-        undefined,
-        onComplete,
-      ),
+      useConnectionPreview(defaultViewport, [], undefined, onComplete),
     );
 
     act(() => {
@@ -409,12 +404,7 @@ describe("useConnectionPreview", () => {
   it("picks up updated candidates after rerender", () => {
     let candidates: readonly PortCandidate[] = [];
     const { result, rerender } = renderHook(() =>
-      useConnectionPreview(
-        defaultViewport,
-        candidates,
-        undefined,
-        undefined,
-      ),
+      useConnectionPreview(defaultViewport, candidates, undefined, undefined),
     );
 
     act(() => {
@@ -439,12 +429,16 @@ describe("useConnectionPreview", () => {
   });
 
   it("picks up updated validator after rerender", () => {
-    let validator: ((s: string, sp: string, t: string, tp: string) => boolean) | undefined;
+    const validatorRef: {
+      current:
+        | ((s: string, sp: string, t: string, tp: string) => boolean)
+        | undefined;
+    } = { current: undefined };
     const { result, rerender } = renderHook(() =>
       useConnectionPreview(
         defaultViewport,
         [targetCandidate],
-        validator,
+        validatorRef.current,
         undefined,
       ),
     );
@@ -460,7 +454,7 @@ describe("useConnectionPreview", () => {
     expect(result.current.previewState?.isValid).toBe(true);
 
     // Add rejecting validator and rerender
-    validator = () => false;
+    validatorRef.current = () => false;
     rerender();
 
     act(() => {
