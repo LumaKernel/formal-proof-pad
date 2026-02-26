@@ -15,12 +15,12 @@
   - [x] HubContent: プレゼンテーション層分離 (HubPageView) + Storybookストーリー作成（空状態・ノート一覧・クエスト一覧・作成フォーム）
   - [x] WorkspaceContent: プレゼンテーション層分離 (WorkspacePageView) + Storybookストーリー作成（ノート表示・404状態・公理ノード付き・述語論理体系）
 - [-] (まずはタスク分解から！) リファレンス、内部ドキュメント管理のための仕組みを用意しよう
-  - [-] リファレンスデータモデル: 多言語対応の構造化リファレンスシステムの型定義と純粋ロジック
-    - [ ] `src/lib/reference/` にリファレンスライブラリを作成
-    - [ ] `ReferenceEntry` 型定義: id, 多言語テキスト(en/ja)、パラグラフ単位のマークダウン、カテゴリ、関連リンク
-    - [ ] `ReferenceCategory`: axiom, inference-rule, logic-system, notation, concept 等
-    - [ ] 検索・フィルタリングの純粋ロジック
-    - [ ] テスト
+  - [x] リファレンスデータモデル: 多言語対応の構造化リファレンスシステムの型定義と純粋ロジック
+    - [x] `src/lib/reference/` にリファレンスライブラリを作成
+    - [x] `ReferenceEntry` 型定義: id, 多言語テキスト(en/ja)、パラグラフ単位のマークダウン、カテゴリ、関連リンク
+    - [x] `ReferenceCategory`: axiom, inference-rule, logic-system, notation, concept 等
+    - [x] 検索・フィルタリングの純粋ロジック
+    - [x] テスト
   - [ ] リファレンスコンテンツ: dev/logic-reference/ の内容をユーザー向けに再構成
     - [ ] 公理(A1,A2,A3,M3,EFQ,DNE,A4,A5,E1-E5)の解説(en/ja)
     - [ ] 推論規則(MP,Gen,自然演繹ルール,シーケント計算ルール)の解説(en/ja)

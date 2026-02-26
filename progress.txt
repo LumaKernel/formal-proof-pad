@@ -79,7 +79,35 @@
 - クエスト進捗のMapもJSON化不可。serialize/deserializeパターンはnotebookSerializationと同様
 - ノード検索も3層分離: nodeSearch.ts(純粋) → useNodeSearch.ts(hook) → NodeSearchComponent.tsx(UI)
 - キーボードショートカット追加時は `KeyboardAction` union + `classifyKeyDown` + `handleAction` switch の3箇所を変更
+- `src/lib/reference/` は多言語リファレンスシステム。referenceEntry.ts(型・検索ロジック) + referenceContent.ts(コンテンツデータ)。パラグラフ単位でen/jaを対応させる設計
+- リファレンスエントリ追加時は `allReferenceEntries` 配列 + `referenceContent.test.ts` のエントリ数を更新
 
+---
+
+## 2026-02-26 - リファレンス: 多言語対応リファレンスシステムの型定義・純粋ロジック・コンテンツ追加
+- `src/lib/reference/` に新ライブラリを作成
+  - `referenceEntry.ts`: 型定義(ReferenceEntry, LocalizedText, ReferenceCategory等) + 検索・フィルタリング・グループ化の純粋ロジック
+  - `referenceContent.ts`: 全23エントリの多言語リファレンスコンテンツ（公理11, 推論規則2, 論理体系5, 概念3, 理論2）
+  - `referenceEntry.test.ts`: 33テスト（型・検索・フィルタ・ソート・関連エントリ・バリデーション）
+  - `referenceContent.test.ts`: 174テスト（多言語テキスト完全性、en/jaパラグラフ数一致、外部リンク・関連エントリの整合性、検索動作）
+- テスト: 167ファイル、3940テスト全パス（+207テスト追加）
+- カバレッジ: Stmts 99.34%(微増), Branch 94.95%(微増), Funcs 90.07%(微増), Lines 99.92%(維持)
+  - ベースライン: Stmts 99.33%, Branch 94.93%, Funcs 89.98%, Lines 99.92%
+  - lib/reference: Stmts 100%, Branch 100%, Funcs 100%, Lines 100%
+- ブラウザ確認: .screenshots/storybook-reference-check.png（Storybook正常起動確認）
+- タスク分解: `prd-theories.md` にリファレンスシステムの詳細サブタスクを追加
+- 変更ファイル:
+  - `src/lib/reference/referenceEntry.ts` (NEW - 型定義・純粋ロジック)
+  - `src/lib/reference/referenceEntry.test.ts` (NEW - 33テスト)
+  - `src/lib/reference/referenceContent.ts` (NEW - 23エントリの多言語コンテンツ)
+  - `src/lib/reference/referenceContent.test.ts` (NEW - 174テスト)
+  - `task-processing.md` (MODIFIED - タスク記入→完了後クリア)
+  - `tasks/prd-theories.md` (MODIFIED - タスク分解追加・完了マーク)
+- **今後のイテレーションへの学び:**
+  - リファレンスコンテンツはパラグラフ単位でen/jaを対応させることで翻訳同期が容易（テストで検証可能）
+  - `referenceContent.test.ts` の `it.each` パターンでエントリ追加時の検証漏れを防止
+  - 関連エントリIDの整合性テストは重要 — 存在しないIDへの参照を検出できる
+  - 次はリファレンスUIコンポーネント（ReferencePopover, ReferenceModal）またはコンテンツ拡充
 ---
 
 ## 2026-02-26 - 群論: Storybookで実際に問題を解くデモストーリー追加
