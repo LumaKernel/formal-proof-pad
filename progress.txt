@@ -3617,3 +3617,29 @@
   - QuestCatalog storyは固定のサンプルデータを使用しており、builtinQuests.ts の実データは反映されない（結合テストは builtinQuests.test.ts で行う）
   - questStartLogic.ts にはHilbert-onlyガードがあり、PA体系クエストを実際に開始するにはこのガードの緩和が必要（次のタスク: storybookで実際に問題を解く動き）
 ---
+
+## 2026-02-26 - 理論公理: PA体系Storybookデモストーリー追加
+- PeanoArithmeticDemo.stories.tsx を新規作成（4ストーリー）:
+  1. PA1AxiomPlacement: PA1公理をそのまま配置してゴール達成（最も簡単な例）
+  2. ZeroPlusZeroCompleted: PA3 + A5 + MPで 0+0=0 を導出（完成済み証明）
+  3. ZeroPlusZeroInteractive: PA3とA5配置済み、play関数でMP適用して0+0=0完成
+  4. SuccessorNotZeroProof: PA1 + A5 + MPで ¬(S(0)=0) を導出（1≠0の形式証明）
+- テスト: 162ファイル、3682テスト全パス（+4テスト追加）
+- カバレッジ: Stmts 99.32%(維持), Branch 94.87%(+0.06向上), Funcs 90.68%(+0.69向上), Lines 99.92%(維持)
+  - ベースライン: Stmts 99.32%, Branch 94.81%, Funcs 89.99%, Lines 99.92%
+- 品質チェック: typecheck ✅, lint ✅ (既存prettier warningのみ), test ✅
+- ブラウザ確認: 全4ストーリーをPlaywright MCPで確認済み、Proof Complete!バナー表示を確認
+- スクリーンショット:
+  - screenshots.local/pa-demo-axiom-placement.png
+  - screenshots.local/pa-demo-zero-plus-zero.png
+  - screenshots.local/pa-demo-successor-not-zero.png
+- 変更ファイル:
+  - `src/lib/proof-pad/PeanoArithmeticDemo.stories.tsx` (NEW - PA体系証明デモストーリー)
+  - `tasks/prd-theories.md` (MODIFIED - storybookタスクを[x]に)
+  - `task-processing.md` (MODIFIED - タスク完了)
+- **今後のイテレーションへの学び:**
+  - PA体系の∀消去パターンは PA公理(∀x.φ) + A5インスタンス((∀x.φ)→φ[t/x]) + MP の3ステップが基本形
+  - A5インスタンスのtestIdは `workspace-axiom-palette-item-A5`（∀-Dist）、公理パレットでは「A5 (∀-Dist)」と表示
+  - theory axiomのパレットtestIdは `workspace-axiom-palette-item-{axiom.id}`（例: PA1, PA3等）
+  - ProofWorkspace.stories.tsxは既存のLukasiewicz系デモ専用なので、PA系は別ファイル(PeanoArithmeticDemo)で分離するのが適切
+---
