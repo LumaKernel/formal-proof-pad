@@ -3643,3 +3643,32 @@
   - theory axiomのパレットtestIdは `workspace-axiom-palette-item-{axiom.id}`（例: PA1, PA3等）
   - ProofWorkspace.stories.tsxは既存のLukasiewicz系デモ専用なので、PA系は別ファイル(PeanoArithmeticDemo)で分離するのが適切
 ---
+
+## 2026-02-26 - 群論セットアップ
+- 実装した内容:
+  - 群論公理テンプレート6種 (G1結合律, G2L/G2R単位元, G3L/G3R逆元, G4可換律)
+  - 3つのLogicSystem定義: groupTheoryLeftSystem (左公理系3公理), groupTheoryFullSystem (両側5公理), abelianGroupSystem (アーベル群6公理)
+  - notebookCreateLogicに群論プリセット3種追加 (group-left, group-full, abelian-group)
+  - questDefinitionに2カテゴリ追加 (group-basics, group-proofs)
+  - builtinQuestsに群論クエスト8問追加 (公理配置6問 + 推論2問)
+  - 全テスト追加・カバレッジ維持 (3720 tests, Stmts 99.33%, Branch 94.87%, Lines 99.92%)
+- 変更したファイル:
+  - src/lib/logic-core/inferenceRule.ts (+190行: 公理テンプレート, LogicSystem定義)
+  - src/lib/logic-core/inferenceRule.test.ts (+288行: 群論公理テスト)
+  - src/lib/logic-core/index.ts (+12行: エクスポート追加)
+  - src/lib/notebook/notebookCreateLogic.ts (+24行: プリセット追加)
+  - src/lib/notebook/notebookCreateLogic.test.ts (+37行: プリセットテスト)
+  - src/lib/quest/questDefinition.ts (+21行: カテゴリ・型定義)
+  - src/lib/quest/questDefinition.test.ts (+4行: カテゴリ数更新)
+  - src/lib/quest/builtinQuests.ts (+211行: クエスト定義)
+  - src/lib/quest/builtinQuests.test.ts (+4行: クエスト数更新)
+  - src/lib/quest/questStartLogic.test.ts (+24行: プリセット解決テスト)
+- **今後のイテレーションへの学び:**
+  - identifyAxiom関数の引数順序は (formula, system) - 間違えやすいので注意
+  - AxiomIdentificationResult の TheoryAxiom 結果は theoryAxiomId プロパティ（axiom.id ではない）
+  - AxiomIdentificationResult の未識別は "Error" タグ（"Unknown" ではない）
+  - 群論の3流儀（左公理系・両側・アーベル群）はPA流儀バリアントと同じパターンで追加可能
+  - questCategories の数を変更したらテスト (toHaveLength) も更新が必要
+  - 新プリセット追加時の同期ポイント: inferenceRule.ts → index.ts → notebookCreateLogic.ts → questDefinition.ts → questStartLogic.ts → builtinQuests.ts（全6箇所）
+  - 残タスク: storybookで実際に群論の問題を解くデモストーリー (PeanoArithmeticDemoと同パターン)
+---
