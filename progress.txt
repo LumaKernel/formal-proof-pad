@@ -3491,3 +3491,32 @@
   - 自然演繹プリセットでのクエスト/ノートブック作成は未対応（ガードでブロック中）。将来のUI対応が必要
   - シーケント計算(LM/LJ/LK)のプリセット追加が残タスク
 ---
+
+## 2026-02-26 - シーケント計算(LM/LJ/LK)プリセット追加
+- 実装した内容:
+  - sequentCalculus.ts: ゲンツェン流シーケント計算のピュアロジック（Sequent型、ScProofNode 19種のdiscriminated union、ファクトリ関数、getScConclusion/countScNodes/scProofDepth/validateScProof）
+  - deductionSystem.ts: ScRuleId型(19種)、SequentCalculusSystem型（maxSuccedentLength付き）、lmSystem/ljSystem/lkSystem定数、sequentCalculusDeduction()ファクトリ、isScRuleEnabled/allScRuleIds/getScRuleDisplayName
+  - notebookCreateLogic.ts: sc-lm/sc-lj/sc-lkプリセット登録
+  - questDefinition.ts: SystemPresetIdに"sc-lm"|"sc-lj"|"sc-lk"追加
+  - ND/SCプリセットのラベル重複修正（UIバッジとlabelの重複解消）
+- 変更したファイル:
+  - src/lib/logic-core/sequentCalculus.ts (NEW: ピュアロジック ~750行)
+  - src/lib/logic-core/sequentCalculus.test.ts (NEW: 58テスト)
+  - src/lib/logic-core/deductionSystem.ts (SC型+プリセット追加)
+  - src/lib/logic-core/deductionSystem.test.ts (SC関連80テスト)
+  - src/lib/notebook/notebookCreateLogic.ts (SCプリセット3件+NDラベル修正)
+  - src/lib/notebook/notebookCreateLogic.test.ts (SCテスト追加)
+  - src/lib/quest/questDefinition.ts (SystemPresetId拡張)
+  - src/lib/quest/questStartLogic.test.ts (SCプリセット解決テスト追加)
+- カバレッジ: Stmts 99.37%, Branch 94.90%, Funcs 90.02%, Lines 99.94% (全て向上or維持)
+- テスト: 3602テスト全pass (161ファイル)
+- スクリーンショット: `.screenshots/notebook-create-form-sc-presets-fullscreen.png`, `.screenshots/notebook-create-form-sc-presets-visible.png`
+- **今後のイテレーションへの学び:**
+  - 戸次『数理論理学』第10章: LK=定義10.2-10.4、LJ=定義10.20+10.22-10.24、LM=定義10.36
+  - LM=LJから(⊥⇒)と(⇒w)を除いた体系。LJ=右辺高々1。LK=右辺無制限
+  - LMでは右辺は常に1つ（系10.37）。(⇒w)が使えないため右辺0にできない
+  - LM=NM, LJ=NJ, LK=NK の等価性が成立
+  - SequentCalculusSystem.maxSuccedentLength でLJ/LM(=1)とLK(=undefined)を区別
+  - notebookCreateLogicのプリセットlabelにスタイル名を含めるとUIバッジと重複する。labelはスタイル名なしにすべき
+  - prd-logic-selection.md を tasks-archived/ に移動（全タスク完了）
+---
