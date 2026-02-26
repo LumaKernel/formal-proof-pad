@@ -6,6 +6,9 @@ import {
   lukasiewiczSystem,
   mendelsonSystem,
   equalityLogicSystem,
+  peanoArithmeticSystem,
+  axiomPA1Template,
+  axiomPA3Template,
 } from "../logic-core/inferenceRule";
 import type { LogicSystem } from "../logic-core/inferenceRule";
 import { implication, universal, equality } from "../logic-core/formula";
@@ -79,7 +82,9 @@ describe("axiomNameLogic", () => {
     // --- M3 (背理法) ---
     describe("M3", () => {
       it("identifies exact M3 template in mendelson system", () => {
-        const formula = parseFormula("(~phi -> ~psi) -> ((~phi -> psi) -> phi)");
+        const formula = parseFormula(
+          "(~phi -> ~psi) -> ((~phi -> psi) -> phi)",
+        );
         const result = identifyAxiomName(formula, mendelsonSystem);
         expect(result._tag).toBe("Identified");
         if (result._tag === "Identified") {
@@ -89,7 +94,9 @@ describe("axiomNameLogic", () => {
       });
 
       it("does not identify M3 in lukasiewicz system", () => {
-        const formula = parseFormula("(~phi -> ~psi) -> ((~phi -> psi) -> phi)");
+        const formula = parseFormula(
+          "(~phi -> ~psi) -> ((~phi -> psi) -> phi)",
+        );
         const result = identifyAxiomName(formula, lukasiewiczSystem);
         expect(result._tag).toBe("NotIdentified");
       });
@@ -288,6 +295,31 @@ describe("axiomNameLogic", () => {
 
     it("returns display name for E5", () => {
       expect(getAxiomDisplayName("E5")).toBe("E5");
+    });
+  });
+
+  describe("theory axiom identification", () => {
+    it("identifies PA1 in peano arithmetic system", () => {
+      const result = identifyAxiomName(axiomPA1Template, peanoArithmeticSystem);
+      expect(result._tag).toBe("TheoryAxiomIdentified");
+      if (result._tag === "TheoryAxiomIdentified") {
+        expect(result.theoryAxiomId).toBe("PA1");
+        expect(result.displayName).toBe("PA1 (0≠後者)");
+      }
+    });
+
+    it("identifies PA3 in peano arithmetic system", () => {
+      const result = identifyAxiomName(axiomPA3Template, peanoArithmeticSystem);
+      expect(result._tag).toBe("TheoryAxiomIdentified");
+      if (result._tag === "TheoryAxiomIdentified") {
+        expect(result.theoryAxiomId).toBe("PA3");
+        expect(result.displayName).toBe("PA3 (加法基底)");
+      }
+    });
+
+    it("does not identify PA axioms in non-PA systems", () => {
+      const result = identifyAxiomName(axiomPA1Template, equalityLogicSystem);
+      expect(result._tag).toBe("NotIdentified");
     });
   });
 });

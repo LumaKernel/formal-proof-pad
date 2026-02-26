@@ -6,6 +6,7 @@ import {
   matchAxiomA4,
   matchAxiomA5,
   matchEqualityAxiom,
+  matchTheoryAxiom,
   matchFormulaPattern,
   applySubstitution,
   identifyAxiom,
@@ -18,6 +19,14 @@ import {
   axiomE1Template,
   axiomE2Template,
   axiomE3Template,
+  axiomPA1Template,
+  axiomPA2Template,
+  axiomPA3Template,
+  axiomPA4Template,
+  axiomPA5Template,
+  axiomPA6Template,
+  peanoFixedAxioms,
+  peanoArithmeticSystem,
   skSystem,
   minimalLogicSystem,
   intuitionisticSystem,
@@ -26,6 +35,7 @@ import {
   classicalLogicSystem,
   predicateLogicSystem,
   equalityLogicSystem,
+  type TheoryAxiom,
 } from "./inferenceRule";
 import {
   metaVariable,
@@ -1489,6 +1499,244 @@ describe("matchFormulaPattern", () => {
       const candidate = equality(binaryOperation("*", x, y), z);
       const result = matchFormulaPattern(template, candidate);
       expect(result).toBeUndefined();
+    });
+  });
+});
+
+// ── ペアノ算術の公理テンプレート ────────────────────────────
+
+describe("ペアノ算術公理テンプレート", () => {
+  // ヘルパー
+  const zero = constant("0");
+  const succOfX = functionApplication("S", [x]);
+  const succOfY = functionApplication("S", [y]);
+
+  describe("PA1: ∀x. ¬(S(x) = 0)", () => {
+    it("テンプレートが正しい構造を持つ", () => {
+      expect(axiomPA1Template._tag).toBe("Universal");
+      if (axiomPA1Template._tag === "Universal") {
+        expect(axiomPA1Template.variable.name).toBe("x");
+        expect(axiomPA1Template.formula._tag).toBe("Negation");
+      }
+    });
+
+    it("正しいインスタンスとexactマッチする", () => {
+      const result = matchTheoryAxiom(peanoFixedAxioms[0], axiomPA1Template);
+      expect(result._tag).toBe("Ok");
+    });
+
+    it("異なる式はマッチしない", () => {
+      const wrong = universal(x, equality(succOfX, zero)); // ¬ がない
+      const result = matchTheoryAxiom(peanoFixedAxioms[0], wrong);
+      expect(result._tag).toBe("Error");
+    });
+  });
+
+  describe("PA2: ∀x.∀y. S(x) = S(y) → x = y", () => {
+    it("テンプレートが正しい構造を持つ", () => {
+      expect(axiomPA2Template._tag).toBe("Universal");
+      if (axiomPA2Template._tag === "Universal") {
+        expect(axiomPA2Template.formula._tag).toBe("Universal");
+      }
+    });
+
+    it("正しいインスタンスとexactマッチする", () => {
+      const result = matchTheoryAxiom(peanoFixedAxioms[1], axiomPA2Template);
+      expect(result._tag).toBe("Ok");
+    });
+
+    it("異なる式はマッチしない", () => {
+      // S(x) = S(y) → y = x (x,y 逆)
+      const wrong = universal(
+        x,
+        universal(y, implication(equality(succOfX, succOfY), equality(y, x))),
+      );
+      const result = matchTheoryAxiom(peanoFixedAxioms[1], wrong);
+      expect(result._tag).toBe("Error");
+    });
+  });
+
+  describe("PA3: ∀x. x + 0 = x", () => {
+    it("テンプレートが正しい構造を持つ", () => {
+      expect(axiomPA3Template._tag).toBe("Universal");
+      if (axiomPA3Template._tag === "Universal") {
+        expect(axiomPA3Template.formula._tag).toBe("Equality");
+      }
+    });
+
+    it("正しいインスタンスとexactマッチする", () => {
+      const result = matchTheoryAxiom(peanoFixedAxioms[2], axiomPA3Template);
+      expect(result._tag).toBe("Ok");
+    });
+  });
+
+  describe("PA4: ∀x.∀y. x + S(y) = S(x + y)", () => {
+    it("テンプレートが正しい構造を持つ", () => {
+      expect(axiomPA4Template._tag).toBe("Universal");
+    });
+
+    it("正しいインスタンスとexactマッチする", () => {
+      const result = matchTheoryAxiom(peanoFixedAxioms[3], axiomPA4Template);
+      expect(result._tag).toBe("Ok");
+    });
+  });
+
+  describe("PA5: ∀x. x * 0 = 0", () => {
+    it("テンプレートが正しい構造を持つ", () => {
+      expect(axiomPA5Template._tag).toBe("Universal");
+    });
+
+    it("正しいインスタンスとexactマッチする", () => {
+      const result = matchTheoryAxiom(peanoFixedAxioms[4], axiomPA5Template);
+      expect(result._tag).toBe("Ok");
+    });
+  });
+
+  describe("PA6: ∀x.∀y. x * S(y) = x * y + x", () => {
+    it("テンプレートが正しい構造を持つ", () => {
+      expect(axiomPA6Template._tag).toBe("Universal");
+    });
+
+    it("正しいインスタンスとexactマッチする", () => {
+      const result = matchTheoryAxiom(peanoFixedAxioms[5], axiomPA6Template);
+      expect(result._tag).toBe("Ok");
+    });
+  });
+});
+
+describe("peanoArithmeticSystem", () => {
+  it("述語論理・等号・汎化が有効", () => {
+    expect(peanoArithmeticSystem.predicateLogic).toBe(true);
+    expect(peanoArithmeticSystem.equalityLogic).toBe(true);
+    expect(peanoArithmeticSystem.generalization).toBe(true);
+  });
+
+  it("理論公理(PA1-PA6)が含まれる", () => {
+    const axioms = peanoArithmeticSystem.theoryAxioms;
+    expect(axioms).toBeDefined();
+    expect(axioms?.length).toBe(6);
+    expect(axioms?.map((a) => a.id)).toEqual([
+      "PA1",
+      "PA2",
+      "PA3",
+      "PA4",
+      "PA5",
+      "PA6",
+    ]);
+  });
+});
+
+describe("identifyAxiom with theoryAxioms", () => {
+  it("PA体系でPA1公理を識別する", () => {
+    const result = identifyAxiom(axiomPA1Template, peanoArithmeticSystem);
+    expect(result._tag).toBe("TheoryAxiom");
+    if (result._tag === "TheoryAxiom") {
+      expect(result.theoryAxiomId).toBe("PA1");
+      expect(result.displayName).toBe("PA1 (0≠後者)");
+    }
+  });
+
+  it("PA体系でPA3公理を識別する", () => {
+    const result = identifyAxiom(axiomPA3Template, peanoArithmeticSystem);
+    expect(result._tag).toBe("TheoryAxiom");
+    if (result._tag === "TheoryAxiom") {
+      expect(result.theoryAxiomId).toBe("PA3");
+    }
+  });
+
+  it("PA体系でPA6公理を識別する", () => {
+    const result = identifyAxiom(axiomPA6Template, peanoArithmeticSystem);
+    expect(result._tag).toBe("TheoryAxiom");
+    if (result._tag === "TheoryAxiom") {
+      expect(result.theoryAxiomId).toBe("PA6");
+    }
+  });
+
+  it("PA体系でも通常の論理公理(A1)は識別される", () => {
+    const result = identifyAxiom(axiomA1Template, peanoArithmeticSystem);
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(result.axiomId).toBe("A1");
+    }
+  });
+
+  it("PA体系でも等号公理(E1)は識別される", () => {
+    const result = identifyAxiom(axiomE1Template, peanoArithmeticSystem);
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(result.axiomId).toBe("E1");
+    }
+  });
+
+  it("theoryAxiomsが未定義の体系では理論公理は識別されない", () => {
+    const result = identifyAxiom(axiomPA1Template, equalityLogicSystem);
+    expect(result._tag).toBe("Error");
+  });
+
+  it("論理公理でもPA公理でもない式はErrorになる", () => {
+    // ¬¬φ は A1, A2, A3, A4, A5, E1-E3, PA1-PA6 のいずれにもマッチしない
+    const randomFormula = negation(negation(phi));
+    const result = identifyAxiom(randomFormula, peanoArithmeticSystem);
+    expect(result._tag).toBe("Error");
+  });
+});
+
+describe("matchTheoryAxiom", () => {
+  describe("exactモード", () => {
+    it("完全一致でOkを返す", () => {
+      const axiom: TheoryAxiom = {
+        id: "TEST",
+        displayName: "Test",
+        template: axiomPA1Template,
+        dslText: "",
+        matchMode: "exact",
+      };
+      const result = matchTheoryAxiom(axiom, axiomPA1Template);
+      expect(result._tag).toBe("Ok");
+    });
+
+    it("不一致でErrorを返す", () => {
+      const axiom: TheoryAxiom = {
+        id: "TEST",
+        displayName: "Test",
+        template: axiomPA1Template,
+        dslText: "",
+        matchMode: "exact",
+      };
+      const result = matchTheoryAxiom(axiom, axiomPA2Template);
+      expect(result._tag).toBe("Error");
+    });
+  });
+
+  describe("patternモード", () => {
+    it("パターンマッチでOkを返す", () => {
+      // テンプレート: φ → φ
+      const axiom: TheoryAxiom = {
+        id: "TEST",
+        displayName: "Test",
+        template: implication(phi, phi),
+        dslText: "",
+        matchMode: "pattern",
+      };
+      // 候補: (P(x) → P(x)) — φ = P(x) としてマッチ
+      const px = predicate("P", [x]);
+      const candidate = implication(px, px);
+      const result = matchTheoryAxiom(axiom, candidate);
+      expect(result._tag).toBe("Ok");
+    });
+
+    it("パターン不一致でErrorを返す", () => {
+      const axiom: TheoryAxiom = {
+        id: "TEST",
+        displayName: "Test",
+        template: implication(phi, phi),
+        dslText: "",
+        matchMode: "pattern",
+      };
+      // 候補: P(x) → Q(x) — φ が P(x) と Q(x) で矛盾
+      const candidate = implication(predicate("P", [x]), predicate("Q", [x]));
+      const result = matchTheoryAxiom(axiom, candidate);
+      expect(result._tag).toBe("Error");
     });
   });
 });

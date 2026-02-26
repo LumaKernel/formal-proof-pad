@@ -47,6 +47,11 @@ export type AxiomNameResult =
       readonly axiomId: AxiomId;
       readonly displayName: string;
     }
+  | {
+      readonly _tag: "TheoryAxiomIdentified";
+      readonly theoryAxiomId: string;
+      readonly displayName: string;
+    }
   | { readonly _tag: "NotIdentified" };
 
 /**
@@ -62,14 +67,22 @@ export function identifyAxiomName(
   system: LogicSystem,
 ): AxiomNameResult {
   const result = identifyAxiom(formula, system);
-  if (result._tag === "Error") {
-    return { _tag: "NotIdentified" };
+  switch (result._tag) {
+    case "Ok":
+      return {
+        _tag: "Identified",
+        axiomId: result.axiomId,
+        displayName: axiomDisplayNames[result.axiomId],
+      };
+    case "TheoryAxiom":
+      return {
+        _tag: "TheoryAxiomIdentified",
+        theoryAxiomId: result.theoryAxiomId,
+        displayName: result.displayName,
+      };
+    case "Error":
+      return { _tag: "NotIdentified" };
   }
-  return {
-    _tag: "Identified",
-    axiomId: result.axiomId,
-    displayName: axiomDisplayNames[result.axiomId],
-  };
 }
 
 /**

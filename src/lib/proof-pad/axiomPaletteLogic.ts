@@ -176,5 +176,18 @@ export function getAvailableAxioms(
     }
   }
 
+  // 理論公理（非論理的公理）
+  if (system.theoryAxioms !== undefined) {
+    for (const axiom of system.theoryAxioms) {
+      items.push({
+        id: axiom.id,
+        displayName: axiom.displayName,
+        template: axiom.template,
+        unicodeDisplay: formatFormula(axiom.template),
+        dslText: axiom.dslText,
+      });
+    }
+  }
+
   return items;
 }

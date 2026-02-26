@@ -18,7 +18,14 @@ import {
   universal,
   equality,
 } from "./formula";
-import { type Term, TermVariable, termVariable } from "./term";
+import {
+  type Term,
+  TermVariable,
+  termVariable,
+  constant,
+  functionApplication,
+  binaryOperation,
+} from "./term";
 import { equalFormula, equalTerm } from "./equality";
 import { metaVariableKey, termMetaVariableKey } from "./metaVariable";
 import {
@@ -165,6 +172,183 @@ export const axiomE3Template: Formula = universal(
 // E4, E5 はシグネチャ依存（関数記号・述語記号ごとに生成）のため、テンプレートではなく
 // 検証関数内で動的に処理する。
 
+// ── 理論公理（非論理的公理） ──────────────────────────────
+
+/**
+ * 理論公理（非論理的公理）。
+ *
+ * 論理体系の上に乗る、特定の理論（ペアノ算術、群論など）の公理。
+ * パターンマッチングで使用されるテンプレートと、表示用メタデータを保持する。
+ *
+ * matchMode:
+ * - "pattern": テンプレートをパターンとして一方向マッチング（メタ変数を含むスキーマ）
+ * - "exact": 完全一致（メタ変数を含まない固定公理）
+ */
+export type TheoryAxiom = {
+  /** 公理ID（表示・識別用。例: "PA1", "PA2"） */
+  readonly id: string;
+  /** 公理の表示名（例: "PA1 (0≠後者)"） */
+  readonly displayName: string;
+  /** 公理テンプレートの論理式 */
+  readonly template: Formula;
+  /** DSLテキスト（パレット表示・エディタ用） */
+  readonly dslText: string;
+  /** マッチングモード */
+  readonly matchMode: "pattern" | "exact";
+};
+
+// ── ペアノ算術の公理テンプレート ─────────────────────────
+
+// ヘルパー: ペアノ算術の定数・関数
+const zero = constant("0");
+const succOfX = functionApplication("S", [xVar]);
+const succOfY = functionApplication("S", [yVar]);
+
+/**
+ * PA1: ∀x. ¬(S(x) = 0)
+ * 0は後者関数の値域にない。
+ */
+export const axiomPA1Template: Formula = universal(
+  xVar,
+  negation(equality(succOfX, zero)),
+);
+
+/**
+ * PA2: ∀x.∀y. S(x) = S(y) → x = y
+ * 後者関数は単射。
+ */
+export const axiomPA2Template: Formula = universal(
+  xVar,
+  universal(
+    yVar,
+    implication(equality(succOfX, succOfY), equality(xVar, yVar)),
+  ),
+);
+
+/**
+ * PA3: ∀x. x + 0 = x
+ * 加法の基底。
+ */
+export const axiomPA3Template: Formula = universal(
+  xVar,
+  equality(binaryOperation("+", xVar, zero), xVar),
+);
+
+/**
+ * PA4: ∀x.∀y. x + S(y) = S(x + y)
+ * 加法の再帰定義。
+ */
+export const axiomPA4Template: Formula = universal(
+  xVar,
+  universal(
+    yVar,
+    equality(
+      binaryOperation("+", xVar, succOfY),
+      functionApplication("S", [binaryOperation("+", xVar, yVar)]),
+    ),
+  ),
+);
+
+/**
+ * PA5: ∀x. x * 0 = 0
+ * 乗法の基底。
+ */
+export const axiomPA5Template: Formula = universal(
+  xVar,
+  equality(binaryOperation("*", xVar, zero), zero),
+);
+
+/**
+ * PA6: ∀x.∀y. x * S(y) = x * y + x
+ * 乗法の再帰定義。
+ */
+export const axiomPA6Template: Formula = universal(
+  xVar,
+  universal(
+    yVar,
+    equality(
+      binaryOperation("*", xVar, succOfY),
+      binaryOperation("+", binaryOperation("*", xVar, yVar), xVar),
+    ),
+  ),
+);
+
+/**
+ * PA7: 帰納法スキーマ
+ * φ[0/x] → (∀x.(φ → φ[S(x)/x])) → ∀x.φ
+ *
+ * これはメタ変数φを含むスキーマ。任意の論理式φに対して成立する。
+ * matchMode: "pattern" でパターンマッチングにより検証する。
+ *
+ * テンプレートでは:
+ * - φ はメタ変数 (matchFormulaPattern で自由にバインド)
+ * - x は項変数 (テンプレート内で固定)
+ *
+ * 注意: このテンプレートのマッチングは matchFormulaPattern だけでは不十分。
+ * φ[0/x] と φ[S(x)/x] が正しい代入結果であることの検証が必要。
+ * → matchTheoryAxiomPA7 で専用ロジックを実装。
+ */
+export const axiomPA7Template: Formula = implication(
+  metaVariable("φ"), // placeholder: 実際は φ[0/x]
+  implication(
+    universal(xVar, implication(metaVariable("φ"), metaVariable("φ"))),
+    universal(xVar, metaVariable("φ")),
+  ),
+);
+// PA7 は構造的パターンマッチだけでは表現できないため、
+// 専用の matchTheoryAxiomPA7 関数で検証する。
+
+// ── ペアノ算術の理論公理定義 ────────────────────────────
+
+/**
+ * ペアノ算術の固定公理（PA1-PA6）。
+ * これらはメタ変数を含まない固定テンプレート。exact マッチで検証。
+ */
+export const peanoFixedAxioms: readonly TheoryAxiom[] = [
+  {
+    id: "PA1",
+    displayName: "PA1 (0≠後者)",
+    template: axiomPA1Template,
+    dslText: "all x. ~(S(x) = 0)",
+    matchMode: "exact",
+  },
+  {
+    id: "PA2",
+    displayName: "PA2 (Sの単射性)",
+    template: axiomPA2Template,
+    dslText: "all x. all y. S(x) = S(y) -> x = y",
+    matchMode: "exact",
+  },
+  {
+    id: "PA3",
+    displayName: "PA3 (加法基底)",
+    template: axiomPA3Template,
+    dslText: "all x. x + 0 = x",
+    matchMode: "exact",
+  },
+  {
+    id: "PA4",
+    displayName: "PA4 (加法再帰)",
+    template: axiomPA4Template,
+    dslText: "all x. all y. x + S(y) = S(x + y)",
+    matchMode: "exact",
+  },
+  {
+    id: "PA5",
+    displayName: "PA5 (乗法基底)",
+    template: axiomPA5Template,
+    dslText: "all x. x * 0 = 0",
+    matchMode: "exact",
+  },
+  {
+    id: "PA6",
+    displayName: "PA6 (乗法再帰)",
+    template: axiomPA6Template,
+    dslText: "all x. all y. x * S(y) = x * y + x",
+    matchMode: "exact",
+  },
+];
+
 // ── 体系設定 ──────────────────────────────────────────────
 
 /**
@@ -172,6 +356,9 @@ export const axiomE3Template: Formula = universal(
  *
  * どの公理・推論規則を有効にするかを指定する。
  * 段階的実装: Phase 1 Łukasiewicz → Phase 2 他の体系追加
+ *
+ * theoryAxioms を指定することで、特定の理論（ペアノ算術、群論など）の
+ * 非論理的公理を体系に含めることができる。
  */
 export type LogicSystem = {
   /** 体系名 */
@@ -184,6 +371,8 @@ export type LogicSystem = {
   readonly equalityLogic: boolean;
   /** 汎化規則（Gen）の有効/無効 */
   readonly generalization: boolean;
+  /** 理論公理（非論理的公理）。デフォルトは空。 */
+  readonly theoryAxioms?: readonly TheoryAxiom[];
 };
 
 /**
@@ -286,6 +475,21 @@ export const equalityLogicSystem: LogicSystem = {
   predicateLogic: true,
   equalityLogic: true,
   generalization: true,
+};
+
+/**
+ * ペアノ算術（PA）: 等号付き述語論理 + PA1-PA6
+ * 帰納法スキーマ(PA7)は含まない（構造が特殊なため別途対応が必要）。
+ *
+ * シグネチャ: 定数 0, 関数 S(·), 二項演算 +, *
+ */
+export const peanoArithmeticSystem: LogicSystem = {
+  name: "Peano Arithmetic",
+  propositionalAxioms: new Set(["A1", "A2", "A3"]),
+  predicateLogic: true,
+  equalityLogic: true,
+  generalization: true,
+  theoryAxioms: peanoFixedAxioms,
 };
 
 // ── 推論規則の適用結果 ───────────────────────────────────
@@ -796,15 +1000,57 @@ export const applySubstitution = (
  * 論理式がシステムで有効な公理のいずれかのインスタンスかを判定する。
  *
  * マッチした場合、公理IDと代入を返す。
+ * 理論公理の場合は theoryAxiomId フィールドに理論公理のIDが入る。
  */
 export type AxiomIdentificationResult =
   | {
       readonly _tag: "Ok";
       readonly axiomId: AxiomId;
+      readonly theoryAxiomId?: undefined;
+      readonly formulaSubstitution: FormulaSubstitutionMap;
+      readonly termSubstitution: TermMetaSubstitutionMap;
+    }
+  | {
+      readonly _tag: "TheoryAxiom";
+      readonly theoryAxiomId: string;
+      readonly displayName: string;
       readonly formulaSubstitution: FormulaSubstitutionMap;
       readonly termSubstitution: TermMetaSubstitutionMap;
     }
   | { readonly _tag: "Error" };
+
+/**
+ * 理論公理のインスタンスか判定する。
+ *
+ * matchMode に応じて:
+ * - "exact": テンプレートと完全一致
+ * - "pattern": テンプレートをパターンとして一方向マッチング
+ */
+export const matchTheoryAxiom = (
+  axiom: TheoryAxiom,
+  formula: Formula,
+): AxiomMatchResult => {
+  if (axiom.matchMode === "exact") {
+    if (equalFormula(axiom.template, formula)) {
+      return axiomMatchOk(new Map(), new Map());
+    }
+    return axiomMatchErr({
+      _tag: "NotAnAxiomInstance",
+      axiomId: axiom.id as AxiomId,
+      formula,
+    });
+  }
+  // pattern mode
+  const result = matchFormulaPattern(axiom.template, formula);
+  if (result === undefined) {
+    return axiomMatchErr({
+      _tag: "NotAnAxiomInstance",
+      axiomId: axiom.id as AxiomId,
+      formula,
+    });
+  }
+  return axiomMatchOk(result.formulaSub, result.termSub);
+};
 
 export const identifyAxiom = (
   formula: Formula,
@@ -862,6 +1108,22 @@ export const identifyAxiom = (
         return {
           _tag: "Ok",
           axiomId,
+          formulaSubstitution: result.formulaSubstitution,
+          termSubstitution: result.termSubstitution,
+        };
+      }
+    }
+  }
+
+  // 理論公理
+  if (system.theoryAxioms !== undefined) {
+    for (const axiom of system.theoryAxioms) {
+      const result = matchTheoryAxiom(axiom, formula);
+      if (result._tag === "Ok") {
+        return {
+          _tag: "TheoryAxiom",
+          theoryAxiomId: axiom.id,
+          displayName: axiom.displayName,
           formulaSubstitution: result.formulaSubstitution,
           termSubstitution: result.termSubstitution,
         };

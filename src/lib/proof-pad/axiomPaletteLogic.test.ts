@@ -8,6 +8,7 @@ import {
   classicalLogicSystem,
   predicateLogicSystem,
   equalityLogicSystem,
+  peanoArithmeticSystem,
 } from "../logic-core/inferenceRule";
 import type { LogicSystem } from "../logic-core/inferenceRule";
 
@@ -176,6 +177,48 @@ describe("axiomPalette", () => {
       for (const item of items) {
         expect(item.template._tag).toBeDefined();
       }
+    });
+
+    describe("theory axioms", () => {
+      it("includes PA1-PA6 for peano arithmetic system", () => {
+        const items = getAvailableAxioms(peanoArithmeticSystem);
+        const ids = items.map((i) => i.id);
+        expect(ids).toContain("PA1");
+        expect(ids).toContain("PA2");
+        expect(ids).toContain("PA3");
+        expect(ids).toContain("PA4");
+        expect(ids).toContain("PA5");
+        expect(ids).toContain("PA6");
+      });
+
+      it("theory axioms have dslText", () => {
+        const items = getAvailableAxioms(peanoArithmeticSystem);
+        const pa1 = items.find((i) => i.id === "PA1");
+        const pa3 = items.find((i) => i.id === "PA3");
+        expect(pa1?.dslText).toBe("all x. ~(S(x) = 0)");
+        expect(pa3?.dslText).toBe("all x. x + 0 = x");
+      });
+
+      it("theory axioms have unicodeDisplay", () => {
+        const items = getAvailableAxioms(peanoArithmeticSystem);
+        const pa1 = items.find((i) => i.id === "PA1");
+        expect(pa1?.unicodeDisplay).toContain("¬");
+      });
+
+      it("theory axioms appear after logic axioms", () => {
+        const items = getAvailableAxioms(peanoArithmeticSystem);
+        const ids = items.map((i) => i.id);
+        // 論理公理が先、理論公理が後
+        const a1Index = ids.indexOf("A1");
+        const pa1Index = ids.indexOf("PA1");
+        expect(pa1Index).toBeGreaterThan(a1Index);
+      });
+
+      it("does not include theory axioms for system without theoryAxioms", () => {
+        const items = getAvailableAxioms(equalityLogicSystem);
+        const ids = items.map((i) => i.id);
+        expect(ids).not.toContain("PA1");
+      });
     });
   });
 });

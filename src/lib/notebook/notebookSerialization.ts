@@ -124,8 +124,13 @@ export function serializeCollection(collection: NotebookCollection): string {
       workspace: {
         ...n.workspace,
         system: {
-          ...n.workspace.system,
+          name: n.workspace.system.name,
           propositionalAxioms: [...n.workspace.system.propositionalAxioms],
+          predicateLogic: n.workspace.system.predicateLogic,
+          equalityLogic: n.workspace.system.equalityLogic,
+          generalization: n.workspace.system.generalization,
+          // theoryAxioms は Formula テンプレートを含むためシリアライズしない。
+          // 復元時はプリセットから体系名で theoryAxioms を取得する。
         },
       },
       ...(n.questId !== undefined ? { questId: n.questId } : {}),

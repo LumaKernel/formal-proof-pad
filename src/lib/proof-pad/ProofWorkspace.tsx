@@ -744,7 +744,10 @@ export function ProofWorkspace({
       const formula = parseNodeFormula(node);
       if (formula === undefined) continue;
       const result = identifyAxiomName(formula, workspace.system);
-      if (result._tag === "Identified") {
+      if (
+        result._tag === "Identified" ||
+        result._tag === "TheoryAxiomIdentified"
+      ) {
         names.set(node.id, result.displayName);
       }
     }
