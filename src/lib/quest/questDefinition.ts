@@ -103,6 +103,7 @@ export function findCategoryById(
  */
 export type SystemPresetId =
   | "minimal"
+  | "intuitionistic"
   | "lukasiewicz"
   | "mendelson"
   | "predicate"

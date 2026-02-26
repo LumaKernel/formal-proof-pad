@@ -13,10 +13,12 @@ import {
   axiomA2Template,
   axiomA3Template,
   axiomM3Template,
+  axiomEFQTemplate,
   axiomE1Template,
   axiomE2Template,
   axiomE3Template,
   minimalLogicSystem,
+  intuitionisticSystem,
   lukasiewiczSystem,
   mendelsonSystem,
   predicateLogicSystem,
@@ -272,6 +274,39 @@ describe("matchPropositionalAxiom", () => {
         implication(psi, phi),
       );
       const result = matchPropositionalAxiom("M3", nonInstance);
+      expect(result._tag).toBe("Error");
+    });
+  });
+
+  describe("EFQ: 爆発原理 ¬φ → (φ → ψ)", () => {
+    it("should match the template itself", () => {
+      const result = matchPropositionalAxiom("EFQ", axiomEFQTemplate);
+      expect(result._tag).toBe("Ok");
+    });
+
+    it("should match a concrete instance", () => {
+      const p = predicate("P", []);
+      const q = predicate("Q", []);
+      // ¬P → (P → Q)
+      const instance = implication(negation(p), implication(p, q));
+      const result = matchPropositionalAxiom("EFQ", instance);
+      expect(result._tag).toBe("Ok");
+    });
+
+    it("should not match A3 template", () => {
+      const result = matchPropositionalAxiom("EFQ", axiomA3Template);
+      expect(result._tag).toBe("Error");
+    });
+
+    it("A3 should not match EFQ template", () => {
+      const result = matchPropositionalAxiom("A3", axiomEFQTemplate);
+      expect(result._tag).toBe("Error");
+    });
+
+    it("should not match when structure differs", () => {
+      // φ → (¬φ → ψ) ≠ ¬φ → (φ → ψ)
+      const nonInstance = implication(phi, implication(negation(phi), psi));
+      const result = matchPropositionalAxiom("EFQ", nonInstance);
       expect(result._tag).toBe("Error");
     });
   });
@@ -561,6 +596,18 @@ describe("LogicSystem", () => {
     expect(minimalLogicSystem.generalization).toBe(false);
   });
 
+  it("Intuitionistic system has A1, A2, EFQ", () => {
+    expect(intuitionisticSystem.propositionalAxioms.has("A1")).toBe(true);
+    expect(intuitionisticSystem.propositionalAxioms.has("A2")).toBe(true);
+    expect(intuitionisticSystem.propositionalAxioms.has("EFQ")).toBe(true);
+    expect(intuitionisticSystem.propositionalAxioms.has("A3")).toBe(false);
+    expect(intuitionisticSystem.propositionalAxioms.has("M3")).toBe(false);
+    expect(intuitionisticSystem.propositionalAxioms.size).toBe(3);
+    expect(intuitionisticSystem.predicateLogic).toBe(false);
+    expect(intuitionisticSystem.equalityLogic).toBe(false);
+    expect(intuitionisticSystem.generalization).toBe(false);
+  });
+
   it("Łukasiewicz system has A1, A2, A3", () => {
     expect(lukasiewiczSystem.propositionalAxioms.has("A1")).toBe(true);
     expect(lukasiewiczSystem.propositionalAxioms.has("A2")).toBe(true);
@@ -674,6 +721,37 @@ describe("identifyAxiom", () => {
     expect(a3Result._tag).toBe("Error");
     const m3Result = identifyAxiom(axiomM3Template, minimalLogicSystem);
     expect(m3Result._tag).toBe("Error");
+  });
+
+  it("should identify EFQ instance in intuitionistic system", () => {
+    const result = identifyAxiom(axiomEFQTemplate, intuitionisticSystem);
+    expect(result._tag).toBe("Ok");
+    if (result._tag === "Ok") {
+      expect(result.axiomId).toBe("EFQ");
+    }
+  });
+
+  it("should not identify EFQ in lukasiewicz system", () => {
+    const result = identifyAxiom(axiomEFQTemplate, lukasiewiczSystem);
+    expect(result._tag).toBe("Error");
+  });
+
+  it("should not identify A3 in intuitionistic system", () => {
+    const result = identifyAxiom(axiomA3Template, intuitionisticSystem);
+    expect(result._tag).toBe("Error");
+  });
+
+  it("should identify A1 and A2 in intuitionistic system", () => {
+    const a1Result = identifyAxiom(axiomA1Template, intuitionisticSystem);
+    expect(a1Result._tag).toBe("Ok");
+    if (a1Result._tag === "Ok") {
+      expect(a1Result.axiomId).toBe("A1");
+    }
+    const a2Result = identifyAxiom(axiomA2Template, intuitionisticSystem);
+    expect(a2Result._tag).toBe("Ok");
+    if (a2Result._tag === "Ok") {
+      expect(a2Result.axiomId).toBe("A2");
+    }
   });
 
   it("should identify A4 instance when predicate logic enabled", () => {

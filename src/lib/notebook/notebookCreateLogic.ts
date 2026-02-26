@@ -10,6 +10,7 @@
 import type { LogicSystem } from "../logic-core/inferenceRule";
 import {
   minimalLogicSystem,
+  intuitionisticSystem,
   lukasiewiczSystem,
   mendelsonSystem,
   predicateLogicSystem,
@@ -34,6 +35,13 @@ export const systemPresets: readonly SystemPreset[] = [
     description:
       "A1, A2 + Modus Ponens。否定公理なしの最小体系。含意のみで閉じる。",
     system: minimalLogicSystem,
+  },
+  {
+    id: "intuitionistic",
+    label: "直観主義論理（Intuitionistic Logic）",
+    description:
+      "A1, A2, EFQ + Modus Ponens。爆発原理を含む直観主義命題論理体系。",
+    system: intuitionisticSystem,
   },
   {
     id: "lukasiewicz",

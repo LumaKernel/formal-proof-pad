@@ -40,6 +40,7 @@ import { freeVariablesInFormula } from "./freeVariables";
  * - A2 (S公理): (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ)) — 全体系共通
  * - A3 (対偶): (¬φ → ¬ψ) → (ψ → φ) — Łukasiewicz体系
  * - M3 (背理法): (¬φ → ¬ψ) → ((¬φ → ψ) → φ) — Mendelson体系
+ * - EFQ (爆発): ¬φ → (φ → ψ) — 直観主義論理
  *
  * 新しい命題論理公理を追加する場合:
  *   1. ここに ID を追加
@@ -49,7 +50,7 @@ import { freeVariablesInFormula } from "./freeVariables";
  *   5. axiomPaletteLogic.ts の propositionalAxiomMetas に追加
  *   6. notebookSerialization.ts の VALID_AXIOM_IDS に追加
  */
-export type PropositionalAxiomId = "A1" | "A2" | "A3" | "M3";
+export type PropositionalAxiomId = "A1" | "A2" | "A3" | "M3" | "EFQ";
 
 /**
  * 述語論理の追加公理スキーマID。
@@ -106,6 +107,17 @@ export const axiomA3Template: Formula = implication(
 export const axiomM3Template: Formula = implication(
   implication(negation(phi), negation(psi)),
   implication(implication(negation(phi), psi), phi),
+);
+
+/**
+ * EFQ: 爆発原理 (Ex Falso Quodlibet) ¬φ → (φ → ψ)
+ * 直観主義論理(HJ)で使用。矛盾から任意の命題が導かれる。
+ * ¬をプリミティブとして持つ体系での表現。⊥ベースでは ⊥ → φ に相当。
+ * @see dev/logic-reference/07-axiom-systems-survey.md §4.4
+ */
+export const axiomEFQTemplate: Formula = implication(
+  negation(phi),
+  implication(phi, psi),
 );
 
 /**
@@ -171,6 +183,21 @@ export type LogicSystem = {
 export const minimalLogicSystem: LogicSystem = {
   name: "Minimal Logic",
   propositionalAxioms: new Set(["A1", "A2"]),
+  predicateLogic: false,
+  equalityLogic: false,
+  generalization: false,
+};
+
+/**
+ * 直観主義論理（Intuitionistic Logic / HJ）: A1, A2, EFQ + MP
+ * 最小論理(HM) + EFQ（爆発原理）。
+ * ¬φ → (φ → ψ) により矛盾から任意の命題が導かれる。
+ * 古典論理と異なり、二重否定除去 ¬¬φ → φ は成り立たない。
+ * @see dev/logic-reference/07-axiom-systems-survey.md §4.4
+ */
+export const intuitionisticSystem: LogicSystem = {
+  name: "Intuitionistic Logic",
+  propositionalAxioms: new Set(["A1", "A2", "EFQ"]),
   predicateLogic: false,
   equalityLogic: false,
   generalization: false,
@@ -469,7 +496,7 @@ const axiomMatchErr = (error: RuleApplicationError): AxiomMatchResult => ({
 });
 
 /**
- * 命題論理公理 (A1, A2, A3, M3) のインスタンスか判定。
+ * 命題論理公理 (A1, A2, A3, M3, EFQ) のインスタンスか判定。
  */
 export const matchPropositionalAxiom = (
   axiomId: PropositionalAxiomId,
@@ -495,6 +522,8 @@ const getPropositionalAxiomTemplate = (
       return axiomA3Template;
     case "M3":
       return axiomM3Template;
+    case "EFQ":
+      return axiomEFQTemplate;
   }
   /* v8 ignore start */
   axiomId satisfies never;
@@ -746,6 +775,7 @@ export const identifyAxiom = (
     "A2",
     "A3",
     "M3",
+    "EFQ",
   ];
   for (const axiomId of propAxiomIds) {
     if (system.propositionalAxioms.has(axiomId)) {

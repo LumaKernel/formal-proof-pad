@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { getAvailableAxioms } from "./axiomPaletteLogic";
 import {
   minimalLogicSystem,
+  intuitionisticSystem,
   lukasiewiczSystem,
   mendelsonSystem,
   predicateLogicSystem,
@@ -40,6 +41,25 @@ describe("axiomPalette", () => {
       const items = getAvailableAxioms(mendelsonSystem);
       const m3 = items.find((i) => i.id === "M3");
       expect(m3?.dslText).toBe("(~phi -> ~psi) -> ((~phi -> psi) -> phi)");
+    });
+
+    it("returns A1, A2, EFQ for intuitionistic system", () => {
+      const items = getAvailableAxioms(intuitionisticSystem);
+      const ids = items.map((i) => i.id);
+      expect(ids).toEqual(["A1", "A2", "EFQ"]);
+    });
+
+    it("provides correct displayName for intuitionistic axioms", () => {
+      const items = getAvailableAxioms(intuitionisticSystem);
+      expect(items[0].displayName).toBe("A1 (K)");
+      expect(items[1].displayName).toBe("A2 (S)");
+      expect(items[2].displayName).toBe("EFQ");
+    });
+
+    it("provides dslText for EFQ", () => {
+      const items = getAvailableAxioms(intuitionisticSystem);
+      const efq = items.find((i) => i.id === "EFQ");
+      expect(efq?.dslText).toBe("~phi -> (phi -> psi)");
     });
 
     it("returns A1-A5 for predicate logic system", () => {

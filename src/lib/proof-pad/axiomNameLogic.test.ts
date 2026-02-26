@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { identifyAxiomName, getAxiomDisplayName } from "./axiomNameLogic";
 import {
+  intuitionisticSystem,
   lukasiewiczSystem,
   mendelsonSystem,
   equalityLogicSystem,
@@ -88,6 +89,25 @@ describe("axiomNameLogic", () => {
 
       it("does not identify M3 in lukasiewicz system", () => {
         const formula = parseFormula("(~phi -> ~psi) -> ((~phi -> psi) -> phi)");
+        const result = identifyAxiomName(formula, lukasiewiczSystem);
+        expect(result._tag).toBe("NotIdentified");
+      });
+    });
+
+    // --- EFQ (爆発原理) ---
+    describe("EFQ", () => {
+      it("identifies EFQ template in intuitionistic system", () => {
+        const formula = parseFormula("~phi -> (phi -> psi)");
+        const result = identifyAxiomName(formula, intuitionisticSystem);
+        expect(result._tag).toBe("Identified");
+        if (result._tag === "Identified") {
+          expect(result.axiomId).toBe("EFQ");
+          expect(result.displayName).toBe("EFQ");
+        }
+      });
+
+      it("does not identify EFQ in lukasiewicz system", () => {
+        const formula = parseFormula("~phi -> (phi -> psi)");
         const result = identifyAxiomName(formula, lukasiewiczSystem);
         expect(result._tag).toBe("NotIdentified");
       });
@@ -212,6 +232,10 @@ describe("axiomNameLogic", () => {
 
     it("returns display name for M3", () => {
       expect(getAxiomDisplayName("M3")).toBe("M3");
+    });
+
+    it("returns display name for EFQ", () => {
+      expect(getAxiomDisplayName("EFQ")).toBe("EFQ");
     });
 
     it("returns display name for A4", () => {

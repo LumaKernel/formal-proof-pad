@@ -33,9 +33,10 @@ describe("systemPresets", () => {
     }
   });
 
-  it("includes minimal, lukasiewicz, mendelson, predicate, and equality presets", () => {
+  it("includes minimal, intuitionistic, lukasiewicz, mendelson, predicate, and equality presets", () => {
     const ids = systemPresets.map((p) => p.id);
     expect(ids).toContain("minimal");
+    expect(ids).toContain("intuitionistic");
     expect(ids).toContain("lukasiewicz");
     expect(ids).toContain("mendelson");
     expect(ids).toContain("predicate");
@@ -90,6 +91,15 @@ describe("validateCreateForm", () => {
   it("valid form with minimal system", () => {
     expect(
       validateCreateForm({ ...validValues, systemPresetId: "minimal" }),
+    ).toEqual({ valid: true });
+  });
+
+  it("valid form with intuitionistic system", () => {
+    expect(
+      validateCreateForm({
+        ...validValues,
+        systemPresetId: "intuitionistic",
+      }),
     ).toEqual({ valid: true });
   });
 

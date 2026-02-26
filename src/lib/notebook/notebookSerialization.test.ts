@@ -10,6 +10,7 @@ import {
 } from "./notebookState";
 import {
   minimalLogicSystem,
+  intuitionisticSystem,
   lukasiewiczSystem,
   mendelsonSystem,
 } from "../logic-core/inferenceRule";
@@ -99,6 +100,33 @@ describe("notebookSerialization", () => {
       ).toBe(true);
       expect(
         restored.notebooks[0]?.workspace.system.propositionalAxioms.has("M3"),
+      ).toBe(true);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A3"),
+      ).toBe(false);
+    });
+
+    it("直観主義論理体系のノートブックをラウンドトリップできる", () => {
+      const col = createNotebook(createEmptyCollection(), {
+        name: "直観主義ノート",
+        system: intuitionisticSystem,
+        now: 1000,
+      });
+      const json = serializeCollection(col);
+      const restored = deserializeCollection(json);
+
+      expect(restored.notebooks.length).toBe(1);
+      expect(restored.notebooks[0]?.workspace.system.name).toBe(
+        "Intuitionistic Logic",
+      );
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A1"),
+      ).toBe(true);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A2"),
+      ).toBe(true);
+      expect(
+        restored.notebooks[0]?.workspace.system.propositionalAxioms.has("EFQ"),
       ).toBe(true);
       expect(
         restored.notebooks[0]?.workspace.system.propositionalAxioms.has("A3"),

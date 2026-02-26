@@ -17,6 +17,7 @@ import {
   axiomA2Template,
   axiomA3Template,
   axiomM3Template,
+  axiomEFQTemplate,
   axiomE1Template,
   axiomE2Template,
   axiomE3Template,
@@ -72,6 +73,12 @@ const propositionalAxiomMetas: readonly PropositionalAxiomMeta[] = [
     displayName: "M3",
     template: axiomM3Template,
     dslText: "(~phi -> ~psi) -> ((~phi -> psi) -> phi)",
+  },
+  {
+    id: "EFQ",
+    displayName: "EFQ",
+    template: axiomEFQTemplate,
+    dslText: "~phi -> (phi -> psi)",
   },
 ];
 
