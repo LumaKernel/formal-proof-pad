@@ -6,7 +6,12 @@ import {
 } from "./questStartLogic";
 import type { QuestDefinition, SystemPresetId } from "./questDefinition";
 import {
+  skSystem,
+  minimalLogicSystem,
+  intuitionisticSystem,
+  classicalLogicSystem,
   lukasiewiczSystem,
+  mendelsonSystem,
   predicateLogicSystem,
   equalityLogicSystem,
 } from "../logic-core/inferenceRule";
@@ -44,10 +49,40 @@ const testQuests: readonly QuestDefinition[] = [
 ];
 
 describe("resolveSystemPreset", () => {
+  it("skプリセットを解決できる", () => {
+    const result = resolveSystemPreset("sk");
+    expect(result).toBeDefined();
+    expect(result?.system).toBe(skSystem);
+  });
+
+  it("minimalプリセットを解決できる", () => {
+    const result = resolveSystemPreset("minimal");
+    expect(result).toBeDefined();
+    expect(result?.system).toBe(minimalLogicSystem);
+  });
+
+  it("intuitionisticプリセットを解決できる", () => {
+    const result = resolveSystemPreset("intuitionistic");
+    expect(result).toBeDefined();
+    expect(result?.system).toBe(intuitionisticSystem);
+  });
+
+  it("classicalプリセットを解決できる", () => {
+    const result = resolveSystemPreset("classical");
+    expect(result).toBeDefined();
+    expect(result?.system).toBe(classicalLogicSystem);
+  });
+
   it("lukasiewiczプリセットを解決できる", () => {
     const result = resolveSystemPreset("lukasiewicz");
     expect(result).toBeDefined();
     expect(result?.system).toBe(lukasiewiczSystem);
+  });
+
+  it("mendelsonプリセットを解決できる", () => {
+    const result = resolveSystemPreset("mendelson");
+    expect(result).toBeDefined();
+    expect(result?.system).toBe(mendelsonSystem);
   });
 
   it("predicateプリセットを解決できる", () => {

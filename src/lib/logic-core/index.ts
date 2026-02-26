@@ -131,6 +131,11 @@ export {
   lukasiewiczSystem,
   predicateLogicSystem,
   equalityLogicSystem,
+  skSystem,
+  minimalLogicSystem,
+  intuitionisticSystem,
+  classicalLogicSystem,
+  mendelsonSystem,
 } from "./inferenceRule";
 export type {
   PropositionalAxiomId,

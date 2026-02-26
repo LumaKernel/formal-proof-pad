@@ -9,6 +9,7 @@
 
 import type { LogicSystem } from "../logic-core/inferenceRule";
 import {
+  skSystem,
   minimalLogicSystem,
   intuitionisticSystem,
   classicalLogicSystem,
@@ -28,52 +29,71 @@ export type SystemPreset = {
   readonly system: LogicSystem;
 };
 
-/** 利用可能なプリセット公理系一覧 */
+/**
+ * 利用可能なプリセット公理系一覧。
+ *
+ * ヒルベルト流証明論の体系を包含関係に基づいて整理:
+ *   SK = HM ⊆ HJ ⊆ HK
+ *   SK = HM ⊆ Łukasiewicz = HK（古典論理として等価）
+ *   SK = HM ⊆ Mendelson = HK（古典論理として等価）
+ *
+ * @see 戸次大介『数理論理学』第7章
+ */
 export const systemPresets: readonly SystemPreset[] = [
   {
-    id: "minimal",
-    label: "最小論理（Minimal Logic）",
+    id: "sk",
+    label: "体系SK（基本命題計算）",
     description:
-      "A1, A2 + Modus Ponens。否定公理なしの最小体系。含意のみで閉じる。",
+      "(S)(K) + MP。含意→のみの最も基本的な体系。戸次『数理論理学』§7.2。",
+    system: skSystem,
+  },
+  {
+    id: "minimal",
+    label: "最小論理（HM）",
+    description:
+      "A1(K), A2(S) + MP。否定公理なしの最小体系。SK と同一。HM ⊆ HJ ⊆ HK。",
     system: minimalLogicSystem,
   },
   {
     id: "intuitionistic",
-    label: "直観主義論理（Intuitionistic Logic）",
+    label: "直観主義論理（HJ）",
     description:
-      "A1, A2, EFQ + Modus Ponens。爆発原理を含む直観主義命題論理体系。",
+      "HM + EFQ（爆発原理）。¬φ → (φ → ψ)。二重否定除去は成り立たない。",
     system: intuitionisticSystem,
   },
   {
     id: "classical",
-    label: "古典論理（Classical Logic / HK）",
+    label: "古典論理（HK）",
     description:
-      "A1, A2, DNE + Modus Ponens。二重否定除去を含む古典命題論理体系。",
+      "HM + DNE（二重否定除去）。¬¬φ → φ。最も広い命題論理体系。",
     system: classicalLogicSystem,
   },
   {
     id: "lukasiewicz",
-    label: "Łukasiewicz（命題論理）",
-    description: "A1, A2, A3 + Modus Ponens。命題論理の基本体系。",
+    label: "Łukasiewicz体系",
+    description:
+      "A1, A2, A3（対偶）+ MP。古典論理(HK)と等価。戸次『数理論理学』§7.2。",
     system: lukasiewiczSystem,
   },
   {
     id: "mendelson",
-    label: "Mendelson（命題論理）",
+    label: "Mendelson体系",
     description:
-      "A1, A2, M3 + Modus Ponens。背理法公理を使う命題論理体系。",
+      "A1, A2, M3（背理法）+ MP。古典論理(HK)と等価。異なる公理化。",
     system: mendelsonSystem,
   },
   {
     id: "predicate",
     label: "述語論理",
-    description: "A1-A5 + MP + Gen。量化子（∀, ∃）を含む述語論理。",
+    description:
+      "A1-A5 + MP + Gen。量化子（∀, ∃）を含む述語論理。",
     system: predicateLogicSystem,
   },
   {
     id: "equality",
     label: "等号付き述語論理",
-    description: "A1-A5 + E1-E5 + MP + Gen。等号公理を含む体系。",
+    description:
+      "A1-A5 + E1-E5 + MP + Gen。等号公理を含む体系。",
     system: equalityLogicSystem,
   },
 ] as const;

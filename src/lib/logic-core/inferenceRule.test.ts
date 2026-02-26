@@ -18,6 +18,7 @@ import {
   axiomE1Template,
   axiomE2Template,
   axiomE3Template,
+  skSystem,
   minimalLogicSystem,
   intuitionisticSystem,
   lukasiewiczSystem,
@@ -619,6 +620,10 @@ describe("applySubstitution", () => {
 // ── 体系設定 ──────────────────────────────────────────────
 
 describe("LogicSystem", () => {
+  it("SK system is same reference as minimal logic system", () => {
+    expect(skSystem).toBe(minimalLogicSystem);
+  });
+
   it("Minimal logic system has A1, A2 only", () => {
     expect(minimalLogicSystem.propositionalAxioms.has("A1")).toBe(true);
     expect(minimalLogicSystem.propositionalAxioms.has("A2")).toBe(true);

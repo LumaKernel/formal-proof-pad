@@ -190,6 +190,9 @@ export type LogicSystem = {
  * 最小論理（Minimal Logic / HM）: A1, A2 + MP
  * 否定に関する公理を含まない。含意のみで閉じた体系。
  * 直観主義論理・古典論理の共通部分。
+ *
+ * 戸次本の体系 SK（(S)(K) + MP）と同一。
+ * HM ⊆ HJ ⊆ HK の包含関係の基底となる。
  * @see dev/logic-reference/07-axiom-systems-survey.md
  */
 export const minimalLogicSystem: LogicSystem = {
@@ -199,6 +202,13 @@ export const minimalLogicSystem: LogicSystem = {
   equalityLogic: false,
   generalization: false,
 };
+
+/**
+ * 体系 SK（基本命題計算）: (S)(K) + MP
+ * 戸次大介『数理論理学』§7.2 で導入される一階命題論理の体系。
+ * 内部的には minimalLogicSystem と同一。教育的文脈で別名として提供。
+ */
+export const skSystem: LogicSystem = minimalLogicSystem;
 
 /**
  * 直観主義論理（Intuitionistic Logic / HJ）: A1, A2, EFQ + MP
