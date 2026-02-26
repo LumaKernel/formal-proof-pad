@@ -132,7 +132,7 @@ const containerStyle: CSSProperties = {
 };
 
 const inputBaseStyle: CSSProperties = {
-  fontFamily: "monospace",
+  fontFamily: "var(--font-mono)",
   padding: "6px 8px",
   borderWidth: 1,
   borderStyle: "solid",
@@ -167,12 +167,12 @@ const errorContainerStyle: CSSProperties = {
 const errorMessageStyle: CSSProperties = {
   color: "var(--color-error, #e53e3e)",
   fontSize: "0.85em",
-  fontFamily: "monospace",
+  fontFamily: "var(--font-mono)",
 };
 
 const highlightContainerStyle: CSSProperties = {
   position: "relative",
-  fontFamily: "monospace",
+  fontFamily: "var(--font-mono)",
   fontSize: "inherit",
   whiteSpace: "pre",
   padding: "6px 8px",

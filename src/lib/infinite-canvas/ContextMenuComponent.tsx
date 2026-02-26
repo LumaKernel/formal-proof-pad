@@ -76,7 +76,7 @@ export function ContextMenuComponent({
         borderRadius: 6,
         boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
         padding: "4px 0",
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-ui)",
         fontSize: 13,
         userSelect: "none",
       }}

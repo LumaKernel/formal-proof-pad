@@ -50,7 +50,7 @@ export const BasicTerms: Story = {
           >
             <span
               style={{
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 12,
                 color: "#888",
                 minWidth: 140,
@@ -117,7 +117,7 @@ export const FunctionApplications: Story = {
           >
             <span
               style={{
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 12,
                 color: "#888",
                 minWidth: 100,
@@ -191,7 +191,7 @@ export const BinaryOperations: Story = {
           >
             <span
               style={{
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 12,
                 color: "#888",
                 minWidth: 80,
@@ -271,7 +271,7 @@ export const ComplexTerms: Story = {
           <div key={label}>
             <div
               style={{
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 11,
                 color: "#888",
                 marginBottom: 4,

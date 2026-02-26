@@ -118,7 +118,7 @@ function EditableProofNodeDemo() {
           padding: "4px 8px",
           borderRadius: 4,
           fontSize: 12,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
         }}
       >
@@ -262,7 +262,7 @@ export const LevelOfDetail: Story = {
             <div key={level}>
               <div
                 style={{
-                  fontFamily: "monospace",
+                  fontFamily: "var(--font-mono)",
                   fontSize: 14,
                   fontWeight: 700,
                   marginBottom: 12,
@@ -336,9 +336,7 @@ export const LevelOfDetail: Story = {
     await expect(
       canvas.getByTestId("lod-axiom-full-axiom-name"),
     ).toBeInTheDocument();
-    await expect(
-      canvas.getByTestId("lod-mp-full-status"),
-    ).toBeInTheDocument();
+    await expect(canvas.getByTestId("lod-mp-full-status")).toBeInTheDocument();
     await expect(
       canvas.getByTestId("lod-mp-full-dependencies"),
     ).toBeInTheDocument();

@@ -30,8 +30,7 @@ const pageStyle: CSSProperties = {
   minHeight: "100vh",
   background: "var(--color-bg-primary)",
   color: "var(--color-text-primary)",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontFamily: "var(--font-ui)",
 };
 
 const headerStyle: CSSProperties = {

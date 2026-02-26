@@ -96,10 +96,7 @@ function findItem(
   return items.find((item) => item.id === id);
 }
 
-function toEndpoint(
-  item: ItemData,
-  size: Size,
-): ConnectionEndpoint {
+function toEndpoint(item: ItemData, size: Size): ConnectionEndpoint {
   return {
     position: item.position,
     width: size.width,
@@ -115,9 +112,9 @@ function FullDemo() {
   });
   const [items, setItems] = useState<readonly ItemData[]>(INITIAL_ITEMS);
   const [lastAction, setLastAction] = useState<string>("");
-  const [itemSizes, setItemSizes] = useState<
-    Readonly<Record<string, Size>>
-  >({});
+  const [itemSizes, setItemSizes] = useState<Readonly<Record<string, Size>>>(
+    {},
+  );
 
   const handlePositionChange = (id: string, newPosition: Point) => {
     setItems((prev) =>
@@ -201,7 +198,7 @@ function FullDemo() {
                 background: item.color,
                 color: "#fff",
                 borderRadius: 8,
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 14,
                 fontWeight: 600,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -225,7 +222,7 @@ function FullDemo() {
           padding: "4px 8px",
           borderRadius: 4,
           fontSize: 12,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
         }}
       >

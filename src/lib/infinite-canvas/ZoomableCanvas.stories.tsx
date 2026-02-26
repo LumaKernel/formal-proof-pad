@@ -24,7 +24,7 @@ function ZoomableCanvasDemo() {
           padding: "4px 8px",
           borderRadius: 4,
           fontSize: 12,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
         }}
       >

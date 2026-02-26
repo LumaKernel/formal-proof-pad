@@ -40,8 +40,7 @@ const containerStyle: CSSProperties = {
   flexDirection: "column",
   gap: 20,
   padding: 16,
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontFamily: "var(--font-ui)",
 };
 
 const filterBarStyle: CSSProperties = {

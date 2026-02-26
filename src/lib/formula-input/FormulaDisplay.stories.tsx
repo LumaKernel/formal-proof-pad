@@ -98,7 +98,7 @@ export const PropositionalConnectives: Story = {
           >
             <span
               style={{
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 12,
                 color: "#888",
                 minWidth: 80,
@@ -175,7 +175,7 @@ export const Quantifiers: Story = {
           >
             <span
               style={{
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 12,
                 color: "#888",
                 minWidth: 80,
@@ -249,7 +249,7 @@ export const PredicatesAndEquality: Story = {
           >
             <span
               style={{
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 12,
                 color: "#888",
                 minWidth: 120,
@@ -332,7 +332,7 @@ export const ComplexFormulas: Story = {
           <div key={label}>
             <div
               style={{
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 11,
                 color: "#888",
                 marginBottom: 4,

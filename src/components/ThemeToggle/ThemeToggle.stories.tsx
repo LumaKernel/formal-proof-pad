@@ -13,7 +13,7 @@ function ThemeToggleWithProvider(): ReactNode {
           background: "var(--color-bg-primary, #ffffff)",
           color: "var(--color-text-primary, #171717)",
           minHeight: "100px",
-          fontFamily: "sans-serif",
+          fontFamily: "var(--font-ui)",
         }}
       >
         <ThemeToggle />
@@ -71,7 +71,7 @@ function ThemeToggleIconsOnly(): ReactNode {
           background: "var(--color-bg-primary, #ffffff)",
           color: "var(--color-text-primary, #171717)",
           minHeight: "100px",
-          fontFamily: "sans-serif",
+          fontFamily: "var(--font-ui)",
         }}
       >
         <ThemeToggle showLabels={false} />

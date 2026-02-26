@@ -39,8 +39,7 @@ const formStyle: CSSProperties = {
   gap: 16,
   padding: 24,
   maxWidth: 480,
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontFamily: "var(--font-ui)",
 };
 
 const fieldGroupStyle: CSSProperties = {

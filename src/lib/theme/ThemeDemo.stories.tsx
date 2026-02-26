@@ -16,7 +16,7 @@ function ThemeDemoContent(): ReactNode {
         color: isDark ? "#ededed" : "#171717",
         minHeight: "200px",
         borderRadius: "8px",
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-ui)",
         transition: "background 0.3s, color 0.3s",
       }}
     >

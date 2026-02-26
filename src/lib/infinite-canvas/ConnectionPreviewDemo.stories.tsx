@@ -69,7 +69,9 @@ function ConnectionPreviewDemo() {
   const [itemSizes, setItemSizes] = useState<ReadonlyMap<string, ItemSize>>(
     new Map(),
   );
-  const [statusMessage, setStatusMessage] = useState("Drag from a port to connect nodes");
+  const [statusMessage, setStatusMessage] = useState(
+    "Drag from a port to connect nodes",
+  );
 
   const candidates = buildPortCandidates(
     items
@@ -131,13 +133,12 @@ function ConnectionPreviewDemo() {
     [],
   );
 
-  const { previewState, startDrag, updateDrag, endDrag } =
-    useConnectionPreview(
-      viewport,
-      candidates,
-      validateConnection,
-      handleConnectionComplete,
-    );
+  const { previewState, startDrag, updateDrag, endDrag } = useConnectionPreview(
+    viewport,
+    candidates,
+    validateConnection,
+    handleConnectionComplete,
+  );
 
   const handlePositionChange = (id: string, newPosition: Point) => {
     setItems((prev) =>
@@ -167,21 +168,20 @@ function ConnectionPreviewDemo() {
   );
 
   const handlePortDragStart = useCallback(
-    (itemId: string) =>
-      (portId: string, screenX: number, screenY: number) => {
-        const size = itemSizes.get(itemId);
-        const item = items.find((i) => i.id === itemId);
-        const port = item?.ports.find((p) => p.id === portId);
-        if (!size || !item || !port) return;
+    (itemId: string) => (portId: string, screenX: number, screenY: number) => {
+      const size = itemSizes.get(itemId);
+      const item = items.find((i) => i.id === itemId);
+      const port = item?.ports.find((p) => p.id === portId);
+      if (!size || !item || !port) return;
 
-        const portOnItem: ConnectorPortOnItem = {
-          port,
-          itemPosition: item.position,
-          itemWidth: size.width,
-          itemHeight: size.height,
-        };
-        startDrag(itemId, portOnItem, screenX, screenY);
-      },
+      const portOnItem: ConnectorPortOnItem = {
+        port,
+        itemPosition: item.position,
+        itemWidth: size.width,
+        itemHeight: size.height,
+      };
+      startDrag(itemId, portOnItem, screenX, screenY);
+    },
     [items, itemSizes, startDrag],
   );
 
@@ -204,7 +204,11 @@ function ConnectionPreviewDemo() {
     .map((item) => {
       const size = itemSizes.get(item.id);
       if (!size) return null;
-      return { position: item.position, width: size.width, height: size.height };
+      return {
+        position: item.position,
+        width: size.width,
+        height: size.height,
+      };
     })
     .filter((o) => o !== null);
 
@@ -254,10 +258,7 @@ function ConnectionPreviewDemo() {
 
         {/* Preview line */}
         {previewState !== null && (
-          <ConnectionPreviewLine
-            state={previewState}
-            viewport={viewport}
-          />
+          <ConnectionPreviewLine state={previewState} viewport={viewport} />
         )}
 
         {/* Items */}
@@ -279,7 +280,7 @@ function ConnectionPreviewDemo() {
                 background: item.color,
                 color: "#fff",
                 borderRadius: 8,
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 14,
                 fontWeight: 600,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -311,8 +312,20 @@ function ConnectionPreviewDemo() {
                 itemHeight={size.height}
                 viewport={viewport}
                 highlighted={isSnappedTarget ?? false}
-                color={isSnappedTarget === true ? (previewState?.isValid === true ? "#3b82f6" : "#ef4444") : "#fff"}
-                borderColor={isSnappedTarget === true ? (previewState?.isValid === true ? "#3b82f6" : "#ef4444") : "#666"}
+                color={
+                  isSnappedTarget === true
+                    ? previewState?.isValid === true
+                      ? "#3b82f6"
+                      : "#ef4444"
+                    : "#fff"
+                }
+                borderColor={
+                  isSnappedTarget === true
+                    ? previewState?.isValid === true
+                      ? "#3b82f6"
+                      : "#ef4444"
+                    : "#666"
+                }
                 onPortDragStart={handlePortDragStart(item.id)}
               />
             );
@@ -331,7 +344,7 @@ function ConnectionPreviewDemo() {
           padding: "8px 12px",
           borderRadius: 4,
           fontSize: 12,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
           maxWidth: 300,
         }}
@@ -343,7 +356,8 @@ function ConnectionPreviewDemo() {
             Dragging from: {previewState.sourceItemId}
             {previewState.snappedTarget !== null && (
               <span>
-                {" → "}{previewState.snappedTarget.itemId}
+                {" → "}
+                {previewState.snappedTarget.itemId}
                 {previewState.isValid ? " (valid)" : " (invalid)"}
               </span>
             )}
@@ -380,7 +394,9 @@ export const Default: Story = {
     );
 
     // Verify connector ports are rendered
-    const ports = canvasElement.querySelectorAll("[data-testid^='connector-port-']");
+    const ports = canvasElement.querySelectorAll(
+      "[data-testid^='connector-port-']",
+    );
     await expect(ports.length).toBeGreaterThanOrEqual(12); // 3 items × 4 ports
 
     // Verify no preview line initially

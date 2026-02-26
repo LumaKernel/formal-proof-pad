@@ -283,7 +283,7 @@ function ProofTreeDemo() {
                 background: nodeColor(node.kind),
                 color: "#fff",
                 borderRadius: node.kind === "conclusion" ? 12 : 8,
-                fontFamily: "serif, 'Times New Roman', Times",
+                fontFamily: "var(--font-formula)",
                 fontSize: 13,
                 boxShadow:
                   node.kind === "conclusion"
@@ -301,7 +301,7 @@ function ProofTreeDemo() {
               <div
                 style={{
                   fontSize: 10,
-                  fontFamily: "sans-serif",
+                  fontFamily: "var(--font-ui)",
                   fontWeight: 700,
                   opacity: 0.8,
                   marginBottom: 2,
@@ -351,7 +351,7 @@ function ProofTreeDemo() {
           padding: "8px 12px",
           borderRadius: 6,
           fontSize: 12,
-          fontFamily: "sans-serif",
+          fontFamily: "var(--font-ui)",
           pointerEvents: "none",
           lineHeight: 1.6,
         }}

@@ -33,7 +33,7 @@ const panelStyle: CSSProperties = {
   border: "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
   boxShadow: "0 2px 12px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
   padding: "8px 0",
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontSize: 12,
   maxHeight: "calc(100% - 80px)",
   overflowY: "auto" as const,
@@ -48,7 +48,8 @@ const headerStyle: CSSProperties = {
   textTransform: "uppercase",
   letterSpacing: 1,
   color: "var(--color-text-secondary, #666)",
-  borderBottom: "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
+  borderBottom:
+    "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
   marginBottom: 4,
 };
 
@@ -59,7 +60,8 @@ const itemStyle: CSSProperties = {
   flexDirection: "column",
   gap: 2,
   transition: "background 0.15s, box-shadow 0.15s",
-  borderBottom: "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
+  borderBottom:
+    "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
 };
 
 const itemHoverStyle: CSSProperties = {
@@ -74,7 +76,7 @@ const itemLabelStyle: CSSProperties = {
 };
 
 const itemFormulaStyle: CSSProperties = {
-  fontFamily: "serif, 'Times New Roman', Times",
+  fontFamily: "var(--font-formula)",
   fontStyle: "italic",
   fontSize: 11,
   color: "var(--color-text-secondary, #666)",

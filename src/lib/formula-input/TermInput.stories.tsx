@@ -37,7 +37,7 @@ function TermInputWrapper({
             marginTop: 8,
             fontSize: 12,
             color: "var(--color-text-secondary, #888)",
-            fontFamily: "monospace",
+            fontFamily: "var(--font-mono)",
           }}
         >
           AST: {parsedTag}

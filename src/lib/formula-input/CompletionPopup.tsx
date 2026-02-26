@@ -46,7 +46,7 @@ const popupStyle: CSSProperties = {
   borderRadius: 6,
   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
   padding: "4px 0",
-  fontFamily: "monospace",
+  fontFamily: "var(--font-mono)",
   fontSize: "0.9em",
 };
 

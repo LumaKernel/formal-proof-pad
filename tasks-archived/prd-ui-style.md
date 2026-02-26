@@ -148,11 +148,11 @@
 
 **受け入れ基準:**
 
-- [ ] CSS変数に `--font-ui`, `--font-formula`, `--font-mono` を定義
-- [ ] 各コンポーネントのfont-familyをCSS変数参照に統一
-- [ ] 数式フォントとUIフォントの一貫した使い分け
-- [ ] フォントサイズのスケール定義（--font-size-xs, sm, base, lg, xl）
-- [ ] 型チェック/lint/テスト通過
+- [x] CSS変数に `--font-ui`, `--font-formula`, `--font-mono` を定義
+- [x] 各コンポーネントのfont-familyをCSS変数参照に統一
+- [x] 数式フォントとUIフォントの一貫した使い分け
+- [x] フォントサイズのスケール定義（--font-size-xs, sm, base, lg, xl）
+- [x] 型チェック/lint/テスト通過
 
 ---
 

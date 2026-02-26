@@ -131,7 +131,7 @@ function CommandPaletteDemoComponent() {
                 background: item.color,
                 color: "#fff",
                 borderRadius: 6,
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 14,
                 fontWeight: 600,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -171,7 +171,7 @@ function CommandPaletteDemoComponent() {
           padding: "8px 12px",
           borderRadius: 6,
           fontSize: 11,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
           zIndex: 10000,
           maxWidth: 300,
@@ -248,9 +248,10 @@ export const PaletteInteraction: Story = {
     ).toBeInTheDocument();
 
     // First item should be selected
-    await expect(
-      canvas.getByTestId("command-palette-item-a1"),
-    ).toHaveAttribute("aria-selected", "true");
+    await expect(canvas.getByTestId("command-palette-item-a1")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     // Type to filter
     const input = canvas.getByTestId("command-palette-input");

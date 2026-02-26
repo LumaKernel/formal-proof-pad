@@ -24,7 +24,7 @@ function UndoRedoDemoComponent() {
     <div
       style={{
         padding: 24,
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-ui)",
         maxWidth: 480,
         margin: "0 auto",
       }}

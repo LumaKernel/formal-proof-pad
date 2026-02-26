@@ -65,16 +65,13 @@ function ZoomControlsDemo() {
     height: 600,
   });
 
-  const handlePositionChange = useCallback(
-    (id: string, newPosition: Point) => {
-      setNodes((prev) =>
-        prev.map((node) =>
-          node.id === id ? { ...node, position: newPosition } : node,
-        ),
-      );
-    },
-    [],
-  );
+  const handlePositionChange = useCallback((id: string, newPosition: Point) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === id ? { ...node, position: newPosition } : node,
+      ),
+    );
+  }, []);
 
   const containerCallbackRef = useCallback((el: HTMLDivElement | null) => {
     if (el) {
@@ -108,7 +105,7 @@ function ZoomControlsDemo() {
                 background: node.color,
                 color: "#fff",
                 borderRadius: 8,
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 14,
                 fontWeight: 600,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -145,17 +142,14 @@ function ZoomControlsTopRight() {
       style={{ width: "100vw", height: "100vh" }}
     >
       <InfiniteCanvas viewport={viewport} onViewportChange={setViewport}>
-        <CanvasItem
-          position={{ x: 100, y: 100 }}
-          viewport={viewport}
-        >
+        <CanvasItem position={{ x: 100, y: 100 }} viewport={viewport}>
           <div
             style={{
               padding: "10px 16px",
               background: "#4a90d9",
               color: "#fff",
               borderRadius: 8,
-              fontFamily: "sans-serif",
+              fontFamily: "var(--font-ui)",
               fontSize: 14,
               fontWeight: 600,
               boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -316,16 +310,13 @@ function ZoomToSelectionDemo() {
     new Set(),
   );
 
-  const handlePositionChange = useCallback(
-    (id: string, newPosition: Point) => {
-      setNodes((prev) =>
-        prev.map((node) =>
-          node.id === id ? { ...node, position: newPosition } : node,
-        ),
-      );
-    },
-    [],
-  );
+  const handlePositionChange = useCallback((id: string, newPosition: Point) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === id ? { ...node, position: newPosition } : node,
+      ),
+    );
+  }, []);
 
   const containerCallbackRef = useCallback((el: HTMLDivElement | null) => {
     if (el) {
@@ -336,8 +327,7 @@ function ZoomToSelectionDemo() {
 
   const zoomItems = toZoomItems(nodes);
   const selectedItems = useMemo(
-    () =>
-      zoomItems.filter((_, i) => selectedIds.has(INITIAL_NODES[i]!.id)),
+    () => zoomItems.filter((_, i) => selectedIds.has(INITIAL_NODES[i]!.id)),
     [zoomItems, selectedIds],
   );
 
@@ -389,7 +379,7 @@ function ZoomToSelectionDemo() {
                 background: node.color,
                 color: "#fff",
                 borderRadius: 8,
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 14,
                 fontWeight: 600,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -442,8 +432,7 @@ export const ZoomToSelection: Story = {
     await user.click(canvas.getByTestId("zoom-to-selection-button"));
 
     // Zoom percentage should have changed (fitted to the selected node)
-    const percentText =
-      canvas.getByTestId("zoom-percentage").textContent ?? "";
+    const percentText = canvas.getByTestId("zoom-percentage").textContent ?? "";
     const num = parseInt(percentText, 10);
     // Should zoom in significantly since we fit to a single small node
     await expect(num).toBeGreaterThan(100);

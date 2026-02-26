@@ -110,7 +110,7 @@ function LineMenuPanel({
         borderRadius: 8,
         boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
         padding: 0,
-        fontFamily: "sans-serif",
+        fontFamily: "var(--font-ui)",
         fontSize: 13,
         userSelect: "none",
         overflow: "hidden",
@@ -281,7 +281,7 @@ function LineMenuDemo() {
                 background: node.color,
                 color: "#fff",
                 borderRadius: 8,
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 14,
                 fontWeight: 600,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -318,7 +318,7 @@ function LineMenuDemo() {
           padding: "4px 8px",
           borderRadius: 4,
           fontSize: 12,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
         }}
       >

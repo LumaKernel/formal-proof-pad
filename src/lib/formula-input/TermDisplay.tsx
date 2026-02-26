@@ -45,7 +45,7 @@ export function TermDisplay({
 
   const mergedStyle: CSSProperties = useMemo(
     () => ({
-      fontFamily: "serif, 'Times New Roman', Times",
+      fontFamily: "var(--font-formula)",
       fontStyle: "italic",
       whiteSpace: "nowrap",
       ...style,

@@ -71,7 +71,7 @@ export interface EditableProofNodeProps {
 
 const labelStyle: CSSProperties = {
   fontSize: 10,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontWeight: 700,
   opacity: 0.8,
   marginBottom: 2,
@@ -80,7 +80,7 @@ const labelStyle: CSSProperties = {
 };
 
 const formulaContainerReadonlyStyle: CSSProperties = {
-  fontFamily: "serif, 'Times New Roman', Times",
+  fontFamily: "var(--font-formula)",
   fontStyle: "italic",
   whiteSpace: "nowrap",
   fontSize: 13,
@@ -88,7 +88,7 @@ const formulaContainerReadonlyStyle: CSSProperties = {
 
 const statusErrorStyle: CSSProperties = {
   fontSize: 10,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontStyle: "normal",
   marginTop: 4,
   padding: "2px 6px",
@@ -99,7 +99,7 @@ const statusErrorStyle: CSSProperties = {
 
 const statusSuccessStyle: CSSProperties = {
   fontSize: 10,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontStyle: "normal",
   marginTop: 4,
   padding: "2px 6px",
@@ -110,7 +110,7 @@ const statusSuccessStyle: CSSProperties = {
 
 const roleBadgeBaseStyle: CSSProperties = {
   fontSize: 9,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontWeight: 600,
   padding: "1px 6px",
   borderRadius: 3,
@@ -129,7 +129,7 @@ const headerRowStyle: CSSProperties = {
 
 const protectedBadgeStyle: CSSProperties = {
   fontSize: 9,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontWeight: 600,
   padding: "1px 6px",
   borderRadius: 3,
@@ -142,7 +142,7 @@ const protectedBadgeStyle: CSSProperties = {
 
 const axiomNameBadgeStyle: CSSProperties = {
   fontSize: 9,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontWeight: 600,
   padding: "1px 6px",
   borderRadius: 3,
@@ -155,7 +155,7 @@ const axiomNameBadgeStyle: CSSProperties = {
 
 const dependencyContainerStyle: CSSProperties = {
   fontSize: 9,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontStyle: "normal",
   marginTop: 4,
   padding: "3px 6px",
@@ -246,7 +246,10 @@ export function EditableProofNode({
   testId,
 }: EditableProofNodeProps) {
   const nodeStyle = useMemo(() => getProofNodeStyle(kind), [kind]);
-  const visibility = useMemo(() => getDetailVisibility(detailLevel), [detailLevel]);
+  const visibility = useMemo(
+    () => getDetailVisibility(detailLevel),
+    [detailLevel],
+  );
   const [isHovered, setIsHovered] = useState(false);
 
   const containerStyle: CSSProperties = useMemo(
@@ -255,7 +258,7 @@ export function EditableProofNode({
       background: nodeStyle.backgroundColor,
       color: nodeStyle.textColor,
       borderRadius: nodeStyle.borderRadius,
-      fontFamily: "serif, 'Times New Roman', Times",
+      fontFamily: "var(--font-formula)",
       fontSize: 13,
       boxShadow: isHovered ? nodeStyle.boxShadowHover : nodeStyle.boxShadow,
       minWidth: 80,
@@ -326,8 +329,12 @@ export function EditableProofNode({
     return parsed.status === "success" ? parsed.formula : null;
   }, [effectiveEditable, formulaText]);
 
-  const handleMouseEnter = useCallback(() => { setIsHovered(true); }, []);
-  const handleMouseLeave = useCallback(() => { setIsHovered(false); }, []);
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
 
   return (
     <div
@@ -429,7 +436,9 @@ export function EditableProofNode({
           {statusMessage}
         </div>
       ) : null}
-      {visibility.showDependencies && dependencies && dependencies.length > 0 ? (
+      {visibility.showDependencies &&
+      dependencies &&
+      dependencies.length > 0 ? (
         <div
           style={dependencyContainerStyle}
           data-testid={

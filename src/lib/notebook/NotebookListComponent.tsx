@@ -29,8 +29,7 @@ const containerStyle: CSSProperties = {
   flexDirection: "column",
   gap: 12,
   padding: 16,
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontFamily: "var(--font-ui)",
 };
 
 const emptyStyle: CSSProperties = {
@@ -50,12 +49,10 @@ const itemStyle: CSSProperties = {
   alignItems: "center",
   padding: "14px 18px",
   borderRadius: 8,
-  border:
-    "1px solid var(--color-notebook-card-border, rgba(180,160,130,0.25))",
+  border: "1px solid var(--color-notebook-card-border, rgba(180,160,130,0.25))",
   background: "var(--color-notebook-card-bg, #fffdf8)",
   cursor: "pointer",
-  transition:
-    "box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease",
+  transition: "box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease",
   gap: 12,
   boxShadow:
     "0 1px 3px var(--color-notebook-card-shadow, rgba(120,100,70,0.08))",
@@ -64,8 +61,7 @@ const itemStyle: CSSProperties = {
 
 const itemHoverStyle: CSSProperties = {
   ...itemStyle,
-  background:
-    "var(--color-notebook-card-hover-bg, rgba(252,249,243,0.98))",
+  background: "var(--color-notebook-card-hover-bg, rgba(252,249,243,0.98))",
   boxShadow:
     "0 3px 8px var(--color-notebook-card-shadow-hover, rgba(120,100,70,0.18))",
   transform: "translateY(-1px)",
@@ -135,21 +131,18 @@ const actionButtonStyle: CSSProperties = {
 
 const actionButtonHoverStyle: CSSProperties = {
   ...actionButtonStyle,
-  background:
-    "var(--color-notebook-action-hover-bg, rgba(245,240,230,0.95))",
+  background: "var(--color-notebook-action-hover-bg, rgba(245,240,230,0.95))",
 };
 
 const deleteButtonStyle: CSSProperties = {
   ...actionButtonStyle,
   color: "var(--color-notebook-delete-text, #c62828)",
-  borderColor:
-    "var(--color-notebook-delete-border, rgba(198,40,40,0.25))",
+  borderColor: "var(--color-notebook-delete-border, rgba(198,40,40,0.25))",
 };
 
 const deleteButtonHoverStyle: CSSProperties = {
   ...deleteButtonStyle,
-  background:
-    "var(--color-notebook-delete-hover-bg, rgba(198,40,40,0.06))",
+  background: "var(--color-notebook-delete-hover-bg, rgba(198,40,40,0.06))",
 };
 
 const renameInputStyle: CSSProperties = {

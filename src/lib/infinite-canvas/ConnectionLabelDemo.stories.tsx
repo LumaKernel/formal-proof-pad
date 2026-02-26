@@ -102,7 +102,7 @@ function SubstitutionPanel({
         borderRadius: 6,
         padding: "6px 10px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-        fontFamily: "serif",
+        fontFamily: "var(--font-formula)",
         fontSize: 13,
         minWidth: 100,
         pointerEvents: "auto",
@@ -145,7 +145,7 @@ function SubstitutionPanel({
               borderRadius: 3,
               padding: "2px 4px",
               fontSize: 12,
-              fontFamily: "serif",
+              fontFamily: "var(--font-formula)",
               width: 60,
             }}
             onChange={(e) => {
@@ -248,7 +248,7 @@ function ConnectionLabelDemo() {
                 background: node.color,
                 color: "#fff",
                 borderRadius: 8,
-                fontFamily: "serif",
+                fontFamily: "var(--font-formula)",
                 fontSize: 14,
                 fontWeight: 600,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -277,7 +277,7 @@ function ConnectionLabelDemo() {
           padding: "4px 8px",
           borderRadius: 4,
           fontSize: 12,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
         }}
       >

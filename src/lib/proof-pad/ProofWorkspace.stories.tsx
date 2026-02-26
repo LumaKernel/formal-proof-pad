@@ -507,12 +507,8 @@ export const SubtreeSelection: Story = {
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
 
     // ノードが表示されている
-    await expect(
-      canvas.getByTestId("proof-node-node-1"),
-    ).toBeInTheDocument();
-    await expect(
-      canvas.getByTestId("proof-node-node-5"),
-    ).toBeInTheDocument();
+    await expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    await expect(canvas.getByTestId("proof-node-node-5")).toBeInTheDocument();
 
     // node-1を右クリック → コンテキストメニュー表示
     const node1 = canvas.getByTestId("proof-node-node-1");

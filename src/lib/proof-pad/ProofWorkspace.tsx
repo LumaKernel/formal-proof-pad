@@ -25,7 +25,11 @@ import { AxiomPalette } from "./AxiomPalette";
 import { getAvailableAxioms, type AxiomPaletteItem } from "./axiomPaletteLogic";
 import { validateMPApplication } from "./mpApplicationLogic";
 import { validateGenApplication } from "./genApplicationLogic";
-import { getMPErrorMessageKey, getGenErrorMessageKey, formatMessage } from "./proofMessages";
+import {
+  getMPErrorMessageKey,
+  getGenErrorMessageKey,
+  formatMessage,
+} from "./proofMessages";
 import { useProofMessages } from "./ProofMessagesContext";
 import { checkGoal } from "./goalCheckLogic";
 import {
@@ -150,7 +154,7 @@ const headerStyle = {
   border: "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
   boxShadow: "0 1px 6px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
   fontSize: 13,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   pointerEvents: "auto" as const,
   color: "var(--color-text-primary, #171717)",
 };
@@ -162,8 +166,10 @@ const systemBadgeStyle = {
   borderRadius: 6,
   fontWeight: 600 as const,
   fontSize: 12,
-  border: "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
-  boxShadow: "0 1px 2px var(--color-paper-button-shadow, rgba(120, 100, 70, 0.08))",
+  border:
+    "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
+  boxShadow:
+    "0 1px 2px var(--color-paper-button-shadow, rgba(120, 100, 70, 0.08))",
 };
 
 const mpButtonStyle = {
@@ -175,7 +181,7 @@ const mpButtonStyle = {
   cursor: "pointer",
   fontWeight: 600 as const,
   fontSize: 12,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
 };
 
 const mpButtonActiveStyle = {
@@ -195,7 +201,7 @@ const mpSelectionBannerStyle = {
   color: "var(--color-node-text, #fff)",
   borderRadius: 8,
   fontSize: 13,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   fontWeight: 500 as const,
   boxShadow: "0 2px 8px var(--color-node-shadow, rgba(0,0,0,0.2))",
   pointerEvents: "auto" as const,
@@ -212,7 +218,7 @@ const cancelButtonStyle = {
   borderRadius: 4,
   cursor: "pointer",
   fontSize: 11,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
 };
 
 const genButtonStyle = {
@@ -236,7 +242,7 @@ const genVariableInputStyle = {
   border: "1px solid rgba(255,255,255,0.5)",
   borderRadius: 4,
   fontSize: 12,
-  fontFamily: "serif",
+  fontFamily: "var(--font-formula)",
   width: 40,
   outline: "none",
   background: "rgba(255,255,255,0.2)",
@@ -259,17 +265,18 @@ const goalContainerStyle = {
   border: "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
   boxShadow: "0 1px 6px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
   fontSize: 13,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
   pointerEvents: "auto" as const,
   color: "var(--color-text-primary, #171717)",
 };
 
 const goalInputStyle = {
   padding: "3px 8px",
-  border: "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
+  border:
+    "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
   borderRadius: 6,
   fontSize: 13,
-  fontFamily: "serif, 'Times New Roman', Times",
+  fontFamily: "var(--font-formula)",
   fontStyle: "italic" as const,
   width: 180,
   outline: "none",
@@ -294,7 +301,7 @@ const proofCompleteBannerStyle: CSSProperties = {
   color: "var(--color-proof-complete-text, #1a7a3a)",
   borderRadius: 4,
   fontSize: 20,
-  fontFamily: "'Georgia', 'Times New Roman', serif",
+  fontFamily: "var(--font-formula)",
   fontWeight: 700,
   fontVariant: "small-caps",
   border: "3px solid var(--color-proof-complete-border, #2ecc71)",
@@ -327,12 +334,14 @@ const paperButtonStyle = {
   padding: "3px 8px",
   background: "var(--color-paper-button-bg, rgba(255, 253, 248, 0.9))",
   color: "var(--color-text-primary, #171717)",
-  border: "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
+  border:
+    "1px solid var(--color-paper-button-border, rgba(180, 160, 130, 0.3))",
   borderRadius: 6,
   cursor: "pointer",
   fontSize: 11,
-  fontFamily: "sans-serif",
-  boxShadow: "0 1px 2px var(--color-paper-button-shadow, rgba(120, 100, 70, 0.08))",
+  fontFamily: "var(--font-ui)",
+  boxShadow:
+    "0 1px 2px var(--color-paper-button-shadow, rgba(120, 100, 70, 0.08))",
 };
 
 const convertToFreeButtonStyle = {
@@ -353,7 +362,7 @@ const selectionActionButtonStyle = {
   borderRadius: 4,
   cursor: "pointer",
   fontSize: 11,
-  fontFamily: "sans-serif",
+  fontFamily: "var(--font-ui)",
 };
 
 // --- コンポーネント ---
@@ -839,13 +848,17 @@ export function ProofWorkspace({
     const svgStr = generateExportSVG(workspace, { nodeSizes });
     // eslint-disable-next-line @luma-dev/luma-ts/no-date -- 不純なUI層でのみ使用
     const d = new Date();
-    const fileName = generateImageExportFileName(workspace.system.name, {
-      year: d.getUTCFullYear(),
-      month: d.getUTCMonth() + 1,
-      day: d.getUTCDate(),
-      hour: d.getUTCHours(),
-      minute: d.getUTCMinutes(),
-    }, "svg");
+    const fileName = generateImageExportFileName(
+      workspace.system.name,
+      {
+        year: d.getUTCFullYear(),
+        month: d.getUTCMonth() + 1,
+        day: d.getUTCDate(),
+        hour: d.getUTCHours(),
+        minute: d.getUTCMinutes(),
+      },
+      "svg",
+    );
     const blob = new Blob([svgStr], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -877,13 +890,17 @@ export function ProofWorkspace({
         if (pngBlob === null) return;
         // eslint-disable-next-line @luma-dev/luma-ts/no-date -- 不純なUI層でのみ使用
         const d = new Date();
-        const fileName = generateImageExportFileName(workspace.system.name, {
-          year: d.getUTCFullYear(),
-          month: d.getUTCMonth() + 1,
-          day: d.getUTCDate(),
-          hour: d.getUTCHours(),
-          minute: d.getUTCMinutes(),
-        }, "png");
+        const fileName = generateImageExportFileName(
+          workspace.system.name,
+          {
+            year: d.getUTCFullYear(),
+            month: d.getUTCMonth() + 1,
+            day: d.getUTCDate(),
+            hour: d.getUTCHours(),
+            minute: d.getUTCMinutes(),
+          },
+          "png",
+        );
         const url = URL.createObjectURL(pngBlob);
         const a = document.createElement("a");
         a.href = url;
@@ -1500,7 +1517,8 @@ export function ProofWorkspace({
         {/* 自動レイアウトトグル */}
         <span
           style={{
-            borderLeft: "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
+            borderLeft:
+              "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
             paddingLeft: 8,
             marginLeft: 4,
             display: "inline-flex",
@@ -1564,7 +1582,8 @@ export function ProofWorkspace({
         {/* エクスポート/インポート */}
         <span
           style={{
-            borderLeft: "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
+            borderLeft:
+              "1px solid var(--color-panel-rule-line, rgba(180, 160, 130, 0.15))",
             paddingLeft: 8,
             marginLeft: 4,
             display: "inline-flex",
@@ -1783,7 +1802,7 @@ export function ProofWorkspace({
             style={{
               color: "var(--color-proof-complete-text, #1a7a3a)",
               fontWeight: 700,
-              fontFamily: "'Georgia', serif",
+              fontFamily: "var(--font-formula)",
               border: "2px solid var(--color-proof-complete-border, #2ecc71)",
               borderRadius: 3,
               padding: "1px 8px",
@@ -1843,7 +1862,14 @@ export function ProofWorkspace({
         >
           <div>{msg.proofCompleteButAxiomViolation}</div>
           {questGoalResult?._tag === "AllAchievedButAxiomViolation" ? (
-            <div style={{ fontSize: 13, fontWeight: 400, marginTop: 4, fontVariant: "normal" as const }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 400,
+                marginTop: 4,
+                fontVariant: "normal" as const,
+              }}
+            >
               {formatMessage(msg.axiomViolationDetail, {
                 axiomIds: questGoalResult.goalResults
                   .flatMap((r) => [...r.violatingAxiomIds])
@@ -1877,15 +1903,14 @@ export function ProofWorkspace({
             top: nodeMenuState.screenPosition.y,
             zIndex: 2000,
             minWidth: 140,
-            background:
-              "var(--color-panel-bg, rgba(252, 249, 243, 0.96))",
+            background: "var(--color-panel-bg, rgba(252, 249, 243, 0.96))",
             border:
               "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
             borderRadius: 8,
             boxShadow:
               "0 4px 16px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
             padding: "4px 0",
-            fontFamily: "sans-serif",
+            fontFamily: "var(--font-ui)",
             fontSize: 13,
             userSelect: "none",
           }}
@@ -1902,7 +1927,8 @@ export function ProofWorkspace({
             onClick={handleSelectSubtree}
             /* v8 ignore start - hover visual effect only */
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "var(--color-surface-hover, #f0f0f0)";
+              e.currentTarget.style.background =
+                "var(--color-surface-hover, #f0f0f0)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = "transparent";

@@ -98,7 +98,7 @@ function FormulaNodeDemo() {
                   fontSize: 11,
                   color: "var(--color-text-secondary, #6b7280)",
                   marginBottom: 4,
-                  fontFamily: "sans-serif",
+                  fontFamily: "var(--font-ui)",
                 }}
               >
                 {node.label}
@@ -129,7 +129,7 @@ function FormulaNodeDemo() {
           padding: "4px 8px",
           borderRadius: 4,
           fontSize: 12,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
         }}
       >

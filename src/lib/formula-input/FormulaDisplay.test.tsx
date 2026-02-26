@@ -228,7 +228,7 @@ describe("FormulaDisplay", () => {
     it("デフォルトスタイルが適用される", () => {
       render(<FormulaDisplay formula={metaVariable("φ")} testId="formula" />);
       const el = screen.getByTestId("formula");
-      expect(el.style.fontFamily).toContain("serif");
+      expect(el.style.fontFamily).toBe("var(--font-formula)");
       expect(el.style.fontStyle).toBe("italic");
       expect(el.style.whiteSpace).toBe("nowrap");
     });

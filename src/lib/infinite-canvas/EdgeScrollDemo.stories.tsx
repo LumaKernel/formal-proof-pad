@@ -73,16 +73,13 @@ function EdgeScrollDemo() {
     EDGE_SCROLL_CONFIG,
   );
 
-  const handlePositionChange = useCallback(
-    (id: string, newPosition: Point) => {
-      setNodes((prev) =>
-        prev.map((node) =>
-          node.id === id ? { ...node, position: newPosition } : node,
-        ),
-      );
-    },
-    [],
-  );
+  const handlePositionChange = useCallback((id: string, newPosition: Point) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === id ? { ...node, position: newPosition } : node,
+      ),
+    );
+  }, []);
 
   const handleDragMove = useCallback(
     (screenPoint: Point) => {
@@ -139,7 +136,7 @@ function EdgeScrollDemo() {
                 background: node.color,
                 color: "#fff",
                 borderRadius: 8,
-                fontFamily: "sans-serif",
+                fontFamily: "var(--font-ui)",
                 fontSize: 14,
                 fontWeight: 600,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
@@ -224,19 +221,19 @@ function EdgeScrollDemo() {
           padding: "8px 12px",
           borderRadius: 6,
           fontSize: 12,
-          fontFamily: "monospace",
+          fontFamily: "var(--font-mono)",
           pointerEvents: "none",
           zIndex: 10000,
         }}
       >
         <div>Edge Scroll Demo</div>
+        <div>Drag a node to the viewport edge to auto-pan</div>
         <div>
-          Drag a node to the viewport edge to auto-pan
+          Threshold: {String(EDGE_SCROLL_CONFIG.threshold) satisfies string}px
         </div>
-        <div>Threshold: {String(EDGE_SCROLL_CONFIG.threshold) satisfies string}px</div>
         <div>
-          Viewport: ({viewport.offsetX.toFixed(0)}, {viewport.offsetY.toFixed(0)}) @{" "}
-          {(viewport.scale * 100).toFixed(0)}%
+          Viewport: ({viewport.offsetX.toFixed(0)},{" "}
+          {viewport.offsetY.toFixed(0)}) @ {(viewport.scale * 100).toFixed(0)}%
         </div>
       </div>
     </div>

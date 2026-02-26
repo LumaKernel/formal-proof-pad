@@ -189,7 +189,7 @@ describe("TermDisplay", () => {
     it("デフォルトスタイルが適用される", () => {
       render(<TermDisplay term={termVariable("x")} testId="term" />);
       const el = screen.getByTestId("term");
-      expect(el.style.fontFamily).toContain("serif");
+      expect(el.style.fontFamily).toBe("var(--font-formula)");
       expect(el.style.fontStyle).toBe("italic");
       expect(el.style.whiteSpace).toBe("nowrap");
     });
