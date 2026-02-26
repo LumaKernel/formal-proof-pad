@@ -82,6 +82,39 @@
 
 ---
 
+## 2026-02-26 - UIスタイル: クエストカタログの改善（US-S08）
+- globals.css にクエストカタログ用CSS変数を追加（--color-quest-card-*, --color-quest-chapter-*, --color-quest-filter-*, --color-quest-progress-bar-*, --color-quest-star-*, --color-quest-rating-*, --color-quest-start-*, --color-quest-difficulty-*, --color-quest-empty-*）
+- QuestCatalogComponent.tsx のスタイルを教科書の目次風デザインに変更
+  - カテゴリヘッダーにチャプター番号（丸バッジ）を追加
+  - カテゴリ進捗にプログレスバーを追加
+  - 難易度表示を filled/empty 星（★）のビジュアル表示に変更
+  - 評価バッジの色をCSS変数化（rating CSS vars）
+  - フィルタバーを紙パネル風に統一
+  - クエストアイテムをカード風に変更（borderBottom区切り、ホバーで左辺インセットシャドウ）
+  - 空状態メッセージも紙パネルスタイルに
+- questCatalogListLogic.ts に `ratingCssVars()`, `difficultyStars()` 純粋関数を追加
+- ライト/ダークモード両対応（CSS変数で切り替え）
+- テスト: 158ファイル、3314テスト全パス（+13テスト追加: チャプター番号、プログレスバー、難易度星、ratingCssVars, difficultyStars）
+- カバレッジ: Stmts 99.34%(維持), Branch 94.91%(-0.05), Funcs 89.93%(-0.05), Lines 99.93%(維持)
+  - ベースライン: Stmts 99.34%, Branch 94.96%, Funcs 89.98%, Lines 99.93%
+  - 微減の原因: ratingCssVars のv8 ignoreブロック内exhaustive check追加分
+- ブラウザ確認: .screenshots/us-s08-quest-catalog-full-light.png, .screenshots/us-s08-quest-catalog-full-dark.png, .screenshots/us-s08-quest-catalog-empty-light.png
+- 変更ファイル:
+  - `src/app/globals.css` (MODIFIED - クエストカタログCSS変数追加 light/dark)
+  - `src/lib/quest/QuestCatalogComponent.tsx` (MODIFIED - 教科書目次風デザイン + チャプター番号 + プログレスバー + 星表示)
+  - `src/lib/quest/QuestCatalogComponent.test.tsx` (MODIFIED - チャプター番号・プログレスバー・難易度星テスト追加)
+  - `src/lib/quest/QuestCatalogComponent.stories.tsx` (MODIFIED - 新UI要素のplay関数アサーション追加)
+  - `src/lib/quest/questCatalogListLogic.ts` (MODIFIED - ratingCssVars, difficultyStars追加)
+  - `src/lib/quest/questCatalogListLogic.test.ts` (MODIFIED - ratingCssVars, difficultyStarsテスト追加)
+  - `tasks/prd-ui-style.md` (MODIFIED - US-S08完了)
+- **今後のイテレーションへの学び:**
+  - クエストカタログCSS変数（--color-quest-*）はノートブックカード（--color-notebook-card-*）と類似だが別系統。用途ごとに名前空間を分離
+  - `difficultyStars()` は boolean[] を返す純粋関数。UI側で filled/empty の色分けを行う
+  - `ratingCssVars()` はCSS変数名ペア（bg, text）を返す。ハードコード色をratingColor()で返す旧方式からCSS変数参照に移行
+  - プログレスバーはシンプルな div-in-div で実装。transition で滑らかに変化
+  - チャプター番号はフィルタ後の表示順（index+1）で振る。カテゴリ固有のorderではない
+---
+
 ## 2026-02-26 - UIスタイル: ノートブック一覧のカード化（US-S07）
 - globals.css にノートブックカード用CSS変数を追加（--color-notebook-card-*, --color-badge-free-*, --color-badge-quest-*, --color-notebook-action-*, --color-notebook-delete-*）
 - NotebookListComponent.tsx のスタイルを紙カード風に変更（クリーム系背景、微細な影、ホバーで浮き上がるアニメーション）
