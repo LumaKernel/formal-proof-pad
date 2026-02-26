@@ -3381,3 +3381,25 @@
   - AST上に⊥(Bottom)ノードがないため、EFQは `¬φ → (φ → ψ)` で表現。将来⊥を追加する場合はEFQ定義の再検討が必要
   - `prd-logic-selection.md`はまだ完了していない（HK=NK古典論理の独立定義、シークエント計算、自然演繹等が残っている）
 ---
+
+## 2026-02-26 - 論理体系: 古典論理(HK)追加
+- 実装した内容: DNE公理(¬¬φ→φ)と古典論理(Classical Logic / HK)体系の追加
+  - Bekki §7.8 Definition 7.21: HK = HM + DNE
+  - PropositionalAxiomId に "DNE" 追加
+  - axiomDNETemplate, classicalLogicSystem 定数追加
+  - ノートブック作成プリセット「古典論理（Classical Logic / HK）」追加
+  - 6ファイル更新 + 5テストファイル更新（全テストパス、3377テスト）
+- 変更したファイル:
+  - src/lib/logic-core/inferenceRule.ts (DNEテンプレート、classicalLogicSystem定義)
+  - src/lib/logic-core/inferenceRule.test.ts (DNEマッチング+identifyAxiomテスト)
+  - src/lib/proof-pad/axiomNameLogic.ts + test (DNE表示名)
+  - src/lib/proof-pad/axiomPaletteLogic.ts + test (DNEパレット項目)
+  - src/lib/notebook/notebookCreateLogic.ts + test (classicalプリセット)
+  - src/lib/notebook/notebookSerialization.ts + test (DNEバリデーション+ラウンドトリップ)
+- カバレッジ: Stmts 99.34%, Branch 94.92%, Funcs 89.94%, Lines 99.93% (低下なし)
+- スクリーンショット: `.screenshots/classical-logic-preset-form.png`, `.screenshots/classical-logic-selected.png`
+- **今後のイテレーションへの学び:**
+  - DNE追加もEFQと同じ6ステップパターンで完了。このパターンは安定している
+  - HK(古典論理)はA1+A2+DNEで定義。EFQではなくDNEを使う点がHJ(直観主義)との違い
+  - `prd-logic-selection.md`はまだ完了していない（シークエント計算、自然演繹等が残っている）
+---
