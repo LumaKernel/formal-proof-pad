@@ -3354,3 +3354,30 @@
   - 新しいLogicSystem定数 + プリセット + SystemPresetId の3点セットで体系追加可能
   - `prd-logic-selection.md`はまだ完了していない（HJ=NJ直観主義、HK=NK古典、シークエント計算等が残っている）
 ---
+
+## 2026-02-26 - 論理体系: 直観主義論理(Intuitionistic Logic)体系の追加
+- 直観主義論理(HJ = Hilbert Intuitionistic Logic)を新しい命題論理公理系として追加
+- HJ = HM + EFQ（爆発原理: ¬φ → (φ → ψ)）
+- bekki.pdf（戸次大介「数理論理学」）第7章のHJ体系定義を参照
+- EFQはAST上のNegationノードを使い `¬φ → (φ → ψ)` として表現（⊥ノードなし）
+- 変更ファイル（11ファイル、+211行）:
+  - `src/lib/logic-core/inferenceRule.ts` — PropositionalAxiomIdにEFQ追加、axiomEFQTemplate、intuitionisticSystem定数、getPropositionalAxiomTemplate/identifyAxiom更新
+  - `src/lib/logic-core/inferenceRule.test.ts` — EFQマッチング(+5件)、intuitionisticSystem構成テスト(+1件)、identifyAxiom直観主義テスト(+4件)
+  - `src/lib/notebook/notebookCreateLogic.ts` — "intuitionistic"プリセット追加
+  - `src/lib/notebook/notebookCreateLogic.test.ts` — intuitionisticプリセット存在・バリデーションテスト(+2件)
+  - `src/lib/notebook/notebookSerialization.ts` — VALID_AXIOM_IDSにEFQ追加
+  - `src/lib/notebook/notebookSerialization.test.ts` — 直観主義論理ラウンドトリップテスト(+1件)
+  - `src/lib/proof-pad/axiomNameLogic.ts` — EFQ表示名追加
+  - `src/lib/proof-pad/axiomNameLogic.test.ts` — EFQ識別・表示名テスト(+3件)
+  - `src/lib/proof-pad/axiomPaletteLogic.ts` — EFQパレットアイテム追加
+  - `src/lib/proof-pad/axiomPaletteLogic.test.ts` — intuitionistic体系パレットテスト(+3件)
+  - `src/lib/quest/questDefinition.ts` — SystemPresetIdに"intuitionistic"追加
+- ベースラインカバレッジ: Stmts 99.34%, Branch 94.92%, Funcs 89.96%, Lines 99.93%
+- 完了後カバレッジ: Stmts 99.34%, Branch 94.92%, Funcs 90.01%, Lines 99.93%（維持/微増）
+- テスト: 3342→3360件（+18件）
+- スクリーンショット: `.screenshots/intuitionistic-logic-fullscreen.png`, `.screenshots/intuitionistic-logic-full-list.png`
+- **今後のイテレーションへの学び:**
+  - EFQのような新しい公理追加は6ステップ: PropositionalAxiomId → template → switch文 → axiomNameLogic → axiomPaletteLogic → notebookSerialization
+  - AST上に⊥(Bottom)ノードがないため、EFQは `¬φ → (φ → ψ)` で表現。将来⊥を追加する場合はEFQ定義の再検討が必要
+  - `prd-logic-selection.md`はまだ完了していない（HK=NK古典論理の独立定義、シークエント計算、自然演繹等が残っている）
+---
