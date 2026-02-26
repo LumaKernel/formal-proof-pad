@@ -3304,3 +3304,30 @@
   - フォントトークンの3分類(UI/formula/mono)はこのプロジェクトのすべてのコンポーネントで十分にカバーできる
   - `prd-ui-style.md` の全9ストーリーが完了し、PRDをアーカイブ済み
 ---
+
+## 2026-02-26 - 論理体系: Mendelson命題論理体系の追加
+- Mendelson体系（A1, A2, M3）を新しい命題論理公理系として追加
+- PropositionalAxiomIdに"M3"を追加、axiomM3Template/mendelsonSystemを定義
+- 変更ファイル（13ファイル、+295行）:
+  - `src/lib/logic-core/inferenceRule.ts` — M3テンプレート、mendelsonSystem、getPropositionalAxiomTemplate/identifyAxiom更新
+  - `src/lib/logic-core/inferenceRule.test.ts` — M3マッチング5件、mendelsonSystem1件、identifyAxiom4件
+  - `src/lib/logic-core/proofTree.test.ts` — M3公理検証3件
+  - `src/lib/notebook/notebookCreateLogic.ts` — mendelsonプリセット追加
+  - `src/lib/notebook/notebookCreateLogic.test.ts` — mendelsonプリセット2件
+  - `src/lib/notebook/notebookSerialization.ts` — VALID_AXIOM_IDSにM3追加
+  - `src/lib/notebook/notebookSerialization.test.ts` — Mendelsonラウンドトリップ2件
+  - `src/lib/proof-pad/axiomNameLogic.ts` — M3表示名追加
+  - `src/lib/proof-pad/axiomNameLogic.test.ts` — M3識別+表示名3件
+  - `src/lib/proof-pad/axiomPaletteLogic.ts` — M3パレットアイテム追加
+  - `src/lib/proof-pad/axiomPaletteLogic.test.ts` — Mendelsonパレット3件
+  - `src/lib/quest/questDefinition.ts` — SystemPresetIdに"mendelson"追加
+  - `task-processing.md`
+- カバレッジ: Stmts 99.34%, Branch 94.92%, Funcs 89.95%, Lines 99.93%（ベースラインと同等）
+- テスト: 3314→3336件（+22件）
+- スクリーンショット: `.screenshots/mendelson-create-form-fullscreen.png`
+- **今後のイテレーションへの学び:**
+  - 新しい公理を追加する際は、PropositionalAxiomIdのJSDocに記載された6ステップのチェックリストに従う
+  - `notebookSerialization.ts`のVALID_AXIOM_IDSの更新を忘れやすい（デシリアライズ時のバリデーションに影響）
+  - Mendelson体系のM3 (¬φ→¬ψ)→((¬φ→ψ)→φ) とŁukasiewicz体系のA3 (¬φ→¬ψ)→(ψ→φ) は構造が異なるため、クロスマッチしない
+  - `prd-logic-selection.md`はまだ完了していない（SK, 最小論理, etc. が残っている）
+---
