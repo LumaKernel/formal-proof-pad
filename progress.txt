@@ -84,6 +84,36 @@
 
 ---
 
+## 2026-02-27 - リファレンス統合: NotebookCreateFormに体系リファレンスポップオーバー
+- NotebookCreateFormの各体系プリセットカードに(?)リファレンスボタンを追加
+- notebookCreateLogic.tsにプリセットID→リファレンスエントリIDマッピング（20プリセット分）を追加
+- テスト: 4231テスト全パス（+32テスト追加: マッピング24件 + UIテスト7件 + ストーリー1件）
+- カバレッジ: Stmts 99.36%(維持), Branch 94.95%, Funcs 90.17%, Lines 99.91%
+  - ベースライン: Stmts 99.36%, Branch 94.97%, Funcs 90.15%, Lines 99.91%
+- 品質チェック: typecheck ✅, lint ✅, test ✅
+- ブラウザ確認: Playwright MCPでスクリーンショット撮影・確認済み
+  - `.screenshots/notebook-create-form-with-reference.png`
+  - `.screenshots/notebook-create-form-with-reference-full.png`
+- 変更ファイル:
+  - `src/lib/notebook/notebookCreateLogic.ts` (MODIFIED - マッピング関数追加)
+  - `src/lib/notebook/notebookCreateLogic.test.ts` (MODIFIED - マッピングテスト追加)
+  - `src/lib/notebook/NotebookCreateFormComponent.tsx` (MODIFIED - ポップオーバー統合)
+  - `src/lib/notebook/NotebookCreateFormComponent.test.tsx` (MODIFIED - UIテスト追加)
+  - `src/lib/notebook/NotebookCreateFormComponent.stories.tsx` (MODIFIED - WithReferenceストーリー追加)
+  - `tasks/prd-theories.md` (MODIFIED - タスク完了マーク)
+- マッピング一覧:
+  - 命題論理: sk→system-minimal, minimal→system-minimal, intuitionistic→system-intuitionistic, classical→system-classical, lukasiewicz→system-lukasiewicz, mendelson→system-mendelson
+  - 算術系: peano/robinson/peano-hk/peano-mendelson/heyting→theory-peano
+  - 群論系: group-left/group-full/abelian-group→theory-group
+  - 自然演繹: nd-nm/nd-nj/nd-nk→rule-nd-overview
+  - シーケント計算: sc-lm/sc-lj/sc-lk→rule-sc-overview
+  - マッピングなし: predicate, equality（汎用体系のためリファレンスエントリ未作成）
+- **今後のイテレーションへの学び:**
+  - AxiomPaletteと同じパターン（ID→リファレンスIDマッピング + optional props + findEntryById + ReferencePopover）が再利用可能
+  - stopPropagationで親要素（radio card）のクリックイベントと(?)ボタンのクリックイベントを分離する必要がある
+  - predicate/equalityにも将来的にリファレンスエントリ（述語論理概要、等号概要）を追加すべき
+---
+
 ## 2026-02-27 - リファレンス: 記法・記号コンテンツ追加
 - 7つの新しいリファレンスエントリを追加（notationカテゴリ: 0→7）
   - notation-connectives: 論理結合子（→, ∧, ∨, ¬, ↔）の解説・ASCII入力方法
