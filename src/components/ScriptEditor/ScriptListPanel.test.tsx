@@ -1,10 +1,17 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { ConfigProvider } from "antd";
 import userEvent from "@testing-library/user-event";
 import {
   ScriptListPanel,
   type ScriptListPanelMessages,
 } from "./ScriptListPanel";
+
+function renderWithAntd(ui: React.ReactElement) {
+  return render(
+    <ConfigProvider button={{ autoInsertSpace: false }}>{ui}</ConfigProvider>,
+  );
+}
 import type { ScriptListItem } from "./scriptListPanelLogic";
 
 const defaultMessages: ScriptListPanelMessages = {
@@ -23,7 +30,7 @@ const sampleItems: readonly ScriptListItem[] = [
 describe("ScriptListPanel", () => {
   describe("空状態", () => {
     it("空メッセージが表示される", () => {
-      render(<ScriptListPanel items={[]} messages={defaultMessages} />);
+      renderWithAntd(<ScriptListPanel items={[]} messages={defaultMessages} />);
       expect(screen.getByText("No saved scripts yet")).toBeInTheDocument();
       expect(
         screen.getByText("Save scripts from the workspace."),
@@ -31,7 +38,7 @@ describe("ScriptListPanel", () => {
     });
 
     it("empty testId が付く", () => {
-      render(
+      renderWithAntd(
         <ScriptListPanel
           items={[]}
           messages={defaultMessages}
@@ -44,7 +51,7 @@ describe("ScriptListPanel", () => {
 
   describe("一覧表示", () => {
     it("スクリプトが一覧表示される", () => {
-      render(
+      renderWithAntd(
         <ScriptListPanel items={sampleItems} messages={defaultMessages} />,
       );
       expect(screen.getByText("Script Alpha")).toBeInTheDocument();
@@ -54,7 +61,7 @@ describe("ScriptListPanel", () => {
     });
 
     it("デフォルト testId が付く", () => {
-      render(
+      renderWithAntd(
         <ScriptListPanel items={sampleItems} messages={defaultMessages} />,
       );
       expect(screen.getByTestId("script-list-panel")).toBeInTheDocument();
@@ -64,7 +71,7 @@ describe("ScriptListPanel", () => {
   describe("削除", () => {
     it("削除ボタンが動作する", async () => {
       const onDelete = vi.fn();
-      render(
+      renderWithAntd(
         <ScriptListPanel
           items={sampleItems}
           messages={defaultMessages}
@@ -76,7 +83,7 @@ describe("ScriptListPanel", () => {
     });
 
     it("onDelete 未指定で削除ボタンが非表示", () => {
-      render(
+      renderWithAntd(
         <ScriptListPanel items={sampleItems} messages={defaultMessages} />,
       );
       expect(screen.queryByTestId("script-delete-btn-s1")).toBeNull();
@@ -86,7 +93,7 @@ describe("ScriptListPanel", () => {
   describe("リネーム", () => {
     it("リネームボタンでインラインリネームが開始される", async () => {
       const onRename = vi.fn();
-      render(
+      renderWithAntd(
         <ScriptListPanel
           items={sampleItems}
           messages={defaultMessages}
@@ -101,7 +108,7 @@ describe("ScriptListPanel", () => {
 
     it("Enter でリネームが確定される", async () => {
       const onRename = vi.fn();
-      render(
+      renderWithAntd(
         <ScriptListPanel
           items={sampleItems}
           messages={defaultMessages}
@@ -118,7 +125,7 @@ describe("ScriptListPanel", () => {
 
     it("Escape でリネームがキャンセルされる", async () => {
       const onRename = vi.fn();
-      render(
+      renderWithAntd(
         <ScriptListPanel
           items={sampleItems}
           messages={defaultMessages}
@@ -134,7 +141,7 @@ describe("ScriptListPanel", () => {
 
     it("空のリネームは確定されない", async () => {
       const onRename = vi.fn();
-      render(
+      renderWithAntd(
         <ScriptListPanel
           items={sampleItems}
           messages={defaultMessages}
@@ -152,7 +159,7 @@ describe("ScriptListPanel", () => {
   describe("エクスポート", () => {
     it("エクスポートボタンが動作する", async () => {
       const onExport = vi.fn();
-      render(
+      renderWithAntd(
         <ScriptListPanel
           items={sampleItems}
           messages={defaultMessages}

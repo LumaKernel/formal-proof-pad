@@ -8,7 +8,7 @@ ant活用してほしい
 - [x] 自作クエストタブの同様に各種ボタン、同様 — antd Button に置き換え完了（11個のスタイル定数削除）
 - [x] コレクションタブの各種ボタン、同様 — antd Button に置き換え完了（Panel + PageView、8個のスタイル定数削除）
 - [x] リファレンスタブの各種ボタン、同様 — antd Button に置き換え完了（Browser/Modal/FloatingWindow/ViewerPageView）
-- [ ] スクリプトタブの各種ボタン、同様
+- [x] スクリプトタブの各種ボタン、同様 — antd Button に置き換え完了（rename/export/deleteボタン）
 - [ ] ヘッダーの各要素
 
 - [ ] EN/JAの切り替えってリロード必要なの？ (必要ならいい)

@@ -8,6 +8,7 @@
  */
 
 import { useState, type CSSProperties } from "react";
+import { Button } from "antd";
 import type { ScriptListItem } from "./scriptListPanelLogic";
 
 // ── Types ──────────────────────────────────────────────────────
@@ -74,23 +75,6 @@ const actionsStyle: Readonly<CSSProperties> = {
   gap: "4px",
   marginLeft: "8px",
   flexShrink: 0,
-};
-
-const actionBtnStyle: Readonly<CSSProperties> = {
-  padding: "4px 10px",
-  fontSize: "0.75rem",
-  fontWeight: 600,
-  borderRadius: "6px",
-  cursor: "pointer",
-  border: "1px solid var(--ui-border)",
-  backgroundColor: "transparent",
-  color: "var(--ui-muted-foreground)",
-};
-
-const deleteBtnStyle: Readonly<CSSProperties> = {
-  ...actionBtnStyle,
-  color: "var(--ui-destructive, #dc2626)",
-  borderColor: "var(--ui-destructive, #dc2626)",
 };
 
 const emptyStyle: Readonly<CSSProperties> = {
@@ -199,34 +183,32 @@ export function ScriptListPanel({
           </div>
           <div style={actionsStyle}>
             {onRename && renamingId !== item.id && (
-              <button
-                type="button"
-                style={actionBtnStyle}
+              <Button
+                size="small"
                 data-testid={`script-rename-btn-${item.id satisfies string}`}
                 onClick={() => handleStartRename(item.id, item.title)}
               >
                 {messages.renameButton}
-              </button>
+              </Button>
             )}
             {onExport && (
-              <button
-                type="button"
-                style={actionBtnStyle}
+              <Button
+                size="small"
                 data-testid={`script-export-btn-${item.id satisfies string}`}
                 onClick={() => onExport(item.id)}
               >
                 {messages.exportButton}
-              </button>
+              </Button>
             )}
             {onDelete && (
-              <button
-                type="button"
-                style={deleteBtnStyle}
+              <Button
+                size="small"
+                danger
                 data-testid={`script-delete-btn-${item.id satisfies string}`}
                 onClick={() => onDelete(item.id)}
               >
                 {messages.deleteButton}
-              </button>
+              </Button>
             )}
           </div>
         </div>
