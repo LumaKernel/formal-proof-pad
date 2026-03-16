@@ -14832,3 +14832,15 @@
   - addNodeで直接公理インスタンスを配置するとhasInstanceRootNodesチェックに引っかかる。クエストモードではbuildModelAnswerWorkspaceでスキーマ→SubstitutionEdge→インスタンスの正しい構造を作る必要がある
   - Storybook dev serverのplay関数はvitest chromiumテストと結果が異なることがある（timing/HMR）。vitestが権威的
 ---
+
+## 2026-03-16 - sc-auto-proof 模範解答
+- sc-ap-01 (φ→φ), sc-ap-02 ((φ→ψ)→(¬ψ→¬φ)), sc-ap-03 (¬(φ∧ψ)→(¬φ∨¬ψ)) の模範解答を作成
+- 各模範解答は証明木ステップ（sc-root + sc-rule）+ 自動証明スクリプトステップの組み合わせ
+- 変更ファイル: builtinModelAnswers.ts, builtinModelAnswers.test.ts
+- テスト: 1161全テストパス（12テスト追加）
+- カバレッジ: ベースライン維持
+- **今後のイテレーションへの学び:**
+  - sc-auto-proof模範解答はscriptステップ + 証明木ステップの組み合わせが有効
+  - SC規則の∧右(conjunction-right)は分岐後に左右で成分を分けるが、succedentの位置に注意（negation-leftで末尾に追加された場合principalPositionがずれる）
+  - makeAutoProveScriptStep ヘルパーで自動証明スクリプトを統一的に生成できるパターンを確立
+---

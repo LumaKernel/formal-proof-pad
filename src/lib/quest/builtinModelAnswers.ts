@@ -18979,6 +18979,242 @@ const sc_ce14QuantifierShift: ModelAnswer = {
   ],
 };
 
+// ── sc-auto-proof ────────────────────────────────────────────────
+
+/**
+ * sc-auto-proof クエストのスクリプトステップ共通ヘルパー。
+ * proveSequentLK + displayScProof の自動証明スクリプトを生成する。
+ */
+const makeAutoProveScriptStep = (
+  formulaText: string,
+): {
+  readonly _tag: "script";
+  readonly title: string;
+  readonly code: string;
+} => ({
+  _tag: "script",
+  title: "自動証明スクリプト",
+  code: `// 自動証明探索 (LK)
+//
+// proveSequentLK を使って自動的に証明を生成し、
+// displayScProof でキャンバスに展開します。
+
+var goal = {
+  antecedents: [],
+  succedents: [parseFormula("${formulaText satisfies string}")]
+};
+
+var proof = proveSequentLK(goal);
+displayScProof(proof);
+console.log("Q.E.D.");
+`,
+});
+
+/**
+ * sc-ap-01: 自動証明 φ → φ
+ *
+ * 手動証明:
+ * ⇒ φ → φ        (root)
+ * ⇒→: φ ⇒ φ      (implication-right)
+ * ID: φ ⇒ φ       (identity)
+ */
+const sc_ap01AutoIdentity: ModelAnswer = {
+  questId: "sc-ap-01",
+  steps: [
+    { _tag: "sc-root", sequentText: "⇒ phi -> phi" },
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 0,
+      ruleId: "implication-right",
+      principalPosition: 0,
+    },
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 1,
+      ruleId: "identity",
+      principalPosition: 0,
+    },
+    makeAutoProveScriptStep("phi -> phi"),
+  ],
+};
+
+/**
+ * sc-ap-02: 自動証明 (φ → ψ) → (¬ψ → ¬φ)
+ *
+ * 手動証明:
+ * ⇒ (φ → ψ) → (¬ψ → ¬φ)                      (root)
+ * ⇒→: φ → ψ ⇒ ¬ψ → ¬φ                         (step 1)
+ * ⇒→: ¬ψ, φ → ψ ⇒ ¬φ                           (step 2)
+ * ⇒¬: φ, ¬ψ, φ → ψ ⇒                           (step 3)
+ * e-left 0↔1: ¬ψ, φ, φ → ψ ⇒                   (step 4)
+ * ¬⇒: φ, φ → ψ ⇒ ψ                             (step 5)
+ * →⇒: L: φ ⇒ φ  R: ψ ⇒ ψ                      (step 6, branching)
+ * ID: φ ⇒ φ                                      (step 7)
+ * ID: ψ ⇒ ψ                                      (step 8)
+ */
+const sc_ap02AutoContraposition: ModelAnswer = {
+  questId: "sc-ap-02",
+  steps: [
+    {
+      _tag: "sc-root",
+      sequentText: "⇒ (phi -> psi) -> (~psi -> ~phi)",
+    },
+    // Step 1: ⇒→
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 0,
+      ruleId: "implication-right",
+      principalPosition: 0,
+    },
+    // Step 2: ⇒→
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 1,
+      ruleId: "implication-right",
+      principalPosition: 0,
+    },
+    // Step 3: ⇒¬ on pos 0 (¬φ in succedent)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 2,
+      ruleId: "negation-right",
+      principalPosition: 0,
+    },
+    // Step 4: exchange-left 0↔1 (φ, ¬ψ → ¬ψ, φ)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 3,
+      ruleId: "exchange-left",
+      principalPosition: 0,
+      exchangePosition: 0,
+    },
+    // Step 5: ¬⇒ on pos 0 (¬ψ)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 4,
+      ruleId: "negation-left",
+      principalPosition: 0,
+    },
+    // Step 6: →⇒ on pos 1 (φ → ψ) → L: φ ⇒ φ, R: ψ ⇒ ψ
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 5,
+      ruleId: "implication-left",
+      principalPosition: 1,
+    },
+    // Step 7: identity on L (φ ⇒ φ)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 6,
+      ruleId: "identity",
+      principalPosition: 0,
+    },
+    // Step 8: identity on R (ψ ⇒ ψ)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 7,
+      ruleId: "identity",
+      principalPosition: 0,
+    },
+    makeAutoProveScriptStep("(phi -> psi) -> (~psi -> ~phi)"),
+  ],
+};
+
+/**
+ * sc-ap-03: 自動証明 ¬(φ ∧ ψ) → (¬φ ∨ ¬ψ)
+ *
+ * 手動証明（古典論理 LK）:
+ * ⇒ ¬(φ ∧ ψ) → (¬φ ∨ ¬ψ)                      (root)
+ * ⇒→: ¬(φ ∧ ψ) ⇒ ¬φ ∨ ¬ψ                       (step 1)
+ * ¬⇒: ⇒ φ ∧ ψ, ¬φ ∨ ¬ψ                         (step 2)
+ * ⇒∧: L: ⇒ ¬φ ∨ ¬ψ, φ  R: ⇒ ¬φ ∨ ¬ψ, ψ       (step 3, branching)
+ * --- Left branch ---
+ * ⇒∨ comp1: ⇒ ¬φ, φ                             (step 4)
+ * ⇒¬: φ ⇒ φ                                     (step 5)
+ * ID: φ ⇒ φ                                      (step 6)
+ * --- Right branch ---
+ * ⇒∨ comp2: ⇒ ¬ψ, ψ                             (step 7)
+ * ⇒¬: ψ ⇒ ψ                                     (step 8)
+ * ID: ψ ⇒ ψ                                      (step 9)
+ */
+const sc_ap03AutoDeMorgan: ModelAnswer = {
+  questId: "sc-ap-03",
+  steps: [
+    {
+      _tag: "sc-root",
+      sequentText: "⇒ ~(phi /\\ psi) -> (~phi \\/ ~psi)",
+    },
+    // Step 1: ⇒→
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 0,
+      ruleId: "implication-right",
+      principalPosition: 0,
+    },
+    // Step 2: ¬⇒ on pos 0
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 1,
+      ruleId: "negation-left",
+      principalPosition: 0,
+    },
+    // Step 3: ⇒∧ on pos 1 (φ ∧ ψ is at end of succedent after ¬⇒)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 2,
+      ruleId: "conjunction-right",
+      principalPosition: 1,
+    },
+    // --- Left branch: ⇒ ¬φ ∨ ¬ψ, φ ---
+    // Step 4: ⇒∨ comp1 on pos 0 (¬φ ∨ ¬ψ → ¬φ)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 3,
+      ruleId: "disjunction-right",
+      principalPosition: 0,
+      componentIndex: 1,
+    },
+    // Step 5: ⇒¬ on pos 0 (¬φ → φ to left)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 5,
+      ruleId: "negation-right",
+      principalPosition: 0,
+    },
+    // Step 6: identity (φ ⇒ φ)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 6,
+      ruleId: "identity",
+      principalPosition: 0,
+    },
+    // --- Right branch: ⇒ ¬φ ∨ ¬ψ, ψ ---
+    // Step 7: ⇒∨ comp2 on pos 0 (¬φ ∨ ¬ψ → ¬ψ)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 4,
+      ruleId: "disjunction-right",
+      principalPosition: 0,
+      componentIndex: 2,
+    },
+    // Step 8: ⇒¬ on pos 0 (¬ψ → ψ to left)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 8,
+      ruleId: "negation-right",
+      principalPosition: 0,
+    },
+    // Step 9: identity (ψ ⇒ ψ)
+    {
+      _tag: "sc-rule",
+      conclusionIndex: 9,
+      ruleId: "identity",
+      principalPosition: 0,
+    },
+    makeAutoProveScriptStep("~(phi /\\\\ psi) -> (~phi \\\\/ ~psi)"),
+  ],
+};
+
 // --- レジストリ ---
 
 /** 全ビルトイン模範解答 */
@@ -19256,6 +19492,10 @@ export const builtinModelAnswers: readonly ModelAnswer[] = [
   sc_ce12ExistentialTransitivity,
   sc_ce13QuantifierDeMorgan,
   sc_ce14QuantifierShift,
+  // sc-auto-proof
+  sc_ap01AutoIdentity,
+  sc_ap02AutoContraposition,
+  sc_ap03AutoDeMorgan,
 ];
 
 /** QuestId → ModelAnswer のマップ */
