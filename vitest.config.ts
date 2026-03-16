@@ -40,7 +40,7 @@ export default defineConfig({
       reporter: ["text", "html", "lcov"],
     },
     pool: "forks",
-    maxWorkers: 2,
+    maxWorkers: process.env["CI"] ? undefined : 2,
     projects: [
       {
         extends: true,
