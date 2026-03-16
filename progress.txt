@@ -14844,3 +14844,15 @@
   - SC規則の∧右(conjunction-right)は分岐後に左右で成分を分けるが、succedentの位置に注意（negation-leftで末尾に追加された場合principalPositionがずれる）
   - makeAutoProveScriptStep ヘルパーで自動証明スクリプトを統一的に生成できるパターンを確立
 ---
+
+## 2026-03-16 - nd-01インタラクションストーリー
+- QuestCompleteNd01Interactive ストーリーを追加（WorkspacePageView.stories.tsx）
+- ND体系固有の操作フロー: 空ワークスペース → 仮定追加 → 式入力 → NDパレット確認
+- ND規則はポート接続で適用するため、play関数では仮定追加+式入力までをカバー
+- カバレッジ: 変化なし（99.99% Stmts, 99.93% Branch, 100% Lines）
+- 変更ファイル: src/app/workspace/[id]/WorkspacePageView.stories.tsx
+- **今後のイテレーションへの学び:**
+  - NdRuleIdは"implication-intro"のように"nd-"プレフィックスなし。テストIDは`workspace-nd-rule-palette-rule-${ruleId}`
+  - ND体系のplay関数でポート接続（ドラッグ操作）のシミュレーションは困難。仮定追加+式入力の部分的インタラクションが現実的
+  - createQuestWorkspaceとresolveSystemPresetを組み合わせて空のクエストワークスペースを作成できる
+---
