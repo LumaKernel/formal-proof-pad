@@ -332,3 +332,7 @@ Infinity Canvasについて。
   - [x] package.jsonから入れたものは削除。tailwindなどもあれば削除 — Phase 0完了、shadcn-ui/Tailwind関連パッケージ全削除
   - [x] ant designの要素に置き換えていくためのタスクリスト prd-replace-with-ant.md を作成して、どこを置き換えるか、というタスクリストをまず作成 — `tasks/prd-replace-with-ant.md` に5フェーズの詳細タスクリスト作成済み
   - [x] ダークモードやカラーシステムなども乗り換える — AntDesignThemeProvider(darkAlgorithm連携)導入、CSS変数ベースのテーマシステム維持、全Phase完了
+
+- [x] キャンバス内のタイトルの横の三点リーダーは要らない
+- [x] 「自由帳として複製」は、そのメニューバー横の三点リーダーの中に入れてほしい
+  - useImperativeHandleでexport/import操作をrefとして公開し、ページヘッダー⋮メニューに移動

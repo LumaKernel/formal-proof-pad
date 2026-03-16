@@ -14712,3 +14712,19 @@
   - V8カバレッジマージquirkは3ファイルに残っていた。すべて単独実行で100%を確認後にv8 ignoreで対処
   - OR条件(`||`)の短絡評価やfindIndexコールバック内の`&&`がマージquirkの対象になりやすい
 ---
+
+## 2026-03-16 - [UI] キャンバス内⋯メニュー削除・エクスポート/インポートをページヘッダー⋮メニューに移動
+- ProofWorkspace内の⋯メニュー（Export JSON/SVG/PNG, Import JSON）と「自由帳として複製」ボタンを削除
+- `useImperativeHandle` + `forwardRef` で export/import 操作を `ProofWorkspaceRef` として公開
+- WorkspacePageView の⋮メニュー（More actions）に Export JSON/SVG/PNG・Import JSON 項目を追加
+- i18nメッセージ（en.json/ja.json）に4キー追加
+- ProofWorkspace.test.tsx: ⋯メニュー関連11テスト削除（249テストに）
+- ProofWorkspace.stories.tsx: QuestMode ストーリーから convert-free-button アサーション削除
+- カバレッジ: 100% Stmts / 100% Branch（変化なし）
+- 変更ファイル: ProofWorkspace.tsx, WorkspacePageView.tsx, WorkspaceContent.tsx, workspacePageMessages.ts, index.ts, en.json, ja.json, ProofWorkspace.test.tsx, ProofWorkspace.stories.tsx
+- スクリーンショット: .screenshots/workspace-more-menu-export-import-fullscreen.png
+- **今後のイテレーションへの学び:**
+  - `useImperativeHandle` パターン: 子コンポーネントの内部状態に依存する操作を親に公開する際に有効。`forwardRef` と組み合わせて使う
+  - ProofWorkspace は巨大ファイル（~6000行）。内部の export/import ハンドラは `workspace`, `nodeSizes`, `setWorkspace` 等の内部状態に依存するため、外部に移動不可
+  - `hasMoreMenuItems` をハードコード `true` にした（export/import は常に利用可能なので）
+---
