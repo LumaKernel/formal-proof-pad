@@ -14740,3 +14740,15 @@
   - .storybook/preview.tsにAntThemeWrapperが既に設定済みのため、ストーリーでantdコンポーネントが直接動作する
   - browser MCP (browsermcp, chrome-devtools)が接続できない場合、Storybook chromiumテストでUI検証を代替可能
 ---
+
+## 2026-03-16 - [UI] ノートブック一覧タブ antd 置き換え
+- NotebookListComponent.tsx: 三点リーダーボタン→antd Button+EllipsisOutlined、メニュー項目→antd Menu、削除確認ボタン→antd Button
+- HubPageView.tsx: 「新規ノートブック」「インポート」ボタン→antd Button (type="primary" / default)
+- カスタムスタイル定数を大幅削減（menuItemBase/Default/Danger, moreButton, cancelButton, deleteConfirmButton, createButton, importButton）
+- 変更したファイル: src/lib/notebook/NotebookListComponent.tsx, src/app/HubPageView.tsx, tasks/prd-inserted-tasks.md
+- テスト: NotebookListComponent 38 unit + 13 storybook, HubPageView 27 storybook すべてパス
+- **今後のイテレーションへの学び:**
+  - antd Menu の items で data-testid を保持するには `label: <span data-testid="...">テキスト</span>` パターンが有効。クリックイベントはspanからMenu itemに伝播する
+  - antd Dropdown はポータルレンダリングのため `within(canvasElement)` でテスト要素が見つからない問題がある。カスタムポジショニング + antd Menu の組み合わせが互換性を保つ
+  - antd Button の `danger` + `type="primary"` で赤い確定ボタン、`size="small"` でコンパクトなインライン削除確認UI
+---
