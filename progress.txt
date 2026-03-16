@@ -14871,3 +14871,19 @@
   - ノード上の仮定ID表示にはWorkspaceNodeにassumptionIdフィールドの追加が必要（別タスク）
   - Storybook DOM snapshotではInferenceEdgeBadge（connection上の描画要素）はaccessibility treeに出ない場合がある
 ---
+
+## 2026-03-16 - SC証明木Gentzenスタイル表示パネル
+- scProofTreeRendererLogic.ts: ScProofNode→ProofTreeDisplayData変換（全21規則ラベル、深さ計算、統計）
+- scProofTreeRendererLogic.test.ts: 34テスト（規則ラベル網羅、変換、統計）
+- ScProofTreePanel.tsx: Gentzenスタイル再帰レンダリング（横線+規則ラベル+結論）
+- ScProofTreePanel.test.tsx: 8テスト（表示、操作、stopPropagation）
+- ScProofTreePanel.stories.tsx: 6ストーリー（Identity, SimpleCut, ImplicationRight, DeepTree, BranchingRule, ComplexProof）
+- ProofWorkspace.tsx: カット除去ステッパー内に証明木パネル統合
+- index.ts: 新コンポーネント/型のエクスポート追加
+- カバレッジ: Statements 99.99%, Branches 99.93%, Lines 100% (低下なし)
+- ブラウザ確認: Storybook全ストーリーでGentzenスタイル表示を確認
+- **今後のイテレーションへの学び:**
+  - ScProofNode の getPremises() は _tag ごとに premise/left/right フィールド名が異なるのでif-chainで対応
+  - convertScProofTreeToDisplay は深さ優先でID付与するため、テストでID順序を前提にしないこと
+  - CutEliminationStepper (左下) と ScProofTreePanel (右下) は同じz-index/position:absolute配置パターン
+---
