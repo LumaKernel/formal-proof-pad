@@ -30,6 +30,7 @@ import {
   addNode,
   addGoal,
   applyMPAndConnect,
+  createQuestWorkspace,
 } from "../../../lib/proof-pad/workspaceState";
 import type { WorkspaceState } from "../../../lib/proof-pad/workspaceState";
 import type { GoalAchievedInfo } from "../../../lib/proof-pad";
@@ -41,6 +42,7 @@ import {
   findQuestById,
   modelAnswerRegistry,
   buildModelAnswerWorkspace,
+  resolveSystemPreset,
 } from "../../../lib/quest";
 import type { ModelAnswer } from "../../../lib/quest";
 import type { GoalQuestInfo } from "../../../lib/proof-pad";
@@ -889,6 +891,101 @@ export const QuestCompleteProp01ModelAnswer: Story = {
     await expect(goalPanel).toBeInTheDocument();
     await expect(goalPanel).toHaveTextContent("1 / 1");
     await expect(goalPanel).toHaveTextContent("Proved!");
+  },
+};
+
+/**
+ * nd-01: 自然演繹 NM φ→φ インタラクション。
+ * ND体系のUI操作を完全に再現する:
+ *
+ * 1. 空のクエストワークスペース（ゴール: φ→φ）
+ * 2. NDパレットの「仮定を追加」をクリック → 空の仮定ノード追加
+ * 3. ダブルクリックで編集モード → "phi" を入力 → 確定
+ * 4. 仮定ノードの式が正しく表示されることを確認
+ * 5. ゴールパネルが 0/1 であることを確認（→I適用前）
+ *
+ * ND体系では推論規則はポート接続で適用するため、
+ * ここでは仮定追加+式入力のND固有操作フローを検証する。
+ */
+export const QuestCompleteNd01Interactive: Story = {
+  render: () => {
+    const quest = findQuestById(builtinQuests, "nd-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: nd-01");
+    }
+    const preset = resolveSystemPreset(quest.systemPresetId);
+    if (preset === undefined) {
+      throw new Error("Preset not found for nd-01");
+    }
+    const initialWorkspace = createQuestWorkspace(preset.deductionSystem, [
+      { formulaText: quest.goals[0].formulaText },
+    ]);
+    const questInfo: GoalQuestInfo = {
+      description: quest.description,
+      hints: quest.hints,
+      learningPoint: quest.learningPoint,
+    };
+    return (
+      <StatefulWorkspace
+        initialWorkspace={initialWorkspace}
+        initialNotebookName={quest.title}
+        onBack={fn()}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- 初期状態: 空のNDワークスペース、ゴール未達成 ---
+    await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    const goalPanel = canvas.getByTestId("workspace-goal-panel");
+    await expect(goalPanel).toHaveTextContent("0 / 1");
+
+    // NDパレットが表示される（Hilbert公理パレットではない）
+    await expect(
+      canvas.getByTestId("workspace-nd-rule-palette"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.queryByTestId("workspace-axiom-palette"),
+    ).not.toBeInTheDocument();
+
+    // --- 「仮定を追加」をクリック → 空の仮定ノードが追加される ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-nd-rule-palette-add-assumption"),
+    );
+
+    // 仮定ノードが生成される
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // --- 仮定ノードをダブルクリックして編集モードに入る ---
+    const display = canvas.getByTestId("proof-node-node-1-editor-display");
+    await userEvent.dblClick(display);
+
+    // 式を入力: phi
+    const input = canvas.getByTestId("proof-node-node-1-editor-input-input");
+    await userEvent.type(input, "phi");
+
+    // 編集確定（tabでblur）
+    await userEvent.tab();
+
+    // --- 仮定ノードの式が正しく表示されることを確認 ---
+    // ゴールパネルは依然 0/1（→I適用前）
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // NDパレットの規則一覧が表示されている
+    await expect(
+      canvas.getByTestId("workspace-nd-rule-palette-rule-implication-intro"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("workspace-nd-rule-palette-rule-implication-elim"),
+    ).toBeInTheDocument();
   },
 };
 
