@@ -14764,3 +14764,44 @@
   - 単体テストでantdコンポーネントを使う場合、ConfigProvider wrapping が必要。`renderWithAntd` ヘルパーパターンを利用
   - `.textContent.toBe()` は antd のDOM構造変更に弱い。`toHaveTextContent()` を推奨
 ---
+
+## 2026-03-16 - antd UI置き換え (タスク2,3,4)
+- Task 2: HubPageView + NotebookListComponent — antd Button/Menu/EllipsisOutlined に置き換え
+- Task 3: QuestCatalogComponent — フィルタチップ・開始ボタン・三点メニューをantdに置き換え
+- Task 4: CustomQuestListComponent — 全11種のカスタムボタンスタイルをantd Buttonに統一
+- ConfigProvider: autoInsertSpace: false でCJK文字間スペース挿入抑制
+- テスト: renderWithAntd ラッパーパターンを導入
+- 変更ファイル: .storybook/preview.ts, HubPageView.tsx, NotebookListComponent.tsx, QuestCatalogComponent.tsx/.test.tsx, CustomQuestListComponent.tsx/.test.tsx, AntDesignThemeProvider.tsx
+- **今後のイテレーションへの学び:**
+  - antd Button は CJK2文字のテキスト間にスペースを自動挿入する → ConfigProvider の button.autoInsertSpace: false で抑制
+  - antd Menu の items で data-testid を付与するには label: <span data-testid="..."> パターンを使う
+  - antd Dropdown はポータルレンダリングのため within(canvasElement) が効かない → カスタムドロップダウン位置制御を維持
+  - antd Button の type="submit" は htmlType="submit" に変更が必要
+  - renderWithAntd パターン: テストで ConfigProvider ラッパーが必要な場合のヘルパー関数
+---
+
+## 2026-03-16 - antd UI置き換え (タスク5,6,7,8)
+- Task 5: コレクションタブ — ProofCollectionPanel + ProofCollectionPageView のボタンをantd Buttonに
+- Task 6: リファレンスタブ — ReferenceBrowserComponent/ReferenceModal/ReferenceFloatingWindow/ReferenceViewerPageView のボタンをantd Buttonに
+- Task 7: スクリプトタブ — ScriptListPanel のrename/export/deleteボタンをantd Buttonに
+- Task 8: ヘッダー — ThemeToggle/LanguageToggleはrole="radio"+aria-checkedカスタムsegmentedでantd Segmented代替不可。標準ボタンなし
+- 変更ファイル: ProofCollectionPanel.tsx/.test.tsx, ProofCollectionPageView.tsx/.test.tsx, ReferenceBrowserComponent.tsx/.test.tsx, ReferenceModal.tsx/.test.tsx, ReferenceFloatingWindow.tsx/.test.tsx, ReferenceViewerPageView.tsx/.test.tsx, ScriptListPanel.tsx/.test.tsx
+- **今後のイテレーションへの学び:**
+  - antd Segmentedはrole="radio"/aria-checked/per-option aria-labelをサポートしない → カスタムsegmented controlが必要な場合は維持
+  - カード型ボタン（guide card, entry list）はantd Buttonに適さない → 複雑な内部レイアウトを持つclickable要素はそのまま
+  - renderWithAntdパターンは全テストファイルで統一的に適用可能
+---
+
+## 2026-03-16 - 非Hilbert体系UI調査・PRD作成・Substitutionメニュー修正
+- 調査: EN/JA切り替え → リロード必要（next-intl設計、意図的）
+- 調査: 模範解答の公理制約違反 → Hilbert系101/127がINSTANCE_ROOTS（axiomステップが代入済みインスタンスを直接配置）、ND/TAB/AT/SCは全てAllAchieved
+- PRD作成: tasks/prd-quest-ans.md（Hilbert模範解答修正計画）
+- PRD作成: tasks/prd-non-hilbert.md（非Hilbert体系UI完全性タスク）
+- 修正: ProofWorkspace.tsx — Substitutionコンテキストメニュー項目をisHilbertStyleガード内に移動
+- テスト: ProofWorkspace.test.tsx — ND体系でSubstitution非表示を検証するテスト追加
+- 変更ファイル: ProofWorkspace.tsx, ProofWorkspace.test.tsx, tasks/prd-inserted-tasks.md, tasks/prd-quest-ans.md, tasks/prd-non-hilbert.md
+- **今後のイテレーションへの学び:**
+  - Hilbert模範解答の根本原因はhasInstanceRoots（axiomステップが代入済みインスタンスを直接配置）。修正にはbuildModelAnswerWorkspaceのaxiomケースでスキーマ→SubstitutionEdge→インスタンスの自動展開が必要
+  - check-model-answers.local.ts スクリプトで全模範解答の状態を一覧確認できる
+  - ProofWorkspace.tsx のコンテキストメニュー項目追加時は、どの演繹体系で表示すべきかを必ず確認すること
+---

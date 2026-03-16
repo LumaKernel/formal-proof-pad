@@ -5497,19 +5497,19 @@ export const ProofWorkspace = forwardRef<
                       }
                     />
                   ) : null}
+                  <WorkspaceMenuItem
+                    label={msg.applySubstitutionToNode}
+                    onClick={handleApplySubstitutionToNode}
+                    testId={
+                      /* v8 ignore start -- V8集約アーティファクト */
+                      testId
+                        ? `${testId satisfies string}-apply-substitution-to-node`
+                        : "apply-substitution-to-node"
+                      /* v8 ignore stop */
+                    }
+                  />
                 </>
               ) : null}
-              <WorkspaceMenuItem
-                label={msg.applySubstitutionToNode}
-                onClick={handleApplySubstitutionToNode}
-                testId={
-                  /* v8 ignore start -- V8集約アーティファクト */
-                  testId
-                    ? `${testId satisfies string}-apply-substitution-to-node`
-                    : "apply-substitution-to-node"
-                  /* v8 ignore stop */
-                }
-              />
               <WorkspaceMenuItem
                 label={msg.normalizeFormula}
                 onClick={handleNormalizeFormula}

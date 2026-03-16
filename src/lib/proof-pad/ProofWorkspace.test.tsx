@@ -592,6 +592,18 @@ describe("ProofWorkspace", () => {
         screen.queryByTestId("workspace-use-as-mp-right"),
       ).not.toBeInTheDocument();
     });
+
+    it("does not show Substitution context menu item for ND system", async () => {
+      const user = userEvent.setup();
+      let ws = createEmptyWorkspace(naturalDeduction(njSystem));
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+      render(<StatefulWorkspace initialWorkspace={ws} testId="workspace" />);
+      const node = screen.getByTestId("proof-node-node-1");
+      await user.pointer({ keys: "[MouseRight]", target: node });
+      expect(
+        screen.queryByTestId("workspace-apply-substitution-to-node"),
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe("node interaction callbacks", () => {

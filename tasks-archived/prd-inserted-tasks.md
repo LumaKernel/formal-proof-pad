@@ -336,3 +336,14 @@ Infinity Canvasについて。
 - [x] キャンバス内のタイトルの横の三点リーダーは要らない
 - [x] 「自由帳として複製」は、そのメニューバー横の三点リーダーの中に入れてほしい
   - useImperativeHandleでexport/import操作をrefとして公開し、ページヘッダー⋮メニューに移動
+
+## antd コンポーネント置き換え (2026-03-16)
+
+- [x] トップページのタブ切り替え、タブ自体 — antd Tabs に置き換え完了
+- [x] ノートブック一覧タブの三点リーダーボタンと、その中のメニュー、新規ノートブックとかのボタン、削除するときの画面 — antd Button/Menu/EllipsisOutlined に置き換え完了
+- [x] クエスト一覧タブの三点リーダーボタンと、その中のメニュー、開始ボタン、難易度や状態フィルタのチップボタンみたいなやつ — antd Button/Menu/MoreOutlined に置き換え完了
+- [x] 自作クエストタブの同様に各種ボタン、同様 — antd Button に置き換え完了（11個のスタイル定数削除）
+- [x] コレクションタブの各種ボタン、同様 — antd Button に置き換え完了（Panel + PageView、8個のスタイル定数削除）
+- [x] リファレンスタブの各種ボタン、同様 — antd Button に置き換え完了（Browser/Modal/FloatingWindow/ViewerPageView）
+- [x] スクリプトタブの各種ボタン、同様 — antd Button に置き換え完了（rename/export/deleteボタン）
+- [x] ヘッダーの各要素 — ThemeToggle/LanguageToggleはrole="radio"+aria-checked付きのカスタムsegmentedでantd Segmentedでは代替不可。GitHubリンクは`<a>`タグ。ヘッダーに標準ボタンなし
