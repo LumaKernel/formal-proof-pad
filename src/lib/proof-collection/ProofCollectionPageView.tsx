@@ -19,6 +19,7 @@ import {
   useRef,
   useEffect,
 } from "react";
+import { Button } from "antd";
 import type {
   ProofEntry,
   ProofEntryId,
@@ -181,17 +182,6 @@ const deductionStyleBadgeStyle: CSSProperties = {
   fontWeight: 400,
 };
 
-const deleteButtonStyle: CSSProperties = {
-  fontSize: 12,
-  color: "var(--color-error, #c53030)",
-  cursor: "pointer",
-  background: "none",
-  border: "none",
-  padding: "2px 8px",
-  borderRadius: 4,
-  fontFamily: "var(--font-ui)",
-};
-
 const moveSelectStyle: CSSProperties = {
   fontSize: 11,
   fontFamily: "var(--font-ui)",
@@ -227,37 +217,10 @@ const folderActionsStyle: CSSProperties = {
   marginLeft: "auto",
 };
 
-const folderActionButtonStyle: CSSProperties = {
-  fontSize: 11,
-  color: "var(--color-text-secondary, #888)",
-  cursor: "pointer",
-  background: "none",
-  border: "none",
-  padding: "2px 6px",
-  borderRadius: 4,
-  fontFamily: "var(--font-ui)",
-};
-
-const folderDeleteButtonStyle: CSSProperties = {
-  ...folderActionButtonStyle,
-  color: "var(--color-error, #c53030)",
-};
-
 const folderCountStyle: CSSProperties = {
   fontSize: 11,
   fontWeight: 400,
   color: "var(--color-text-secondary, #aaa)",
-};
-
-const createFolderButtonStyle: CSSProperties = {
-  padding: "8px 20px",
-  fontSize: 14,
-  fontWeight: 600,
-  borderRadius: 8,
-  cursor: "pointer",
-  border: "1px solid var(--color-border, #ccc)",
-  background: "transparent",
-  color: "var(--color-text-secondary, #666)",
 };
 
 const sectionLabelStyle: CSSProperties = {
@@ -483,9 +446,9 @@ function CollectionEntryCard({
             ))}
           </select>
         )}
-        <button
-          type="button"
-          style={deleteButtonStyle}
+        <Button
+          size="small"
+          danger
           onClick={() => onRemove(entry.id)}
           data-testid={
             /* v8 ignore start -- testId always provided in tests */
@@ -496,7 +459,7 @@ function CollectionEntryCard({
           }
         >
           {messages.collectionDelete}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -642,9 +605,9 @@ function FolderSection({
           )}
         </span>
         <span style={folderActionsStyle}>
-          <button
-            type="button"
-            style={folderActionButtonStyle}
+          <Button
+            size="small"
+            type="text"
             onClick={(e) => {
               e.stopPropagation();
               onStartFolderEdit();
@@ -658,11 +621,12 @@ function FolderSection({
             }
           >
             {messages.collectionFolderRename}
-          </button>
+          </Button>
           {onRemoveFolder !== undefined && (
-            <button
-              type="button"
-              style={folderDeleteButtonStyle}
+            <Button
+              size="small"
+              type="text"
+              danger
               onClick={(e) => {
                 e.stopPropagation();
                 onRemoveFolder();
@@ -676,7 +640,7 @@ function FolderSection({
               }
             >
               {messages.collectionFolderDelete}
-            </button>
+            </Button>
           )}
         </span>
       </div>
@@ -897,9 +861,8 @@ export function ProofCollectionPageView({
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {onCreateFolder !== undefined &&
             panelState.creatingFolder === undefined && (
-              <button
-                type="button"
-                style={createFolderButtonStyle}
+              <Button
+                size="small"
                 onClick={handleStartCreateFolder}
                 data-testid={
                   /* v8 ignore start -- testId always provided in tests */
@@ -910,7 +873,7 @@ export function ProofCollectionPageView({
                 }
               >
                 {messages.collectionCreateFolder}
-              </button>
+              </Button>
             )}
         </div>
       </div>

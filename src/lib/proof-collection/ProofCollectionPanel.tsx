@@ -16,6 +16,7 @@ import {
   useRef,
   useEffect,
 } from "react";
+import { Button } from "antd";
 import type {
   ProofEntry,
   ProofEntryId,
@@ -197,27 +198,6 @@ const entryActionsStyle: CSSProperties = {
   marginTop: 2,
 };
 
-const deleteButtonStyle: Readonly<CSSProperties> = {
-  fontSize: 10,
-  color: "var(--ui-destructive)",
-  cursor: "pointer",
-  background: "transparent",
-  border: "none",
-  padding: "1px 4px",
-  borderRadius: 2,
-};
-
-const importButtonStyle: Readonly<CSSProperties> = {
-  fontSize: 10,
-  color: "var(--ui-primary)",
-  cursor: "pointer",
-  background: "transparent",
-  border: "none",
-  padding: "1px 4px",
-  borderRadius: 2,
-  fontWeight: 600,
-};
-
 const deductionStyleBadgeStyle: CSSProperties = {
   fontSize: 9,
   color: "var(--color-text-secondary, #aaa)",
@@ -249,39 +229,6 @@ const folderActionsStyle: CSSProperties = {
   display: "flex",
   gap: 4,
   marginLeft: "auto",
-};
-
-const folderActionButtonStyle: Readonly<CSSProperties> = {
-  fontSize: 9,
-  color: "var(--ui-muted-foreground)",
-  cursor: "pointer",
-  background: "transparent",
-  border: "none",
-  padding: "1px 4px",
-  borderRadius: 2,
-};
-
-const folderDeleteButtonStyle: Readonly<CSSProperties> = {
-  fontSize: 9,
-  color: "var(--ui-destructive)",
-  cursor: "pointer",
-  background: "transparent",
-  border: "none",
-  padding: "1px 4px",
-  borderRadius: 2,
-};
-
-const createFolderButtonStyle: Readonly<CSSProperties> = {
-  fontSize: 10,
-  color: "var(--ui-primary)",
-  cursor: "pointer",
-  background: "transparent",
-  border: "none",
-  padding: "4px 12px",
-  fontWeight: 600,
-  display: "block",
-  width: "100%",
-  textAlign: "left",
 };
 
 const moveSelectStyle: CSSProperties = {
@@ -549,9 +496,9 @@ function CollectionEntry({
           />
         )}
         {onImport !== undefined && (
-          <button
-            type="button"
-            style={importButtonStyle}
+          <Button
+            size="small"
+            type="link"
             onClick={() => onImport(entry)}
             data-testid={
               entryTestId !== undefined
@@ -560,11 +507,12 @@ function CollectionEntry({
             }
           >
             {messages.collectionEntryImport}
-          </button>
+          </Button>
         )}
-        <button
-          type="button"
-          style={deleteButtonStyle}
+        <Button
+          size="small"
+          danger
+          type="text"
           onClick={() => onRemove(entry.id)}
           data-testid={
             entryTestId !== undefined
@@ -573,7 +521,7 @@ function CollectionEntry({
           }
         >
           {messages.collectionEntryDelete}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -685,9 +633,9 @@ function FolderHeader({
         )}
       </span>
       <span style={folderActionsStyle}>
-        <button
-          type="button"
-          style={folderActionButtonStyle}
+        <Button
+          size="small"
+          type="text"
           onClick={(e) => {
             e.stopPropagation();
             onStartFolderEdit();
@@ -699,11 +647,12 @@ function FolderHeader({
           }
         >
           {messages.collectionFolderRename}
-        </button>
+        </Button>
         {onRemoveFolder !== undefined && (
-          <button
-            type="button"
-            style={folderDeleteButtonStyle}
+          <Button
+            size="small"
+            type="text"
+            danger
             onClick={(e) => {
               e.stopPropagation();
               onRemoveFolder();
@@ -717,7 +666,7 @@ function FolderHeader({
             /* v8 ignore stop */
           >
             {messages.collectionFolderDelete}
-          </button>
+          </Button>
         )}
       </span>
     </div>
@@ -1048,9 +997,9 @@ export function ProofCollectionPanel({
       {/* フォルダ作成ボタン */}
       {onCreateFolder !== undefined &&
         panelState.creatingFolder === undefined && (
-          <button
-            type="button"
-            style={createFolderButtonStyle}
+          <Button
+            size="small"
+            type="text"
             onClick={handleStartCreateFolder}
             data-testid={
               testId !== undefined
@@ -1059,7 +1008,7 @@ export function ProofCollectionPanel({
             }
           >
             + {messages.collectionCreateFolder}
-          </button>
+          </Button>
         )}
 
       {/* フォルダ作成入力 */}
