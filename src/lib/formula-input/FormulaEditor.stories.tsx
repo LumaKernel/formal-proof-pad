@@ -486,6 +486,108 @@ export const MultilineAutoExpand: Story = {
 };
 
 /**
+ * 内蔵拡大モーダル。
+ * onOpenExpandedを指定せずとも、⤢ ボタンで内蔵の拡大エディタモーダルが開く。
+ */
+export const BuiltinExpandedEditor: Story = {
+  render: () => (
+    <FormulaEditorWrapper initialValue="φ → ψ" testId="builtin-editor" />
+  ),
+  args: {
+    value: "",
+    onChange: () => {},
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const rootEl = canvasElement.ownerDocument.body;
+    const root = within(rootEl);
+
+    // 表示モード
+    await expect(
+      canvas.getByTestId("builtin-editor-display"),
+    ).toBeInTheDocument();
+
+    // 編集モードに入る
+    await userEvent.click(canvas.getByTestId("builtin-editor-display"));
+    await waitFor(() => {
+      expect(canvas.getByTestId("builtin-editor-edit")).toBeInTheDocument();
+    });
+
+    // 拡大ボタンが表示される
+    await expect(
+      canvas.getByTestId("builtin-editor-expand"),
+    ).toBeInTheDocument();
+
+    // 拡大ボタンをクリック → 内蔵モーダルが開く
+    await userEvent.click(canvas.getByTestId("builtin-editor-expand"));
+    await waitFor(() => {
+      expect(root.getByTestId("builtin-editor-expanded")).toBeInTheDocument();
+    });
+
+    // モーダル内のtextareaが表示される
+    await expect(
+      root.getByTestId("builtin-editor-expanded-textarea"),
+    ).toBeInTheDocument();
+
+    // Escapeでモーダルを閉じる
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(
+        root.queryByTestId("builtin-editor-expanded"),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+/**
+ * 内蔵拡大モーダル（複数行テキスト）。
+ * onOpenExpanded未指定 + 複数行テキストでクリックすると、内蔵の拡大モーダルが直接開く。
+ */
+export const BuiltinExpandedMultiline: Story = {
+  render: () => (
+    <FormulaEditorWrapper
+      initialValue={"φ → ψ\nχ → φ"}
+      testId="builtin-multiline"
+    />
+  ),
+  args: {
+    value: "",
+    onChange: () => {},
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const rootEl = canvasElement.ownerDocument.body;
+    const root = within(rootEl);
+
+    // 表示モード
+    await expect(
+      canvas.getByTestId("builtin-multiline-display"),
+    ).toBeInTheDocument();
+
+    // クリックすると内蔵拡大モーダルが直接開く
+    await userEvent.click(canvas.getByTestId("builtin-multiline-display"));
+    await waitFor(() => {
+      expect(
+        root.getByTestId("builtin-multiline-expanded"),
+      ).toBeInTheDocument();
+    });
+
+    // インライン編集モードにはならない
+    expect(
+      canvas.queryByTestId("builtin-multiline-edit"),
+    ).not.toBeInTheDocument();
+
+    // モーダルを閉じる
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(
+        root.queryByTestId("builtin-multiline-expanded"),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+/**
  * 構文ヘルプボタン付きエディタ。
  * 編集モードに入ると?ボタンが表示され、クリックで入力方法のリファレンスモーダルが開く。
  */

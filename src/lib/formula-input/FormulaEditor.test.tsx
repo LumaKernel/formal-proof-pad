@@ -767,7 +767,7 @@ describe("FormulaEditor - 拡大ボタン", () => {
     );
   });
 
-  it("onOpenExpanded未指定時、編集モードでも拡大ボタンは表示されない", async () => {
+  it("onOpenExpanded未指定時でも、編集モードで拡大ボタンが表示される（内蔵モーダル）", async () => {
     render(<EditorWrapper initialValue="φ → ψ" />);
 
     // 編集モードに入る
@@ -776,8 +776,8 @@ describe("FormulaEditor - 拡大ボタン", () => {
       expect(screen.getByTestId("editor-edit")).toBeInTheDocument();
     });
 
-    // 拡大ボタンは非表示
-    expect(screen.queryByTestId("editor-expand")).not.toBeInTheDocument();
+    // 拡大ボタンが表示される（内蔵モーダル用）
+    expect(screen.getByTestId("editor-expand")).toBeInTheDocument();
   });
 
   it("拡大ボタンクリックでonOpenExpandedが呼ばれる", async () => {
@@ -817,7 +817,7 @@ describe("FormulaEditor - 拡大ボタン", () => {
     expect(screen.queryByTestId("editor-display")).not.toBeInTheDocument();
   });
 
-  it("testIdがundefinedでも拡大ボタン付きでエラーなくレンダリングできる", () => {
+  it("testIdがundefinedでも拡大ボタン付きでエラーなくレンダリングできる（外部ハンドラ）", () => {
     render(
       <FormulaEditor
         value="φ → ψ"
@@ -825,6 +825,19 @@ describe("FormulaEditor - 拡大ボタン", () => {
         testId={undefined}
         forceEditMode={true}
         onOpenExpanded={vi.fn()}
+      />,
+    );
+    // 編集モードのinputが存在する
+    expect(document.querySelector("input")).toBeInTheDocument();
+  });
+
+  it("testIdがundefinedでも拡大ボタン付きでエラーなくレンダリングできる（内蔵モーダル）", () => {
+    render(
+      <FormulaEditor
+        value="φ → ψ"
+        onChange={vi.fn()}
+        testId={undefined}
+        forceEditMode={true}
       />,
     );
     // 編集モードのinputが存在する
@@ -868,14 +881,16 @@ describe("FormulaEditor - 複数行テキストの自動モーダル起動", () 
     expect(screen.queryByTestId("editor-edit")).not.toBeInTheDocument();
   });
 
-  it("複数行テキストでもonOpenExpandedが未指定なら通常の編集モードに入る", () => {
+  it("複数行テキストでonOpenExpanded未指定なら内蔵拡大モーダルが開く", () => {
     render(<EditorWrapper initialValue={"φ → ψ\nχ → φ"} />);
 
     // 表示モードでクリック
     fireEvent.click(screen.getByTestId("editor-display"));
 
-    // onOpenExpandedがないので通常の編集モードに入る
-    expect(screen.getByTestId("editor-edit")).toBeInTheDocument();
+    // 内蔵拡大モーダルが開く
+    expect(screen.getByTestId("editor-expanded")).toBeInTheDocument();
+    // 通常の編集モードには遷移しない
+    expect(screen.queryByTestId("editor-edit")).not.toBeInTheDocument();
   });
 
   it("単一行テキストではonOpenExpandedが自動で呼ばれない", () => {
@@ -944,5 +959,147 @@ describe("FormulaEditor - 複数行テキストの自動モーダル起動", () 
     fireEvent.doubleClick(screen.getByTestId("editor-display"));
 
     expect(handleExpand).toHaveBeenCalledOnce();
+  });
+
+  it("複数行テキストでforceEditMode + onOpenExpanded未指定なら内蔵モーダルが開く", async () => {
+    const { rerender } = render(
+      <EditorWrapper initialValue={"φ → ψ\nχ → φ"} forceEditMode={false} />,
+    );
+
+    rerender(
+      <EditorWrapper initialValue={"φ → ψ\nχ → φ"} forceEditMode={true} />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("editor-expanded")).toBeInTheDocument();
+    });
+  });
+});
+
+// --- 内蔵拡大モーダルのテスト ---
+
+describe("FormulaEditor - 内蔵拡大モーダル", () => {
+  it("onOpenExpanded未指定時、拡大ボタンクリックで内蔵モーダルが開く", async () => {
+    render(<EditorWrapper initialValue="φ → ψ" />);
+
+    // 編集モードに入る
+    await userEvent.click(screen.getByTestId("editor-display"));
+    await waitFor(() => {
+      expect(screen.getByTestId("editor-edit")).toBeInTheDocument();
+    });
+
+    // 拡大ボタンをクリック
+    fireEvent.click(screen.getByTestId("editor-expand"));
+
+    // 内蔵モーダルが表示される
+    expect(screen.getByTestId("editor-expanded")).toBeInTheDocument();
+  });
+
+  it("内蔵モーダルの閉じるボタンで閉じる", async () => {
+    render(<EditorWrapper initialValue="φ → ψ" />);
+
+    // 編集モードに入る
+    await userEvent.click(screen.getByTestId("editor-display"));
+    await waitFor(() => {
+      expect(screen.getByTestId("editor-edit")).toBeInTheDocument();
+    });
+
+    // 拡大ボタンをクリック
+    fireEvent.click(screen.getByTestId("editor-expand"));
+    expect(screen.getByTestId("editor-expanded")).toBeInTheDocument();
+
+    // 閉じるボタンをクリック
+    fireEvent.click(screen.getByTestId("editor-expanded-close"));
+
+    // モーダルが閉じる
+    expect(screen.queryByTestId("editor-expanded")).not.toBeInTheDocument();
+  });
+
+  it("内蔵モーダルでの編集が親のvalueに反映される", async () => {
+    render(<EditorWrapper initialValue="φ → ψ" />);
+
+    // 編集モードに入る
+    await userEvent.click(screen.getByTestId("editor-display"));
+    await waitFor(() => {
+      expect(screen.getByTestId("editor-edit")).toBeInTheDocument();
+    });
+
+    // 拡大ボタンをクリック
+    fireEvent.click(screen.getByTestId("editor-expand"));
+
+    // 内蔵モーダルのtextareaに入力
+    const textarea = screen.getByTestId("editor-expanded-textarea");
+    await userEvent.clear(textarea);
+    await userEvent.type(textarea, "χ → φ");
+
+    // モーダルを閉じる
+    fireEvent.click(screen.getByTestId("editor-expanded-close"));
+
+    // 変更がvalueに反映されている（表示モードに戻ると新しい式が表示される）
+    await waitFor(() => {
+      const display = screen.getByTestId("editor-display");
+      expect(display).toBeInTheDocument();
+      expect(display.textContent).toContain("χ → φ");
+    });
+  });
+
+  it("onOpenExpanded指定時は内蔵モーダルではなく外部ハンドラが呼ばれる", async () => {
+    const handleExpand = vi.fn();
+    render(
+      <EditorWrapper initialValue="φ → ψ" onOpenExpanded={handleExpand} />,
+    );
+
+    // 編集モードに入る
+    await userEvent.click(screen.getByTestId("editor-display"));
+    await waitFor(() => {
+      expect(screen.getByTestId("editor-edit")).toBeInTheDocument();
+    });
+
+    // 拡大ボタンをクリック
+    fireEvent.click(screen.getByTestId("editor-expand"));
+
+    // 外部ハンドラが呼ばれる
+    expect(handleExpand).toHaveBeenCalledOnce();
+    // 内蔵モーダルは表示されない
+    expect(screen.queryByTestId("editor-expanded")).not.toBeInTheDocument();
+  });
+
+  it("内蔵モーダルに構文ヘルプボタンが表示される（onOpenSyntaxHelp指定時）", async () => {
+    const handleHelp = vi.fn();
+    render(
+      <EditorWrapper initialValue="φ → ψ" onOpenSyntaxHelp={handleHelp} />,
+    );
+
+    // 編集モードに入る
+    await userEvent.click(screen.getByTestId("editor-display"));
+    await waitFor(() => {
+      expect(screen.getByTestId("editor-edit")).toBeInTheDocument();
+    });
+
+    // 拡大ボタンをクリック
+    fireEvent.click(screen.getByTestId("editor-expand"));
+
+    // 内蔵モーダルの構文ヘルプボタン
+    expect(
+      screen.getByTestId("editor-expanded-syntax-help"),
+    ).toBeInTheDocument();
+  });
+
+  it("testIdがundefinedでも内蔵モーダルがエラーなく動作する", () => {
+    render(
+      <FormulaEditor
+        value={"φ → ψ\nχ → φ"}
+        onChange={vi.fn()}
+        testId={undefined}
+      />,
+    );
+
+    // 複数行テキストで表示モードクリック → 内蔵モーダルが開く
+    const button = document.querySelector("[role='button']");
+    expect(button).toBeInTheDocument();
+    fireEvent.click(button!);
+
+    // モーダルのダイアログが開く
+    expect(document.querySelector("[role='dialog']")).toBeInTheDocument();
   });
 });

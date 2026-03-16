@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Formula } from "../logic-core/formula";
 import { formatFormula } from "../logic-lang/formatUnicode";
 import { FormulaDisplay } from "./FormulaDisplay";
+import { FormulaExpandedEditor } from "./FormulaExpandedEditor";
 import { computeParseState, FormulaInput } from "./FormulaInput";
 import { FormulaKaTeX } from "./FormulaKaTeX";
 import type { DisplayRenderer, EditTrigger, EditorMode } from "./editorLogic";
@@ -42,7 +43,7 @@ export interface FormulaEditorProps {
   readonly editTrigger?: EditTrigger;
   /** 構文ヘルプを開くコールバック（指定時に編集モードで?ボタンを表示） */
   readonly onOpenSyntaxHelp?: () => void;
-  /** 拡大エディタを開くコールバック（指定時に編集モードで拡大ボタンを表示） */
+  /** 拡大エディタを開くコールバック（指定時は外部ハンドラを使用、未指定時は内蔵モーダルを表示） */
   readonly onOpenExpanded?: () => void;
   /** 外部から編集モードを強制的に開始するフラグ（trueにすると編集モードに遷移、使用後はfalseに戻すこと） */
   readonly forceEditMode?: boolean;
@@ -146,6 +147,7 @@ export function FormulaEditor({
   testId,
 }: FormulaEditorProps) {
   const [mode, setModeInternal] = useState<EditorMode>("display");
+  const [isBuiltinExpandedOpen, setIsBuiltinExpandedOpen] = useState(false);
 
   const setMode = useCallback(
     (nextMode: EditorMode) => {
@@ -168,9 +170,13 @@ export function FormulaEditor({
 
   const enterEditMode = useCallback(() => {
     // 複数行テキストは一行インライン編集に適さないため、
-    // onOpenExpandedがあれば直接モーダルに遷移する
-    if (value.includes("\n") && onOpenExpanded !== undefined) {
-      onOpenExpanded();
+    // 拡大エディタに遷移する（外部ハンドラ or 内蔵モーダル）
+    if (value.includes("\n")) {
+      if (onOpenExpanded !== undefined) {
+        onOpenExpanded();
+      } else {
+        setIsBuiltinExpandedOpen(true);
+      }
       return;
     }
     setMode("editing");
@@ -246,10 +252,18 @@ export function FormulaEditor({
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      onOpenExpanded?.();
+      if (onOpenExpanded !== undefined) {
+        onOpenExpanded();
+      } else {
+        setIsBuiltinExpandedOpen(true);
+      }
     },
     [onOpenExpanded],
   );
+
+  const handleBuiltinExpandedClose = useCallback(() => {
+    setIsBuiltinExpandedOpen(false);
+  }, []);
 
   const handleDisplayKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -365,20 +379,18 @@ export function FormulaEditor({
               showPreview={false}
             />
           </div>
-          {onOpenExpanded !== undefined && (
-            <button
-              type="button"
-              style={expandButtonStyle}
-              onMouseDown={handleExpandMouseDown}
-              onClick={handleExpandClick}
-              aria-label="拡大編集"
-              data-testid={
-                testId ? `${testId satisfies string}-expand` : undefined
-              }
-            >
-              ⤢
-            </button>
-          )}
+          <button
+            type="button"
+            style={expandButtonStyle}
+            onMouseDown={handleExpandMouseDown}
+            onClick={handleExpandClick}
+            aria-label="拡大編集"
+            data-testid={
+              testId ? `${testId satisfies string}-expand` : undefined
+            }
+          >
+            ⤢
+          </button>
           {onOpenSyntaxHelp !== undefined && (
             <button
               type="button"
@@ -394,6 +406,17 @@ export function FormulaEditor({
             </button>
           )}
         </div>
+      )}
+      {isBuiltinExpandedOpen && (
+        <FormulaExpandedEditor
+          value={value}
+          onChange={onChange}
+          onParsed={onParsed}
+          onClose={handleBuiltinExpandedClose}
+          onOpenSyntaxHelp={onOpenSyntaxHelp}
+          placeholder={placeholder}
+          testId={testId ? `${testId satisfies string}-expanded` : undefined}
+        />
       )}
     </div>
   );
