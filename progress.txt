@@ -108,6 +108,27 @@
 
 ---
 
+## 2026-03-17 - [FormulaEditor] 拡張編集モーダルの内蔵化
+- ベースライン: Stmts 99.99%, Branch 99.89%, Funcs 90.39%, Lines 100%
+- **結果: カバレッジ変化なし（99.99% / 99.89% / 90.39% / 100%）**
+- 実装内容:
+  - FormulaEditorに内蔵FormulaExpandedEditorモーダルを追加
+  - onOpenExpanded未指定でも⤢ボタンを常時表示（内蔵モーダルが開く）
+  - onOpenExpanded指定時は従来通り外部ハンドラを使用（後方互換性維持）
+  - 複数行テキストのクリック時、onOpenExpanded未指定でも内蔵モーダルに自動遷移
+  - 新ストーリー2つ追加: BuiltinExpandedEditor, BuiltinExpandedMultiline
+  - テスト9件追加（71テスト、全パス）
+- 変更ファイル:
+  - src/lib/formula-input/FormulaEditor.tsx（内蔵モーダル状態管理、拡大ボタン常時表示）
+  - src/lib/formula-input/FormulaEditor.test.tsx（+9テスト、既存2テスト更新）
+  - src/lib/formula-input/FormulaEditor.stories.tsx（+2ストーリー）
+- スクリーンショット: .screenshots/formula-editor-builtin-expanded-story.png, .screenshots/formula-editor-builtin-multiline-story.png
+- **今後のイテレーションへの学び:**
+  - FormulaEditorのonOpenExpandedは「外部モーダル管理 or 内蔵モーダル」のスイッチとして機能。ProofWorkspaceのような複雑な統合では外部管理が適切
+  - EdgeParameterPopoverのFormulaEditorは拡大ボタンが自動的に利用可能になった（コード変更不要）
+  - AxiomPaletteとGoalPanelはFormulaDisplay（読み取り専用）で適切。FormulaEditorへの置換は不要
+---
+
 ## 2026-03-17 - [FormulaDisplay] 項代入・自由変数不在のストーリー追加
 - ベースライン: Stmts 99.99%, Branch 99.89%, Lines 100%
 - **結果: カバレッジ変化なし（99.99% / 99.89% / 100%）**
