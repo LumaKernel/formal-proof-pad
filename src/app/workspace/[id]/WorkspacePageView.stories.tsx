@@ -748,7 +748,7 @@ function buildCompletedQuestWorkspace(questId: string): {
   };
 }
 
-/** prop-01: Hilbert体系 φ→φ 完了（模範解答はインスタンス公理のためAxiom violation表示） */
+/** prop-01: Hilbert体系 φ→φ 完了（模範解答の公理ステップは自動展開されProved!表示） */
 export const QuestCompleteProp01: Story = {
   render: () => {
     const { workspace, questInfo, title } =
@@ -771,10 +771,9 @@ export const QuestCompleteProp01: Story = {
     // ゴールパネルが表示される
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toBeInTheDocument();
-    // 模範解答はインスタンス公理を使用するため、Axiom violation が表示される
-    // （UIからスキーマベースで構築した場合は Proved! になる）
-    await expect(goalPanel).toHaveTextContent("0 / 1");
-    await expect(goalPanel).toHaveTextContent("Axiom violation");
+    // 模範解答の公理ステップは自動展開されるため Proved! になる
+    await expect(goalPanel).toHaveTextContent("1 / 1");
+    await expect(goalPanel).toHaveTextContent("Proved!");
   },
 };
 

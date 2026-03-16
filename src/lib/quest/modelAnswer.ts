@@ -22,9 +22,11 @@ import {
   addScriptNode,
   applyMPAndConnect,
   applyGenAndConnect,
+  applySubstitutionAndConnect,
   applyTreeLayout,
   applyTabRuleAndConnect,
   applyScRuleAndConnect,
+  updateNodeFormulaText,
 } from "../proof-pad/workspaceState";
 import {
   checkQuestGoalsWithAxioms,
@@ -39,6 +41,22 @@ import type { TabRuleId } from "../logic-core/tableauCalculus";
 import type { TabRuleApplicationParams } from "../proof-pad/tabApplicationLogic";
 import type { ScRuleId } from "../logic-core/deductionSystem";
 import type { ScRuleApplicationParams } from "../proof-pad/scApplicationLogic";
+import { parseString } from "../logic-lang/parser";
+import { formatFormula } from "../logic-lang/formatUnicode";
+import { formatTerm } from "../logic-lang/formatUnicode";
+import { identifyAxiom } from "../logic-core/inferenceRule";
+import { isTrivialAxiomSubstitution } from "../proof-pad/axiomNameLogic";
+import {
+  collectUniqueFormulaMetaVariables,
+  collectUniqueTermMetaVariablesInFormula,
+  metaVariableKey,
+  termMetaVariableKey,
+} from "../logic-core/metaVariable";
+import type { SubstitutionEntries } from "../proof-pad/substitutionApplicationLogic";
+import type {
+  FormulaSubstitutionMap,
+  TermMetaSubstitutionMap,
+} from "../logic-core/substitution";
 
 // --- ステップ定義 ---
 
@@ -386,6 +404,208 @@ function applyNdStep(
   return { workspace: updatedWs, nodeId };
 }
 
+// --- 公理スキーマDSLテキストのルックアップ ---
+
+/**
+ * 公理IDからスキーマのDSLテキストを返す。
+ * 変更時は axiomPaletteLogic.ts の propositionalAxiomMetas と同期すること。
+ */
+const propositionalAxiomDslTexts: Readonly<Record<string, string>> = {
+  A1: "phi -> (psi -> phi)",
+  A2: "(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))",
+  A3: "(~phi -> ~psi) -> (psi -> phi)",
+  M3: "(~phi -> ~psi) -> ((~phi -> psi) -> phi)",
+  EFQ: "~phi -> (phi -> psi)",
+  DNE: "~~phi -> phi",
+  "CONJ-DEF": "(phi /\\ psi) -> ~(phi -> ~psi)",
+  "DISJ-DEF": "(phi \\/ psi) -> (~phi -> psi)",
+  A4: "(all x. phi) -> phi",
+  A5: "(all x. (phi -> psi)) -> (phi -> all x. psi)",
+  "EX-DEF": "(ex x. phi) -> ~(all x. ~phi)",
+  E1: "all x. x = x",
+  E2: "all x. all y. x = y -> y = x",
+  E3: "all x. all y. all z. (x = y -> (y = z -> x = z))",
+};
+
+/**
+ * 公理同定結果のSubstitutionMapからSubstitutionEntriesを構築する。
+ * スキーマの論理式ASTからメタ変数を抽出し、各メタ変数の代入をエントリとして返す。
+ */
+function buildSubstitutionEntriesFromMaps(
+  schemaFormula: import("../logic-core/formula").Formula,
+  formulaSub: FormulaSubstitutionMap,
+  termSub: TermMetaSubstitutionMap,
+): SubstitutionEntries {
+  const entries: (
+    | import("../proof-pad/substitutionApplicationLogic").FormulaSubstitutionEntry
+    | import("../proof-pad/substitutionApplicationLogic").TermSubstitutionEntry
+  )[] = [];
+
+  // 論理式メタ変数
+  const formulaMVs = collectUniqueFormulaMetaVariables(schemaFormula);
+  for (const mv of formulaMVs) {
+    const key = metaVariableKey(mv);
+    const formula = formulaSub.get(key);
+    if (formula !== undefined) {
+      entries.push({
+        _tag: "FormulaSubstitution",
+        metaVariableName: mv.name,
+        metaVariableSubscript: mv.subscript,
+        formulaText: formatFormula(formula),
+      });
+    }
+  }
+
+  // 項メタ変数（現在の公理スキーマにはTermMetaVariableが含まれないが、将来の拡張に備える）
+  /* v8 ignore start — 現在の公理スキーマにTermMetaVariableは含まれない */
+  const termMVs = collectUniqueTermMetaVariablesInFormula(schemaFormula);
+  for (const tmv of termMVs) {
+    const key = termMetaVariableKey(tmv);
+    const term = termSub.get(key);
+    if (term !== undefined) {
+      entries.push({
+        _tag: "TermSubstitution",
+        metaVariableName: tmv.name,
+        metaVariableSubscript: tmv.subscript,
+        termText: formatTerm(term),
+      });
+    }
+  }
+  /* v8 ignore stop */
+
+  return entries;
+}
+
+/**
+ * 公理ステップの自動展開ヘルパー。
+ *
+ * Hilbert系かつ公理インスタンス（非自明な代入）の場合:
+ *   スキーマノード + SubstitutionEdge + インスタンスノードのチェーンを生成する。
+ * それ以外の場合: 単一ノードを作成（従来の動作）。
+ */
+function expandAxiomStepIfNeeded(
+  ws: WorkspaceState,
+  formulaText: string,
+  deductionSystem: import("../logic-core/deductionSystem").DeductionSystem,
+  stepIndex: number,
+):
+  | { readonly workspace: WorkspaceState; readonly nodeId: string }
+  | BuildModelAnswerResult {
+  // Hilbert系以外は単一ノード
+  if (deductionSystem.style !== "hilbert") {
+    const nodeId = `node-${String(ws.nextNodeId) satisfies string}`;
+    const workspace = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, formulaText);
+    return { workspace, nodeId };
+  }
+
+  const system = deductionSystem.system;
+
+  // 論理式をパース
+  const parseResult = parseString(formulaText);
+  if (Either.isLeft(parseResult)) {
+    /* v8 ignore start — defensive: correct model answers always have valid formula text */
+    return {
+      _tag: "StepError",
+      stepIndex,
+      reason: `axiom formula parse error: ${formulaText satisfies string}`,
+    };
+    /* v8 ignore stop */
+  }
+  const formula = parseResult.right;
+
+  // 公理同定
+  const identification = identifyAxiom(formula, system);
+  if (identification._tag === "Error") {
+    // 同定できない場合は単一ノード（理論公理のexact matchなど）
+    const nodeId = `node-${String(ws.nextNodeId) satisfies string}`;
+    const workspace = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, formulaText);
+    return { workspace, nodeId };
+  }
+
+  // 自明な代入（スキーマそのもの）→ 単一ノード
+  if (
+    isTrivialAxiomSubstitution(
+      identification.formulaSubstitution,
+      identification.termSubstitution,
+    )
+  ) {
+    const nodeId = `node-${String(ws.nextNodeId) satisfies string}`;
+    const workspace = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, formulaText);
+    return { workspace, nodeId };
+  }
+
+  // スキーマのDSLテキストを取得
+  let schemaDslText: string | undefined;
+  if (identification._tag === "Ok") {
+    schemaDslText = propositionalAxiomDslTexts[identification.axiomId];
+  }
+  /* v8 ignore start — 理論公理は matchMode:"exact" のため非自明代入にならず到達しない */
+  if (identification._tag === "TheoryAxiom") {
+    const theoryAxiom = system.theoryAxioms?.find(
+      (a) => a.id === identification.theoryAxiomId,
+    );
+    schemaDslText = theoryAxiom?.dslText;
+  }
+  /* v8 ignore stop */
+
+  if (schemaDslText === undefined) {
+    /* v8 ignore start — defensive: all known axioms have dslText */
+    const nodeId = `node-${String(ws.nextNodeId) satisfies string}`;
+    const workspace = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, formulaText);
+    return { workspace, nodeId };
+    /* v8 ignore stop */
+  }
+
+  // スキーマのASTをパース（SubstitutionEntries構築用）
+  const schemaParseResult = parseString(schemaDslText);
+  if (Either.isLeft(schemaParseResult)) {
+    /* v8 ignore start — defensive: axiom schema dsl texts are always valid */
+    const nodeId = `node-${String(ws.nextNodeId) satisfies string}`;
+    const workspace = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, formulaText);
+    return { workspace, nodeId };
+    /* v8 ignore stop */
+  }
+  const schemaFormula = schemaParseResult.right;
+
+  // スキーマノードを作成
+  const schemaNodeId = `node-${String(ws.nextNodeId) satisfies string}`;
+  let currentWs = addNode(
+    ws,
+    "axiom",
+    "Axiom",
+    { x: 0, y: 0 },
+    schemaDslText,
+  );
+
+  // SubstitutionEntriesを構築
+  const entries = buildSubstitutionEntriesFromMaps(
+    schemaFormula,
+    identification.formulaSubstitution,
+    identification.termSubstitution,
+  );
+
+  // 代入適用でインスタンスノードを生成
+  // entries が空の場合でもノード・エッジは作成される。
+  // 述語論理公理（A4等）では項メタ変数がスキーマASTに含まれず entries が不完全になりうるが、
+  // formulaText を強制上書きするため問題ない。
+  const substResult = applySubstitutionAndConnect(
+    currentWs,
+    schemaNodeId,
+    entries,
+    { x: 0, y: 0 },
+  );
+
+  currentWs = substResult.workspace;
+  const instanceNodeId = substResult.substitutionNodeId;
+
+  // SubstitutionEdge の結論テキストと一致させるため、formulaText を強制上書き。
+  // 述語公理の場合 validateSubstitutionApplication が失敗しうるが、
+  // ルート判定には InferenceEdge の存在のみが必要なので問題ない。
+  currentWs = updateNodeFormulaText(currentWs, instanceNodeId, formulaText);
+
+  return { workspace: currentWs, nodeId: instanceNodeId };
+}
+
 /**
  * ModelAnswer から WorkspaceState を純粋に構築する。
  *
@@ -432,9 +652,19 @@ export function buildModelAnswerWorkspace(
     switch (step._tag) {
       /* v8 ignore stop */
       case "axiom": {
-        const nodeId = `node-${String(ws.nextNodeId) satisfies string}`;
-        ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, step.formulaText);
-        stepNodeIds.push(nodeId);
+        const expanded = expandAxiomStepIfNeeded(
+          ws,
+          step.formulaText,
+          preset.deductionSystem,
+          i,
+        );
+        /* v8 ignore start — defensive: expandAxiomStepIfNeeded only returns StepError on parse failure */
+        if (!("nodeId" in expanded)) {
+          return expanded;
+        }
+        /* v8 ignore stop */
+        ws = expanded.workspace;
+        stepNodeIds.push(expanded.nodeId);
         break;
       }
       case "mp": {
