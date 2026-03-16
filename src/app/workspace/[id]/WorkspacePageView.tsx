@@ -16,10 +16,7 @@ import {
   type CSSProperties,
 } from "react";
 import { ProofWorkspace } from "../../../lib/proof-pad";
-import type {
-  GoalAchievedInfo,
-  ProofWorkspaceRef,
-} from "../../../lib/proof-pad";
+import type { GoalAchievedInfo } from "../../../lib/proof-pad";
 import { ProofMessagesProvider } from "../../../lib/proof-pad";
 import type { ProofMessages } from "../../../lib/proof-pad";
 import type { WorkspaceState } from "../../../lib/proof-pad/workspaceState";
@@ -73,7 +70,7 @@ export type WorkspacePageViewProps = {
       readonly onGoalAchieved: (info: GoalAchievedInfo) => void;
       /** 構文ヘルプを開くコールバック */
       readonly onOpenSyntaxHelp?: () => void;
-      /** 自由帳として複製するコールバック */
+      /** 自由帳として複製するコールバック（ProofWorkspaceに転送） */
       readonly onDuplicateToFree?: () => void;
       /** 証明をコレクションに保存するコールバック */
       readonly onSaveProofToCollection?: (params: ProofSaveParams) => void;
@@ -214,53 +211,6 @@ const githubLinkStyle: Readonly<CSSProperties> = {
   transitionDuration: "150ms",
 };
 
-const moreMenuButtonStyle: Readonly<CSSProperties> = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "1.75rem",
-  height: "1.75rem",
-  borderRadius: "0.375rem",
-  border: "none",
-  backgroundColor: "transparent",
-  cursor: "pointer",
-  color: "var(--ui-muted-foreground)",
-  fontSize: "1.125rem",
-  lineHeight: 1,
-  padding: 0,
-};
-
-const moreMenuDropdownStyle: Readonly<CSSProperties> = {
-  position: "absolute",
-  top: "100%",
-  right: 0,
-  marginTop: "0.25rem",
-  backgroundColor: "var(--ui-card)",
-  border: "1px solid var(--ui-border)",
-  borderRadius: "0.375rem",
-  boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
-  zIndex: 100,
-  minWidth: "180px",
-  paddingTop: "0.25rem",
-  paddingBottom: "0.25rem",
-};
-
-const moreMenuItemStyle: Readonly<CSSProperties> = {
-  display: "block",
-  width: "100%",
-  paddingTop: "0.5rem",
-  paddingBottom: "0.5rem",
-  paddingLeft: "1rem",
-  paddingRight: "1rem",
-  fontSize: "13px",
-  textAlign: "left",
-  border: "none",
-  backgroundColor: "transparent",
-  cursor: "pointer",
-  color: "var(--ui-foreground)",
-  whiteSpace: "nowrap",
-};
-
 const workspaceContainerStyle: Readonly<CSSProperties> = {
   flex: 1,
   position: "relative",
@@ -374,11 +324,6 @@ function WorkspacePageViewFound({
   const [titleError, setTitleError] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // --- More menu state ---
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
-  const proofWorkspaceRef = useRef<ProofWorkspaceRef>(null);
-
   const handleTitleClick = useCallback(() => {
     if (onNotebookRename === undefined) return;
     setIsEditingTitle(true);
@@ -429,56 +374,6 @@ function WorkspacePageViewFound({
       titleInputRef.current.select();
     }
   }, [isEditingTitle]);
-
-  // --- More menu handlers ---
-  const handleMoreMenuToggle = useCallback(() => {
-    setIsMoreMenuOpen((prev) => !prev);
-  }, []);
-
-  const handleDuplicateToFree = useCallback(() => {
-    onDuplicateToFree?.();
-    setIsMoreMenuOpen(false);
-  }, [onDuplicateToFree]);
-
-  const handleExportJSON = useCallback(() => {
-    proofWorkspaceRef.current?.exportJSON();
-    setIsMoreMenuOpen(false);
-  }, []);
-
-  const handleExportSVG = useCallback(() => {
-    proofWorkspaceRef.current?.exportSVG();
-    setIsMoreMenuOpen(false);
-  }, []);
-
-  const handleExportPNG = useCallback(() => {
-    proofWorkspaceRef.current?.exportPNG();
-    setIsMoreMenuOpen(false);
-  }, []);
-
-  const handleImportJSON = useCallback(() => {
-    proofWorkspaceRef.current?.importJSON();
-    setIsMoreMenuOpen(false);
-  }, []);
-
-  // Close more menu on outside click
-  useEffect(() => {
-    if (!isMoreMenuOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        moreMenuRef.current !== null &&
-        !moreMenuRef.current.contains(e.target as Node)
-      ) {
-        setIsMoreMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMoreMenuOpen]);
-
-  // Export/Import は常に利用可能なので、メニューは常に表示
-  const hasMoreMenuItems = true;
 
   return (
     <div style={pageStyle} data-testid="workspace-page">
@@ -541,83 +436,6 @@ function WorkspacePageViewFound({
           )}
         </div>
         <div style={headerActionsStyle}>
-          {hasMoreMenuItems ? (
-            <div style={{ position: "relative" }} ref={moreMenuRef}>
-              <button
-                type="button"
-                className="workspace-more-menu-button"
-                style={moreMenuButtonStyle}
-                onClick={handleMoreMenuToggle}
-                aria-label="More actions"
-                data-testid="workspace-more-menu-button"
-              >
-                ⋮
-              </button>
-              {isMoreMenuOpen ? (
-                <div
-                  style={moreMenuDropdownStyle}
-                  data-testid="workspace-more-menu-dropdown"
-                >
-                  {onDuplicateToFree !== undefined ? (
-                    <button
-                      type="button"
-                      className="workspace-more-menu-item"
-                      style={moreMenuItemStyle}
-                      onClick={handleDuplicateToFree}
-                      data-testid="workspace-more-menu-duplicate-free"
-                    >
-                      {pm.duplicateToFree}
-                    </button>
-                  ) : null}
-                  {onDuplicateToFree !== undefined ? (
-                    <div
-                      style={{
-                        height: 1,
-                        backgroundColor: "var(--ui-border)",
-                        margin: "4px 8px",
-                      }}
-                    />
-                  ) : null}
-                  <button
-                    type="button"
-                    className="workspace-more-menu-item"
-                    style={moreMenuItemStyle}
-                    onClick={handleExportJSON}
-                    data-testid="workspace-more-menu-export-json"
-                  >
-                    {pm.exportJSON}
-                  </button>
-                  <button
-                    type="button"
-                    className="workspace-more-menu-item"
-                    style={moreMenuItemStyle}
-                    onClick={handleExportSVG}
-                    data-testid="workspace-more-menu-export-svg"
-                  >
-                    {pm.exportSVG}
-                  </button>
-                  <button
-                    type="button"
-                    className="workspace-more-menu-item"
-                    style={moreMenuItemStyle}
-                    onClick={handleExportPNG}
-                    data-testid="workspace-more-menu-export-png"
-                  >
-                    {pm.exportPNG}
-                  </button>
-                  <button
-                    type="button"
-                    className="workspace-more-menu-item"
-                    style={moreMenuItemStyle}
-                    onClick={handleImportJSON}
-                    data-testid="workspace-more-menu-import-json"
-                  >
-                    {pm.importJSON}
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
           {languageToggle !== undefined ? (
             <LanguageToggle
               locale={languageToggle.locale}
@@ -661,12 +479,12 @@ function WorkspacePageViewFound({
       <div style={workspaceContainerStyle}>
         <ProofMessagesProvider messages={messages}>
           <ProofWorkspace
-            ref={proofWorkspaceRef}
             system={workspace.system}
             workspace={workspace}
             onWorkspaceChange={onWorkspaceChange}
             onGoalAchieved={onGoalAchieved}
             onOpenSyntaxHelp={onOpenSyntaxHelp}
+            onDuplicateToFree={onDuplicateToFree}
             testId={workspaceTestId}
             questInfo={questInfo}
             onSaveProofToCollection={onSaveProofToCollection}

@@ -398,7 +398,7 @@ export const TitleEditCancel: Story = {
 
 // --- 三点メニューストーリー ---
 
-/** 三点メニューから「自由帳として複製」を実行できる */
+/** 体系名の横の⋮メニューから「自由帳として複製」を実行できる */
 export const MoreMenuDuplicateToFree: Story = {
   render: () => {
     const duplicateSpy = fn();
@@ -409,25 +409,24 @@ export const MoreMenuDuplicateToFree: Story = {
         onBack={fn()}
         onGoalAchieved={fn()}
         onDuplicateToFree={duplicateSpy}
+        workspaceTestId="pw"
       />
     );
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // 三点メニューボタンが表示される
-    const menuButton = canvas.getByTestId("workspace-more-menu-button");
+    // ⋮メニューボタンが体系名の横に表示される
+    const menuButton = canvas.getByTestId("pw-more-menu-button");
     await expect(menuButton).toBeInTheDocument();
 
     // クリックでドロップダウンが開く
     await userEvent.click(menuButton);
-    const dropdown = canvas.getByTestId("workspace-more-menu-dropdown");
+    const dropdown = canvas.getByTestId("pw-more-menu-dropdown");
     await expect(dropdown).toBeInTheDocument();
 
     // 「Duplicate as Free」項目が表示される
-    const duplicateItem = canvas.getByTestId(
-      "workspace-more-menu-duplicate-free",
-    );
+    const duplicateItem = canvas.getByTestId("pw-more-menu-duplicate-free");
     await expect(duplicateItem).toHaveTextContent("Duplicate as Free");
 
     // クリックでコールバックが呼ばれる
@@ -436,7 +435,7 @@ export const MoreMenuDuplicateToFree: Story = {
     // メニューが閉じる
     await waitFor(() => {
       expect(
-        canvas.queryByTestId("workspace-more-menu-dropdown"),
+        canvas.queryByTestId("pw-more-menu-dropdown"),
       ).not.toBeInTheDocument();
     });
   },

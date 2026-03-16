@@ -3,6 +3,7 @@
  *
  * WorkspacePageView で表示されるページレベルのメッセージのキーとデフォルト値を定義する。
  * ProofMessages（証明パッド内部のメッセージ）とは分離されている。
+ * エクスポート/インポート/複製メニューは ProofWorkspace 内に移動したため ProofMessages 側で管理。
  *
  * 変更時は WorkspaceContent.tsx, WorkspacePageView.tsx, WorkspacePageView.stories.tsx,
  * messages/en.json, messages/ja.json も同期すること。
@@ -16,12 +17,7 @@ export type WorkspacePageMessages = {
   readonly back: string;
   readonly backToHub: string;
   readonly notebookNotFound: string;
-  readonly duplicateToFree: string;
   readonly titleEditPlaceholder: string;
-  readonly exportJSON: string;
-  readonly exportSVG: string;
-  readonly exportPNG: string;
-  readonly importJSON: string;
 };
 
 /**
@@ -32,10 +28,5 @@ export const defaultWorkspacePageMessages: WorkspacePageMessages = {
   back: "Back",
   backToHub: "Back to Hub",
   notebookNotFound: "Notebook not found",
-  duplicateToFree: "Duplicate as Free",
   titleEditPlaceholder: "Notebook name",
-  exportJSON: "Export JSON",
-  exportSVG: "Export SVG",
-  exportPNG: "Export PNG",
-  importJSON: "Import JSON",
 };

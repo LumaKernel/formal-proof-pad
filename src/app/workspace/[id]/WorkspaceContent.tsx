@@ -38,12 +38,7 @@ function useWorkspacePageMessagesFromIntl(): WorkspacePageMessages {
       back: t("back"),
       backToHub: t("backToHub"),
       notebookNotFound: t("notebookNotFound"),
-      duplicateToFree: t("duplicateToFree"),
       titleEditPlaceholder: t("titleEditPlaceholder"),
-      exportJSON: t("exportJSON"),
-      exportSVG: t("exportSVG"),
-      exportPNG: t("exportPNG"),
-      importJSON: t("importJSON"),
     }),
     [t],
   );
@@ -433,7 +428,9 @@ function WorkspaceInner() {
         onWorkspaceChange={handleWorkspaceChange}
         onGoalAchieved={handleGoalAchieved}
         onOpenSyntaxHelp={handleOpenSyntaxHelp}
-        onDuplicateToFree={handleDuplicateToFree}
+        onDuplicateToFree={
+          questId !== undefined ? handleDuplicateToFree : undefined
+        }
         onSaveProofToCollection={handleSaveToCollection}
         collectionEntries={proofCollection.entries}
         onRenameCollectionEntry={proofCollection.renameEntry}

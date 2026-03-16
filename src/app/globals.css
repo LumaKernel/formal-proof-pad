@@ -657,13 +657,6 @@ a {
   opacity: 1;
 }
 
-.workspace-more-menu-button:hover {
-  background-color: var(--ui-muted);
-}
-
-.workspace-more-menu-item:hover {
-  background-color: var(--ui-muted);
-}
 
 /* ============================================
  * NotebookList — hover/focus styles

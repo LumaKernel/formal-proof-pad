@@ -10,3 +10,6 @@
     - colorPrimary #fafafa + darkAlgorithm が白文字/薄灰色背景の低コントラストを生成していた。colorTextLightSolid で暗色テキストに修正
   - [x] playwright-cliで確認
     - chrome-devtools MCPで実アプリ(localhost:13000)のダーク/ライト両モードをスクリーンショット検証済み
+- [x] 以前、キャンバス編集のタイトルの横の三点リーダーを消してと頼んだが、体系の名前の横のものが削除されてしまった。
+  - [x] 体系の横に移そう (タイトルの横からは消す) — ⋮メニューをWorkspacePageViewヘッダーからProofWorkspaceキャンバスヘッダー（体系名バッジの横）に移動
+  - [x] また、クエストではない(自由帳)なのに、自由帳として複製、が出てきてしまっている — questId !== undefined の場合のみ onDuplicateToFree を渡すように修正

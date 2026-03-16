@@ -352,6 +352,8 @@ export interface ProofWorkspaceProps {
   readonly onRemoveCollectionFolder?: (id: string) => void;
   /** コレクションフォルダ名変更 */
   readonly onRenameCollectionFolder?: (id: string, newName: string) => void;
+  /** 自由帳として複製するコールバック（クエストモード時のみ渡す） */
+  readonly onDuplicateToFree?: () => void;
   /** 初期クリップボードデータ（テスト・ストーリー用） */
   readonly initialClipboardData?: ClipboardData;
   /** data-testid */
@@ -464,6 +466,56 @@ const systemBadgeClickableStyle: CSSProperties = {
   textDecorationStyle: "dotted",
   textUnderlineOffset: 2,
   fontFamily: "inherit",
+};
+
+const moreMenuButtonStyle: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "1.5rem",
+  height: "1.5rem",
+  borderRadius: "0.375rem",
+  border: "none",
+  backgroundColor: "transparent",
+  cursor: "pointer",
+  color: "var(--color-text-secondary, #666)",
+  fontSize: "1rem",
+  lineHeight: 1,
+  padding: 0,
+  fontFamily: "var(--font-ui)",
+};
+
+const moreMenuDropdownStyle: CSSProperties = {
+  position: "absolute",
+  top: "100%",
+  left: 0,
+  marginTop: "0.25rem",
+  backgroundColor: "var(--color-panel-bg, rgba(252, 249, 243, 0.98))",
+  border: "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
+  borderRadius: "0.375rem",
+  boxShadow:
+    "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
+  zIndex: 100,
+  minWidth: "180px",
+  paddingTop: "0.25rem",
+  paddingBottom: "0.25rem",
+};
+
+const moreMenuItemStyle: CSSProperties = {
+  display: "block",
+  width: "100%",
+  paddingTop: "0.5rem",
+  paddingBottom: "0.5rem",
+  paddingLeft: "1rem",
+  paddingRight: "1rem",
+  fontSize: "13px",
+  textAlign: "left",
+  border: "none",
+  backgroundColor: "transparent",
+  cursor: "pointer",
+  color: "var(--color-text-primary, #171717)",
+  whiteSpace: "nowrap",
+  fontFamily: "var(--font-ui)",
 };
 
 const mpButtonStyle = {
@@ -726,6 +778,7 @@ export const ProofWorkspace = forwardRef<
     onCreateCollectionFolder,
     onRemoveCollectionFolder,
     onRenameCollectionFolder,
+    onDuplicateToFree,
     initialClipboardData,
     testId,
   }: ProofWorkspaceProps,
@@ -924,6 +977,10 @@ export const ProofWorkspace = forwardRef<
 
   // ファイルインポート用の隠しinput
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ⋮ メニュー（エクスポート/インポート/複製）
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   // キャンバス空白部分コンテキストメニュー
   const [canvasMenuState, setCanvasMenuState] = useState<{
@@ -2667,6 +2724,53 @@ export const ProofWorkspace = forwardRef<
     }),
     [handleExportJSON, handleExportSVG, handleExportPNG, handleImportJSON],
   );
+
+  // --- ⋮ メニューハンドラー ---
+  const handleMoreMenuToggle = useCallback(() => {
+    setIsMoreMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleMoreMenuDuplicateToFree = useCallback(() => {
+    onDuplicateToFree?.();
+    setIsMoreMenuOpen(false);
+  }, [onDuplicateToFree]);
+
+  const handleMoreMenuExportJSON = useCallback(() => {
+    handleExportJSON();
+    setIsMoreMenuOpen(false);
+  }, [handleExportJSON]);
+
+  const handleMoreMenuExportSVG = useCallback(() => {
+    handleExportSVG();
+    setIsMoreMenuOpen(false);
+  }, [handleExportSVG]);
+
+  const handleMoreMenuExportPNG = useCallback(() => {
+    handleExportPNG();
+    setIsMoreMenuOpen(false);
+  }, [handleExportPNG]);
+
+  const handleMoreMenuImportJSON = useCallback(() => {
+    handleImportJSON();
+    setIsMoreMenuOpen(false);
+  }, [handleImportJSON]);
+
+  // Close more menu on outside click
+  useEffect(() => {
+    if (!isMoreMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        moreMenuRef.current !== null &&
+        !moreMenuRef.current.contains(e.target as Node)
+      ) {
+        setIsMoreMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMoreMenuOpen]);
 
   const handleCanvasClick = useCallback(() => {
     // マーキー選択直後のclickイベントはスキップ
@@ -4435,6 +4539,94 @@ export const ProofWorkspace = forwardRef<
             )}
           </>
         ) : null}
+        {/* ⋮ メニュー（エクスポート/インポート/複製） */}
+        <div style={{ position: "relative" }} ref={moreMenuRef}>
+          <button
+            type="button"
+            style={moreMenuButtonStyle}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMoreMenuToggle();
+            }}
+            aria-label="More actions"
+            data-testid={
+              /* v8 ignore start -- V8集約アーティファクト */
+              testId
+                ? `${testId satisfies string}-more-menu-button`
+                : undefined
+              /* v8 ignore stop */
+            }
+          >
+            ⋮
+          </button>
+          {isMoreMenuOpen ? (
+            <div
+              style={moreMenuDropdownStyle}
+              data-testid={
+                /* v8 ignore start -- V8集約アーティファクト */
+                testId
+                  ? `${testId satisfies string}-more-menu-dropdown`
+                  : undefined
+                /* v8 ignore stop */
+              }
+            >
+              {onDuplicateToFree !== undefined ? (
+                <>
+                  <button
+                    type="button"
+                    style={moreMenuItemStyle}
+                    onClick={handleMoreMenuDuplicateToFree}
+                    data-testid={
+                      /* v8 ignore start -- V8集約アーティファクト */
+                      testId
+                        ? `${testId satisfies string}-more-menu-duplicate-free`
+                        : undefined
+                      /* v8 ignore stop */
+                    }
+                  >
+                    {msg.duplicateToFree}
+                  </button>
+                  <div
+                    style={{
+                      height: 1,
+                      backgroundColor:
+                        "var(--color-panel-border, rgba(180, 160, 130, 0.2))",
+                      margin: "4px 8px",
+                    }}
+                  />
+                </>
+              ) : null}
+              <button
+                type="button"
+                style={moreMenuItemStyle}
+                onClick={handleMoreMenuExportJSON}
+              >
+                {msg.exportJSON}
+              </button>
+              <button
+                type="button"
+                style={moreMenuItemStyle}
+                onClick={handleMoreMenuExportSVG}
+              >
+                {msg.exportSVG}
+              </button>
+              <button
+                type="button"
+                style={moreMenuItemStyle}
+                onClick={handleMoreMenuExportPNG}
+              >
+                {msg.exportPNG}
+              </button>
+              <button
+                type="button"
+                style={moreMenuItemStyle}
+                onClick={handleMoreMenuImportJSON}
+              >
+                {msg.importJSON}
+              </button>
+            </div>
+          ) : null}
+        </div>
         {/* ファイルインポート用の隠しinput（refからimportJSON()で利用） */}
         <input
           ref={fileInputRef}
