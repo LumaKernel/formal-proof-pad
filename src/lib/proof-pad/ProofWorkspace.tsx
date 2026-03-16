@@ -493,8 +493,7 @@ const moreMenuDropdownStyle: CSSProperties = {
   backgroundColor: "var(--color-panel-bg, rgba(252, 249, 243, 0.98))",
   border: "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
   borderRadius: "0.375rem",
-  boxShadow:
-    "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
+  boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
   zIndex: 100,
   minWidth: "180px",
   paddingTop: "0.25rem",
@@ -4551,9 +4550,7 @@ export const ProofWorkspace = forwardRef<
             aria-label="More actions"
             data-testid={
               /* v8 ignore start -- V8集約アーティファクト */
-              testId
-                ? `${testId satisfies string}-more-menu-button`
-                : undefined
+              testId ? `${testId satisfies string}-more-menu-button` : undefined
               /* v8 ignore stop */
             }
           >
