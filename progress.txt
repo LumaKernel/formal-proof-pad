@@ -14887,3 +14887,16 @@
   - convertScProofTreeToDisplay は深さ優先でID付与するため、テストでID順序を前提にしないこと
   - CutEliminationStepper (左下) と ScProofTreePanel (右下) は同じz-index/position:absolute配置パターン
 ---
+
+## 2026-03-16 - [ND] 証明木Gentzenスタイル表示パネル
+- ND証明木の純粋ロジック（ndProofTreeRendererLogic.ts）を実装: グラフ→ツリー変換、循環参照検出、複数ルート検出
+- UIパネル（NdProofTreePanel.tsx）を実装: 空状態メッセージ、複数ルート切替ボタン、Gentzenスタイル再帰描画
+- ProofWorkspace.tsxにND体系の場合のみパネルを条件付きレンダリングで統合
+- テスト: 30テスト（純粋ロジック） + 7テスト（UIコンポーネント）
+- カバレッジ: 99.99% → 99.99%（維持）、280ファイル11357テスト全通過
+- 変更ファイル: ndProofTreeRendererLogic.ts, ndProofTreeRendererLogic.test.ts, NdProofTreePanel.tsx, NdProofTreePanel.test.tsx, ProofWorkspace.tsx, index.ts, prd-non-hilbert.md
+- **今後のイテレーションへの学び:**
+  - SC証明木パネルとND証明木パネルは同じProofTreeDisplayData型を共有。UI描画ロジックも類似のためコンポーネント共有の余地あり
+  - NDのワークスペースは平坦なグラフ（ノード＋InferenceEdges）なので、SC（ネストされたツリー構造）とは異なる変換ロジックが必要
+  - 循環参照検出のテストを忘れるとカバレッジが低下する — visitedセットのガード分岐をテストで必ずカバーする
+---
