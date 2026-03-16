@@ -106,7 +106,7 @@ function AntThemeWrapper({
     [resolvedTheme],
   );
 
-  return React.createElement(ConfigProvider, { theme: themeConfig }, children);
+  return React.createElement(ConfigProvider, { theme: themeConfig, button: { autoInsertSpace: false } }, children);
 }
 
 /**

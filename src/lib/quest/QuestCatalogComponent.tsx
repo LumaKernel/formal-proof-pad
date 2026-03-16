@@ -13,8 +13,12 @@ import {
   useRef,
   useEffect,
   useCallback,
+  useMemo,
   type CSSProperties,
 } from "react";
+import { Button, Menu } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
+import type { MenuProps } from "antd";
 import type { QuestCatalogItem, CategoryGroup } from "./questCatalog";
 import type { QuestId, DifficultyLevel } from "./questDefinition";
 import {
@@ -89,31 +93,6 @@ const filterLabelStyle: Readonly<CSSProperties> = {
   textTransform: "uppercase",
 };
 
-const filterButtonStyle: Readonly<CSSProperties> = {
-  padding: "4px 10px",
-  fontSize: "11px",
-  borderRadius: "9999px",
-  border: "1px solid var(--color-quest-filter-border)",
-  background: "var(--color-quest-filter-bg)",
-  color: "var(--ui-foreground)",
-  cursor: "pointer",
-  transitionProperty: "all",
-  transitionDuration: "150ms",
-  fontWeight: 500,
-};
-
-const filterButtonActiveStyle: Readonly<CSSProperties> = {
-  padding: "4px 10px",
-  fontSize: "11px",
-  borderRadius: "9999px",
-  border: "1px solid var(--color-quest-filter-active-border)",
-  background: "var(--color-quest-filter-active-bg)",
-  color: "white",
-  cursor: "pointer",
-  transitionProperty: "all",
-  transitionDuration: "150ms",
-  fontWeight: 600,
-};
 
 const categoryContainerStyle: Readonly<CSSProperties> = {
   display: "flex",
@@ -285,39 +264,7 @@ const notebookCountBadgeStyle: Readonly<CSSProperties> = {
   border: "none",
 };
 
-const startButtonStyle: Readonly<CSSProperties> = {
-  padding: "6px 12px",
-  fontSize: "11px",
-  fontWeight: 600,
-  borderRadius: "6px",
-  border: "none",
-  background: "var(--color-quest-start-bg)",
-  color: "white",
-  cursor: "pointer",
-  flexShrink: 0,
-  transitionProperty: "color, background-color, border-color",
-  transitionDuration: "150ms",
-};
-
-const moreButtonStyle: Readonly<CSSProperties> = {
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "28px",
-  height: "28px",
-  borderRadius: "9999px",
-  border: "none",
-  background: "transparent",
-  color: "var(--ui-muted-foreground)",
-  cursor: "pointer",
-  flexShrink: 0,
-  fontSize: "1rem",
-  lineHeight: 1,
-  transitionProperty: "color, background-color, border-color",
-  transitionDuration: "150ms",
-};
-
-const moreMenuStyle: Readonly<CSSProperties> = {
+const moreMenuDropdownStyle: Readonly<CSSProperties> = {
   position: "absolute",
   right: 0,
   top: "100%",
@@ -327,23 +274,7 @@ const moreMenuStyle: Readonly<CSSProperties> = {
   border: "1px solid var(--ui-border)",
   borderRadius: "6px",
   boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
-  padding: "4px 0",
-};
-
-const moreMenuItemStyle: Readonly<CSSProperties> = {
-  display: "block",
-  width: "100%",
-  padding: "6px 14px",
-  fontSize: "0.75rem",
-  fontWeight: 500,
-  border: "none",
-  background: "transparent",
-  color: "var(--ui-foreground)",
-  cursor: "pointer",
-  textAlign: "left",
-  transitionProperty: "color, background-color, border-color",
-  transitionDuration: "150ms",
-  whiteSpace: "nowrap",
+  overflow: "hidden",
 };
 
 const emptyStyle: Readonly<CSSProperties> = {
@@ -533,6 +464,33 @@ function QuestItemMoreMenu({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
+  const menuItems: MenuProps["items"] = useMemo(() => {
+    const items: NonNullable<MenuProps["items"]> = [];
+    if (onShowModelAnswer !== undefined) {
+      items.push({
+        key: "model-answer",
+        label: <span data-testid={`show-model-answer-btn-${questId satisfies string}`}>模範解答を表示</span>,
+        onClick: ({ domEvent }) => {
+          domEvent.stopPropagation();
+          onShowModelAnswer(questId);
+          setOpen(false);
+        },
+      });
+    }
+    if (onDuplicateToCustom !== undefined) {
+      items.push({
+        key: "duplicate",
+        label: <span data-testid={`duplicate-to-custom-btn-${questId satisfies string}`}>自作に複製</span>,
+        onClick: ({ domEvent }) => {
+          domEvent.stopPropagation();
+          onDuplicateToCustom(questId);
+          setOpen(false);
+        },
+      });
+    }
+    return items;
+  }, [questId, onShowModelAnswer, onDuplicateToCustom]);
+
   if (!hasActions) return null;
 
   return (
@@ -541,49 +499,26 @@ function QuestItemMoreMenu({
       style={{ position: "relative", flexShrink: 0 }}
       data-testid={`quest-more-menu-${questId satisfies string}`}
     >
-      <button
+      <Button
         data-testid={`quest-more-btn-${questId satisfies string}`}
-        className="quest-more-btn"
-        style={moreButtonStyle}
+        icon={<MoreOutlined />}
+        type="text"
+        size="small"
         onClick={handleToggle}
-        title="その他のアクション"
         aria-label="その他のアクション"
-      >
-        {"\u22EE"}
-      </button>
+        style={{ flexShrink: 0 }}
+      />
       {open && (
         <div
-          style={moreMenuStyle}
+          style={moreMenuDropdownStyle}
           data-testid={`quest-more-dropdown-${questId satisfies string}`}
+          onClick={() => setOpen(false)}
         >
-          {onShowModelAnswer !== undefined && (
-            <button
-              data-testid={`show-model-answer-btn-${questId satisfies string}`}
-              className="quest-more-menu-item"
-              style={moreMenuItemStyle}
-              onClick={(e) => {
-                e.stopPropagation();
-                onShowModelAnswer(questId);
-                setOpen(false);
-              }}
-            >
-              模範解答を表示
-            </button>
-          )}
-          {onDuplicateToCustom !== undefined && (
-            <button
-              data-testid={`duplicate-to-custom-btn-${questId satisfies string}`}
-              className="quest-more-menu-item"
-              style={moreMenuItemStyle}
-              onClick={(e) => {
-                e.stopPropagation();
-                onDuplicateToCustom(questId);
-                setOpen(false);
-              }}
-            >
-              自作に複製
-            </button>
-          )}
+          <Menu
+            items={menuItems}
+            selectable={false}
+            style={{ border: "none", boxShadow: "none", borderRadius: "6px" }}
+          />
         </div>
       )}
     </div>
@@ -658,17 +593,19 @@ function QuestItem({
         onDuplicateToCustom={onDuplicateToCustom}
         onShowModelAnswer={onShowModelAnswer}
       />
-      <button
+      <Button
         data-testid={`start-btn-${item.quest.id satisfies string}`}
-        style={startButtonStyle}
+        type="primary"
+        size="small"
         onClick={(e) => {
           e.stopPropagation();
           onStart(item.quest.id);
         }}
         title={item.completed ? "再挑戦" : "開始"}
+        style={{ flexShrink: 0 }}
       >
         {item.completed ? "再挑戦" : "開始"}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -780,33 +717,29 @@ export function QuestCatalog({
       <div style={filterBarStyle} data-testid="filter-bar">
         <span style={filterLabelStyle}>難易度:</span>
         {difficultyFilterOptions.map((opt) => (
-          <button
+          <Button
             key={String(opt.value)}
             data-testid={`difficulty-filter-${String(opt.value) satisfies string}`}
-            style={
-              filter.difficulty === opt.value
-                ? filterButtonActiveStyle
-                : filterButtonStyle
-            }
+            type={filter.difficulty === opt.value ? "primary" : "default"}
+            shape="round"
+            size="small"
             onClick={() => handleDifficultyChange(opt.value)}
           >
             {opt.label}
-          </button>
+          </Button>
         ))}
         <span style={{ ...filterLabelStyle, marginLeft: 12 }}>状態:</span>
         {completionFilterOptions.map((opt) => (
-          <button
+          <Button
             key={opt.value}
             data-testid={`completion-filter-${opt.value satisfies string}`}
-            style={
-              filter.completion === opt.value
-                ? filterButtonActiveStyle
-                : filterButtonStyle
-            }
+            type={filter.completion === opt.value ? "primary" : "default"}
+            shape="round"
+            size="small"
             onClick={() => handleCompletionChange(opt.value)}
           >
             {opt.label}
-          </button>
+          </Button>
         ))}
       </div>
 

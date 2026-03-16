@@ -42,5 +42,9 @@ export function AntDesignThemeProvider({
     [resolved],
   );
 
-  return <ConfigProvider theme={themeConfig}>{children}</ConfigProvider>;
+  return (
+    <ConfigProvider theme={themeConfig} button={{ autoInsertSpace: false }}>
+      {children}
+    </ConfigProvider>
+  );
 }
