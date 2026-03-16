@@ -8,7 +8,8 @@
  * 変更時は HubContent.tsx, HubPageView.stories.tsx も同期すること。
  */
 
-import { useState, useRef, useCallback, type CSSProperties } from "react";
+import { useState, useRef, useCallback, useMemo, type CSSProperties } from "react";
+import { Tabs } from "antd";
 import {
   NotebookList,
   NotebookCreateForm,
@@ -209,34 +210,6 @@ const githubLinkStyle: Readonly<CSSProperties> = {
   transitionDuration: "150ms",
 };
 
-const tabBarStyle: Readonly<CSSProperties> = {
-  display: "flex",
-  borderBottom: "1px solid var(--ui-border)",
-  paddingLeft: "24px",
-  paddingRight: "24px",
-  backgroundColor: "var(--ui-card)",
-};
-
-const tabBaseStyle: Readonly<CSSProperties> = {
-  paddingLeft: "20px",
-  paddingRight: "20px",
-  paddingTop: "12px",
-  paddingBottom: "12px",
-  fontSize: "0.875rem",
-  fontWeight: 600,
-  cursor: "pointer",
-  borderBottom: "2px solid transparent",
-  backgroundColor: "transparent",
-  color: "var(--ui-muted-foreground)",
-  transitionProperty: "color, background-color, border-color",
-  transitionDuration: "150ms",
-};
-
-const tabActiveStyle: Readonly<CSSProperties> = {
-  ...tabBaseStyle,
-  borderBottom: "2px solid var(--ui-primary)",
-  color: "var(--ui-primary)",
-};
 
 const contentStyle: Readonly<CSSProperties> = {
   maxWidth: "800px",
@@ -620,6 +593,30 @@ export function HubPageView({
     setView("list");
   };
 
+  const handleAntTabChange = useCallback(
+    (key: string) => {
+      const hubTab = key as HubTab;
+      onTabChange(hubTab);
+      setView("list");
+      if (hubTab === "notebooks") {
+        setQuestFilter(null);
+      }
+    },
+    [onTabChange],
+  );
+
+  const tabItems = useMemo(
+    () => [
+      { key: "notebooks" as const, label: m.tabNotebooks },
+      { key: "quests" as const, label: m.tabQuests },
+      { key: "custom-quests" as const, label: m.tabCustomQuests },
+      { key: "collection" as const, label: m.tabCollection },
+      { key: "reference" as const, label: m.tabReference },
+      { key: "scripts" as const, label: m.tabScripts },
+    ],
+    [m],
+  );
+
   const displayedItems =
     questFilter !== null
       ? filterNotebooksByQuestId(listItems, questFilter)
@@ -764,69 +761,12 @@ export function HubPageView({
       ) : (
         <>
           {/* Tab Bar */}
-          <nav style={tabBarStyle}>
-            <button
-              type="button"
-              style={tab === "notebooks" ? tabActiveStyle : tabBaseStyle}
-              onClick={() => {
-                onTabChange("notebooks");
-                setView("list");
-                setQuestFilter(null);
-              }}
-            >
-              {m.tabNotebooks}
-            </button>
-            <button
-              type="button"
-              style={tab === "quests" ? tabActiveStyle : tabBaseStyle}
-              onClick={() => {
-                onTabChange("quests");
-                setView("list");
-              }}
-            >
-              {m.tabQuests}
-            </button>
-            <button
-              type="button"
-              style={tab === "custom-quests" ? tabActiveStyle : tabBaseStyle}
-              onClick={() => {
-                onTabChange("custom-quests");
-                setView("list");
-              }}
-            >
-              {m.tabCustomQuests}
-            </button>
-            <button
-              type="button"
-              style={tab === "collection" ? tabActiveStyle : tabBaseStyle}
-              onClick={() => {
-                onTabChange("collection");
-                setView("list");
-              }}
-            >
-              {m.tabCollection}
-            </button>
-            <button
-              type="button"
-              style={tab === "reference" ? tabActiveStyle : tabBaseStyle}
-              onClick={() => {
-                onTabChange("reference");
-                setView("list");
-              }}
-            >
-              {m.tabReference}
-            </button>
-            <button
-              type="button"
-              style={tab === "scripts" ? tabActiveStyle : tabBaseStyle}
-              onClick={() => {
-                onTabChange("scripts");
-                setView("list");
-              }}
-            >
-              {m.tabScripts}
-            </button>
-          </nav>
+          <Tabs
+            activeKey={tab}
+            onChange={handleAntTabChange}
+            items={tabItems}
+            style={{ paddingLeft: 24, paddingRight: 24, marginBottom: 0 }}
+          />
 
           {/* Content */}
           <div style={contentStyle}>
