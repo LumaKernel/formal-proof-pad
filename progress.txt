@@ -14954,3 +14954,15 @@
   - CSS変数の参照先が存在するか確認する。インラインスタイルで `var(--name, fallback)` を使うと、変数未定義でもフォールバック値で動作するため、ダークモードでのみ問題が顕在化する
   - 実アプリ(localhost:13000)での確認が最も確実。Storybook はデコレータ構成が異なる場合がある
 ---
+
+## 2026-03-17 - ProofWorkspace ⋮メニュー移動
+- ⋮メニューをWorkspacePageViewヘッダー(タイトル横)からProofWorkspaceキャンバスヘッダー(体系名横)に移動
+- クエストノートブック時のみ「自由帳として複製」を表示するよう修正（questId !== undefined で制御）
+- WorkspacePageMessagesからメニュー関連キーを削除（ProofMessages側で管理）
+- 不要になったCSS・import・ref・ハンドラーを整理
+- 変更ファイル: ProofWorkspace.tsx, WorkspacePageView.tsx, WorkspaceContent.tsx, workspacePageMessages.ts, WorkspacePageView.stories.tsx, globals.css
+- **今後のイテレーションへの学び:**
+  - WorkspacePageViewとProofWorkspaceの責務分離: ページレベルUI(タイトル、言語切替、テーマ)はWorkspacePageView、証明キャンバス操作(エクスポート/インポート、複製)はProofWorkspaceが担当
+  - メニュー移動時は testId パターンも変わるため、stories の play 関数のセレクタ更新を忘れずに
+  - prettier --check をローカルで実行してからコミットする（globals.css のような非TS/TSXファイルも対象）
+---
