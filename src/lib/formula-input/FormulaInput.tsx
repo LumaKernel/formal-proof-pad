@@ -193,11 +193,15 @@ const highlightMarkStyle: CSSProperties = {
   textDecoration: "underline",
   textDecorationColor: "var(--color-error, #e53e3e)",
   textDecorationStyle: "wavy",
-  color: "transparent",
+  color: "var(--color-error, #e53e3e)",
 };
 
 const transparentTextStyle: CSSProperties = {
   color: "transparent",
+};
+
+const errorNormalTextStyle: CSSProperties = {
+  color: "var(--color-text-primary, #171717)",
 };
 
 /**
@@ -485,7 +489,7 @@ function renderHighlightedText(
       parts.push(
         <span
           key={`t-${`${pos satisfies number}` satisfies string}`}
-          style={transparentTextStyle}
+          style={errorNormalTextStyle}
         >
           {text.slice(pos, h.start)}
         </span>,
@@ -506,7 +510,7 @@ function renderHighlightedText(
     parts.push(
       <span
         key={`t-${`${pos satisfies number}` satisfies string}`}
-        style={transparentTextStyle}
+        style={errorNormalTextStyle}
       >
         {text.slice(pos)}
       </span>,
