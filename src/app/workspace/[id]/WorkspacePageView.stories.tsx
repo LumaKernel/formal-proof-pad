@@ -856,13 +856,13 @@ export const QuestCompleteProp01: Story = {
 
     // --- 最終確認: ゴール達成 ---
     await waitFor(() => {
-      expect(
-        canvas.getByTestId("workspace-goal-panel"),
-      ).toHaveTextContent("1 / 1");
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
     });
-    await expect(
-      canvas.getByTestId("workspace-goal-panel"),
-    ).toHaveTextContent("Proved!");
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
   },
 };
 
