@@ -218,6 +218,10 @@
   --color-quest-difficulty-bg: rgba(180, 160, 130, 0.12);
   --color-quest-difficulty-text: #8b7355;
   --color-quest-empty-bg: rgba(252, 249, 243, 0.96);
+  --color-quest-notebook-badge-bg: #e8eaf6;
+  --color-quest-notebook-badge-text: #3949ab;
+  --color-quest-reference-badge-bg: #e8f5e9;
+  --color-quest-reference-badge-text: #2e7d32;
 
   /* Formula Syntax Highlight */
   --color-syntax-connective: #7b3fa0;
@@ -421,6 +425,10 @@
   --color-quest-difficulty-bg: rgba(100, 90, 75, 0.15);
   --color-quest-difficulty-text: #c8b898;
   --color-quest-empty-bg: rgba(36, 33, 30, 0.96);
+  --color-quest-notebook-badge-bg: rgba(57, 73, 171, 0.2);
+  --color-quest-notebook-badge-text: #9fa8da;
+  --color-quest-reference-badge-bg: rgba(46, 125, 50, 0.2);
+  --color-quest-reference-badge-text: #81c784;
 
   /* Formula Syntax Highlight */
   --color-syntax-connective: #c89bdf;

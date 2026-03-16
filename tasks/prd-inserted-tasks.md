@@ -1,11 +1,6 @@
 # 差し込みタスク
 
-- [ ] ../tasks-archived/prd-replace.md が達成されていない
-  - [x] term入力のコンポーネントのストーリー(FormulaDisplay)に phi[tau/x] などがあるべきだろう
-    - SubstitutionDisplay（6パターン）とSubstitutionHighlight（3パターン、A4公理全体含む）をplay関数付きで追加
-  - [x] UIの公理は (all x. phi) -> phi ではなく (all x. phi) -> phi[τ/x] にする！！
-    - axiomA4Template に FormulaSubstitution を追加。dslText は identifyAxiom 互換性のため旧形式維持
-- [ ] ダークモードでの(クエスト)「開始」とか「再挑戦」とか、選択済みの「全難易度」とかが背景色と一緒になってみえにくい。
+- [-] ダークモードでの(クエスト)「開始」とか「再挑戦」とか、選択済みの「全難易度」とかが背景色と一緒になってみえにくい。
   - [ ] 過去の遺産で余計なことをしてしまってないか？ シンプルにAntのダークモードの方法にのっかるような方針にできないか
   - [ ] playwright-cliで確認
 - [ ] 以前、キャンバス編集のタイトルの横の三点リーダーを消してと頼んだが、体系の名前の横のものが削除されてしまった。

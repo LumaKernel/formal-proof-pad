@@ -24,8 +24,11 @@ export function AntDesignThemeProvider({
       algorithm:
         resolved === "dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,
       token: {
-        // Map to existing CSS variable values
+        // Light: dark primary (#171717) on white bg.
+        // Dark: light primary (#fafafa) on dark bg, with dark text
+        // on primary buttons (colorTextLightSolid).
         colorPrimary: resolved === "dark" ? "#fafafa" : "#171717",
+        ...(resolved === "dark" ? { colorTextLightSolid: "#141414" } : {}),
         colorBgContainer: resolved === "dark" ? "#0a0a0a" : "#ffffff",
         colorText: resolved === "dark" ? "#e0e0e0" : "#171717",
         colorTextSecondary: resolved === "dark" ? "#999999" : "#666666",
