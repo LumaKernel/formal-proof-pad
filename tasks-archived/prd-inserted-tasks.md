@@ -347,3 +347,13 @@ Infinity Canvasについて。
 - [x] リファレンスタブの各種ボタン、同様 — antd Button に置き換え完了（Browser/Modal/FloatingWindow/ViewerPageView）
 - [x] スクリプトタブの各種ボタン、同様 — antd Button に置き換え完了（rename/export/deleteボタン）
 - [x] ヘッダーの各要素 — ThemeToggle/LanguageToggleはrole="radio"+aria-checked付きのカスタムsegmentedでantd Segmentedでは代替不可。GitHubリンクは`<a>`タグ。ヘッダーに標準ボタンなし
+
+## 模範解答修正・ブラウザ確認 (2026-03-16)
+
+- [x] EN/JAの切り替えってリロード必要なの？ — リロード必要。next-intlがサーバーサイドでcookieからロケール解決するため意図的な設計
+- [x] 各クエストで模範解答を開いても、公理制約違反だったり、証明されていなかったりする
+  - [x] 各論理体系ごとに何が必要？ — Hilbert系101/127がINSTANCE_ROOTSで失敗
+  - [x] buildModelAnswerWorkspaceのaxiomステップ自動展開を実装。全1149テストパス
+  - [x] pw mcpでしっかり確認 — Storybook上でprop-01がPROOF COMPLETE!表示を確認
+  - [x] prd-quest-ans.md にタスクリスト作成済み
+- [x] Substitutionコンテキストメニュー項目をisHilbertStyleガードで囲む
