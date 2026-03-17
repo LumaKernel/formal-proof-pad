@@ -15066,3 +15066,16 @@
   - `computeNextAssumptionId` は既存エッジを走査して最大IDを取得。→I, ∨E, ∃Eのedge typeを考慮
   - ストーリーURLパターン: title "Pages/Workspace" → `pages-workspace--story-name`（WorkspacePageView部分は含まない）
 ---
+
+## 2026-03-17 - SC-01・TAB-01完全フローストーリー
+- SC-01 (シーケント計算) とTAB-01 (タブロー法) の完全フローストーリーを追加
+- SC-01: Add Sequent → 式入力 `phi -> phi` → ゴール達成
+- TAB-01: Add Sequent → 式入力 `~(phi -> phi)` → ゴール達成
+- 「hilbert以外を開始するとemptyになる」問題を調査 → emptyはby design（パレットから追加する設計）。パレットが正しく表示されることを確認
+- 変更ファイル: src/app/workspace/[id]/WorkspacePageView.stories.tsx
+- カバレッジ: Stmts 99.95%, Branch 99.77%, Funcs 90.43%, Lines 99.95% (変化なし)
+- **今後のイテレーションへの学び:**
+  - SC/TABのゴールチェックは、sequent形式(`⇒ formula`)と直接formula textの両方にマッチする
+  - SC/TABの模範解答は単一axiomステップ（ゴール式をそのままaxiomノードとして配置）
+  - AT-01フルフローストーリーが未対応（残りの章）
+---
