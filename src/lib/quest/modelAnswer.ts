@@ -45,7 +45,6 @@ import { parseString } from "../logic-lang/parser";
 import { formatFormula } from "../logic-lang/formatUnicode";
 import { formatTerm } from "../logic-lang/formatUnicode";
 import { identifyAxiom } from "../logic-core/inferenceRule";
-import { isTrivialAxiomSubstitution } from "../proof-pad/axiomNameLogic";
 import {
   collectUniqueFormulaMetaVariables,
   collectUniqueTermMetaVariablesInFormula,
@@ -57,6 +56,47 @@ import type {
   FormulaSubstitutionMap,
   TermMetaSubstitutionMap,
 } from "../logic-core/substitution";
+
+// --- 自明な代入の判定（modelAnswer内部用） ---
+
+/**
+ * 公理識別結果の代入が自明（公理スキーマそのもの or メタ変数の命名違いのみ）かどうかを判定する。
+ * 自明でない場合、その式は公理スキーマそのものではなく代入インスタンスである。
+ *
+ * modelAnswer でのみ使用。UI層では matchAxiomTemplateByEquality に統一済み。
+ */
+const isTrivialAxiomSubstitution = (
+  formulaSub: FormulaSubstitutionMap,
+  termSub: TermMetaSubstitutionMap,
+): boolean => {
+  // FormulaSubstitutionMap: すべての値が MetaVariable かつ単射
+  const usedFormulaTargets = new Set<string>();
+  for (const [, value] of formulaSub) {
+    if (value._tag !== "MetaVariable") return false;
+    const subscriptSuffix =
+      value.subscript !== undefined
+        ? `_${value.subscript satisfies string}`
+        : "";
+    const targetKey = `${value.name satisfies string}${subscriptSuffix satisfies string}`;
+    if (usedFormulaTargets.has(targetKey)) return false;
+    usedFormulaTargets.add(targetKey);
+  }
+  // TermMetaSubstitutionMap: すべての値が TermMetaVariable かつ単射
+  // 模範解答では命題論理公理のみが自明代入を持ち、termSub は常に空
+  /* v8 ignore start — 命題論理公理は term meta-variable を持たないため到達しない */
+  const usedTermTargets = new Set<string>();
+  for (const [, value] of termSub) {
+    if (value._tag !== "TermMetaVariable") return false;
+    const { name, subscript } = value;
+    const subscriptSuffix =
+      subscript !== undefined ? `_${subscript satisfies string}` : "";
+    const targetKey = `${name satisfies string}${subscriptSuffix satisfies string}`;
+    if (usedTermTargets.has(targetKey)) return false;
+    usedTermTargets.add(targetKey);
+  }
+  /* v8 ignore stop */
+  return true;
+};
 
 // --- ステップ定義 ---
 
@@ -532,7 +572,8 @@ function expandAxiomStepIfNeeded(
     return { workspace, nodeId };
   }
 
-  // 自明な代入（スキーマそのもの）→ 単一ノード
+  // 自明な代入（スキーマそのもの or メタ変数のリネームのみ）→ 単一ノード
+  // メタ変数リネーム時はオリジナルのテキストを保持（後続MPが参照するため）
   if (
     isTrivialAxiomSubstitution(
       identification.formulaSubstitution,
@@ -1564,13 +1605,9 @@ export type ValidateModelAnswerResult =
  * 模範解答がクエストのゴールを正しく達成しているか検証する。
  * テスト用の純粋関数。
  *
- * 模範解答は公理インスタンスを直接記述するため、SubstitutionEdge を経由しない。
- * そのため hasInstanceRootNodes が true になるが、これは正常な挙動であり、
- * AllAchievedButAxiomViolation でも hasInstanceRootNodes のみが原因なら Valid とする。
- *
- * ただし以下の場合は違反として報告する:
- * - violatingAxiomIds が空でない（真の公理制約違反）→ AxiomConstraintViolation
- * - violatingRuleIds が空でない（真の規則制約違反）→ RuleConstraintViolation
+ * 以下の場合は違反として報告する:
+ * - violatingAxiomIds が空でない（公理制約違反）→ AxiomConstraintViolation
+ * - violatingRuleIds が空でない（規則制約違反）→ RuleConstraintViolation
  *
  * 注: hasUnknownRootNodes は GoalAxiomCheckResult のデータフィールドとして提供される。
  * validateModelAnswer ではチェックしない（非Hilbert系では全ルートが unknown になるため）。

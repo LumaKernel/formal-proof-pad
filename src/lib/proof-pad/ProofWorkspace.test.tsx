@@ -1791,8 +1791,9 @@ describe("ProofWorkspace", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("does not show any banner when instance is placed directly", () => {
+    it("shows complete banner when instance is placed directly (no instance root check)", () => {
       // A1 の代入インスタンスをルートノードに直接配置
+      // 構造的一致では公理として認識しないが、公理制約違反にもならない
       let ws = createQuestWorkspace(lukasiewiczSystem, [
         {
           formulaText: "(phi -> psi) -> (chi -> (phi -> psi))",
@@ -1816,10 +1817,11 @@ describe("ProofWorkspace", () => {
         />,
       );
 
-      // 完全達成バナーは表示されない（instance root violation のため）
+      // 公理インスタンスの直接配置は公理制約違反として扱わないため、
+      // ゴール達成とみなされバナーが表示される
       expect(
         screen.queryByTestId("workspace-proof-complete-banner"),
-      ).not.toBeInTheDocument();
+      ).toBeInTheDocument();
     });
   });
 

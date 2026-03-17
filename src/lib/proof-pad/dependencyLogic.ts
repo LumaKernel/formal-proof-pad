@@ -10,14 +10,15 @@
 
 import { Either } from "effect";
 import type { LogicSystem, AxiomId } from "../logic-core/inferenceRule";
-import { identifyAxiom } from "../logic-core/inferenceRule";
-import { matchAxiomTemplateByEquality } from "../logic-core/inferenceRule";
+import {
+  matchAxiomTemplateByEquality,
+  matchTheoryAxiomTemplateByEquality,
+} from "../logic-core/inferenceRule";
 import { parseString } from "../logic-lang/parser";
 import type { DependencyInfo } from "./EditableProofNode";
 import type { WorkspaceNode } from "./workspaceState";
 import type { InferenceEdge, InferenceRuleId } from "./inferenceEdge";
 import { getInferenceEdgePremiseNodeIds } from "./inferenceEdge";
-import { isTrivialAxiomSubstitution } from "./axiomNameLogic";
 
 /**
  * あるノードが依存するルートノード（公理）のID集合を返す。
@@ -191,7 +192,7 @@ export function getProofNodeIds(
  * あるノードが依存する公理スキーマID（A1, A2, A3, ...）の集合を返す。
  *
  * 1. getNodeDependencies でルートノードIDを取得
- * 2. 各ルートノードの formulaText をパースして identifyAxiom で公理スキーマIDを特定
+ * 2. 各ルートノードの formulaText をパースして matchAxiomTemplateByEquality で公理スキーマIDを特定
  * 3. 特定できなかったノードは結果に含まない
  *
  * @param nodeId 対象ノードのID
@@ -219,9 +220,9 @@ export function getNodeAxiomIds(
     const parsed = parseString(trimmed);
     if (Either.isLeft(parsed)) continue;
 
-    const identification = identifyAxiom(parsed.right, system);
-    if (identification._tag === "Ok") {
-      result.add(identification.axiomId);
+    const axiomId = matchAxiomTemplateByEquality(parsed.right, system);
+    if (axiomId !== undefined) {
+      result.add(axiomId);
     }
   }
 
@@ -279,12 +280,9 @@ export function getNodeInferenceRuleIds(
 /**
  * ルートノードの公理バリデーション結果。
  *
- * - "schema": 公理スキーマそのもの（メタ変数の命名違いのみ）。正当なルートノード。
- * - "instance": 公理スキーマの代入インスタンスがルートに直接配置されている。
- *   SubstitutionEdge を介してスキーマから導出すべき。
- * - "theory-schema": 理論公理スキーマそのもの（メタ変数の命名違いのみ）。正当なルートノード。
- * - "theory-instance": 理論公理スキーマの代入インスタンスがルートに直接配置されている。
- * - "unknown": 公理として識別できないルートノード。
+ * - "schema": 標準公理テンプレートと構造的に一致。正当なルートノード。
+ * - "theory-schema": 理論公理テンプレートと構造的に一致。正当なルートノード。
+ * - "unknown": 公理テンプレートと一致しないルートノード。
  */
 export type RootNodeValidation =
   | {
@@ -293,17 +291,7 @@ export type RootNodeValidation =
       readonly axiomId: AxiomId;
     }
   | {
-      readonly _tag: "instance";
-      readonly nodeId: string;
-      readonly axiomId: AxiomId;
-    }
-  | {
       readonly _tag: "theory-schema";
-      readonly nodeId: string;
-      readonly theoryAxiomId: string;
-    }
-  | {
-      readonly _tag: "theory-instance";
       readonly nodeId: string;
       readonly theoryAxiomId: string;
     }
@@ -315,9 +303,9 @@ export type RootNodeValidation =
 /**
  * あるノードが依存するルートノードを厳密にバリデーションする。
  *
- * ルートノードが公理スキーマそのものか、代入インスタンスか、未知かを判定する。
- * 代入インスタンスがルートに直接配置されている場合は "instance" として報告する
- * （SubstitutionEdge で明示的に導出すべき）。
+ * ルートノードが公理テンプレートと構造的に一致するかを判定する。
+ * equalFormula による完全一致のみを認め、メタ変数のリネームや
+ * 代入インスタンスは識別しない（"unknown" として扱う）。
  *
  * @param nodeId 対象ノードのID
  * @param nodes ワークスペースの全ノード
@@ -350,97 +338,31 @@ export function validateRootNodes(
       continue;
     }
 
-    const identification = identifyAxiom(parsed.right, system);
-    switch (identification._tag) {
-      case "Ok": {
-        const isTrivial = isTrivialAxiomSubstitution(
-          identification.formulaSubstitution,
-          identification.termSubstitution,
-        );
-        if (isTrivial) {
-          results.push({
-            _tag: "schema",
-            nodeId: rootId,
-            axiomId: identification.axiomId,
-          });
-        } else {
-          results.push({
-            _tag: "instance",
-            nodeId: rootId,
-            axiomId: identification.axiomId,
-          });
-        }
-        break;
-      }
-      case "TheoryAxiom": {
-        const isTrivial = isTrivialAxiomSubstitution(
-          identification.formulaSubstitution,
-          identification.termSubstitution,
-        );
-        if (isTrivial) {
-          results.push({
-            _tag: "theory-schema",
-            nodeId: rootId,
-            theoryAxiomId: identification.theoryAxiomId,
-          });
-        } else {
-          results.push({
-            _tag: "theory-instance",
-            nodeId: rootId,
-            theoryAxiomId: identification.theoryAxiomId,
-          });
-        }
-        break;
-      }
-      case "Error": {
-        // identifyAxiom は解決済みの形を期待するため、
-        // FormulaSubstitution を含むテンプレート形式（例: A4 の φ[τ/x]）は識別できない。
-        // フォールバックとしてテンプレートとの構造的等価性をチェックする。
-        const templateMatch = matchAxiomTemplateByEquality(
-          parsed.right,
-          system,
-        );
-        if (templateMatch !== undefined) {
-          results.push({
-            _tag: "schema",
-            nodeId: rootId,
-            axiomId: templateMatch,
-          });
-        } else {
-          results.push({ _tag: "unknown", nodeId: rootId });
-        }
-        break;
-      }
+    // 標準公理テンプレートとの構造的一致
+    const axiomId = matchAxiomTemplateByEquality(parsed.right, system);
+    if (axiomId !== undefined) {
+      results.push({ _tag: "schema", nodeId: rootId, axiomId });
+      continue;
     }
+
+    // 理論公理テンプレートとの構造的一致
+    const theoryMatch = matchTheoryAxiomTemplateByEquality(
+      parsed.right,
+      system,
+    );
+    if (theoryMatch !== undefined) {
+      results.push({
+        _tag: "theory-schema",
+        nodeId: rootId,
+        theoryAxiomId: theoryMatch.theoryAxiomId,
+      });
+      continue;
+    }
+
+    results.push({ _tag: "unknown", nodeId: rootId });
   }
 
   return results;
-}
-
-/**
- * ルートノードバリデーション結果からインスタンス直接配置のノードIDを返す。
- * 命題論理公理・理論公理の両方のインスタンスを含む。
- */
-export function getInstanceRootNodeIds(
-  validations: readonly RootNodeValidation[],
-): readonly string[] {
-  /* v8 ignore start -- V8 coverage merging quirk: 100% in isolation but phantom uncovered in full suite */
-  return validations
-    .filter((v) => v._tag === "instance" || v._tag === "theory-instance")
-    .map((v) => v.nodeId);
-  /* v8 ignore stop */
-}
-
-/**
- * ルートノードバリデーション結果に不正なインスタンス直接配置があるかどうかを返す。
- * 命題論理公理・理論公理の両方のインスタンスを含む。
- */
-export function hasInstanceRoots(
-  validations: readonly RootNodeValidation[],
-): boolean {
-  return validations.some(
-    (v) => v._tag === "instance" || v._tag === "theory-instance",
-  );
 }
 
 /**

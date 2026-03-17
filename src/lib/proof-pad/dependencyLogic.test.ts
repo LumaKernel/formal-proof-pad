@@ -7,8 +7,6 @@ import {
   getNodeAxiomIds,
   getNodeInferenceRuleIds,
   validateRootNodes,
-  getInstanceRootNodeIds,
-  hasInstanceRoots,
   hasUnknownRoots,
   deduplicateDependencyInfos,
 } from "./dependencyLogic";
@@ -663,8 +661,9 @@ describe("dependencyLogic", () => {
       expect(result).toEqual([{ _tag: "schema", nodeId: "a1", axiomId: "A1" }]);
     });
 
-    it("公理インスタンス（代入済み）はinstanceとして識別する", () => {
+    it("公理インスタンス（代入済み）はunknownとして識別する（構造的一致のみ）", () => {
       // phi -> ((phi -> phi) -> phi) はA1に φ:=phi, ψ:=(phi→phi) を代入したインスタンス
+      // matchAxiomTemplateByEquality は完全一致のみ認めるため unknown
       const nodes = [
         makeAxiomNode("a1-instance", "phi -> ((phi -> phi) -> phi)"),
       ];
@@ -676,9 +675,7 @@ describe("dependencyLogic", () => {
         edges,
         lukasiewiczSystem,
       );
-      expect(result).toEqual([
-        { _tag: "instance", nodeId: "a1-instance", axiomId: "A1" },
-      ]);
+      expect(result).toEqual([{ _tag: "unknown", nodeId: "a1-instance" }]);
     });
 
     it("識別不能な論理式はunknownとして識別する", () => {
@@ -717,7 +714,7 @@ describe("dependencyLogic", () => {
 
     it("MP導出ノードの依存ルートノードを正しく分類する", () => {
       // a1-schema: A1スキーマそのもの
-      // a1-instance: A1の代入インスタンス
+      // a1-instance: A1の代入インスタンス（構造的一致ではunknown）
       // → mp1 (derived)
       const nodes = [
         makeAxiomNode("a1-schema", "phi -> (psi -> phi)"),
@@ -734,9 +731,8 @@ describe("dependencyLogic", () => {
         axiomId: "A1",
       });
       expect(result).toContainEqual({
-        _tag: "instance",
+        _tag: "unknown",
         nodeId: "a1-instance",
-        axiomId: "A1",
       });
     });
 
@@ -788,7 +784,7 @@ describe("dependencyLogic", () => {
       expect(result).toEqual([{ _tag: "unknown", nodeId: "pa3-inst" }]);
     });
 
-    it("パターンマッチ理論公理の代入インスタンスはtheory-instanceとして識別する", () => {
+    it("パターンマッチ理論公理の代入インスタンスはunknownとして識別する（構造的一致のみ）", () => {
       // A1テンプレート(φ→(ψ→φ))をパターンマッチ理論公理として登録
       const patternTheoryAxiom: TheoryAxiom = {
         id: "T1",
@@ -806,6 +802,7 @@ describe("dependencyLogic", () => {
         theoryAxioms: [patternTheoryAxiom],
       };
       // phi -> ((phi -> phi) -> phi) はA1の代入インスタンス
+      // matchTheoryAxiomTemplateByEquality は完全一致のみ認めるため unknown
       const nodes = [makeAxiomNode("t1-inst", "phi -> ((phi -> phi) -> phi)")];
       const edges: readonly InferenceEdge[] = [];
 
@@ -815,13 +812,7 @@ describe("dependencyLogic", () => {
         edges,
         systemWithPatternTheory,
       );
-      expect(result).toEqual([
-        {
-          _tag: "theory-instance",
-          nodeId: "t1-inst",
-          theoryAxiomId: "T1",
-        },
-      ]);
+      expect(result).toEqual([{ _tag: "unknown", nodeId: "t1-inst" }]);
     });
 
     it("理論公理と命題論理公理が混在するルートノードを正しく分類する", () => {
@@ -875,72 +866,6 @@ describe("dependencyLogic", () => {
     });
   });
 
-  describe("getInstanceRootNodeIds", () => {
-    it("instanceタグのノードIDのみを返す", () => {
-      const validations = [
-        { _tag: "schema" as const, nodeId: "a1", axiomId: "A1" as const },
-        { _tag: "instance" as const, nodeId: "a2", axiomId: "A1" as const },
-        { _tag: "unknown" as const, nodeId: "u1" },
-      ];
-      expect(getInstanceRootNodeIds(validations)).toEqual(["a2"]);
-    });
-
-    it("instanceがなければ空配列を返す", () => {
-      const validations = [
-        { _tag: "schema" as const, nodeId: "a1", axiomId: "A1" as const },
-        { _tag: "unknown" as const, nodeId: "u1" },
-      ];
-      expect(getInstanceRootNodeIds(validations)).toEqual([]);
-    });
-
-    it("theory-instanceタグのノードIDも返す", () => {
-      const validations = [
-        { _tag: "schema" as const, nodeId: "a1", axiomId: "A1" as const },
-        {
-          _tag: "theory-instance" as const,
-          nodeId: "pa3",
-          theoryAxiomId: "PA3",
-        },
-        { _tag: "instance" as const, nodeId: "a2", axiomId: "A1" as const },
-      ];
-      expect(getInstanceRootNodeIds(validations)).toEqual(["pa3", "a2"]);
-    });
-  });
-
-  describe("hasInstanceRoots", () => {
-    it("instanceタグがあればtrueを返す", () => {
-      const validations = [
-        { _tag: "schema" as const, nodeId: "a1", axiomId: "A1" as const },
-        { _tag: "instance" as const, nodeId: "a2", axiomId: "A1" as const },
-      ];
-      expect(hasInstanceRoots(validations)).toBe(true);
-    });
-
-    it("instanceタグがなければfalseを返す", () => {
-      const validations = [
-        { _tag: "schema" as const, nodeId: "a1", axiomId: "A1" as const },
-        { _tag: "unknown" as const, nodeId: "u1" },
-      ];
-      expect(hasInstanceRoots(validations)).toBe(false);
-    });
-
-    it("theory-instanceタグがあればtrueを返す", () => {
-      const validations = [
-        { _tag: "schema" as const, nodeId: "a1", axiomId: "A1" as const },
-        {
-          _tag: "theory-instance" as const,
-          nodeId: "pa3",
-          theoryAxiomId: "PA3",
-        },
-      ];
-      expect(hasInstanceRoots(validations)).toBe(true);
-    });
-
-    it("空の配列ではfalseを返す", () => {
-      expect(hasInstanceRoots([])).toBe(false);
-    });
-  });
-
   describe("hasUnknownRoots", () => {
     it("unknownタグがあればtrueを返す", () => {
       const validations = [
@@ -953,12 +878,12 @@ describe("dependencyLogic", () => {
     it("unknownタグがなければfalseを返す", () => {
       const validations = [
         { _tag: "schema" as const, nodeId: "a1", axiomId: "A1" as const },
-        { _tag: "instance" as const, nodeId: "a2", axiomId: "A1" as const },
+        { _tag: "schema" as const, nodeId: "a2", axiomId: "A2" as const },
       ];
       expect(hasUnknownRoots(validations)).toBe(false);
     });
 
-    it("theory-schema/theory-instanceのみではfalseを返す", () => {
+    it("theory-schemaのみではfalseを返す", () => {
       const validations = [
         {
           _tag: "theory-schema" as const,
@@ -966,7 +891,7 @@ describe("dependencyLogic", () => {
           theoryAxiomId: "PA1",
         },
         {
-          _tag: "theory-instance" as const,
+          _tag: "theory-schema" as const,
           nodeId: "pa3",
           theoryAxiomId: "PA3",
         },

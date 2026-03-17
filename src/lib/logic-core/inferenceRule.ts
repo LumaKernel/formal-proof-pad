@@ -1691,18 +1691,8 @@ export const identifyAxiom = (
 // ── 公理テンプレートの構造的一致 ─────────────────────────────
 
 /**
- * 論理式が既知の公理テンプレートと構造的に等しいかをチェックする。
- *
- * identifyAxiom は解決済み（代入適用後）の形を期待するため、
- * FormulaSubstitution ノードを含むテンプレート形式（例: (∀x.φ) → φ[τ/x]）は
- * 識別できない。この関数は equalFormula で直接比較することで補完する。
- *
- * @returns 一致した場合は公理ID、一致しない場合は undefined
- */
-/**
  * 全公理テンプレートのリスト（ID → テンプレート論理式）。
  *
- * identifyAxiom のフォールバック用。
  * 公理追加時はここにも追加すること。
  */
 const allAxiomTemplates: readonly (readonly [AxiomId, Formula])[] = [
@@ -1722,6 +1712,14 @@ const allAxiomTemplates: readonly (readonly [AxiomId, Formula])[] = [
   ["E3", axiomE3Template],
 ];
 
+/**
+ * 論理式が既知の標準公理テンプレートと構造的に等しいかをチェックする。
+ *
+ * equalFormula で直接比較するため、FormulaSubstitution ノードを含む
+ * テンプレート形式（例: (∀x.φ) → φ[τ/x]）も正しく識別できる。
+ *
+ * @returns 一致した場合は公理ID、一致しない場合は undefined
+ */
 export const matchAxiomTemplateByEquality = (
   formula: Formula,
   system: LogicSystem,
@@ -1739,6 +1737,32 @@ export const matchAxiomTemplateByEquality = (
 
     if (equalFormula(formula, template)) {
       return id;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * 理論公理テンプレートの構造的一致結果。
+ */
+export type TheoryAxiomTemplateMatch = {
+  readonly theoryAxiomId: string;
+  readonly displayName: string;
+};
+
+/**
+ * 論理式が理論公理テンプレートと構造的に等しいかをチェックする。
+ *
+ * @returns 一致した場合は理論公理のID・表示名、一致しない場合は undefined
+ */
+export const matchTheoryAxiomTemplateByEquality = (
+  formula: Formula,
+  system: LogicSystem,
+): TheoryAxiomTemplateMatch | undefined => {
+  if (system.theoryAxioms === undefined) return undefined;
+  for (const axiom of system.theoryAxioms) {
+    if (equalFormula(formula, axiom.template)) {
+      return { theoryAxiomId: axiom.id, displayName: axiom.displayName };
     }
   }
   return undefined;

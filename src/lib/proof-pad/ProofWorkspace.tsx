@@ -2630,7 +2630,7 @@ export const ProofWorkspace = forwardRef<
     }
     return questGoalResult.goalResults.map((r) => ({
       goalId: r.goalId,
-      hasAxiomViolation: r.violatingAxiomIds.size > 0 || r.hasInstanceRootNodes,
+      hasAxiomViolation: r.violatingAxiomIds.size > 0,
       hasRuleViolation: r.violatingRuleIds.size > 0,
       violatingAxiomIds: [...r.violatingAxiomIds],
     }));

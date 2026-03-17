@@ -351,13 +351,7 @@ export type {
   DetailVisibility,
   DetailVisibilityOverrides,
 } from "./levelOfDetail";
-export {
-  identifyAxiomName,
-  getAxiomDisplayName,
-  isTrivialFormulaSubstitution,
-  isTrivialTermSubstitution,
-  isTrivialAxiomSubstitution,
-} from "./axiomNameLogic";
+export { identifyAxiomName, getAxiomDisplayName } from "./axiomNameLogic";
 export type { AxiomNameResult } from "./axiomNameLogic";
 export { computeGoalPanelData } from "./goalPanelLogic";
 export type {
@@ -422,8 +416,6 @@ export {
   getNodeAxiomIds,
   getNodeInferenceRuleIds,
   validateRootNodes,
-  getInstanceRootNodeIds,
-  hasInstanceRoots,
   hasUnknownRoots,
   deduplicateDependencyInfos,
 } from "./dependencyLogic";

@@ -857,9 +857,9 @@ describe("validateModelAnswer", () => {
     }
   });
 
-  it("hasInstanceRootNodesのみの場合はValidを返す（真の制約違反なし）", () => {
-    // 全公理許可（allowedAxiomIds未設定）だが、インスタンス直接配置のため
-    // AllAchievedButAxiomViolation になるが、violatingAxiomIds は空 → Valid
+  it("公理インスタンスの模範解答はスキーマ+SubstitutionEdgeで構築されValidを返す", () => {
+    // 公理インスタンスは buildAxiomStep で schema + SubstitutionEdge → instance に変換される
+    // ルートは schema なので AllAchieved → Valid
     const answer: ModelAnswer = {
       questId: "test-01",
       steps: [

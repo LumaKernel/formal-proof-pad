@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  identifyAxiomName,
-  getAxiomDisplayName,
-  isTrivialFormulaSubstitution,
-  isTrivialTermSubstitution,
-  isTrivialAxiomSubstitution,
-} from "./axiomNameLogic";
+import { identifyAxiomName, getAxiomDisplayName } from "./axiomNameLogic";
 import {
   intuitionisticSystem,
   classicalLogicSystem,
@@ -22,19 +16,10 @@ import {
   implication,
   universal,
   equality,
-  negation,
 } from "../logic-core/formula";
-import { termMetaVariable, termVariable, constant } from "../logic-core/term";
+import { termVariable, constant } from "../logic-core/term";
 import { Either } from "effect";
 import { parseString } from "../logic-lang/parser";
-import {
-  metaVariableKey,
-  termMetaVariableKey,
-} from "../logic-core/metaVariable";
-import type {
-  FormulaSubstitutionMap,
-  TermMetaSubstitutionMap,
-} from "../logic-core/substitution";
 
 // --- ヘルパー ---
 
@@ -75,13 +60,10 @@ describe("axiomNameLogic", () => {
         expect(result._tag).toBe("NotIdentified");
       });
 
-      it("identifies A1 with renamed meta-variables (χ→(α→χ)) as A1", () => {
+      it("does not identify A1 with renamed meta-variables (χ→(α→χ)) — structural equality requires exact names", () => {
         const formula = parseFormula("chi -> (alpha -> chi)");
         const result = identifyAxiomName(formula, lukasiewiczSystem);
-        expect(result._tag).toBe("Identified");
-        if (result._tag === "Identified") {
-          expect(result.axiomId).toBe("A1");
-        }
+        expect(result._tag).toBe("NotIdentified");
       });
     });
 
@@ -385,13 +367,10 @@ describe("axiomNameLogic", () => {
         }
       });
 
-      it("A1のメタ変数名を変えただけ (χ→α→χ) は Identified", () => {
+      it("A1のメタ変数名を変えただけ (χ→α→χ) は NotIdentified（構造的等価性は名前も一致が必要）", () => {
         const formula = parseFormula("chi -> (alpha -> chi)");
         const result = identifyAxiomName(formula, lukasiewiczSystem);
-        expect(result._tag).toBe("Identified");
-        if (result._tag === "Identified") {
-          expect(result.axiomId).toBe("A1");
-        }
+        expect(result._tag).toBe("NotIdentified");
       });
 
       it("A1に具体式を代入 ((α→β)→χ→(α→β)) は NotIdentified", () => {
@@ -432,10 +411,10 @@ describe("axiomNameLogic", () => {
         expect(result._tag).toBe("TheoryAxiomIdentified");
       });
 
-      it("patternモードの理論公理で非自明な代入インスタンスは NotIdentified", () => {
-        // φ→φ をpatternモードの理論公理として登録
-        const patternAxiomSystem: LogicSystem = {
-          name: "pattern-axiom-test",
+      it("理論公理はテンプレートとの構造的等価性で判定（メタ変数名も一致が必要）", () => {
+        // φ→φ を理論公理として登録
+        const theoryAxiomSystem: LogicSystem = {
+          name: "theory-axiom-test",
           propositionalAxioms: new Set(["A1", "A2"]),
           predicateLogic: false,
           equalityLogic: false,
@@ -450,16 +429,24 @@ describe("axiomNameLogic", () => {
             },
           ],
         };
-        // テンプレートそのもの (φ→φ) → TheoryAxiomIdentified (trivial)
-        const trivialFormula = implication(
+        // テンプレートと完全一致 (φ→φ) → TheoryAxiomIdentified
+        const exactFormula = implication(
+          metaVariable("φ"),
+          metaVariable("φ"),
+        );
+        const exactResult = identifyAxiomName(exactFormula, theoryAxiomSystem);
+        expect(exactResult._tag).toBe("TheoryAxiomIdentified");
+
+        // メタ変数名が異なる (α→α) → NotIdentified（構造的等価性は名前一致が必要）
+        const renamedFormula = implication(
           metaVariable("α"),
           metaVariable("α"),
         );
-        const trivialResult = identifyAxiomName(
-          trivialFormula,
-          patternAxiomSystem,
+        const renamedResult = identifyAxiomName(
+          renamedFormula,
+          theoryAxiomSystem,
         );
-        expect(trivialResult._tag).toBe("TheoryAxiomIdentified");
+        expect(renamedResult._tag).toBe("NotIdentified");
 
         // 非自明な代入: (α→β)→(α→β) → NotIdentified
         const nonTrivialFormula = implication(
@@ -468,17 +455,15 @@ describe("axiomNameLogic", () => {
         );
         const nonTrivialResult = identifyAxiomName(
           nonTrivialFormula,
-          patternAxiomSystem,
+          theoryAxiomSystem,
         );
         expect(nonTrivialResult._tag).toBe("NotIdentified");
       });
     });
 
     describe("述語論理公理", () => {
-      it("A4スキーマ ∀x.φ → φ（xが自由でない場合）は Identified", () => {
-        // テンプレート表示は (∀x.φ) → φ[τ/x] だが、matchAxiomA4 は解決済みの形を受け取る。
-        // φ にはxが自由出現しないため φ[τ/x] = φ であり、(∀x.φ) → φ は A4 インスタンスとして認識される。
-        const formula = parseFormula("(all x. phi) -> phi");
+      it("A4テンプレート形式 ∀x.φ → φ[τ/x] は Identified（構造的等価性でテンプレートと一致）", () => {
+        const formula = parseFormula("(all x. phi) -> phi[tau/x]");
         const result = identifyAxiomName(formula, equalityLogicSystem);
         expect(result._tag).toBe("Identified");
         if (result._tag === "Identified") {
@@ -486,14 +471,14 @@ describe("axiomNameLogic", () => {
         }
       });
 
-      it("A4テンプレート形式 ∀x.φ → φ[τ/x]（未解決FormulaSubstitution）は NotIdentified", () => {
-        // FormulaSubstitution ノードが未解決のままの形式は matchAxiomA4 では識別されない
-        const formula = parseFormula("(all x. phi) -> phi[tau/x]");
+      it("A4の解決済みインスタンス (∀x.φ)→φ は NotIdentified（テンプレートはφ[τ/x]を含む）", () => {
+        // テンプレートは (∀x.φ) → φ[τ/x] であり、(∀x.φ) → φ とは構造が異なる
+        const formula = parseFormula("(all x. phi) -> phi");
         const result = identifyAxiomName(formula, equalityLogicSystem);
         expect(result._tag).toBe("NotIdentified");
       });
 
-      it("A5スキーマ (∀x.(φ→ψ)) → (φ→∀x.ψ) は Identified", () => {
+      it("A5テンプレート (∀x.(φ→ψ)) → (φ→∀x.ψ) は Identified", () => {
         const formula = parseFormula(
           "(all x. (phi -> psi)) -> (phi -> all x. psi)",
         );
@@ -504,7 +489,7 @@ describe("axiomNameLogic", () => {
         }
       });
 
-      it("A4のインスタンス ∀x.(x=x) → a=a は NotIdentified (非自明な項代入τ=aを含む)", () => {
+      it("A4の具体インスタンス ∀x.(x=x) → a=a は NotIdentified", () => {
         const x = termVariable("x");
         const a = constant("a");
         const formula = implication(
@@ -515,20 +500,16 @@ describe("axiomNameLogic", () => {
         expect(result._tag).toBe("NotIdentified");
       });
 
-      it("A5のインスタンス ∀x.(P(a)→x=x) → (P(a)→∀x.x=x) も Identified", () => {
-        // A5マッチャーは専用ロジックで構造検証するため、代入マップは常に空
+      it("A5の具体インスタンス ∀x.(P(a)→x=x) → (P(a)→∀x.x=x) は NotIdentified", () => {
+        // 構造的等価性ではテンプレートのメタ変数φ,ψと具体式P(a),x=xは一致しない
         const formula = parseFormula(
           "(all x. (P(a) -> x = x)) -> (P(a) -> all x. x = x)",
         );
         const result = identifyAxiomName(formula, equalityLogicSystem);
-        expect(result._tag).toBe("Identified");
-        if (result._tag === "Identified") {
-          expect(result.axiomId).toBe("A5");
-        }
+        expect(result._tag).toBe("NotIdentified");
       });
 
-      it("リグレッション: PA A4インスタンス (all x. x + 0 = x) -> 0 + 0 = 0 は NotIdentified", () => {
-        // バグ: 以前は matchAxiomA4 が空の代入マップを返していたため Identified だった
+      it("PA A4インスタンス (all x. x + 0 = x) -> 0 + 0 = 0 は NotIdentified", () => {
         const formula = parseFormula("(all x. x + 0 = x) -> 0 + 0 = 0");
         const result = identifyAxiomName(formula, peanoArithmeticSystem);
         expect(result._tag).toBe("NotIdentified");
@@ -548,152 +529,3 @@ describe("axiomNameLogic", () => {
   });
 });
 
-// --- isTrivialFormulaSubstitution / isTrivialTermSubstitution 単体テスト ---
-
-describe("isTrivialFormulaSubstitution", () => {
-  it("空マップは trivial", () => {
-    const map: FormulaSubstitutionMap = new Map();
-    expect(isTrivialFormulaSubstitution(map)).toBe(true);
-  });
-
-  it("全てMetaVariableへの単射マップは trivial", () => {
-    const phi = metaVariable("φ");
-    const psi = metaVariable("ψ");
-    const alpha = metaVariable("α");
-    const beta = metaVariable("β");
-    const map: FormulaSubstitutionMap = new Map([
-      [metaVariableKey(phi), alpha],
-      [metaVariableKey(psi), beta],
-    ]);
-    expect(isTrivialFormulaSubstitution(map)).toBe(true);
-  });
-
-  it("MetaVariableに具体式を代入したマップは non-trivial", () => {
-    const phi = metaVariable("φ");
-    const alpha = metaVariable("α");
-    const beta = metaVariable("β");
-    const map: FormulaSubstitutionMap = new Map([
-      [metaVariableKey(phi), implication(alpha, beta)],
-    ]);
-    expect(isTrivialFormulaSubstitution(map)).toBe(false);
-  });
-
-  it("Negation を代入したマップは non-trivial", () => {
-    const phi = metaVariable("φ");
-    const alpha = metaVariable("α");
-    const map: FormulaSubstitutionMap = new Map([
-      [metaVariableKey(phi), negation(alpha)],
-    ]);
-    expect(isTrivialFormulaSubstitution(map)).toBe(false);
-  });
-
-  it("2つのメタ変数が同じ先に写る非単射マップは non-trivial", () => {
-    const phi = metaVariable("φ");
-    const psi = metaVariable("ψ");
-    const alpha = metaVariable("α");
-    const map: FormulaSubstitutionMap = new Map([
-      [metaVariableKey(phi), alpha],
-      [metaVariableKey(psi), alpha],
-    ]);
-    expect(isTrivialFormulaSubstitution(map)).toBe(false);
-  });
-
-  it("添字付きMetaVariableへの単射マップは trivial", () => {
-    const phi = metaVariable("φ");
-    const alpha1 = metaVariable("α", "1");
-    const map: FormulaSubstitutionMap = new Map([
-      [metaVariableKey(phi), alpha1],
-    ]);
-    expect(isTrivialFormulaSubstitution(map)).toBe(true);
-  });
-});
-
-describe("isTrivialTermSubstitution", () => {
-  it("空マップは trivial", () => {
-    const map: TermMetaSubstitutionMap = new Map();
-    expect(isTrivialTermSubstitution(map)).toBe(true);
-  });
-
-  it("全てTermMetaVariableへの単射マップは trivial", () => {
-    const tau = termMetaVariable("τ");
-    const sigma = termMetaVariable("σ");
-    const map: TermMetaSubstitutionMap = new Map([
-      [termMetaVariableKey(tau), sigma],
-    ]);
-    expect(isTrivialTermSubstitution(map)).toBe(true);
-  });
-
-  it("具体的な定数への代入は non-trivial", () => {
-    const tau = termMetaVariable("τ");
-    const map: TermMetaSubstitutionMap = new Map([
-      [termMetaVariableKey(tau), constant("a")],
-    ]);
-    expect(isTrivialTermSubstitution(map)).toBe(false);
-  });
-
-  it("TermVariableへの代入は non-trivial", () => {
-    const tau = termMetaVariable("τ");
-    const map: TermMetaSubstitutionMap = new Map([
-      [termMetaVariableKey(tau), termVariable("x")],
-    ]);
-    expect(isTrivialTermSubstitution(map)).toBe(false);
-  });
-
-  it("添字付きTermMetaVariableへの単射マップは trivial", () => {
-    const tau = termMetaVariable("τ");
-    const sigma1 = termMetaVariable("σ", "1");
-    const map: TermMetaSubstitutionMap = new Map([
-      [termMetaVariableKey(tau), sigma1],
-    ]);
-    expect(isTrivialTermSubstitution(map)).toBe(true);
-  });
-
-  it("2つのterm metaが同じ先に写る非単射は non-trivial", () => {
-    const tau = termMetaVariable("τ");
-    const sigma = termMetaVariable("σ");
-    const alpha = termMetaVariable("α");
-    const map: TermMetaSubstitutionMap = new Map([
-      [termMetaVariableKey(tau), alpha],
-      [termMetaVariableKey(sigma), alpha],
-    ]);
-    expect(isTrivialTermSubstitution(map)).toBe(false);
-  });
-});
-
-describe("isTrivialAxiomSubstitution", () => {
-  it("両方空マップは trivial", () => {
-    expect(isTrivialAxiomSubstitution(new Map(), new Map())).toBe(true);
-  });
-
-  it("formula trivial + term trivial は trivial", () => {
-    const phi = metaVariable("φ");
-    const alpha = metaVariable("α");
-    const tau = termMetaVariable("τ");
-    const sigma = termMetaVariable("σ");
-    const formulaMap: FormulaSubstitutionMap = new Map([
-      [metaVariableKey(phi), alpha],
-    ]);
-    const termMap: TermMetaSubstitutionMap = new Map([
-      [termMetaVariableKey(tau), sigma],
-    ]);
-    expect(isTrivialAxiomSubstitution(formulaMap, termMap)).toBe(true);
-  });
-
-  it("formula non-trivial + term trivial は non-trivial", () => {
-    const phi = metaVariable("φ");
-    const alpha = metaVariable("α");
-    const beta = metaVariable("β");
-    const formulaMap: FormulaSubstitutionMap = new Map([
-      [metaVariableKey(phi), implication(alpha, beta)],
-    ]);
-    expect(isTrivialAxiomSubstitution(formulaMap, new Map())).toBe(false);
-  });
-
-  it("formula trivial + term non-trivial は non-trivial", () => {
-    const tau = termMetaVariable("τ");
-    const termMap: TermMetaSubstitutionMap = new Map([
-      [termMetaVariableKey(tau), constant("0")],
-    ]);
-    expect(isTrivialAxiomSubstitution(new Map(), termMap)).toBe(false);
-  });
-});

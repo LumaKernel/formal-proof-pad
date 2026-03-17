@@ -61,6 +61,8 @@ import {
   classicalLogicSystem,
   predicateLogicSystem,
   equalityLogicSystem,
+  matchAxiomTemplateByEquality,
+  matchTheoryAxiomTemplateByEquality,
   type TheoryAxiom,
   type RuleApplicationResult,
   type AxiomMatchResult,
@@ -2804,5 +2806,43 @@ describe("群論公理のidentifyAxiom", () => {
   it("G4はgroupTheoryFullSystemでは識別不可", () => {
     const result = identifyAxiom(axiomG4CommTemplate, groupTheoryFullSystem);
     expect(result._tag).toBe("Error");
+  });
+});
+
+// ── matchAxiomTemplateByEquality / matchTheoryAxiomTemplateByEquality ──
+
+describe("matchAxiomTemplateByEquality", () => {
+  it("A1テンプレートと構造的に一致する場合にAxiomIdを返す", () => {
+    expect(matchAxiomTemplateByEquality(axiomA1Template, classicalLogicSystem)).toBe("A1");
+  });
+
+  it("一致しない論理式にはundefinedを返す", () => {
+    // A1テンプレートではない任意の論理式（φ→φ）
+    const formula = implication(metaVariable("φ"), metaVariable("φ"));
+    expect(matchAxiomTemplateByEquality(formula, classicalLogicSystem)).toBeUndefined();
+  });
+
+  it("体系で無効な公理にはundefinedを返す", () => {
+    // DNEはminimalLogicSystemでは無効
+    expect(matchAxiomTemplateByEquality(axiomDNETemplate, minimalLogicSystem)).toBeUndefined();
+  });
+});
+
+describe("matchTheoryAxiomTemplateByEquality", () => {
+  it("理論公理テンプレートと一致する場合にIDと表示名を返す", () => {
+    const result = matchTheoryAxiomTemplateByEquality(axiomG1Template, groupTheoryLeftSystem);
+    expect(result).toEqual({
+      theoryAxiomId: "G1",
+      displayName: "G1 (結合律)",
+    });
+  });
+
+  it("一致しない論理式にはundefinedを返す", () => {
+    const formula = implication(metaVariable("φ"), metaVariable("φ"));
+    expect(matchTheoryAxiomTemplateByEquality(formula, groupTheoryLeftSystem)).toBeUndefined();
+  });
+
+  it("theoryAxiomsがないシステムにはundefinedを返す", () => {
+    expect(matchTheoryAxiomTemplateByEquality(axiomG1Template, classicalLogicSystem)).toBeUndefined();
   });
 });

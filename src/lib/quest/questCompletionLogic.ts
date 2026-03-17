@@ -24,7 +24,6 @@ import {
   getNodeAxiomIds,
   getNodeInferenceRuleIds,
   validateRootNodes,
-  hasInstanceRoots,
   hasUnknownRoots,
 } from "../proof-pad/dependencyLogic";
 import { parseNodeFormula } from "../proof-pad/goalCheckLogic";
@@ -162,11 +161,6 @@ export type GoalAxiomCheckResult = {
   /** 制限違反の公理スキーマID（制限なしまたは制限内の場合は空） */
   readonly violatingAxiomIds: ReadonlySet<AxiomId>;
   /**
-   * 代入インスタンスが直接ルートノードに配置されているかどうか。
-   * true の場合、公理スキーマ → SubstitutionEdge → インスタンスの形式で導出すべき。
-   */
-  readonly hasInstanceRootNodes: boolean;
-  /**
    * 未知のルートノード（公理パターンに一致しない）が存在するかどうか。
    * true の場合、ルートノードとして配置された式が既知の公理テンプレートに一致しない。
    */
@@ -226,7 +220,6 @@ const checkSingleGoalWithAxioms = (
         usedAxiomIds: new Set<AxiomId>(),
         allowedAxiomIds: goal.allowedAxiomIds,
         violatingAxiomIds: new Set<AxiomId>(),
-        hasInstanceRootNodes: false,
         hasUnknownRootNodes: false,
         usedRuleIds: new Set<InferenceRuleId>(),
         allowedRuleIds: goal.allowedRuleIds,
@@ -248,7 +241,6 @@ const checkSingleGoalWithAxioms = (
     const rootValidations = yield* Effect.sync(() =>
       validateRootNodes(matchingNode.id, nodes, inferenceEdges, system),
     );
-    const goalHasInstanceRoots = hasInstanceRoots(rootValidations);
     const goalHasUnknownRoots = hasUnknownRoots(rootValidations);
 
     // 使用された推論規則を特定
@@ -267,7 +259,6 @@ const checkSingleGoalWithAxioms = (
       usedAxiomIds,
       allowedAxiomIds: goal.allowedAxiomIds,
       violatingAxiomIds,
-      hasInstanceRootNodes: goalHasInstanceRoots,
       hasUnknownRootNodes: goalHasUnknownRoots,
       usedRuleIds,
       allowedRuleIds: goal.allowedRuleIds,
@@ -313,7 +304,7 @@ export const checkQuestGoalsWithAxiomsEffect = (
     ).length;
 
     const hasAxiomViolation = goalResults.some(
-      (r) => r.violatingAxiomIds.size > 0 || r.hasInstanceRootNodes,
+      (r) => r.violatingAxiomIds.size > 0,
     );
 
     const hasRuleViolation = goalResults.some(

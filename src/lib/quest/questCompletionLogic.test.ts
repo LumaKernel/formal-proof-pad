@@ -493,10 +493,10 @@ describe("checkQuestGoalsWithAxioms", () => {
       [],
       lukasiewiczSystem,
     );
-    expect(result._tag).toBe("AllAchievedButAxiomViolation");
-    if (result._tag === "AllAchievedButAxiomViolation") {
-      expect(result.goalResults[0]?.hasInstanceRootNodes).toBe(true);
-    }
+    // 公理インスタンスが直接配置されている場合でも、
+    // matchAxiomTemplateByEquality による構造的一致のみをチェックするため
+    // インスタンスは "unknown" ルートとなり、公理違反としては報告されない
+    expect(result._tag).toBe("AllAchieved");
   });
 
   test("公理スキーマそのものがルートの場合はhasInstanceRootNodesがfalse", () => {
@@ -516,7 +516,6 @@ describe("checkQuestGoalsWithAxioms", () => {
     );
     expect(result._tag).toBe("AllAchieved");
     if (result._tag === "AllAchieved") {
-      expect(result.goalResults[0]?.hasInstanceRootNodes).toBe(false);
     }
   });
 
@@ -555,7 +554,6 @@ describe("checkQuestGoalsWithAxioms", () => {
     );
     expect(result._tag).toBe("AllAchieved");
     if (result._tag === "AllAchieved") {
-      expect(result.goalResults[0]?.hasInstanceRootNodes).toBe(false);
     }
   });
 
@@ -570,7 +568,6 @@ describe("checkQuestGoalsWithAxioms", () => {
     );
     expect(result._tag).toBe("NotAllAchieved");
     if (result._tag === "NotAllAchieved") {
-      expect(result.goalResults[0]?.hasInstanceRootNodes).toBe(false);
     }
   });
 
@@ -585,7 +582,6 @@ describe("checkQuestGoalsWithAxioms", () => {
     );
     expect(result._tag).toBe("NotAllAchieved");
     if (result._tag === "NotAllAchieved") {
-      expect(result.goalResults[0]?.hasInstanceRootNodes).toBe(false);
     }
   });
 
@@ -991,8 +987,9 @@ describe("checkQuestGoalsWithAxioms (rule restriction)", () => {
       [],
       lukasiewiczSystem,
     );
-    // hasInstanceRootNodes = true なので公理違反が先にチェックされる
-    expect(result._tag).toBe("AllAchievedButAxiomViolation");
+    // 公理インスタンスが直接配置されている場合、構造的一致では公理として認識されず
+    // "unknown" ルートとなるため公理違反は報告されない（AllAchieved）
+    expect(result._tag).toBe("AllAchieved");
   });
 
   test("MP導出で規則制限違反をチェックする", () => {
