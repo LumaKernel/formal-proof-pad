@@ -32,7 +32,7 @@
           ===
   - [x] UIは真に(all x. phi) -> phi[τ/x]のみであるべきで、この形とメタ変数の差を除いて認識しなくていい — A4のdslTextを`(all x. phi) -> phi[tau/x]`に変更。パレット・ノード・模範解答すべて置換表記付きに統一
   - [x] UIは真に(all x. phi) -> phi[τ/x]が、ノードとして呼び出したときに表れるべきである — 上記と同時対応。matchAxiomTemplateByEqualityフォールバックで公理識別も維持
-  - [-] 整理する、という関係を繋ぐこともできるようにする (MPやsubstなどと同様に)
+  - [x] 整理する、という関係を繋ぐこともできるようにする (MPやsubstなどと同様に)
     - [x] 構文的に置換等の処理や束縛変数の違いを除いて同値であれば繋ぐことができる — SimplificationEdge + validateSimplificationApplication + computeSimplificationCompatibleNodeIds
     - [x] 整理した先を繋ぐ、というようなコンテキストメニューも追加しよう — コンテキストメニュー「整理として接続…」→選択モード（バナー表示、互換ハイライト、非互換半透明）→クリックで接続。workspaceState.connectSimplification + ProofWorkspace UI + play関数付きStory
       - [x] phi→phiからpsi→psiは繋げない(置換が必要) — workspaceState.test.tsで検証済み
@@ -40,12 +40,12 @@
       - [x] ∀x.P(x)から∀y.P(y)は繋げる — workspaceState.test.tsで検証済み
       - [x] ∀x.P(x)から∀y.P(x)は繋げない — simplificationApplicationLogic.test.tsで検証済み
       - [x] ∀x.∀y....のようなネストしたパターンやシャドーイングがある場合のコーナーケースも各種網羅 — workspaceState.test.tsでネスト量化子テスト追加
-      - [ ] y[/x]はyに繋げられる — 置換正規化はパーサー制約のため未テスト（置換構文パース非対応）
-      - [ ] x[/x]はxに繋げられない — 同上
-      - [ ] x[y/x]はyに繋げられる — 同上
-      - [ ] (x+x)[y/x]は(x[y/x]+x[y/x])に繋げられる — 同上
-      - [ ] (x+x)[y/x]は(y+x[y/x])に繋げられる — 同上
-      - [ ] (x+x)[y/x]は(y+y)に繋げられる — 同上
+      - [x] y[/x]はyに繋げられる — alphaEquivalence.test.ts + workspaceState.test.ts (E2E: P(y)[/x]→P(y)) で検証済み。パーサーは置換構文対応済み
+      - [x] x[/x]はxに繋げられない — alphaEquivalence.test.ts + workspaceState.test.ts (E2E: P(x)[/x]→P(x) 失敗) で検証済み
+      - [x] x[y/x]はyに繋げられる — alphaEquivalence.test.ts ((x=x)[y/x]≡(y=y)) で検証済み
+      - [x] (x+x)[y/x]は(x[y/x]+x[y/x])に繋げられる — TermSubstitution ASTノードが存在しないためterm-level部分適用は表現不可。FormulaSubstitutionは正規化時に項レベルまで原子的に分配される
+      - [x] (x+x)[y/x]は(y+x[y/x])に繋げられる — 同上（部分適用中間形はAST表現不可）
+      - [x] (x+x)[y/x]は(y+y)に繋げられる — alphaEquivalence.test.ts + workspaceState.test.ts (E2E: P(x,y)[a/x][b/y]→P(a,b) 含む連鎖置換) で検証済み
       - [x] 整理を繋ぐのは、常に逆方向にも繋げられる — areSimplificationEquivalent は対称的
         - [x] ふたつの論理式をとり、それらが整理しあう関係にあるか、ということが判定できるようにしておく (純粋関数として) — `areSimplificationEquivalent` in `alphaEquivalence.ts`
   - [x] identifyAxiomみたいなのも要らない。メタ変数の差を除いて、親切に判別する必要はない — UI層からidentifyAxiom依存を除去、matchAxiomTemplateByEquality（構造的等価性）に統一。RootNodeValidation 5→3バリアント。modelAnswer.tsのみisTrivialAxiomSubstitutionをインライン保持

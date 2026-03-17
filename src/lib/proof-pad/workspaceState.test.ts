@@ -2164,6 +2164,66 @@ describe("proofWorkspace", () => {
       expect(Either.isRight(result.validation)).toBe(true);
     });
 
+    it("connectSimplification connects P(x)[a/x] to P(a) (substitution resolution)", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "P(x)[a/x]");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "P(a)");
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
+    });
+
+    it("connectSimplification connects P(y)[/x] to P(y) (FreeVariableAbsence resolution)", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "P(y)[/x]");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "P(y)");
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
+    });
+
+    it("connectSimplification fails for P(x)[/x] to P(x) (x is free)", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "P(x)[/x]");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "P(x)");
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isLeft(result.validation)).toBe(true);
+    });
+
+    it("connectSimplification connects (all x. P(x))[a/x] to all x. P(x) (bound var unaffected)", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(
+        ws,
+        "axiom",
+        "Axiom",
+        { x: 0, y: 0 },
+        "(all x. P(x))[a/x]",
+      );
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "all x. P(x)");
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
+    });
+
+    it("connectSimplification is symmetric for substitution resolution", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "P(a)");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "P(x)[a/x]");
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
+    });
+
+    it("connectSimplification connects chained substitution P(x, y)[a/x][b/y] to P(a, b)", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(
+        ws,
+        "axiom",
+        "Axiom",
+        { x: 0, y: 0 },
+        "P(x, y)[a/x][b/y]",
+      );
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "P(a, b)");
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
+    });
+
     it("connectSubstitutionConnection connects two term-variable-related nodes", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "P(a)");
