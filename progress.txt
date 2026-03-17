@@ -15198,3 +15198,22 @@
   - コンテキストメニュー項目追加時: proofMessages.ts(型+デフォルト) → en.json/ja.json → WorkspaceContent.tsx(tマッピング) の3箇所同期
   - Prettierフォーマット忘れに注意: コミット前に必ずprettier --write実行
 ---
+
+## 2026-03-18 - 置換接続（SubstitutionConnection）エッジ
+- 実装した内容:
+  - `termVariableMatching.ts`: 項変数代入検出アルゴリズム（de Bruijn levels、α等価、キャプチャ防止）
+  - `substitutionConnectionLogic.ts`: バリデーション、互換ノード計算、DAGサイクル検出
+  - `SubstitutionConnectionEdge`型 + 全switch文更新（inferenceEdge, labelLogic, badgeEdit, export, workspaceState等）
+  - コンテキストメニュー「置換として接続…」+ 選択モードUI（バナー、ハイライト、半透明、Escape取消）
+  - Storybookストーリー SubstitutionConnectionContextMenu（play関数付き）
+  - i18n（en/ja）
+- 変更したファイル:
+  - 新規: termVariableMatching.ts/.test.ts, substitutionConnectionLogic.ts/.test.ts
+  - 変更: inferenceEdge.ts, inferenceEdgeLabelLogic.ts, edgeBadgeEditLogic.ts, workspaceExport.ts, workspaceState.ts/.test.ts, proofMessages.ts, index.ts, ProofWorkspace.tsx, ProofWorkspace.stories.tsx, WorkspaceContent.tsx, messages/en.json, messages/ja.json, logic-core/index.ts
+- テスト: 37テスト(termVariableMatching) + 19テスト(substitutionConnectionLogic) + 3テスト(workspaceState統合) = 59テスト追加
+- スクリーンショット: .screenshots/substitution-connection-result.png
+- **今後のイテレーションへの学び:**
+  - 命題変数(phi, psi)は0引数述語であり項変数ではない。termVariableMatchingは項引数のみマッチする
+  - InferenceEdge追加時の更新箇所: inferenceEdge.ts(型+ユーティリティ), labelLogic(色+ロール), badgeEdit, workspaceExport(Schema), workspaceState(revalidate+connect), ProofWorkspace.tsx(選択モード)
+  - Prettierフォーマット: CI失敗の主因。sed/pythonで挿入したコードは必ず `prettier --write` すること
+---

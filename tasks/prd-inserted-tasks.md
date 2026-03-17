@@ -49,7 +49,7 @@
       - [x] 整理を繋ぐのは、常に逆方向にも繋げられる — areSimplificationEquivalent は対称的
         - [x] ふたつの論理式をとり、それらが整理しあう関係にあるか、ということが判定できるようにしておく (純粋関数として) — `areSimplificationEquivalent` in `alphaEquivalence.ts`
   - [ ] identifyAxiomみたいなのも要らない。メタ変数の差を除いて、親切に判別する必要はない
-- [-] 置換した先として繋ぐ、というコンテキストメニューのアクションを用意しよう。
-  - [-] 置換した先として繋げるか、ということの判定を純粋に作成
-  - [ ] 可能なアクション対象が光るように
-  - [ ] ループを作ってしまうノードは選択できない
+- [x] 置換した先として繋ぐ、というコンテキストメニューのアクションを用意しよう。 — SubstitutionConnectionEdge + termVariableMatching + コンテキストメニュー「置換として接続…」+ ハイライト + ループ防止
+  - [x] 置換した先として繋げるか、ということの判定を純粋に作成 — termVariableMatching.ts + substitutionConnectionLogic.ts
+  - [x] 可能なアクション対象が光るように — computeSubstitutionConnectionCompatibleNodeIds + ProofWorkspace UI ハイライト
+  - [x] ループを作ってしまうノードは選択できない — wouldCreateCycle で DAG サイクル検出
