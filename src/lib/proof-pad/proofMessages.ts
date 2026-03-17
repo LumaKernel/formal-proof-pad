@@ -144,6 +144,13 @@ export type ProofMessages = {
   readonly simplificationConnected: string;
   readonly simplificationNoTargets: string;
 
+  // --- 置換接続（SubstitutionConnection） ---
+  readonly connectSubstitutionConnection: string;
+  readonly substitutionConnectionBannerSelectTarget: string;
+  readonly substitutionConnectionCancel: string;
+  readonly substitutionConnectionConnected: string;
+  readonly substitutionConnectionNoTargets: string;
+
   // --- マージ選択 ---
   readonly mergeBannerSelectTarget: string;
   readonly mergeCancel: string;
@@ -425,6 +432,15 @@ export const defaultProofMessages: ProofMessages = {
   simplificationCancel: "Cancel Simplification",
   simplificationConnected: "Simplification connected",
   simplificationNoTargets: "No simplification-equivalent nodes found",
+
+  // Substitution Connection
+  connectSubstitutionConnection: "Connect as Substitution Result\u2026",
+  substitutionConnectionBannerSelectTarget:
+    "Click a node related by term-variable substitution to connect",
+  substitutionConnectionCancel: "Cancel Substitution Connection",
+  substitutionConnectionConnected: "Substitution connection established",
+  substitutionConnectionNoTargets:
+    "No nodes related by term-variable substitution found",
 
   // Merge selection
   mergeBannerSelectTarget:

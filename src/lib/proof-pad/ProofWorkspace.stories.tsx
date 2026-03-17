@@ -2205,3 +2205,66 @@ export const SimplificationContextMenu: Story = {
     });
   },
 };
+
+/**
+ * 置換接続（SubstitutionConnection）コンテキストメニュー:
+ * 項変数代入の関係にある2つのノードを右クリックメニューから接続する完全フロー。
+ */
+export const SubstitutionConnectionContextMenu: Story = {
+  render: () => {
+    const [workspace, setWorkspace] = useState<WorkspaceState>(() => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 50 }, "P(a) -> P(a)");
+      ws = addNode(ws, "axiom", "Axiom", { x: 400, y: 50 }, "P(b) -> P(b)");
+      // 非互換ノード（接続不可: 構造が異なる）
+      ws = addNode(ws, "axiom", "Axiom", { x: 250, y: 200 }, "Q(c)");
+      return ws;
+    });
+    const handleChange = useCallback((ws: WorkspaceState) => {
+      setWorkspace(ws);
+    }, []);
+
+    return (
+      <div style={{ width: "100vw", height: "100vh" }}>
+        <ProofWorkspace
+          system={lukasiewiczSystem}
+          workspace={workspace}
+          onWorkspaceChange={handleChange}
+          testId="workspace"
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+
+    // node-1 (P(a) -> P(a)) を右クリック
+    const node1 = canvas.getByTestId("proof-node-node-1");
+    await userEvent.pointer({ keys: "[MouseRight]", target: node1 });
+
+    // コンテキストメニューに「Connect as Substitution…」があること
+    const menuItem = await canvas.findByTestId(
+      "workspace-connect-substitution-connection",
+    );
+    await expect(menuItem).toBeInTheDocument();
+
+    // クリックして選択モードに入る
+    await userEvent.click(menuItem);
+
+    // 置換接続選択バナーが表示される
+    const banner = await canvas.findByTestId("workspace-subconn-banner");
+    await expect(banner).toBeInTheDocument();
+
+    // node-2 (P(b) -> P(b)) をクリックして接続
+    const node2 = canvas.getByTestId("proof-node-node-2");
+    await userEvent.click(node2);
+
+    // バナーが消える（接続完了）
+    await waitFor(() => {
+      expect(
+        canvas.queryByTestId("workspace-subconn-banner"),
+      ).not.toBeInTheDocument();
+    });
+  },
+};

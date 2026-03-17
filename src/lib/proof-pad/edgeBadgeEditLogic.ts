@@ -80,6 +80,9 @@ export function createEditStateFromEdge(
   if (edge._tag === "simplification") {
     return undefined;
   }
+  if (edge._tag === "substitution-connection") {
+    return undefined;
+  }
   if (edge._tag === "gen") {
     return {
       _tag: "gen",

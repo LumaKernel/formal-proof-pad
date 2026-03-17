@@ -47,6 +47,8 @@ export function getInferenceEdgeBadgeColor(edge: InferenceEdge): string {
   if (edge._tag === "mp") return "var(--color-badge-mp, #6c5ce7)";
   if (edge._tag === "gen") return "var(--color-badge-gen, #00b894)";
   if (edge._tag === "simplification") return "var(--color-badge-simp, #fdcb6e)";
+  if (edge._tag === "substitution-connection")
+    return "var(--color-badge-subconn, #74b9ff)";
   // fall-through: TypeScript narrows to "substitution"
   return "var(--color-badge-subst, #e17055)";
 }
@@ -106,6 +108,7 @@ export function getPremiseRole(
     case "gen":
     case "substitution":
     case "simplification":
+    case "substitution-connection":
     case "nd-implication-intro":
     case "nd-conjunction-elim-left":
     case "nd-conjunction-elim-right":

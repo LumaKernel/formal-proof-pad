@@ -49,6 +49,7 @@ import {
   addScriptNode,
   applyNormalize,
   connectSimplification,
+  connectSubstitutionConnection,
   applyNdImplicationIntroAndConnect,
 } from "./workspaceState";
 import {
@@ -2160,6 +2161,56 @@ describe("proofWorkspace", () => {
         "all a. all b. P(a, b)",
       );
       const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
+    });
+
+    it("connectSubstitutionConnection connects two term-variable-related nodes", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "P(a)");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "P(b)");
+      const result = connectSubstitutionConnection(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
+      expect(
+        result.workspace.inferenceEdges.some(
+          (e) =>
+            e._tag === "substitution-connection" &&
+            e.conclusionNodeId === "node-2" &&
+            e.premiseNodeId === "node-1",
+        ),
+      ).toBe(true);
+      // レガシー接続も作成される
+      expect(
+        result.workspace.connections.some(
+          (c) => c.fromNodeId === "node-1" && c.toNodeId === "node-2",
+        ),
+      ).toBe(true);
+    });
+
+    it("connectSubstitutionConnection fails for unrelated formulas", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "phi -> psi");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "chi -> omega");
+      const result = connectSubstitutionConnection(ws, "node-1", "node-2");
+      expect(Either.isLeft(result.validation)).toBe(true);
+    });
+
+    it("connectSubstitutionConnection connects complex substitution", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(
+        ws,
+        "axiom",
+        "Axiom",
+        { x: 0, y: 0 },
+        "P(a) -> P(a)",
+      );
+      ws = addNode(
+        ws,
+        "axiom",
+        "Axiom",
+        { x: 100, y: 0 },
+        "P(b) -> P(b)",
+      );
+      const result = connectSubstitutionConnection(ws, "node-1", "node-2");
       expect(Either.isRight(result.validation)).toBe(true);
     });
 

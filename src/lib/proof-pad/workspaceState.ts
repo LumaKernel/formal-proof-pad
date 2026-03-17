@@ -94,6 +94,10 @@ import {
   validateSimplificationApplication,
   type SimplificationApplicationResult,
 } from "./simplificationApplicationLogic";
+import {
+  validateSubstitutionConnectionApplication,
+  type SubstitutionConnectionApplicationResult,
+} from "./substitutionConnectionLogic";
 
 // --- ノードの明示的な役割マーク ---
 
@@ -986,6 +990,49 @@ export function connectSimplification(
   return { workspace: ws, validation };
 }
 
+// --- 置換接続（SubstitutionConnection）（既存ノード間をSubstitutionConnectionEdgeで接続） ---
+
+/** 置換接続の結果 */
+export type ConnectSubstitutionConnectionResult = {
+  readonly workspace: WorkspaceState;
+  readonly validation: SubstitutionConnectionApplicationResult;
+};
+
+/**
+ * 2つの既存ノードを置換接続（SubstitutionConnection）エッジで接続する。
+ * SimplificationEdgeと同様に、新しいノードは作成せず既存ノード間にエッジを張る。
+ * sourceNodeId が前提、targetNodeId が結論として接続される。
+ *
+ * @param state 現在のワークスペース状態
+ * @param sourceNodeId 前提ノードのID（置換元）
+ * @param targetNodeId 結論ノードのID（置換先）
+ * @returns 新しいワークスペース状態と検証結果
+ */
+export function connectSubstitutionConnection(
+  state: WorkspaceState,
+  sourceNodeId: string,
+  targetNodeId: string,
+): ConnectSubstitutionConnectionResult {
+  const subConnEdge: InferenceEdge = {
+    _tag: "substitution-connection",
+    conclusionNodeId: targetNodeId,
+    premiseNodeId: sourceNodeId,
+    conclusionText: "",
+  };
+  let ws = addInferenceEdge(state, subConnEdge);
+
+  // レガシー接続も追加
+  ws = addConnection(ws, sourceNodeId, "out", targetNodeId, "premise");
+
+  // 検証
+  const validation = validateSubstitutionConnectionApplication(
+    ws,
+    targetNodeId,
+  );
+
+  return { workspace: ws, validation };
+}
+
 // --- ND →I 適用（ノード作成 + InferenceEdge + 結論自動生成） ---
 
 /** ND →I 適用結果 */
@@ -1809,6 +1856,9 @@ export function revalidateInferenceConclusions(
           }
           case "simplification":
             // 整理エッジは結論テキストを自動計算しない（手動入力）
+            return node;
+          case "substitution-connection":
+            // 置換接続エッジは結論テキストを自動計算しない（手動入力）
             return node;
         }
       }

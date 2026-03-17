@@ -69,6 +69,13 @@ export {
   areSimplificationEquivalent,
 } from "./alphaEquivalence";
 
+
+// ── Term Variable Matching ──────────────────────────────
+export {
+  findTermVariableSubstitution,
+  isNonTrivialSubstitutionResult,
+  areSubstitutionConnectable,
+} from "./termVariableMatching";
 // ── MetaVariable utilities ──────────────────────────────
 export {
   isFormulaMetaVariable,

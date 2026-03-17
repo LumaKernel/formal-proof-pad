@@ -94,6 +94,7 @@ import {
 } from "./substitutionApplicationLogic";
 import type { SubstitutionEntries } from "./substitutionApplicationLogic";
 import { computeSimplificationCompatibleNodeIds } from "./simplificationApplicationLogic";
+import { computeSubstitutionConnectionCompatibleNodeIds } from "./substitutionConnectionLogic";
 import {
   getMPErrorMessageKey,
   getGenErrorMessageKey,
@@ -161,6 +162,7 @@ import {
   applySubstitutionAndConnect,
   applyNormalize,
   connectSimplification,
+  connectSubstitutionConnection,
   applyTreeLayout,
   revalidateInferenceConclusions,
   updateInferenceEdgeGenVariableName,
@@ -404,6 +406,13 @@ type SimplificationSelectionState =
       readonly sourceNodeId: string;
     };
 
+type SubstitutionConnectionSelectionState =
+  | { readonly phase: "idle" }
+  | {
+      readonly phase: "selecting-target";
+      readonly sourceNodeId: string;
+    };
+
 // --- TAB規則選択モードの状態 ---
 
 // --- ND規則選択モードの状態 ---
@@ -629,6 +638,11 @@ const simplificationSelectionBannerStyle = {
   ...mpSelectionBannerStyle,
   background: "var(--color-simp-banner, rgba(253, 203, 110, 0.95))",
   color: "rgba(0, 0, 0, 0.85)",
+};
+
+const substitutionConnectionSelectionBannerStyle = {
+  ...mpSelectionBannerStyle,
+  background: "var(--color-subconn-banner, rgba(116, 185, 255, 0.95))",
 };
 
 const tabSelectionBannerStyle = {
@@ -920,6 +934,12 @@ export const ProofWorkspace = forwardRef<
   // 整理（Simplification）接続モード
   const [simplificationSelection, setSimplificationSelection] =
     useState<SimplificationSelectionState>({
+      phase: "idle",
+    });
+
+  // 置換接続（SubstitutionConnection）モード
+  const [subConnSelection, setSubConnSelection] =
+    useState<SubstitutionConnectionSelectionState>({
       phase: "idle",
     });
 
@@ -1761,6 +1781,28 @@ export const ProofWorkspace = forwardRef<
     [simplificationSelection, workspace, setWorkspace],
   );
 
+  // --- 置換接続（SubstitutionConnection）ハンドラ ---
+
+  const handleCancelSubstitutionConnection = useCallback(() => {
+    setSubConnSelection({ phase: "idle" });
+  }, []);
+
+  const handleNodeClickForSubstitutionConnection = useCallback(
+    (targetNodeId: string) => {
+      /* v8 ignore start -- 防御的: ディスパッチャでphaseチェック済み */
+      if (subConnSelection.phase !== "selecting-target") return;
+      /* v8 ignore stop */
+      const result = connectSubstitutionConnection(
+        workspace,
+        subConnSelection.sourceNodeId,
+        targetNodeId,
+      );
+      setWorkspace(result.workspace);
+      setSubConnSelection({ phase: "idle" });
+    },
+    [subConnSelection, workspace, setWorkspace],
+  );
+
   // --- ND規則選択モードハンドラ ---
 
   const handleStartNdRuleSelection = useCallback((ruleId: NdRuleId) => {
@@ -2334,6 +2376,8 @@ export const ProofWorkspace = forwardRef<
         handleNodeClickForMerge(nodeId);
       } else if (simplificationSelection.phase !== "idle") {
         handleNodeClickForSimplification(nodeId);
+      } else if (subConnSelection.phase !== "idle") {
+        handleNodeClickForSubstitutionConnection(nodeId);
       } else if (ndSelection.phase !== "idle") {
         handleNodeClickForNd(nodeId);
       } else if (tabSelection.phase !== "idle") {
@@ -2350,6 +2394,7 @@ export const ProofWorkspace = forwardRef<
       genSelection,
       mergeSelection,
       simplificationSelection,
+      subConnSelection,
       ndSelection,
       tabSelection,
       atSelection,
@@ -2358,6 +2403,7 @@ export const ProofWorkspace = forwardRef<
       handleNodeClickForGen,
       handleNodeClickForMerge,
       handleNodeClickForSimplification,
+      handleNodeClickForSubstitutionConnection,
       handleNodeClickForNd,
       handleNodeClickForTab,
       handleNodeClickForAt,
@@ -2370,6 +2416,7 @@ export const ProofWorkspace = forwardRef<
     genSelection.phase !== "idle" ||
     mergeSelection.phase !== "idle" ||
     simplificationSelection.phase !== "idle" ||
+    subConnSelection.phase !== "idle" ||
     ndSelection.phase !== "idle" ||
     tabSelection.phase !== "idle" ||
     atSelection.phase !== "idle" ||
@@ -2419,6 +2466,18 @@ export const ProofWorkspace = forwardRef<
       simplificationSelection.sourceNodeId,
     );
   }, [simplificationSelection, workspace.nodes]);
+
+  // --- 置換接続互換ノードIDセット（ハイライト用） ---
+
+  const subConnCompatibleNodeIds: ReadonlySet<string> = useMemo(() => {
+    if (subConnSelection.phase !== "selecting-target")
+      return new Set<string>();
+    return computeSubstitutionConnectionCompatibleNodeIds(
+      workspace.nodes,
+      subConnSelection.sourceNodeId,
+      workspace.inferenceEdges,
+    );
+  }, [subConnSelection, workspace.nodes, workspace.inferenceEdges]);
 
   // --- MPノードの検証状態を計算 ---
 
@@ -3147,6 +3206,24 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSubConnSelection({ phase: "idle" });
+    setNodeMenuState(closeNodeMenu());
+  }, [nodeMenuState]);
+
+  // コンテキストメニューから「Connect as Substitution...」
+  const handleStartSubstitutionConnectionFromMenu = useCallback(() => {
+    /* v8 ignore start -- 防御的: メニューが開いている時のみ呼ばれる */
+    if (!nodeMenuState.open) return;
+    /* v8 ignore stop */
+    const nodeId = nodeMenuState.nodeId;
+    setSubConnSelection({
+      phase: "selecting-target",
+      sourceNodeId: nodeId,
+    });
+    setMPSelection({ phase: "idle" });
+    setGenSelection({ phase: "idle" });
+    setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNodeMenuState(closeNodeMenu());
   }, [nodeMenuState]);
 
@@ -3160,6 +3237,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setSimplificationSelection({ phase: "idle" });
+    setSubConnSelection({ phase: "idle" });
     setNodeMenuState(closeNodeMenu());
   }, [nodeMenuState]);
 
@@ -4029,6 +4107,8 @@ export const ProofWorkspace = forwardRef<
           handleCancelMerge();
         } else if (simplificationSelection.phase !== "idle") {
           handleCancelSimplification();
+        } else if (subConnSelection.phase !== "idle") {
+          handleCancelSubstitutionConnection();
         } else {
           setSelectedNodeIds(clearSelection());
         }
@@ -4073,6 +4153,8 @@ export const ProofWorkspace = forwardRef<
     handleCancelMerge,
     simplificationSelection,
     handleCancelSimplification,
+    subConnSelection,
+    handleCancelSubstitutionConnection,
     handleTreeLayout,
     workspace.nodes,
     containerSize,
@@ -4446,6 +4528,19 @@ export const ProofWorkspace = forwardRef<
         !isSimpSource &&
         !simplificationCompatibleNodeIds.has(node.id);
 
+      // 置換接続候補の判定
+      const isSubConnSource =
+        subConnSelection.phase === "selecting-target" &&
+        subConnSelection.sourceNodeId === node.id;
+      const isSubConnTarget =
+        subConnSelection.phase === "selecting-target" &&
+        !isSubConnSource &&
+        subConnCompatibleNodeIds.has(node.id);
+      const isSubConnIncompatible =
+        subConnSelection.phase === "selecting-target" &&
+        !isSubConnSource &&
+        !subConnCompatibleNodeIds.has(node.id);
+
       // ノードの検証状態（MPまたはGen）
       const ruleValidation =
         mpValidations.get(node.id) ??
@@ -4464,6 +4559,8 @@ export const ProofWorkspace = forwardRef<
         "var(--color-merge-highlight, rgba(74,148,217,0.6))";
       const simpHighlightColor =
         "var(--color-simp-highlight, rgba(253,203,110,0.8))";
+      const subConnHighlightColor =
+        "var(--color-subconn-highlight, rgba(116,185,255,0.8))";
       const selectionColor =
         mpSelection.phase !== "idle"
           ? "var(--color-mp-button-shadow, rgba(217,148,74,0.6))"
@@ -4473,7 +4570,9 @@ export const ProofWorkspace = forwardRef<
               ? mergeHighlightColor
               : simplificationSelection.phase !== "idle"
                 ? simpHighlightColor
-                : undefined;
+                : subConnSelection.phase !== "idle"
+                  ? subConnHighlightColor
+                  : undefined;
 
       // アウトラインスタイルの決定
       const outlineStyle = isPreSelectedNode
@@ -4488,11 +4587,15 @@ export const ProofWorkspace = forwardRef<
                 ? `3px solid ${simpHighlightColor satisfies string}`
                 : isSimpTarget
                   ? `2px solid ${simpHighlightColor satisfies string}`
-                  : isNodeSelected
-                    ? "2px solid var(--color-accent, #3b82f6)"
-                    : isSelectionActive && selectionColor
-                      ? `2px dashed ${selectionColor satisfies string}`
-                      : undefined;
+                  : isSubConnSource
+                    ? `3px solid ${subConnHighlightColor satisfies string}`
+                    : isSubConnTarget
+                      ? `2px solid ${subConnHighlightColor satisfies string}`
+                      : isNodeSelected
+                        ? "2px solid var(--color-accent, #3b82f6)"
+                        : isSelectionActive && selectionColor
+                          ? `2px dashed ${selectionColor satisfies string}`
+                          : undefined;
 
       return (
         <CanvasItem
@@ -4525,7 +4628,10 @@ export const ProofWorkspace = forwardRef<
               outlineOffset: 2,
               borderRadius: 10,
               opacity:
-                isMPIncompatible || isMergeIncompatible || isSimpIncompatible
+                isMPIncompatible ||
+                isMergeIncompatible ||
+                isSimpIncompatible ||
+                isSubConnIncompatible
                   ? 0.35
                   : undefined,
               transition: "opacity 0.15s ease",
@@ -4591,6 +4697,8 @@ export const ProofWorkspace = forwardRef<
       mergeTargetNodeIds,
       simplificationSelection,
       simplificationCompatibleNodeIds,
+      subConnSelection,
+      subConnCompatibleNodeIds,
       mpValidations,
       genValidations,
       substitutionValidations,
@@ -4953,6 +5061,29 @@ export const ProofWorkspace = forwardRef<
             onClick={handleCancelSimplification}
           >
             {msg.simplificationCancel}
+          </button>
+        </div>
+      ) : null}
+
+      {/* 置換接続選択バナー */}
+      {subConnSelection.phase !== "idle" ? (
+        <div
+          style={substitutionConnectionSelectionBannerStyle}
+          data-testid={
+            /* v8 ignore start -- V8集約アーティファクト */
+            testId
+              ? `${testId satisfies string}-subconn-banner`
+              : undefined
+            /* v8 ignore stop */
+          }
+        >
+          <span>{msg.substitutionConnectionBannerSelectTarget}</span>
+          <button
+            type="button"
+            style={cancelButtonStyle}
+            onClick={handleCancelSubstitutionConnection}
+          >
+            {msg.substitutionConnectionCancel}
           </button>
         </div>
       ) : null}
@@ -6094,6 +6225,17 @@ export const ProofWorkspace = forwardRef<
                   testId
                     ? `${testId satisfies string}-connect-simplification`
                     : "connect-simplification"
+                  /* v8 ignore stop */
+                }
+              />
+              <WorkspaceMenuItem
+                label={msg.connectSubstitutionConnection}
+                onClick={handleStartSubstitutionConnectionFromMenu}
+                testId={
+                  /* v8 ignore start -- V8集約アーティファクト */
+                  testId
+                    ? `${testId satisfies string}-connect-substitution-connection`
+                    : "connect-substitution-connection"
                   /* v8 ignore stop */
                 }
               />

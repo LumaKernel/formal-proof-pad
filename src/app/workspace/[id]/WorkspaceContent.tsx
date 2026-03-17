@@ -154,6 +154,13 @@ function useProofMessagesFromIntl(): ProofMessages {
       simplificationCancel: t("simplificationCancel"),
       simplificationConnected: t("simplificationConnected"),
       simplificationNoTargets: t("simplificationNoTargets"),
+      connectSubstitutionConnection: t("connectSubstitutionConnection"),
+      substitutionConnectionBannerSelectTarget: t(
+        "substitutionConnectionBannerSelectTarget",
+      ),
+      substitutionConnectionCancel: t("substitutionConnectionCancel"),
+      substitutionConnectionConnected: t("substitutionConnectionConnected"),
+      substitutionConnectionNoTargets: t("substitutionConnectionNoTargets"),
       mergeBannerSelectTarget: t("mergeBannerSelectTarget"),
       mergeCancel: t("mergeCancel"),
       mergeNoTargets: t("mergeNoTargets"),

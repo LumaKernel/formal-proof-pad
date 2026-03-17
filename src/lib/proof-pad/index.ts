@@ -58,6 +58,7 @@ export {
   applySubstitutionAndConnect,
   applyNormalize,
   connectSimplification,
+  connectSubstitutionConnection,
   applyNdImplicationIntroAndConnect,
   applyTabRuleAndConnect,
   applyAtRuleAndConnect,
@@ -88,6 +89,7 @@ export type {
   ApplySubstitutionResult,
   ApplyNormalizeResult,
   ConnectSimplificationResult,
+  ConnectSubstitutionConnectionResult,
   ApplyTabRuleResult,
   ApplyAtRuleResult,
   ApplyScRuleResult,
@@ -194,6 +196,21 @@ export type {
   SimplificationApplicationError,
   SimplificationApplicationResult,
 } from "./simplificationApplicationLogic";
+export {
+  validateSubstitutionConnectionApplicationEffect,
+  validateSubstitutionConnectionApplication,
+  computeSubstitutionConnectionCompatibleNodeIds,
+  getSubstitutionConnectionErrorMessage,
+  SubstitutionConnectionPremiseMissing,
+  SubstitutionConnectionPremiseParseError,
+  SubstitutionConnectionConclusionParseError,
+  SubstitutionConnectionNotRelated,
+} from "./substitutionConnectionLogic";
+export type {
+  SubstitutionConnectionApplicationSuccess,
+  SubstitutionConnectionApplicationError,
+  SubstitutionConnectionApplicationResult,
+} from "./substitutionConnectionLogic";
 export {
   validateNormalizeApplicationEffect,
   validateNormalizeApplication,
@@ -489,6 +506,7 @@ export type {
   GenEdge,
   SubstitutionEdge,
   SimplificationEdge,
+  SubstitutionConnectionEdge,
   HilbertInferenceEdge,
   NdImplicationIntroEdge,
   NdImplicationElimEdge,
