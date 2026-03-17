@@ -1091,3 +1091,234 @@ export const QuestCompleteAt01: Story = {
     await expect(goalPanel).toHaveTextContent("Proved!");
   },
 };
+
+// =============================================================================
+// Quest Complete Full Flow Stories
+// 空のクエストワークスペースから公理パレット・代入・MP操作で証明を完遂するフルフロー
+// =============================================================================
+
+/**
+ * 代入プロンプトで FormulaEditor にDSLテキストを入力するヘルパー。
+ * click display → type into input → (FormulaEditorの値が更新される)
+ */
+async function typeSubstitutionValue(
+  canvas: ReturnType<typeof within>,
+  index: number,
+  dslText: string,
+) {
+  const displayTestId = `workspace-subst-value-${String(index) satisfies string}-display`;
+  const inputTestId = `workspace-subst-value-${String(index) satisfies string}-input-input`;
+  await userEvent.click(canvas.getByTestId(displayTestId));
+  await userEvent.type(canvas.getByTestId(inputTestId), dslText);
+}
+
+/**
+ * Fit to contentボタンを押してノードをビューポートに収めるヘルパー。
+ * ノード追加によりビューポート外にカリングされるのを防ぐ。
+ */
+async function fitToContent(canvas: ReturnType<typeof within>) {
+  const fitButton = canvas.getByTestId("zoom-fit-button");
+  await userEvent.click(fitButton);
+}
+
+/**
+ * ノードを右クリック → "Apply Substitution" → 代入値を入力 → 確定するヘルパー。
+ * 事前にFit to contentを実行してノードをビューポートに収める。
+ * @param nodeTestId ノードの data-testid
+ * @param substitutions 各メタ変数に対するDSLテキスト（インデックス順）
+ */
+async function applySubstitutionViaContextMenu(
+  canvas: ReturnType<typeof within>,
+  nodeTestId: string,
+  substitutions: readonly string[],
+) {
+  // ノードがビューポート外に配置されている可能性があるため、先にフィットさせる
+  await fitToContent(canvas);
+  // ノードを右クリック
+  const node = canvas.getByTestId(nodeTestId);
+  await userEvent.pointer({ keys: "[MouseRight]", target: node });
+
+  // コンテキストメニューから "Apply Substitution" をクリック
+  const menuItem = await canvas.findByTestId(
+    "workspace-apply-substitution-to-node",
+  );
+  await userEvent.click(menuItem);
+
+  // 代入プロンプトバナーが表示されるまで待機
+  await canvas.findByTestId("workspace-subst-prompt-banner");
+
+  // 各メタ変数に対してDSLテキストを入力
+  for (let i = 0; i < substitutions.length; i++) {
+    await typeSubstitutionValue(canvas, i, substitutions[i]!);
+  }
+
+  // 確定ボタンをクリック
+  const confirmBtn = canvas.getByTestId("workspace-subst-prompt-confirm");
+  await userEvent.click(confirmBtn);
+}
+
+/**
+ * MPボタンを押して2つのノードを順にクリックし、MP適用するヘルパー。
+ * 事前にFit to contentを実行してノードをビューポートに収める。
+ * @param leftNodeTestId 左前提(antecedent φ)ノードのtestId
+ * @param rightNodeTestId 右前提(conditional φ→ψ)ノードのtestId
+ */
+async function applyMPViaSelection(
+  canvas: ReturnType<typeof within>,
+  leftNodeTestId: string,
+  rightNodeTestId: string,
+) {
+  // ノードがビューポート外に配置されている可能性があるため、先にフィットさせる
+  await fitToContent(canvas);
+  const mpButton = canvas.getByTestId("workspace-mp-button");
+  await userEvent.click(mpButton);
+  await waitFor(() => {
+    expect(mpButton).toHaveTextContent("Cancel");
+  });
+  await userEvent.click(canvas.getByTestId(leftNodeTestId));
+  await userEvent.click(canvas.getByTestId(rightNodeTestId));
+}
+
+/**
+ * prop-01: 恒等律 φ→φ の完全フロー。
+ *
+ * **空のクエストワークスペースから**公理パレット・代入・MP操作のみで証明を完遂する。
+ * ドラッグ操作は一切不要。
+ *
+ * ノード生成順序:
+ *   1. A2パレットクリック → node-1 (A2スキーマ)
+ *   2. node-1に代入 [φ:=phi, ψ:=phi->phi, χ:=phi] → node-2 (A2インスタンス)
+ *   3. A1パレットクリック → node-3 (A1スキーマ)
+ *   4. node-3に代入 [φ:=phi, ψ:=phi->phi] → node-4 (A1₁インスタンス)
+ *   5. MP₁(left=node-4, right=node-2) → node-5 ((φ→(φ→φ))→(φ→φ))
+ *   6. A1パレットクリック → node-6 (A1スキーマ)
+ *   7. node-6に代入 [φ:=phi, ψ:=phi] → node-7 (A1₂インスタンス)
+ *   8. MP₂(left=node-7, right=node-5) → node-8 (φ→φ, ゴール達成)
+ */
+export const QuestCompleteProp01FullFlow: Story = {
+  render: () => {
+    const quest = findQuestById(builtinQuests, "prop-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: prop-01");
+    }
+    const preset = resolveSystemPreset(quest.systemPresetId);
+    if (preset === undefined) {
+      throw new Error("System preset not found");
+    }
+    const initialWorkspace = createQuestWorkspace(preset.deductionSystem, [
+      { formulaText: quest.goals[0]!.formulaText },
+    ]);
+    const questInfo: GoalQuestInfo = {
+      description: quest.description,
+      hints: quest.hints,
+      learningPoint: quest.learningPoint,
+    };
+    return (
+      <StatefulWorkspace
+        initialWorkspace={initialWorkspace}
+        initialNotebookName={quest.title}
+        onBack={fn()}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- 初期状態: 空のクエストワークスペース ---
+    await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // 公理パレットとMPボタンが表示される（Hilbert体系）
+    await expect(
+      canvas.getByTestId("workspace-axiom-palette"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("workspace-mp-button"),
+    ).toBeInTheDocument();
+
+    // --- Step 1: A2スキーマをパレットから追加 → node-1 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A2"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // --- Step 2: node-1に代入 [φ:=phi, ψ:=phi->phi, χ:=phi] → node-2 ---
+    await applySubstitutionViaContextMenu(canvas, "proof-node-node-1", [
+      "phi",
+      "phi -> phi",
+      "phi",
+    ]);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument();
+    });
+
+    // --- Step 3: A1スキーマをパレットから追加 → node-3 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A1"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-3")).toBeInTheDocument();
+    });
+
+    // --- Step 4: node-3に代入 [φ:=phi, ψ:=phi->phi] → node-4 ---
+    await applySubstitutionViaContextMenu(canvas, "proof-node-node-3", [
+      "phi",
+      "phi -> phi",
+    ]);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-4")).toBeInTheDocument();
+    });
+
+    // --- Step 5: MP₁(left=node-4, right=node-2) → node-5 ---
+    // node-4: φ→((φ→φ)→φ) (antecedent), node-2: (φ→((φ→φ)→φ))→((φ→(φ→φ))→(φ→φ)) (conditional)
+    await applyMPViaSelection(canvas, "proof-node-node-4", "proof-node-node-2");
+    // MP結果ノードがビューポート外の可能性があるため、フィット後に確認
+    await fitToContent(canvas);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-5")).toBeInTheDocument();
+    });
+
+    // --- Step 6: A1スキーマをパレットから追加 → node-6 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A1"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-6")).toBeInTheDocument();
+    });
+
+    // --- Step 7: node-6に代入 [φ:=phi, ψ:=phi] → node-7 ---
+    await applySubstitutionViaContextMenu(canvas, "proof-node-node-6", [
+      "phi",
+      "phi",
+    ]);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-7")).toBeInTheDocument();
+    });
+
+    // --- Step 8: MP₂(left=node-7, right=node-5) → node-8 (φ→φ) ---
+    // node-7: φ→(φ→φ) (antecedent), node-5: (φ→(φ→φ))→(φ→φ) (conditional)
+    await applyMPViaSelection(canvas, "proof-node-node-7", "proof-node-node-5");
+    // MP結果ノードがビューポート外の可能性があるため、フィット後に確認
+    await fitToContent(canvas);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-8")).toBeInTheDocument();
+    });
+
+    // --- 最終確認: ゴール達成 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
+    });
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+  },
+};
