@@ -15233,3 +15233,19 @@
   - 公理dslText変更時は `propositionalAxiomDslTexts`（modelAnswer.ts）も同期が必要
   - builtinModelAnswers.test.ts の hasUnknownRootNodes チェックは公理識別に依存するため、公理表現変更時に影響を受ける
 ---
+
+## 2026-03-18 - identifyAxiom UI層依存除去
+- UI層（axiomNameLogic, dependencyLogic, questCompletionLogic, ProofWorkspace）からidentifyAxiom依存を除去
+- matchAxiomTemplateByEquality + matchTheoryAxiomTemplateByEquality（構造的等価性）に統一
+- RootNodeValidation を5バリアント→3バリアント（schema/theory-schema/unknown）に簡素化
+- hasInstanceRootNodes をquestCompletionLogicから除去
+- modelAnswer.ts にisTrivialAxiomSubstitutionをインライン化（模範解答構築に必要）
+- inferenceRule.ts に matchTheoryAxiomTemplateByEquality を新規追加（100%カバレッジ）
+- 変更ファイル: inferenceRule.ts/test, axiomNameLogic.ts/test, dependencyLogic.ts/test, index.ts, questCompletionLogic.ts/test, modelAnswer.ts/test, builtinModelAnswers.test.ts, ProofWorkspace.tsx/test
+- カバレッジ: Stmts 99.84% | Branch 99.18% | Funcs 90.30% | Lines 99.87%（ベースライン: Stmts 99.84% | Branch 99.20% | Funcs 90.58% | Lines 99.87%）
+- Branch -0.02%, Funcs -0.28% は削除された関数による比率変動（実質的な低下なし）
+- **今後のイテレーションへの学び:**
+  - identifyAxiomはmodelAnswer.tsでは依然必要（代入マップ抽出が必要なため）。UI層のみ除去可能
+  - matchAxiomTemplateByEquality は体系設定（propositionalAxioms, predicateLogic, equalityLogic）を尊重して公理をフィルタする
+  - RootNodeValidation の instance/theory-instance バリアント除去で、テスト期待値の大幅な変更が必要になった
+---
