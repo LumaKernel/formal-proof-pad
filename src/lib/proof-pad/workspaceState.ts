@@ -90,6 +90,10 @@ import {
   importProofEntry,
   type ProofEntry,
 } from "../proof-collection/proofCollectionState";
+import {
+  validateSimplificationApplication,
+  type SimplificationApplicationResult,
+} from "./simplificationApplicationLogic";
 
 // --- ノードの明示的な役割マーク ---
 
@@ -938,6 +942,48 @@ export function applyNormalize(
   }
 
   return { workspace: state, validation };
+}
+
+// --- 整理（Simplification）接続（既存ノード間をSimplificationEdgeで接続） ---
+
+/** 整理接続の結果 */
+export type ConnectSimplificationResult = {
+  readonly workspace: WorkspaceState;
+  readonly validation: SimplificationApplicationResult;
+};
+
+/**
+ * 2つの既存ノードを整理（Simplification）エッジで接続する。
+ * MP/Gen/Substと異なり、新しいノードは作成せず既存ノード間にエッジを張る。
+ * sourceNodeId が前提、targetNodeId が結論として接続される。
+ * 整理は双方向に等価なので、呼び出し側で方向を決定する。
+ *
+ * @param state 現在のワークスペース状態
+ * @param sourceNodeId 前提ノードのID（整理元）
+ * @param targetNodeId 結論ノードのID（整理先）
+ * @returns 新しいワークスペース状態と検証結果
+ */
+export function connectSimplification(
+  state: WorkspaceState,
+  sourceNodeId: string,
+  targetNodeId: string,
+): ConnectSimplificationResult {
+  // SimplificationEdge を追加
+  const simpEdge: InferenceEdge = {
+    _tag: "simplification",
+    conclusionNodeId: targetNodeId,
+    premiseNodeId: sourceNodeId,
+    conclusionText: "",
+  };
+  let ws = addInferenceEdge(state, simpEdge);
+
+  // レガシー接続も追加（依存関係追跡・UI等で利用される）
+  ws = addConnection(ws, sourceNodeId, "out", targetNodeId, "premise");
+
+  // 検証
+  const validation = validateSimplificationApplication(ws, targetNodeId);
+
+  return { workspace: ws, validation };
 }
 
 // --- ND →I 適用（ノード作成 + InferenceEdge + 結論自動生成） ---

@@ -93,6 +93,7 @@ import {
   generateSubstitutionEntryTemplate,
 } from "./substitutionApplicationLogic";
 import type { SubstitutionEntries } from "./substitutionApplicationLogic";
+import { computeSimplificationCompatibleNodeIds } from "./simplificationApplicationLogic";
 import {
   getMPErrorMessageKey,
   getGenErrorMessageKey,
@@ -159,6 +160,7 @@ import {
   cutSelectedNodes,
   applySubstitutionAndConnect,
   applyNormalize,
+  connectSimplification,
   applyTreeLayout,
   revalidateInferenceConclusions,
   updateInferenceEdgeGenVariableName,
@@ -393,6 +395,15 @@ type MergeSelectionState =
       readonly leaderNodeId: string;
     };
 
+// --- 整理（Simplification）接続モードの状態 ---
+
+type SimplificationSelectionState =
+  | { readonly phase: "idle" }
+  | {
+      readonly phase: "selecting-target";
+      readonly sourceNodeId: string;
+    };
+
 // --- TAB規則選択モードの状態 ---
 
 // --- ND規則選択モードの状態 ---
@@ -612,6 +623,12 @@ const genVariableInputStyle = {
 const mergeSelectionBannerStyle = {
   ...mpSelectionBannerStyle,
   background: "var(--color-merge-banner, rgba(74,148,217,0.95))",
+};
+
+const simplificationSelectionBannerStyle = {
+  ...mpSelectionBannerStyle,
+  background: "var(--color-simp-banner, rgba(253, 203, 110, 0.95))",
+  color: "rgba(0, 0, 0, 0.85)",
 };
 
 const tabSelectionBannerStyle = {
@@ -899,6 +916,12 @@ export const ProofWorkspace = forwardRef<
   const [mergeSelection, setMergeSelection] = useState<MergeSelectionState>({
     phase: "idle",
   });
+
+  // 整理（Simplification）接続モード
+  const [simplificationSelection, setSimplificationSelection] =
+    useState<SimplificationSelectionState>({
+      phase: "idle",
+    });
 
   // ND規則選択モード
   const [ndSelection, setNdSelection] = useState<NdSelectionState>({
@@ -1599,6 +1622,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "selecting-left" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNdSelection({ phase: "idle" });
   }, []);
 
@@ -1667,6 +1691,7 @@ export const ProofWorkspace = forwardRef<
     setGenSelection({ phase: "selecting-premise" });
     setMPSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNdSelection({ phase: "idle" });
   }, []);
 
@@ -1714,6 +1739,28 @@ export const ProofWorkspace = forwardRef<
     [mergeSelection, workspace, setWorkspace],
   );
 
+  // --- 整理（Simplification）接続ハンドラ ---
+
+  const handleCancelSimplification = useCallback(() => {
+    setSimplificationSelection({ phase: "idle" });
+  }, []);
+
+  const handleNodeClickForSimplification = useCallback(
+    (targetNodeId: string) => {
+      /* v8 ignore start -- 防御的: ディスパッチャでphaseチェック済み */
+      if (simplificationSelection.phase !== "selecting-target") return;
+      /* v8 ignore stop */
+      const result = connectSimplification(
+        workspace,
+        simplificationSelection.sourceNodeId,
+        targetNodeId,
+      );
+      setWorkspace(result.workspace);
+      setSimplificationSelection({ phase: "idle" });
+    },
+    [simplificationSelection, workspace, setWorkspace],
+  );
+
   // --- ND規則選択モードハンドラ ---
 
   const handleStartNdRuleSelection = useCallback((ruleId: NdRuleId) => {
@@ -1721,6 +1768,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setTabSelection({ phase: "idle" });
     setAtSelection({ phase: "idle" });
     setScSelection({ phase: "idle" });
@@ -1795,6 +1843,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNdSelection({ phase: "idle" });
     setAtSelection({ phase: "idle" });
     setScSelection({ phase: "idle" });
@@ -1918,6 +1967,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNdSelection({ phase: "idle" });
     setTabSelection({ phase: "idle" });
     setScSelection({ phase: "idle" });
@@ -2054,6 +2104,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNdSelection({ phase: "idle" });
     setTabSelection({ phase: "idle" });
     setAtSelection({ phase: "idle" });
@@ -2281,6 +2332,8 @@ export const ProofWorkspace = forwardRef<
         handleNodeClickForGen(nodeId);
       } else if (mergeSelection.phase !== "idle") {
         handleNodeClickForMerge(nodeId);
+      } else if (simplificationSelection.phase !== "idle") {
+        handleNodeClickForSimplification(nodeId);
       } else if (ndSelection.phase !== "idle") {
         handleNodeClickForNd(nodeId);
       } else if (tabSelection.phase !== "idle") {
@@ -2296,6 +2349,7 @@ export const ProofWorkspace = forwardRef<
       mpSelection,
       genSelection,
       mergeSelection,
+      simplificationSelection,
       ndSelection,
       tabSelection,
       atSelection,
@@ -2303,6 +2357,7 @@ export const ProofWorkspace = forwardRef<
       handleNodeClickForMP,
       handleNodeClickForGen,
       handleNodeClickForMerge,
+      handleNodeClickForSimplification,
       handleNodeClickForNd,
       handleNodeClickForTab,
       handleNodeClickForAt,
@@ -2314,6 +2369,7 @@ export const ProofWorkspace = forwardRef<
     mpSelection.phase !== "idle" ||
     genSelection.phase !== "idle" ||
     mergeSelection.phase !== "idle" ||
+    simplificationSelection.phase !== "idle" ||
     ndSelection.phase !== "idle" ||
     tabSelection.phase !== "idle" ||
     atSelection.phase !== "idle" ||
@@ -2352,6 +2408,17 @@ export const ProofWorkspace = forwardRef<
       workspace.inferenceEdges,
     );
   }, [mergeSelection, workspace]);
+
+  // --- 整理互換ノードIDセット（ハイライト用） ---
+
+  const simplificationCompatibleNodeIds: ReadonlySet<string> = useMemo(() => {
+    if (simplificationSelection.phase !== "selecting-target")
+      return new Set<string>();
+    return computeSimplificationCompatibleNodeIds(
+      workspace.nodes,
+      simplificationSelection.sourceNodeId,
+    );
+  }, [simplificationSelection, workspace.nodes]);
 
   // --- MPノードの検証状態を計算 ---
 
@@ -2999,6 +3066,7 @@ export const ProofWorkspace = forwardRef<
     });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNodeMenuState(closeNodeMenu());
   }, [nodeMenuState]);
 
@@ -3013,6 +3081,7 @@ export const ProofWorkspace = forwardRef<
     });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNodeMenuState(closeNodeMenu());
   }, [nodeMenuState]);
 
@@ -3065,6 +3134,22 @@ export const ProofWorkspace = forwardRef<
     setGenPromptInput("");
   }, []);
 
+  // コンテキストメニューから「Connect as Simplification...」
+  const handleStartSimplificationFromMenu = useCallback(() => {
+    /* v8 ignore start -- 防御的: メニューが開いている時のみ呼ばれる */
+    if (!nodeMenuState.open) return;
+    /* v8 ignore stop */
+    const nodeId = nodeMenuState.nodeId;
+    setSimplificationSelection({
+      phase: "selecting-target",
+      sourceNodeId: nodeId,
+    });
+    setMPSelection({ phase: "idle" });
+    setGenSelection({ phase: "idle" });
+    setMergeSelection({ phase: "idle" });
+    setNodeMenuState(closeNodeMenu());
+  }, [nodeMenuState]);
+
   // コンテキストメニューから「Merge with...」
   const handleStartMergeFromMenu = useCallback(() => {
     /* v8 ignore start -- 防御的: メニューが開いている時のみ呼ばれる */
@@ -3074,6 +3159,7 @@ export const ProofWorkspace = forwardRef<
     setMergeSelection({ phase: "selecting-target", leaderNodeId: nodeId });
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
+    setSimplificationSelection({ phase: "idle" });
     setNodeMenuState(closeNodeMenu());
   }, [nodeMenuState]);
 
@@ -3941,6 +4027,8 @@ export const ProofWorkspace = forwardRef<
       } else if (e.key === "Escape") {
         if (mergeSelection.phase !== "idle") {
           handleCancelMerge();
+        } else if (simplificationSelection.phase !== "idle") {
+          handleCancelSimplification();
         } else {
           setSelectedNodeIds(clearSelection());
         }
@@ -3983,6 +4071,8 @@ export const ProofWorkspace = forwardRef<
     handleMergeSelected,
     mergeSelection,
     handleCancelMerge,
+    simplificationSelection,
+    handleCancelSimplification,
     handleTreeLayout,
     workspace.nodes,
     containerSize,
@@ -4343,6 +4433,19 @@ export const ProofWorkspace = forwardRef<
         !isMergeLeader &&
         !mergeTargetNodeIds.has(node.id);
 
+      // 整理候補の判定
+      const isSimpSource =
+        simplificationSelection.phase === "selecting-target" &&
+        simplificationSelection.sourceNodeId === node.id;
+      const isSimpTarget =
+        simplificationSelection.phase === "selecting-target" &&
+        !isSimpSource &&
+        simplificationCompatibleNodeIds.has(node.id);
+      const isSimpIncompatible =
+        simplificationSelection.phase === "selecting-target" &&
+        !isSimpSource &&
+        !simplificationCompatibleNodeIds.has(node.id);
+
       // ノードの検証状態（MPまたはGen）
       const ruleValidation =
         mpValidations.get(node.id) ??
@@ -4359,6 +4462,8 @@ export const ProofWorkspace = forwardRef<
       // 選択モードの視覚的ハイライト色
       const mergeHighlightColor =
         "var(--color-merge-highlight, rgba(74,148,217,0.6))";
+      const simpHighlightColor =
+        "var(--color-simp-highlight, rgba(253,203,110,0.8))";
       const selectionColor =
         mpSelection.phase !== "idle"
           ? "var(--color-mp-button-shadow, rgba(217,148,74,0.6))"
@@ -4366,7 +4471,9 @@ export const ProofWorkspace = forwardRef<
             ? "var(--color-gen-button-shadow, rgba(155,89,182,0.6))"
             : mergeSelection.phase !== "idle"
               ? mergeHighlightColor
-              : undefined;
+              : simplificationSelection.phase !== "idle"
+                ? simpHighlightColor
+                : undefined;
 
       // アウトラインスタイルの決定
       const outlineStyle = isPreSelectedNode
@@ -4377,10 +4484,14 @@ export const ProofWorkspace = forwardRef<
             ? `3px solid ${mergeHighlightColor satisfies string}`
             : isMergeTarget
               ? `2px solid ${mergeHighlightColor satisfies string}`
-              : isNodeSelected
-                ? "2px solid var(--color-accent, #3b82f6)"
-                : isSelectionActive && selectionColor
-                  ? `2px dashed ${selectionColor satisfies string}`
+              : isSimpSource
+                ? `3px solid ${simpHighlightColor satisfies string}`
+                : isSimpTarget
+                  ? `2px solid ${simpHighlightColor satisfies string}`
+                  : isNodeSelected
+                    ? "2px solid var(--color-accent, #3b82f6)"
+                    : isSelectionActive && selectionColor
+                      ? `2px dashed ${selectionColor satisfies string}`
                   : undefined;
 
       return (
@@ -4414,7 +4525,9 @@ export const ProofWorkspace = forwardRef<
               outlineOffset: 2,
               borderRadius: 10,
               opacity:
-                isMPIncompatible || isMergeIncompatible ? 0.35 : undefined,
+                isMPIncompatible || isMergeIncompatible || isSimpIncompatible
+                  ? 0.35
+                  : undefined,
               transition: "opacity 0.15s ease",
             }}
           >
@@ -4476,6 +4589,8 @@ export const ProofWorkspace = forwardRef<
       genSelection,
       mergeSelection,
       mergeTargetNodeIds,
+      simplificationSelection,
+      simplificationCompatibleNodeIds,
       mpValidations,
       genValidations,
       substitutionValidations,
@@ -4815,6 +4930,29 @@ export const ProofWorkspace = forwardRef<
             onClick={handleCancelMerge}
           >
             {msg.mergeCancel}
+          </button>
+        </div>
+      ) : null}
+
+      {/* 整理選択バナー */}
+      {simplificationSelection.phase !== "idle" ? (
+        <div
+          style={simplificationSelectionBannerStyle}
+          data-testid={
+            /* v8 ignore start -- V8集約アーティファクト */
+            testId
+              ? `${testId satisfies string}-simplification-banner`
+              : undefined
+            /* v8 ignore stop */
+          }
+        >
+          <span>{msg.simplificationBannerSelectTarget}</span>
+          <button
+            type="button"
+            style={cancelButtonStyle}
+            onClick={handleCancelSimplification}
+          >
+            {msg.simplificationCancel}
           </button>
         </div>
       ) : null}
@@ -5945,6 +6083,17 @@ export const ProofWorkspace = forwardRef<
                   testId
                     ? `${testId satisfies string}-normalize-formula`
                     : "normalize-formula"
+                  /* v8 ignore stop */
+                }
+              />
+              <WorkspaceMenuItem
+                label={msg.connectSimplification}
+                onClick={handleStartSimplificationFromMenu}
+                testId={
+                  /* v8 ignore start -- V8集約アーティファクト */
+                  testId
+                    ? `${testId satisfies string}-connect-simplification`
+                    : "connect-simplification"
                   /* v8 ignore stop */
                 }
               />

@@ -48,6 +48,7 @@ import {
   importProofFromCollection,
   addScriptNode,
   applyNormalize,
+  connectSimplification,
   applyNdImplicationIntroAndConnect,
 } from "./workspaceState";
 import {
@@ -2110,6 +2111,56 @@ describe("proofWorkspace", () => {
       // Revalidation should not change the conclusion text
       const result = revalidateInferenceConclusions(ws);
       expect(findNode(result, "node-2")?.formulaText).toBe("all y. P(y)");
+    });
+
+    it("connectSimplification connects two α-equivalent nodes", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "all x. P(x)");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "all y. P(y)");
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
+      expect(
+        result.workspace.inferenceEdges.some(
+          (e) =>
+            e._tag === "simplification" &&
+            e.conclusionNodeId === "node-2" &&
+            e.premiseNodeId === "node-1",
+        ),
+      ).toBe(true);
+      // レガシー接続も作成される
+      expect(
+        result.workspace.connections.some(
+          (c) => c.fromNodeId === "node-1" && c.toNodeId === "node-2",
+        ),
+      ).toBe(true);
+    });
+
+    it("connectSimplification fails for non-equivalent formulas", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "phi -> phi");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "psi -> psi");
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isLeft(result.validation)).toBe(true);
+    });
+
+    it("connectSimplification connects α-equivalent quantified formulas", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(
+        ws,
+        "axiom",
+        "Axiom",
+        { x: 0, y: 0 },
+        "all x. all y. P(x, y)",
+      );
+      ws = addNode(
+        ws,
+        "axiom",
+        "Axiom",
+        { x: 100, y: 0 },
+        "all a. all b. P(a, b)",
+      );
+      const result = connectSimplification(ws, "node-1", "node-2");
+      expect(Either.isRight(result.validation)).toBe(true);
     });
 
     it("restores chain when intermediate node is corrected", () => {

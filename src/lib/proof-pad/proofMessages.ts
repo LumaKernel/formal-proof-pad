@@ -137,6 +137,13 @@ export type ProofMessages = {
   /** `{variableName}` プレースホルダーを含む */
   readonly genVariablePrompt: string;
 
+  // --- 整理（Simplification）接続 ---
+  readonly connectSimplification: string;
+  readonly simplificationBannerSelectTarget: string;
+  readonly simplificationCancel: string;
+  readonly simplificationConnected: string;
+  readonly simplificationNoTargets: string;
+
   // --- マージ選択 ---
   readonly mergeBannerSelectTarget: string;
   readonly mergeCancel: string;
@@ -410,6 +417,14 @@ export const defaultProofMessages: ProofMessages = {
   saveToCollection: "Save to Collection",
   savedToCollection: "Saved to collection",
   genVariablePrompt: "Variable name:",
+
+  // Simplification connection
+  connectSimplification: "Connect as Simplification\u2026",
+  simplificationBannerSelectTarget:
+    "Click a simplification-equivalent node to connect",
+  simplificationCancel: "Cancel Simplification",
+  simplificationConnected: "Simplification connected",
+  simplificationNoTargets: "No simplification-equivalent nodes found",
 
   // Merge selection
   mergeBannerSelectTarget:
