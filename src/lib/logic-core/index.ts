@@ -63,6 +63,12 @@ export type { Formula as FormulaType } from "./formula";
 // ── Equality (structural + semantic) ────────────────────
 export { equalTerm, equalFormula, equivalentFormula } from "./equality";
 
+// ── Alpha-equivalence & simplification ─────────────────
+export {
+  alphaEqualFormula,
+  areSimplificationEquivalent,
+} from "./alphaEquivalence";
+
 // ── MetaVariable utilities ──────────────────────────────
 export {
   isFormulaMetaVariable,
