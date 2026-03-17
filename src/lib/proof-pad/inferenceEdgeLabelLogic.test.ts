@@ -10,6 +10,7 @@ import type {
   MPEdge,
   GenEdge,
   SubstitutionEdge,
+  SimplificationEdge,
   NdInferenceEdge,
   NdImplicationElimEdge,
   NdConjunctionIntroEdge,
@@ -62,6 +63,16 @@ describe("inferenceEdgeLabelLogic", () => {
         conclusionText: "",
       };
       expect(getInferenceEdgeBadgeColor(edge)).toContain("--color-badge-subst");
+    });
+
+    it("returns yellow-ish color for Simplification edge", () => {
+      const edge: SimplificationEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "simp-1",
+        premiseNodeId: "a",
+        conclusionText: "",
+      };
+      expect(getInferenceEdgeBadgeColor(edge)).toContain("--color-badge-simp");
     });
   });
 
@@ -209,6 +220,17 @@ describe("inferenceEdgeLabelLogic", () => {
         conclusionText: "",
       };
       expect(getPremiseRole(edge, "a")).toBe("premise");
+    });
+
+    it("returns 'premise' for Simplification edge", () => {
+      const edge: SimplificationEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "c",
+        premiseNodeId: "a",
+        conclusionText: "",
+      };
+      expect(getPremiseRole(edge, "a")).toBe("premise");
+      expect(getPremiseRole(edge, "x")).toBeUndefined();
     });
 
     it("returns 'left'/'right' for →E edge", () => {

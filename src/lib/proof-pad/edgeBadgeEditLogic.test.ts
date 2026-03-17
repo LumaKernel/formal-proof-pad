@@ -24,6 +24,16 @@ describe("edgeBadgeEditLogic", () => {
       expect(createEditStateFromEdge(mpEdge)).toBeUndefined();
     });
 
+    it("returns undefined for Simplification edge", () => {
+      const simpEdge: InferenceEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "n1",
+        premiseNodeId: "n2",
+        conclusionText: "φ",
+      };
+      expect(createEditStateFromEdge(simpEdge)).toBeUndefined();
+    });
+
     it("returns gen edit state for Gen edge", () => {
       const genEdge: InferenceEdge = {
         _tag: "gen",

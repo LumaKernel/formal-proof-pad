@@ -16,6 +16,7 @@ import {
   type MPEdge,
   type GenEdge,
   type SubstitutionEdge,
+  type SimplificationEdge,
   type NdImplicationIntroEdge,
   type NdImplicationElimEdge,
   type NdConjunctionIntroEdge,
@@ -300,6 +301,26 @@ describe("inferenceEdge", () => {
       };
       expect(getInferenceEdgePremiseNodeIds(edge)).toEqual([]);
     });
+
+    it("returns premise for SimplificationEdge", () => {
+      const edge: SimplificationEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "simp-1",
+        premiseNodeId: "a",
+        conclusionText: "",
+      };
+      expect(getInferenceEdgePremiseNodeIds(edge)).toEqual(["a"]);
+    });
+
+    it("returns empty for SimplificationEdge without premise", () => {
+      const edge: SimplificationEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "simp-1",
+        premiseNodeId: undefined,
+        conclusionText: "",
+      };
+      expect(getInferenceEdgePremiseNodeIds(edge)).toEqual([]);
+    });
   });
 
   describe("getInferenceEdgeLabel", () => {
@@ -367,6 +388,16 @@ describe("inferenceEdge", () => {
         conclusionText: "",
       };
       expect(getInferenceEdgeLabel(edge)).toBe("Subst");
+    });
+
+    it("returns 'Simp' for Simplification edge", () => {
+      const edge: SimplificationEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "simp-1",
+        premiseNodeId: "a",
+        conclusionText: "",
+      };
+      expect(getInferenceEdgeLabel(edge)).toBe("Simp");
     });
   });
 
@@ -580,6 +611,16 @@ describe("inferenceEdge", () => {
         conclusionNodeId: "subst-1",
         premiseNodeId: "a",
         entries: [],
+        conclusionText: "",
+      };
+      expect(isHilbertInferenceEdge(edge)).toBe(true);
+    });
+
+    it("returns true for SimplificationEdge", () => {
+      const edge: SimplificationEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "simp-1",
+        premiseNodeId: "a",
         conclusionText: "",
       };
       expect(isHilbertInferenceEdge(edge)).toBe(true);
@@ -875,6 +916,21 @@ describe("inferenceEdge", () => {
         premiseNodeId: "p1",
         entries: [],
         conclusionText: "p → p",
+      };
+      const result = remapEdgeNodeIds(edge, mapFn);
+      expect(result).toEqual({
+        ...edge,
+        conclusionNodeId: "new-c1",
+        premiseNodeId: "new-p1",
+      });
+    });
+
+    it("remaps Simplification edge node IDs", () => {
+      const edge: SimplificationEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "c1",
+        premiseNodeId: "p1",
+        conclusionText: "φ",
       };
       const result = remapEdgeNodeIds(edge, mapFn);
       expect(result).toEqual({

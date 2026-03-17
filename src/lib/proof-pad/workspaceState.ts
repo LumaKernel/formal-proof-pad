@@ -1761,6 +1761,9 @@ export function revalidateInferenceConclusions(
             }
             return node;
           }
+          case "simplification":
+            // 整理エッジは結論テキストを自動計算しない（手動入力）
+            return node;
         }
       }
 

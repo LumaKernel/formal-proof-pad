@@ -178,6 +178,21 @@ export type {
   SubstitutionApplicationResult,
 } from "./substitutionApplicationLogic";
 export {
+  validateSimplificationApplication,
+  validateSimplificationApplicationEffect,
+  computeSimplificationCompatibleNodeIds,
+  getSimplificationErrorMessage,
+  SimplificationPremiseMissing,
+  SimplificationPremiseParseError,
+  SimplificationConclusionParseError,
+  SimplificationNotEquivalent,
+} from "./simplificationApplicationLogic";
+export type {
+  SimplificationApplicationSuccess,
+  SimplificationApplicationError,
+  SimplificationApplicationResult,
+} from "./simplificationApplicationLogic";
+export {
   validateNormalizeApplicationEffect,
   validateNormalizeApplication,
   NormalizeParseError,
@@ -471,6 +486,7 @@ export type {
   MPEdge,
   GenEdge,
   SubstitutionEdge,
+  SimplificationEdge,
   HilbertInferenceEdge,
   NdImplicationIntroEdge,
   NdImplicationElimEdge,

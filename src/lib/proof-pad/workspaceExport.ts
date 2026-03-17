@@ -90,6 +90,7 @@ const ALL_INFERENCE_RULE_IDS = [
   "mp",
   "gen",
   "substitution",
+  "simplification",
   // ND
   "nd-implication-intro",
   "nd-implication-elim",
@@ -282,6 +283,14 @@ const SubstitutionEdgeSchema = Schema.Struct({
   conclusionNodeId: Schema.String,
   premiseNodeId: Schema.optional(Schema.String),
   entries: Schema.Array(SubstitutionEntrySchema),
+  conclusionText: Schema.String,
+});
+
+/** SimplificationEdgeのSchema */
+const SimplificationEdgeSchema = Schema.Struct({
+  _tag: Schema.Literal("simplification"),
+  conclusionNodeId: Schema.String,
+  premiseNodeId: Schema.optional(Schema.String),
   conclusionText: Schema.String,
 });
 
@@ -560,6 +569,7 @@ const InferenceEdgeSchema = Schema.Union(
   MPEdgeSchema,
   GenEdgeSchema,
   SubstitutionEdgeSchema,
+  SimplificationEdgeSchema,
   // ND
   NdImplicationIntroEdgeSchema,
   NdImplicationElimEdgeSchema,

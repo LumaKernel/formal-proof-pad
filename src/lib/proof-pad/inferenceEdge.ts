@@ -85,8 +85,27 @@ export type SubstitutionEdge = {
   readonly conclusionText: string;
 };
 
+/**
+ * Simplification（整理）エッジ。
+ * 2つのノードが整理等価（α等価 + 置換解決）であることを示す関係。
+ * 1つの前提ノードから結論ノードへの関係。結論テキストは自動計算しない。
+ */
+export type SimplificationEdge = {
+  readonly _tag: "simplification";
+  /** 結論ノードのID */
+  readonly conclusionNodeId: string;
+  /** 前提のノードID */
+  readonly premiseNodeId: string | undefined;
+  /** 結論の論理式テキスト（手動入力、自動計算しない） */
+  readonly conclusionText: string;
+};
+
 /** Hilbert系推論エッジのunion型 */
-export type HilbertInferenceEdge = MPEdge | GenEdge | SubstitutionEdge;
+export type HilbertInferenceEdge =
+  | MPEdge
+  | GenEdge
+  | SubstitutionEdge
+  | SimplificationEdge;
 
 // ─── 自然演繹(ND) 推論エッジ型 ─────────────────────────────
 
@@ -622,7 +641,10 @@ export type InferenceRuleId = InferenceEdge["_tag"];
 /** Hilbert系のエッジかどうかを判定する */
 export function isHilbertInferenceEdge(edge: InferenceEdge) {
   return (
-    edge._tag === "mp" || edge._tag === "gen" || edge._tag === "substitution"
+    edge._tag === "mp" ||
+    edge._tag === "gen" ||
+    edge._tag === "substitution" ||
+    edge._tag === "simplification"
   );
 }
 
@@ -719,6 +741,8 @@ export function getInferenceEdgeLabel(edge: InferenceEdge): string {
       return edge.entries.length > 0
         ? `Subst(${String(edge.entries.length) satisfies string})`
         : "Subst";
+    case "simplification":
+      return "Simp";
     // ND
     case "nd-implication-intro":
       return `→I [${String(edge.dischargedAssumptionId) satisfies string}]`;
@@ -817,6 +841,8 @@ export function getInferenceEdgePremiseNodeIds(
     case "gen":
       return edge.premiseNodeId !== undefined ? [edge.premiseNodeId] : [];
     case "substitution":
+      return edge.premiseNodeId !== undefined ? [edge.premiseNodeId] : [];
+    case "simplification":
       return edge.premiseNodeId !== undefined ? [edge.premiseNodeId] : [];
     // ND 1前提系
     case "nd-implication-intro":
@@ -978,6 +1004,12 @@ export function remapEdgeNodeIds(
         premiseNodeId: mapOpt(edge.premiseNodeId),
       };
     case "substitution":
+      return {
+        ...edge,
+        conclusionNodeId: mapRequired(edge.conclusionNodeId),
+        premiseNodeId: mapOpt(edge.premiseNodeId),
+      };
+    case "simplification":
       return {
         ...edge,
         conclusionNodeId: mapRequired(edge.conclusionNodeId),
