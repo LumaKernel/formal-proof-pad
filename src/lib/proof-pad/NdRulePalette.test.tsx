@@ -126,7 +126,7 @@ describe("NdRulePalette", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("各規則アイテムにrole=buttonはない（参照表示のみ）", () => {
+  it("各規則アイテムにrole=buttonとtabIndex=0がある（クリック可能）", () => {
     render(
       <NdRulePalette
         rules={nmRules}
@@ -135,7 +135,38 @@ describe("NdRulePalette", () => {
       />,
     );
     const ruleItem = screen.getByTestId("palette-rule-implication-intro");
-    expect(ruleItem.getAttribute("role")).toBeNull();
+    expect(ruleItem.getAttribute("role")).toBe("button");
+    expect(ruleItem.getAttribute("tabindex")).toBe("0");
+  });
+
+  it("規則アイテムクリックでonSelectRuleが呼ばれる", async () => {
+    const user = userEvent.setup();
+    const onSelectRule = vi.fn();
+    render(
+      <NdRulePalette
+        rules={nmRules}
+        onAddAssumption={() => {}}
+        onSelectRule={onSelectRule}
+        testId="palette"
+      />,
+    );
+    const ruleItem = screen.getByTestId("palette-rule-implication-intro");
+    await user.click(ruleItem);
+    expect(onSelectRule).toHaveBeenCalledWith("implication-intro");
+  });
+
+  it("選択中の規則がハイライトされる", () => {
+    render(
+      <NdRulePalette
+        rules={nmRules}
+        onAddAssumption={() => {}}
+        onSelectRule={() => {}}
+        selectedRuleId="implication-intro"
+        testId="palette"
+      />,
+    );
+    const ruleItem = screen.getByTestId("palette-rule-implication-intro");
+    expect(ruleItem.style.fontWeight).toBe("600");
   });
 
   it("「仮定を追加」ボタンにrole=buttonとtabIndex=0がある", () => {

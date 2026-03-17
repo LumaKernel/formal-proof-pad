@@ -57,6 +57,7 @@ export {
   applyGenAndConnect,
   applySubstitutionAndConnect,
   applyNormalize,
+  applyNdImplicationIntroAndConnect,
   applyTabRuleAndConnect,
   applyAtRuleAndConnect,
   applyScRuleAndConnect,

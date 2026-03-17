@@ -223,6 +223,11 @@ export type ProofMessages = {
   readonly ndPaletteHeader: string;
   readonly ndAddAssumption: string;
   readonly ndRulesSection: string;
+  /** `{ruleName}` プレースホルダーを含む */
+  readonly ndBannerSelectNode: string;
+  readonly ndCancel: string;
+  /** 打ち消す仮定の論理式プロンプト */
+  readonly ndDischargedFormulaPrompt: string;
   readonly tabPaletteHeader: string;
   readonly tabAddSequent: string;
   readonly tabRulesSection: string;
@@ -473,6 +478,9 @@ export const defaultProofMessages: ProofMessages = {
   ndPaletteHeader: "Natural Deduction",
   ndAddAssumption: "+ Add Assumption",
   ndRulesSection: "Rules",
+  ndBannerSelectNode: "Click a node to apply {ruleName}",
+  ndCancel: "Cancel",
+  ndDischargedFormulaPrompt: "Enter discharged assumption formula:",
   tabPaletteHeader: "Tableau Calculus",
   tabAddSequent: "+ Add Sequent",
   tabRulesSection: "Rules",

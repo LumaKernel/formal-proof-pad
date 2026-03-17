@@ -48,6 +48,7 @@ import {
   importProofFromCollection,
   addScriptNode,
   applyNormalize,
+  applyNdImplicationIntroAndConnect,
 } from "./workspaceState";
 import {
   hilbertDeduction,
@@ -839,6 +840,117 @@ describe("proofWorkspace", () => {
       // 正常に更新される（syncInferenceEdgesが走っても問題ない）
       expect(Either.isRight(result.validation)).toBe(true);
       expect(result.workspace.nodes[0]?.formulaText).toBe("P(a)");
+    });
+  });
+
+  describe("applyNdImplicationIntroAndConnect", () => {
+    it("applies →I to create φ→φ from φ premise with φ discharged", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "phi");
+      const result = applyNdImplicationIntroAndConnect(ws, "node-1", "phi", {
+        x: 0,
+        y: 150,
+      });
+      expect(Either.isRight(result.validation)).toBe(true);
+      const conclusionNode = result.workspace.nodes.find(
+        (n) => n.id === result.conclusionNodeId,
+      );
+      expect(conclusionNode?.formulaText).toBe("φ → φ");
+    });
+
+    it("creates NdImplicationIntroEdge with correct fields", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "phi");
+      const result = applyNdImplicationIntroAndConnect(ws, "node-1", "phi", {
+        x: 0,
+        y: 150,
+      });
+      const edge = result.workspace.inferenceEdges.find(
+        (e) => e._tag === "nd-implication-intro",
+      );
+      expect(edge).toBeDefined();
+      if (edge && edge._tag === "nd-implication-intro") {
+        expect(edge.premiseNodeId).toBe("node-1");
+        expect(edge.dischargedFormulaText).toBe("phi");
+        expect(edge.dischargedAssumptionId).toBe(1);
+        expect(edge.conclusionNodeId).toBe(result.conclusionNodeId);
+      }
+    });
+
+    it("returns error when premise has no formula", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "");
+      const result = applyNdImplicationIntroAndConnect(ws, "node-1", "phi", {
+        x: 0,
+        y: 150,
+      });
+      expect(Either.isLeft(result.validation)).toBe(true);
+    });
+
+    it("returns error when discharged formula is invalid", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "phi");
+      const result = applyNdImplicationIntroAndConnect(ws, "node-1", "-> bad", {
+        x: 0,
+        y: 150,
+      });
+      expect(Either.isLeft(result.validation)).toBe(true);
+    });
+
+    it("generates ¬φ when premise is ⊥", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "⊥");
+      const result = applyNdImplicationIntroAndConnect(ws, "node-1", "phi", {
+        x: 0,
+        y: 150,
+      });
+      expect(Either.isRight(result.validation)).toBe(true);
+      const conclusionNode = result.workspace.nodes.find(
+        (n) => n.id === result.conclusionNodeId,
+      );
+      expect(conclusionNode?.formulaText).toBe("¬φ");
+    });
+
+    it("increments assumptionId from existing edges", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "phi");
+      // First →I application
+      const result1 = applyNdImplicationIntroAndConnect(ws, "node-1", "phi", {
+        x: 0,
+        y: 150,
+      });
+      // Second →I application on the result
+      ws = result1.workspace;
+      ws = addNode(ws, "axiom", "Assumption", { x: 200, y: 0 }, "psi");
+      const result2 = applyNdImplicationIntroAndConnect(
+        ws,
+        result1.conclusionNodeId,
+        "psi",
+        { x: 100, y: 300 },
+      );
+      const edge2 = result2.workspace.inferenceEdges.find(
+        (e) =>
+          e._tag === "nd-implication-intro" &&
+          e.conclusionNodeId === result2.conclusionNodeId,
+      );
+      expect(edge2).toBeDefined();
+      if (edge2 && edge2._tag === "nd-implication-intro") {
+        expect(edge2.dischargedAssumptionId).toBe(2);
+      }
+    });
+
+    it("adds connection from premise to conclusion", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "phi");
+      const result = applyNdImplicationIntroAndConnect(ws, "node-1", "phi", {
+        x: 0,
+        y: 150,
+      });
+      const connection = result.workspace.connections.find(
+        (c) =>
+          c.fromNodeId === "node-1" && c.toNodeId === result.conclusionNodeId,
+      );
+      expect(connection).toBeDefined();
     });
   });
 

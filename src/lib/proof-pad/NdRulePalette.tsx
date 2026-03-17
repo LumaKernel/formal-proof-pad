@@ -25,8 +25,10 @@ export interface NdRulePaletteProps {
   readonly rules: readonly NdRulePaletteItem[];
   /** 仮定追加時のコールバック */
   readonly onAddAssumption: () => void;
-  /** 推論規則選択時のコールバック（将来のND-004で利用） */
+  /** 推論規則選択時のコールバック */
   readonly onSelectRule?: (ruleId: NdRuleId) => void;
+  /** 現在選択中の規則ID（ハイライト用） */
+  readonly selectedRuleId?: NdRuleId;
   /** data-testid */
   readonly testId?: string;
 }
@@ -97,6 +99,16 @@ const ruleItemStyle: Readonly<CSSProperties> = {
   gap: 4,
   fontSize: 11,
   color: "var(--color-text-secondary, #666)",
+  cursor: "pointer",
+  transitionProperty: "background",
+  transitionDuration: "150ms",
+};
+
+const ruleItemSelectedStyle: Readonly<CSSProperties> = {
+  ...ruleItemStyle,
+  background: "var(--color-paper-button-hover-bg, rgba(245, 240, 230, 0.95))",
+  fontWeight: 600,
+  color: "var(--color-text-primary, #333)",
 };
 
 // --- コンポーネント ---
@@ -104,12 +116,42 @@ const ruleItemStyle: Readonly<CSSProperties> = {
 function NdRuleItemView({
   rule,
   testId,
+  onClick,
+  isSelected,
 }: {
   readonly rule: NdRulePaletteItem;
   readonly testId?: string;
+  readonly onClick?: () => void;
+  readonly isSelected?: boolean;
 }) {
   return (
-    <div data-testid={testId} style={ruleItemStyle}>
+    <div
+      data-testid={testId}
+      style={isSelected ? ruleItemSelectedStyle : ruleItemStyle}
+      onClick={onClick}
+      onMouseEnter={(e) => {
+        if (!isSelected) {
+          Object.assign(e.currentTarget.style, {
+            background: addButtonHoverBg,
+          });
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isSelected) {
+          Object.assign(e.currentTarget.style, { background: "" });
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        /* v8 ignore start -- キーボード操作 */
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+        /* v8 ignore stop */
+      }}
+    >
       <span>{rule.displayName}</span>
     </div>
   );
@@ -118,6 +160,8 @@ function NdRuleItemView({
 export function NdRulePalette({
   rules,
   onAddAssumption,
+  onSelectRule,
+  selectedRuleId,
   testId,
 }: NdRulePaletteProps) {
   const msg = useProofMessages();
@@ -131,6 +175,8 @@ export function NdRulePalette({
         <NdRuleItemView
           key={rule.id}
           rule={rule}
+          onClick={onSelectRule ? () => onSelectRule(rule.id) : undefined}
+          isSelected={selectedRuleId === rule.id}
           testId={
             testId
               ? `${testId satisfies string}-rule-${rule.id satisfies string}`
@@ -138,7 +184,7 @@ export function NdRulePalette({
           }
         />
       )),
-    [rules, testId],
+    [rules, testId, onSelectRule, selectedRuleId],
   );
 
   if (rules.length === 0) {

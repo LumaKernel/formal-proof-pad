@@ -15,7 +15,11 @@ import {
 } from "../logic-core/deductionSystem";
 import type { Point } from "../infinite-canvas/types";
 import { type ProofNodeKind, getProofNodeKindLabel } from "./proofNodeUI";
-import type { InferenceEdge, InferenceRuleId } from "./inferenceEdge";
+import type {
+  InferenceEdge,
+  InferenceRuleId,
+  NdInferenceEdge,
+} from "./inferenceEdge";
 import {
   isHilbertInferenceEdge,
   isNdInferenceEdge,
@@ -40,7 +44,11 @@ import {
   validateNormalizeApplication,
   type NormalizeApplicationResult,
 } from "./normalizeApplicationLogic";
-import { validateNdApplication } from "./ndApplicationLogic";
+import {
+  validateNdApplication,
+  type NdApplicationResult,
+  isNdEfqValidResult,
+} from "./ndApplicationLogic";
 import {
   validateTabApplication,
   createTabEdgeFromResult,
@@ -930,6 +938,90 @@ export function applyNormalize(
   }
 
   return { workspace: state, validation };
+}
+
+// --- ND →I 適用（ノード作成 + InferenceEdge + 結論自動生成） ---
+
+/** ND →I 適用結果 */
+export type ApplyNdImplicationIntroResult = {
+  readonly workspace: WorkspaceState;
+  readonly conclusionNodeId: string;
+  readonly validation: NdApplicationResult;
+};
+
+/**
+ * 次の仮定IDを計算する。
+ * 既存の NdInferenceEdge から使用済みの仮定IDを走査し、最大値+1を返す。
+ */
+function computeNextAssumptionId(
+  inferenceEdges: readonly InferenceEdge[],
+): number {
+  let maxId = 0;
+  for (const edge of inferenceEdges) {
+    if (edge._tag === "nd-implication-intro") {
+      maxId = Math.max(maxId, edge.dischargedAssumptionId);
+    } else if (edge._tag === "nd-disjunction-elim") {
+      maxId = Math.max(
+        maxId,
+        edge.leftDischargedAssumptionId,
+        edge.rightDischargedAssumptionId,
+      );
+    } else if (edge._tag === "nd-existential-elim") {
+      maxId = Math.max(maxId, edge.dischargedAssumptionId);
+    }
+  }
+  return maxId + 1;
+}
+
+/**
+ * ND →I（含意導入）規則を適用し、derived結論ノードを作成する。
+ * InferenceEdge（NdImplicationIntroEdge）を追加し、前提→結論の関係を管理する。
+ *
+ * @param state 現在のワークスペース状態
+ * @param premiseNodeId 前提（ψ）ノードのID
+ * @param dischargedFormulaText 打ち消す仮定の論理式テキスト（φ）
+ * @param position 結論ノードの配置位置
+ * @returns 新しいワークスペース状態、結論ノードID、検証結果
+ */
+export function applyNdImplicationIntroAndConnect(
+  state: WorkspaceState,
+  premiseNodeId: string,
+  dischargedFormulaText: string,
+  position: Point,
+): ApplyNdImplicationIntroResult {
+  // 結論ノードを追加
+  let ws = addNode(state, "axiom", "→I", position);
+  const conclusionNodeId = `node-${String(state.nextNodeId) satisfies string}`;
+
+  // 仮定IDを計算
+  const assumptionId = computeNextAssumptionId(state.inferenceEdges);
+
+  // NdImplicationIntroEdge を追加
+  const ndEdge: NdInferenceEdge = {
+    _tag: "nd-implication-intro",
+    conclusionNodeId,
+    premiseNodeId,
+    dischargedFormulaText,
+    dischargedAssumptionId: assumptionId,
+    conclusionText: "",
+  };
+  ws = addInferenceEdge(ws, ndEdge);
+
+  // 互換性: レガシーの接続も追加
+  ws = addConnection(ws, premiseNodeId, "out", conclusionNodeId, "premise");
+
+  // ND適用を検証
+  const validation = validateNdApplication(ws, ndEdge);
+
+  // 成功時は結論テキストをderivedノードに設定
+  if (Either.isRight(validation)) {
+    const success = validation.right;
+    if (!isNdEfqValidResult(success)) {
+      ws = updateNodeFormulaText(ws, conclusionNodeId, success.conclusionText);
+    }
+  }
+
+  return { workspace: ws, conclusionNodeId, validation };
 }
 
 // --- TAB規則適用（ノード作成 + InferenceEdge + 前提シーケント自動生成） ---

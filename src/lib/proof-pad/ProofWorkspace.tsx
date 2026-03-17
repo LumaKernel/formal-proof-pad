@@ -71,8 +71,11 @@ import {
 } from "../logic-core/analyticTableau";
 import { getTabErrorMessage, isTabAxiomRule } from "./tabApplicationLogic";
 import { getAtErrorMessage } from "./atApplicationLogic";
-import type { ScRuleId } from "../logic-core/deductionSystem";
-import { getScRuleDisplayName } from "../logic-core/deductionSystem";
+import type { NdRuleId, ScRuleId } from "../logic-core/deductionSystem";
+import {
+  getNdRuleDisplayName,
+  getScRuleDisplayName,
+} from "../logic-core/deductionSystem";
 import { getScErrorMessage, isScAxiomRule } from "./scApplicationLogic";
 import {
   validateMPApplication,
@@ -158,6 +161,7 @@ import {
   updateInferenceEdgeGenVariableName,
   updateInferenceEdgeSubstitutionEntries,
   mergeSelectedNodes,
+  applyNdImplicationIntroAndConnect,
   applyTabRuleAndConnect,
   applyAtRuleAndConnect,
   applyScRuleAndConnect,
@@ -390,6 +394,15 @@ type MergeSelectionState =
     };
 
 // --- TAB規則選択モードの状態 ---
+
+// --- ND規則選択モードの状態 ---
+
+type NdSelectionState =
+  | { readonly phase: "idle" }
+  | {
+      readonly phase: "selecting-node";
+      readonly ruleId: NdRuleId;
+    };
 
 type TabSelectionState =
   | { readonly phase: "idle" }
@@ -884,6 +897,11 @@ export const ProofWorkspace = forwardRef<
 
   // マージ選択モード
   const [mergeSelection, setMergeSelection] = useState<MergeSelectionState>({
+    phase: "idle",
+  });
+
+  // ND規則選択モード
+  const [ndSelection, setNdSelection] = useState<NdSelectionState>({
     phase: "idle",
   });
 
@@ -1584,6 +1602,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "selecting-left" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setNdSelection({ phase: "idle" });
   }, []);
 
   const handleCancelMPSelection = useCallback(() => {
@@ -1655,6 +1674,7 @@ export const ProofWorkspace = forwardRef<
     });
     setMPSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setNdSelection({ phase: "idle" });
   }, [genVariableInput]);
 
   const handleCancelGenSelection = useCallback(() => {
@@ -1716,6 +1736,79 @@ export const ProofWorkspace = forwardRef<
     [mergeSelection, workspace, setWorkspace],
   );
 
+  // --- ND規則選択モードハンドラ ---
+
+  const handleStartNdRuleSelection = useCallback((ruleId: NdRuleId) => {
+    setNdSelection({ phase: "selecting-node", ruleId });
+    setMPSelection({ phase: "idle" });
+    setGenSelection({ phase: "idle" });
+    setMergeSelection({ phase: "idle" });
+    setTabSelection({ phase: "idle" });
+    setAtSelection({ phase: "idle" });
+    setScSelection({ phase: "idle" });
+  }, []);
+
+  const handleCancelNdSelection = useCallback(() => {
+    setNdSelection({ phase: "idle" });
+  }, []);
+
+  const handleNodeClickForNd = useCallback(
+    (nodeId: string) => {
+      /* v8 ignore start -- 防御的: ディスパッチャでphaseチェック済み */
+      if (ndSelection.phase !== "selecting-node") return;
+      /* v8 ignore stop */
+
+      const premiseNode = findNode(workspace, nodeId);
+      /* v8 ignore start -- 防御的 */
+      if (!premiseNode) return;
+      /* v8 ignore stop */
+
+      const { ruleId } = ndSelection;
+
+      // 現在は→Iのみサポート
+      if (ruleId === "implication-intro") {
+        // 打ち消す仮定のformulaTextをpromptで取得
+        const dischargedText = globalThis.prompt(
+          msg.ndDischargedFormulaPrompt,
+          premiseNode.formulaText,
+        );
+        if (dischargedText === null) {
+          setNdSelection({ phase: "idle" });
+          return;
+        }
+
+        const position: Point = {
+          x: premiseNode.position.x,
+          y: premiseNode.position.y + 150,
+        };
+
+        const result = applyNdImplicationIntroAndConnect(
+          workspace,
+          nodeId,
+          dischargedText,
+          position,
+        );
+
+        if (Either.isRight(result.validation)) {
+          setWorkspace(result.workspace);
+        } else {
+          const errorResult = result.validation.left;
+          globalThis.alert(
+            `ND rule error: ${errorResult._tag satisfies string}`,
+          );
+        }
+      } else {
+        // 他のND規則は未実装
+        globalThis.alert(
+          `ND rule "${getNdRuleDisplayName(ruleId) satisfies string}" is not yet implemented for click application`,
+        );
+      }
+
+      setNdSelection({ phase: "idle" });
+    },
+    [ndSelection, workspace, setWorkspace, msg],
+  );
+
   // --- TAB規則選択モードハンドラ ---
 
   const handleStartTabRuleSelection = useCallback((ruleId: TabRuleId) => {
@@ -1724,6 +1817,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setNdSelection({ phase: "idle" });
     setAtSelection({ phase: "idle" });
     setScSelection({ phase: "idle" });
   }, []);
@@ -1846,6 +1940,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setNdSelection({ phase: "idle" });
     setTabSelection({ phase: "idle" });
     setScSelection({ phase: "idle" });
   }, []);
@@ -1981,6 +2076,7 @@ export const ProofWorkspace = forwardRef<
     setMPSelection({ phase: "idle" });
     setGenSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
+    setNdSelection({ phase: "idle" });
     setTabSelection({ phase: "idle" });
     setAtSelection({ phase: "idle" });
   }, []);
@@ -2207,6 +2303,8 @@ export const ProofWorkspace = forwardRef<
         handleNodeClickForGen(nodeId);
       } else if (mergeSelection.phase !== "idle") {
         handleNodeClickForMerge(nodeId);
+      } else if (ndSelection.phase !== "idle") {
+        handleNodeClickForNd(nodeId);
       } else if (tabSelection.phase !== "idle") {
         handleNodeClickForTab(nodeId);
       } else if (atSelection.phase !== "idle") {
@@ -2220,12 +2318,14 @@ export const ProofWorkspace = forwardRef<
       mpSelection,
       genSelection,
       mergeSelection,
+      ndSelection,
       tabSelection,
       atSelection,
       scSelection,
       handleNodeClickForMP,
       handleNodeClickForGen,
       handleNodeClickForMerge,
+      handleNodeClickForNd,
       handleNodeClickForTab,
       handleNodeClickForAt,
       handleNodeClickForSc,
@@ -2236,6 +2336,7 @@ export const ProofWorkspace = forwardRef<
     mpSelection.phase !== "idle" ||
     genSelection.phase !== "idle" ||
     mergeSelection.phase !== "idle" ||
+    ndSelection.phase !== "idle" ||
     tabSelection.phase !== "idle" ||
     atSelection.phase !== "idle" ||
     scSelection.phase !== "idle";
@@ -4749,6 +4850,31 @@ export const ProofWorkspace = forwardRef<
         </div>
       ) : null}
 
+      {/* ND規則選択バナー */}
+      {ndSelection.phase !== "idle" ? (
+        <div
+          style={tabSelectionBannerStyle}
+          data-testid={
+            /* v8 ignore start -- V8集約アーティファクト */
+            testId ? `${testId satisfies string}-nd-banner` : undefined
+            /* v8 ignore stop */
+          }
+        >
+          <span>
+            {formatMessage(msg.ndBannerSelectNode, {
+              ruleName: getNdRuleDisplayName(ndSelection.ruleId),
+            })}
+          </span>
+          <button
+            type="button"
+            style={cancelButtonStyle}
+            onClick={handleCancelNdSelection}
+          >
+            {msg.ndCancel}
+          </button>
+        </div>
+      ) : null}
+
       {/* TAB規則選択バナー */}
       {tabSelection.phase !== "idle" ? (
         <div
@@ -5212,6 +5338,12 @@ export const ProofWorkspace = forwardRef<
         <NdRulePalette
           rules={availableNdRules}
           onAddAssumption={handleAddAssumption}
+          onSelectRule={handleStartNdRuleSelection}
+          selectedRuleId={
+            ndSelection.phase === "selecting-node"
+              ? ndSelection.ruleId
+              : undefined
+          }
           testId={
             /* v8 ignore start -- V8集約アーティファクト */
             testId ? `${testId satisfies string}-nd-rule-palette` : undefined
