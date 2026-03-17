@@ -48,7 +48,6 @@ export type ProofMessages = {
   readonly genErrorVariableEmpty: string;
   readonly genErrorNotEnabled: string;
   readonly genErrorGeneric: string;
-  /** `{variableName}` プレースホルダーを含む */
   readonly genBannerSelectPremise: string;
 
   // --- ゴール ---
@@ -334,7 +333,7 @@ export const defaultProofMessages: ProofMessages = {
   genErrorNotEnabled: "Gen is not enabled in this logic system",
   genErrorGeneric: "Generalization failed",
   genBannerSelectPremise:
-    "Click the premise (\u03C6) to generalize over {variableName}",
+    "Click the premise (\u03C6) to apply Gen",
 
   // Goal
   goalLabel: "Goal:",

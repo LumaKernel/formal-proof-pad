@@ -83,7 +83,10 @@ import {
   computeMPLeftCompatibleNodeIds,
   isNodeImplication,
 } from "./mpApplicationLogic";
-import { validateGenApplication } from "./genApplicationLogic";
+import {
+  validateGenApplication,
+  extractFreeVariablesFromNode,
+} from "./genApplicationLogic";
 import {
   validateSubstitutionApplication,
   extractSubstitutionTargetsFromText,
@@ -379,10 +382,7 @@ type MPSelectionState =
 
 type GenSelectionState =
   | { readonly phase: "idle" }
-  | {
-      readonly phase: "selecting-premise";
-      readonly variableName: string;
-    };
+  | { readonly phase: "selecting-premise" };
 
 // --- マージ選択モードの状態 ---
 
@@ -943,9 +943,6 @@ export const ProofWorkspace = forwardRef<
     readonly startX: number;
     readonly startWidth: number;
   } | null>(null);
-
-  // Gen変数名入力
-  const [genVariableInput, setGenVariableInput] = useState("");
 
   // ノード選択状態（コピペ・削除用）
   const [selectedNodeIds, setSelectedNodeIds] = useState<ReadonlySet<string>>(
@@ -1667,15 +1664,11 @@ export const ProofWorkspace = forwardRef<
   // --- Gen選択モードハンドラ ---
 
   const handleStartGenSelection = useCallback(() => {
-    if (genVariableInput.trim() === "") return;
-    setGenSelection({
-      phase: "selecting-premise",
-      variableName: genVariableInput.trim(),
-    });
+    setGenSelection({ phase: "selecting-premise" });
     setMPSelection({ phase: "idle" });
     setMergeSelection({ phase: "idle" });
     setNdSelection({ phase: "idle" });
-  }, [genVariableInput]);
+  }, []);
 
   const handleCancelGenSelection = useCallback(() => {
     setGenSelection({ phase: "idle" });
@@ -1687,27 +1680,12 @@ export const ProofWorkspace = forwardRef<
       if (genSelection.phase !== "selecting-premise") return;
       /* v8 ignore stop */
 
-      const premiseNode = findNode(workspace, nodeId);
-      /* v8 ignore start -- 防御的: クリックされたノードはワークスペースに存在する */
-      if (!premiseNode) return;
-      /* v8 ignore stop */
-
-      const genPosition: Point = {
-        x: premiseNode.position.x,
-        y: premiseNode.position.y + 150,
-      };
-
-      const result = applyGenAndConnect(
-        workspace,
-        nodeId,
-        genSelection.variableName,
-        genPosition,
-      );
-
-      setWorkspace(result.workspace);
+      // ノードクリック → Genプロンプトモーダルを開く（変数名入力）
+      setGenPromptNodeId(nodeId);
+      setGenPromptInput("");
       setGenSelection({ phase: "idle" });
     },
-    [genSelection, workspace, setWorkspace],
+    [genSelection],
   );
 
   // --- マージ選択モードハンドラ ---
@@ -4619,25 +4597,6 @@ export const ProofWorkspace = forwardRef<
         ) : null}
         {isHilbertStyle && workspace.system.generalization ? (
           <>
-            <input
-              type="text"
-              value={genVariableInput}
-              onChange={(e) => setGenVariableInput(e.target.value)}
-              placeholder="x"
-              style={{
-                ...genVariableInputStyle,
-                ...(genSelection.phase !== "idle"
-                  ? { border: "1px solid var(--color-gen-button, #9b59b6)" }
-                  : {}),
-              }}
-              data-testid={
-                /* v8 ignore start -- V8集約アーティファクト */
-                testId
-                  ? `${testId satisfies string}-gen-variable-input`
-                  : undefined
-                /* v8 ignore stop */
-              }
-            />
             <button
               type="button"
               style={
@@ -4814,11 +4773,7 @@ export const ProofWorkspace = forwardRef<
             /* v8 ignore stop */
           }
         >
-          <span>
-            {formatMessage(msg.genBannerSelectPremise, {
-              variableName: genSelection.variableName,
-            })}
-          </span>
+          <span>{msg.genBannerSelectPremise}</span>
           <button
             type="button"
             style={cancelButtonStyle}
@@ -4952,7 +4907,7 @@ export const ProofWorkspace = forwardRef<
         </div>
       ) : null}
 
-      {/* Gen変数名入力プロンプト（コンテキストメニューから起動） */}
+      {/* Gen変数名入力プロンプト（ヘッダーボタン/コンテキストメニューから起動） */}
       {genPromptNodeId !== null ? (
         <div
           style={genSelectionBannerStyle}
@@ -4966,6 +4921,53 @@ export const ProofWorkspace = forwardRef<
           onClick={(e) => e.stopPropagation()}
         >
           <span>{msg.genVariablePrompt}</span>
+          {/* 自由変数サジェストチップ */}
+          {(() => {
+            const node = findNode(workspace, genPromptNodeId);
+            if (!node) return null;
+            const freeVars = extractFreeVariablesFromNode(node);
+            if (freeVars.length === 0) return null;
+            return (
+              <span
+                style={{ display: "inline-flex", gap: 4, marginRight: 4 }}
+                data-testid={
+                  /* v8 ignore start -- V8集約アーティファクト */
+                  testId
+                    ? `${testId satisfies string}-gen-prompt-suggestions`
+                    : "gen-prompt-suggestions"
+                  /* v8 ignore stop */
+                }
+              >
+                {freeVars.map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    style={{
+                      ...cancelButtonStyle,
+                      padding: "2px 8px",
+                      fontSize: "0.85em",
+                      background:
+                        genPromptInput === v
+                          ? "rgba(255,255,255,0.4)"
+                          : "rgba(255,255,255,0.15)",
+                      border: "1px solid rgba(255,255,255,0.5)",
+                      borderRadius: 12,
+                    }}
+                    onClick={() => setGenPromptInput(v)}
+                    data-testid={
+                      /* v8 ignore start -- V8集約アーティファクト */
+                      testId
+                        ? `${testId satisfies string}-gen-suggest-${v satisfies string}`
+                        : `gen-suggest-${v satisfies string}`
+                      /* v8 ignore stop */
+                    }
+                  >
+                    {v}
+                  </button>
+                ))}
+              </span>
+            );
+          })()}
           <input
             type="text"
             value={genPromptInput}

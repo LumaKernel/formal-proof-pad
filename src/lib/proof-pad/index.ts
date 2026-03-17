@@ -147,6 +147,7 @@ export {
   GenVariableNameEmpty,
   GenGeneralizationNotEnabled,
   GenRuleError,
+  extractFreeVariablesFromNode,
 } from "./genApplicationLogic";
 export type {
   GenApplicationSuccess,

@@ -9,11 +9,13 @@
 
 import { Data, Effect, Either } from "effect";
 import type { Formula } from "../logic-core/formula";
+import { freeVariablesInFormula } from "../logic-core/freeVariables";
 import { applyGeneralization } from "../logic-core/inferenceRule";
 import { termVariable } from "../logic-core/term";
 import { formatFormula } from "../logic-lang/formatUnicode";
+import { parseString } from "../logic-lang/parser";
 import { parseNodeFormula } from "./mpApplicationLogic";
-import type { WorkspaceState } from "./workspaceState";
+import type { WorkspaceState, WorkspaceNode } from "./workspaceState";
 
 // --- Genノードの検証結果型 ---
 
@@ -173,4 +175,22 @@ export function getGenErrorMessage(error: GenApplicationError): string {
     case "GenRuleError":
       return error.message;
   }
+}
+
+// --- 自由変数抽出 ---
+
+/**
+ * ノードの論理式から自由変数名をソート済み配列で返す。
+ * パース失敗時は空配列。
+ *
+ * Gen適用プロンプトでの変数サジェストに使用。
+ */
+export function extractFreeVariablesFromNode(
+  node: WorkspaceNode,
+): readonly string[] {
+  const text = node.formulaText.trim();
+  if (text === "") return [];
+  const result = parseString(text);
+  if (Either.isLeft(result)) return [];
+  return [...freeVariablesInFormula(result.right)].sort();
 }

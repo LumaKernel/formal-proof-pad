@@ -62,9 +62,6 @@ describe("defaultProofMessages", () => {
   });
 
   it("should include placeholder in template messages", () => {
-    expect(defaultProofMessages.genBannerSelectPremise).toContain(
-      "{variableName}",
-    );
     expect(defaultProofMessages.selectionCount).toContain("{count}");
     expect(defaultProofMessages.axiomIdentifiedTooltip).toContain(
       "{axiomName}",
@@ -410,11 +407,8 @@ describe("formatMessage", () => {
   });
 
   it("should format genBannerSelectPremise correctly", () => {
-    const result = formatMessage(defaultProofMessages.genBannerSelectPremise, {
-      variableName: "x",
-    });
-    expect(result).toContain("x");
-    expect(result).not.toContain("{variableName}");
+    // genBannerSelectPremise no longer uses placeholders (variable is entered after node selection)
+    expect(defaultProofMessages.genBannerSelectPremise).toContain("Gen");
   });
 
   it("should format selectionCount correctly", () => {

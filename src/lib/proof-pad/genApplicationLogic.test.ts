@@ -10,6 +10,7 @@ import {
   validateGenApplicationEffect,
   validateGenApplication,
   getGenErrorMessage,
+  extractFreeVariablesFromNode,
   GenPremiseMissing,
   GenPremiseParseError,
   GenVariableNameEmpty,
@@ -339,6 +340,39 @@ describe("genApplicationLogic", () => {
           new GenRuleError({ message: "Generalization failed" }),
         ),
       ).toBe("Generalization failed");
+    });
+  });
+
+  describe("extractFreeVariablesFromNode", () => {
+    it("returns empty array for empty formulaText", () => {
+      const node = { id: "n1", formulaText: "", kind: "axiom" as const, label: "", position: { x: 0, y: 0 } };
+      expect(extractFreeVariablesFromNode(node)).toEqual([]);
+    });
+
+    it("returns empty array for unparseable formulaText", () => {
+      const node = { id: "n1", formulaText: "invalid!!!", kind: "axiom" as const, label: "", position: { x: 0, y: 0 } };
+      expect(extractFreeVariablesFromNode(node)).toEqual([]);
+    });
+
+    it("returns empty array for formula with no free variables", () => {
+      const node = { id: "n1", formulaText: "phi -> psi", kind: "axiom" as const, label: "", position: { x: 0, y: 0 } };
+      // phi, psi are meta variables (proposition variables), not term variables
+      expect(extractFreeVariablesFromNode(node)).toEqual([]);
+    });
+
+    it("returns sorted free variables from predicate formula", () => {
+      const node = { id: "n1", formulaText: "P(y) -> Q(x)", kind: "axiom" as const, label: "", position: { x: 0, y: 0 } };
+      expect(extractFreeVariablesFromNode(node)).toEqual(["x", "y"]);
+    });
+
+    it("excludes bound variables", () => {
+      const node = { id: "n1", formulaText: "all x. P(x, y)", kind: "axiom" as const, label: "", position: { x: 0, y: 0 } };
+      expect(extractFreeVariablesFromNode(node)).toEqual(["y"]);
+    });
+
+    it("handles whitespace-only formulaText", () => {
+      const node = { id: "n1", formulaText: "   ", kind: "axiom" as const, label: "", position: { x: 0, y: 0 } };
+      expect(extractFreeVariablesFromNode(node)).toEqual([]);
     });
   });
 });

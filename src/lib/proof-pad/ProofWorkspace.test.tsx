@@ -1438,7 +1438,7 @@ describe("ProofWorkspace", () => {
   });
 
   describe("Gen button and selection (predicate logic)", () => {
-    it("renders Gen button and variable input for predicate logic system", () => {
+    it("renders Gen button for predicate logic system", () => {
       render(
         <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
       );
@@ -1446,9 +1446,6 @@ describe("ProofWorkspace", () => {
       expect(screen.getByTestId("workspace-gen-button")).toHaveTextContent(
         "Apply Gen",
       );
-      expect(
-        screen.getByTestId("workspace-gen-variable-input"),
-      ).toBeInTheDocument();
     });
 
     it("does not render Gen button for propositional logic system", () => {
@@ -1456,36 +1453,15 @@ describe("ProofWorkspace", () => {
       expect(
         screen.queryByTestId("workspace-gen-button"),
       ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId("workspace-gen-variable-input"),
-      ).not.toBeInTheDocument();
     });
 
-    it("does not enter Gen selection when variable is empty", async () => {
+    it("enters Gen selection mode when Gen button is clicked", async () => {
       const user = userEvent.setup();
       render(
         <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
       );
 
-      // Click Gen without typing variable name
-      await user.click(screen.getByTestId("workspace-gen-button"));
-
-      // Banner should NOT appear
-      expect(
-        screen.queryByTestId("workspace-gen-banner"),
-      ).not.toBeInTheDocument();
-    });
-
-    it("enters Gen selection mode when variable is set and Gen is clicked", async () => {
-      const user = userEvent.setup();
-      render(
-        <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
-      );
-
-      // Type variable name
-      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
-
-      // Click Gen button
+      // Click Gen button — enters node selection mode directly
       await user.click(screen.getByTestId("workspace-gen-button"));
 
       // Banner should appear
@@ -1493,7 +1469,6 @@ describe("ProofWorkspace", () => {
       expect(screen.getByTestId("workspace-gen-banner")).toHaveTextContent(
         "Click the premise",
       );
-      expect(screen.getByTestId("workspace-gen-banner")).toHaveTextContent("x");
 
       // Button should say "Cancel Gen"
       expect(screen.getByTestId("workspace-gen-button")).toHaveTextContent(
@@ -1507,7 +1482,6 @@ describe("ProofWorkspace", () => {
         <ProofWorkspace system={predicateLogicSystem} testId="workspace" />,
       );
 
-      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
       await user.click(screen.getByTestId("workspace-gen-button"));
       expect(screen.getByTestId("workspace-gen-banner")).toBeInTheDocument();
 
@@ -1521,7 +1495,7 @@ describe("ProofWorkspace", () => {
       );
     });
 
-    it("creates Gen node when premise is selected", async () => {
+    it("opens Gen prompt when premise node is clicked in Gen mode", async () => {
       const user = userEvent.setup();
 
       render(
@@ -1534,19 +1508,47 @@ describe("ProofWorkspace", () => {
         />,
       );
 
-      // Type variable name and start Gen selection
-      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
+      // Start Gen selection and click premise
       await user.click(screen.getByTestId("workspace-gen-button"));
-
-      // Click premise node
       await user.click(screen.getByTestId("proof-node-node-1"));
 
-      // Banner should disappear
+      // Gen prompt banner should appear with variable input
       await waitFor(() => {
         expect(
-          screen.queryByTestId("workspace-gen-banner"),
-        ).not.toBeInTheDocument();
+          screen.getByTestId("workspace-gen-prompt-banner"),
+        ).toBeInTheDocument();
       });
+      expect(
+        screen.getByTestId("workspace-gen-prompt-input"),
+      ).toBeInTheDocument();
+    });
+
+    it("creates Gen node via prompt confirm", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <StatefulWorkspace
+          initialWorkspace={(() => {
+            let ws = createEmptyWorkspace(predicateLogicSystem);
+            ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi");
+            return ws;
+          })()}
+        />,
+      );
+
+      // Start Gen selection → click premise → prompt appears
+      await user.click(screen.getByTestId("workspace-gen-button"));
+      await user.click(screen.getByTestId("proof-node-node-1"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("workspace-gen-prompt-banner"),
+        ).toBeInTheDocument();
+      });
+
+      // Type variable name and confirm
+      await user.type(screen.getByTestId("workspace-gen-prompt-input"), "x");
+      await user.click(screen.getByTestId("workspace-gen-prompt-confirm"));
 
       // Gen node should be created
       await waitFor(() => {
@@ -1567,10 +1569,16 @@ describe("ProofWorkspace", () => {
         />,
       );
 
-      // Apply Gen
-      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
+      // Apply Gen via prompt
       await user.click(screen.getByTestId("workspace-gen-button"));
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("workspace-gen-prompt-input"),
+        ).toBeInTheDocument();
+      });
+      await user.type(screen.getByTestId("workspace-gen-prompt-input"), "x");
+      await user.click(screen.getByTestId("workspace-gen-prompt-confirm"));
 
       // Gen node should show success status
       await waitFor(() => {
@@ -1590,7 +1598,6 @@ describe("ProofWorkspace", () => {
       );
 
       // Start Gen selection
-      await user.type(screen.getByTestId("workspace-gen-variable-input"), "x");
       await user.click(screen.getByTestId("workspace-gen-button"));
       expect(screen.getByTestId("workspace-gen-banner")).toBeInTheDocument();
 
