@@ -15048,3 +15048,21 @@
   - noLib: true + addExtraLib パターンはより厳密だが、lib: ['es2020'] で十分な場合が多い
   - Monaco Editor のテストはjsdomでは困難、ブラウザでの目視確認が実質的なテスト
 ---
+
+## 2026-03-17 - ND →Iクリック適用UI + nd-01完全フローストーリー
+- ND →I（含意導入）規則をパレットクリックで適用するUIを実装
+- nd-01（φ→φ）クエスト完遂フローをStorybookストーリーで保証
+- 実装内容:
+  - workspaceState.ts: `applyNdImplicationIntroAndConnect` + `computeNextAssumptionId` 追加
+  - NdRulePalette.tsx: 規則アイテムにクリック・選択UIを追加
+  - ProofWorkspace.tsx: ND選択フロー（パレットクリック→ノード選択→prompt入力→結論ノード生成）
+  - proofMessages.ts: ND関連メッセージキー3件追加
+  - WorkspacePageView.stories.tsx: `QuestCompleteNd01FullFlow` ストーリー追加
+- テスト: workspaceState.test.ts に7件、NdRulePalette.test.tsx に2件追加
+- カバレッジ: Stmts 99.95%, Branch 99.77%, Funcs 90.41%, Lines 99.95%
+- **今後のイテレーションへの学び:**
+  - ND規則適用UIのパターン: パレットクリック→NdSelectionState→ノードクリック→prompt→applyAndConnect。Tab/AT/SC/NDすべて同じselection state machineパターン
+  - `globalThis.prompt` をStorybookのplay関数でモックすることで、ユーザー入力を伴うフローをテスト可能
+  - `computeNextAssumptionId` は既存エッジを走査して最大IDを取得。→I, ∨E, ∃Eのedge typeを考慮
+  - ストーリーURLパターン: title "Pages/Workspace" → `pages-workspace--story-name`（WorkspacePageView部分は含まない）
+---
