@@ -15154,3 +15154,13 @@
   - `findMergeTargets`等のシグネチャ変更はProofWorkspace.tsx(3箇所)に波及する
   - `wouldMergeCreateLoop`は純粋関数でノード情報不要（エッジのみで判定可能）
 ---
+
+## 2026-03-17T20:20 - logic-core (α等価性)
+- `alphaEquivalence.ts`: α等価性（`alphaEqualFormula`）と整理等価性（`areSimplificationEquivalent`）を実装
+- `alphaEquivalence.test.ts`: 41テストケース（α等価性、置換解決、FreeVariableAbsence解決、対称性、ネスト・シャドーイング）
+- `index.ts`: 公開APIにエクスポート追加
+- カバレッジ: Stmts 99.91%, Branch 99.67%, Funcs 90.40%, Lines 99.94%（ベースラインと同等）
+- **今後のイテレーションへの学び:**
+  - `normalizeFormula` が FormulaSubstitution / FreeVariableAbsence を解決するので、整理等価性は normalize → α等価比較の2段階で実現できる
+  - de Bruijn レベルベースの束縛変数比較パターンは他の再帰的論理式走査にも応用可能
+---
