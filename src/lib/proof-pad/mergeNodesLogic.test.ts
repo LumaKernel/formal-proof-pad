@@ -5,6 +5,7 @@ import {
   canMergeSelectedNodes,
   findMergeTargets,
   areFormulasEquivalent,
+  wouldMergeCreateLoop,
 } from "./mergeNodesLogic";
 import type { WorkspaceNode, WorkspaceConnection } from "./workspaceState";
 import type { InferenceEdge } from "./inferenceEdge";
@@ -566,7 +567,7 @@ describe("mergeNodes", () => {
 describe("findMergeableGroups", () => {
   it("同一テキストの2ノードがグループとして検出される", () => {
     const nodes = [makeNode("n1", "phi"), makeNode("n2", "phi")];
-    const groups = findMergeableGroups(["n1", "n2"], nodes, emptyProtected);
+    const groups = findMergeableGroups(["n1", "n2"], nodes, emptyProtected, []);
     expect(groups).toHaveLength(1);
     expect(groups[0].leaderNodeId).toBe("n1");
     expect(groups[0].absorbedNodeIds).toEqual(["n2"]);
@@ -574,7 +575,7 @@ describe("findMergeableGroups", () => {
 
   it("異なるテキストのノードはグループにならない", () => {
     const nodes = [makeNode("n1", "phi"), makeNode("n2", "psi")];
-    const groups = findMergeableGroups(["n1", "n2"], nodes, emptyProtected);
+    const groups = findMergeableGroups(["n1", "n2"], nodes, emptyProtected, []);
     expect(groups).toHaveLength(0);
   });
 
@@ -588,6 +589,7 @@ describe("findMergeableGroups", () => {
       ["n1", "n2", "n3"],
       nodes,
       emptyProtected,
+      [],
     );
     expect(groups).toHaveLength(1);
     expect(groups[0].leaderNodeId).toBe("n1");
@@ -605,19 +607,25 @@ describe("findMergeableGroups", () => {
       ["n1", "n2", "n3", "n4"],
       nodes,
       emptyProtected,
+      [],
     );
     expect(groups).toHaveLength(2);
   });
 
   it("1ノードしかない場合は空", () => {
     const nodes = [makeNode("n1", "phi")];
-    const groups = findMergeableGroups(["n1"], nodes, emptyProtected);
+    const groups = findMergeableGroups(["n1"], nodes, emptyProtected, []);
     expect(groups).toHaveLength(0);
   });
 
   it("保護ノードはグループから除外される", () => {
     const nodes = [makeNode("n1", "phi"), makeNode("n2", "phi")];
-    const groups = findMergeableGroups(["n1", "n2"], nodes, new Set(["n2"]));
+    const groups = findMergeableGroups(
+      ["n1", "n2"],
+      nodes,
+      new Set(["n2"]),
+      [],
+    );
     // n2が除外されるのでn1だけでグループにならない
     expect(groups).toHaveLength(0);
   });
@@ -628,6 +636,7 @@ describe("findMergeableGroups", () => {
       ["n1", "nonexistent"],
       nodes,
       emptyProtected,
+      [],
     );
     expect(groups).toHaveLength(0);
   });
@@ -645,32 +654,32 @@ describe("findMergeTargets", () => {
       makeNode("n3", "psi"),
       makeNode("n4", "phi"),
     ];
-    const targets = findMergeTargets("n1", nodes, emptyProtected);
+    const targets = findMergeTargets("n1", nodes, emptyProtected, []);
     expect(targets).toEqual(new Set(["n2", "n4"]));
   });
 
   it("ソースノード自身は含まない", () => {
     const nodes = [makeNode("n1", "phi"), makeNode("n2", "phi")];
-    const targets = findMergeTargets("n1", nodes, emptyProtected);
+    const targets = findMergeTargets("n1", nodes, emptyProtected, []);
     expect(targets.has("n1")).toBe(false);
     expect(targets.has("n2")).toBe(true);
   });
 
   it("同一formulaTextが存在しない場合は空セット", () => {
     const nodes = [makeNode("n1", "phi"), makeNode("n2", "psi")];
-    const targets = findMergeTargets("n1", nodes, emptyProtected);
+    const targets = findMergeTargets("n1", nodes, emptyProtected, []);
     expect(targets.size).toBe(0);
   });
 
   it("ソースノードが存在しない場合は空セット", () => {
     const nodes = [makeNode("n1", "phi")];
-    const targets = findMergeTargets("nonexistent", nodes, emptyProtected);
+    const targets = findMergeTargets("nonexistent", nodes, emptyProtected, []);
     expect(targets.size).toBe(0);
   });
 
   it("ソースノードが保護されている場合は空セット", () => {
     const nodes = [makeNode("n1", "phi"), makeNode("n2", "phi")];
-    const targets = findMergeTargets("n1", nodes, new Set(["n1"]));
+    const targets = findMergeTargets("n1", nodes, new Set(["n1"]), []);
     expect(targets.size).toBe(0);
   });
 
@@ -680,13 +689,13 @@ describe("findMergeTargets", () => {
       makeNode("n2", "phi"),
       makeNode("n3", "phi"),
     ];
-    const targets = findMergeTargets("n1", nodes, new Set(["n2"]));
+    const targets = findMergeTargets("n1", nodes, new Set(["n2"]), []);
     expect(targets).toEqual(new Set(["n3"]));
   });
 
   it("1ノードしかない場合は空セット", () => {
     const nodes = [makeNode("n1", "phi")];
-    const targets = findMergeTargets("n1", nodes, emptyProtected);
+    const targets = findMergeTargets("n1", nodes, emptyProtected, []);
     expect(targets.size).toBe(0);
   });
 });
@@ -696,21 +705,23 @@ describe("findMergeTargets", () => {
 describe("canMergeSelectedNodes", () => {
   it("マージ可能な場合trueを返す", () => {
     const nodes = [makeNode("n1", "phi"), makeNode("n2", "phi")];
-    expect(canMergeSelectedNodes(["n1", "n2"], nodes, emptyProtected)).toBe(
+    expect(canMergeSelectedNodes(["n1", "n2"], nodes, emptyProtected, [])).toBe(
       true,
     );
   });
 
   it("マージ不可の場合falseを返す", () => {
     const nodes = [makeNode("n1", "phi"), makeNode("n2", "psi")];
-    expect(canMergeSelectedNodes(["n1", "n2"], nodes, emptyProtected)).toBe(
+    expect(canMergeSelectedNodes(["n1", "n2"], nodes, emptyProtected, [])).toBe(
       false,
     );
   });
 
   it("1ノードの場合falseを返す", () => {
     const nodes = [makeNode("n1", "phi")];
-    expect(canMergeSelectedNodes(["n1"], nodes, emptyProtected)).toBe(false);
+    expect(canMergeSelectedNodes(["n1"], nodes, emptyProtected, [])).toBe(
+      false,
+    );
   });
 });
 
@@ -800,6 +811,7 @@ describe("AST等価マージ", () => {
       ["n1", "n2", "n3"],
       nodes,
       emptyProtected,
+      [],
     );
     expect(groups).toHaveLength(1);
     expect(groups[0].leaderNodeId).toBe("n1");
@@ -812,7 +824,7 @@ describe("AST等価マージ", () => {
       makeNode("n2", "(phi -> psi)"),
       makeNode("n3", "chi"),
     ];
-    const targets = findMergeTargets("n1", nodes, emptyProtected);
+    const targets = findMergeTargets("n1", nodes, emptyProtected, []);
     expect(targets).toEqual(new Set(["n2"]));
   });
 
@@ -821,8 +833,292 @@ describe("AST等価マージ", () => {
       makeNode("n1", "phi -> psi"),
       makeNode("n2", "(phi -> psi)"),
     ];
-    expect(canMergeSelectedNodes(["n1", "n2"], nodes, emptyProtected)).toBe(
+    expect(canMergeSelectedNodes(["n1", "n2"], nodes, emptyProtected, [])).toBe(
       true,
     );
+  });
+});
+
+// --- wouldMergeCreateLoop ---
+
+describe("wouldMergeCreateLoop", () => {
+  it("自己ループ: AがBに依存 → BをAにマージすると自己ループ", () => {
+    // A depends on B (B is premise of edge concluding A)
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "mp",
+        conclusionNodeId: "A",
+        leftPremiseNodeId: "B",
+        rightPremiseNodeId: undefined,
+        conclusionText: "phi",
+      },
+    ];
+    // merge B into A: B is absorbed, A is leader
+    // After merge: edge has A as premise and A as conclusion → self-loop
+    expect(wouldMergeCreateLoop("A", ["B"], edges)).toBe(true);
+  });
+
+  it("間接ループ: A→B→C (A depends on B, B depends on C) → CをAにマージするとサイクル", () => {
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "B",
+        premiseNodeId: "A",
+        variableName: "x",
+        conclusionText: "phi",
+      },
+      {
+        _tag: "gen",
+        conclusionNodeId: "C",
+        premiseNodeId: "B",
+        variableName: "y",
+        conclusionText: "psi",
+      },
+    ];
+    // A is premise for B, B is premise for C
+    // merge C into A: C is absorbed, A is leader
+    // After: edge for C is deleted (absorbed as conclusion)
+    // edge for B remains with A as premise
+    // No loop: A→B, that's it. C's edge is deleted.
+    // Wait — C is conclusion so that edge is deleted. B's edge: B concludes from A.
+    // No cycle.
+    expect(wouldMergeCreateLoop("A", ["C"], edges)).toBe(false);
+  });
+
+  it("間接ループ: A is premise → B, C is premise → A → CをAにマージするとサイクル", () => {
+    // C → A → B (C is premise for A, A is premise for B)
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "A",
+        premiseNodeId: "C",
+        variableName: "x",
+        conclusionText: "phi",
+      },
+      {
+        _tag: "gen",
+        conclusionNodeId: "B",
+        premiseNodeId: "A",
+        variableName: "y",
+        conclusionText: "psi",
+      },
+    ];
+    // merge C into A: C is absorbed, A is leader
+    // After: edge concluding A has premise C→A replaced to A→A (self-loop)
+    expect(wouldMergeCreateLoop("A", ["C"], edges)).toBe(true);
+  });
+
+  it("ループなし: 独立したノードのマージ", () => {
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "X",
+        premiseNodeId: "A",
+        variableName: "x",
+        conclusionText: "phi",
+      },
+    ];
+    // merge B into A: B has no edges → no loop
+    expect(wouldMergeCreateLoop("A", ["B"], edges)).toBe(false);
+  });
+
+  it("ループなし: 吸収ノードがリーダーの下流にある（前提ではない）", () => {
+    // A is premise for B
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "B",
+        premiseNodeId: "A",
+        variableName: "x",
+        conclusionText: "phi",
+      },
+    ];
+    // merge B into A: B's conclusion edge is deleted → no loop
+    expect(wouldMergeCreateLoop("A", ["B"], edges)).toBe(false);
+  });
+
+  it("未設定前提のエッジではループにならない", () => {
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "mp",
+        conclusionNodeId: "A",
+        leftPremiseNodeId: undefined,
+        rightPremiseNodeId: undefined,
+        conclusionText: "phi",
+      },
+    ];
+    expect(wouldMergeCreateLoop("A", ["B"], edges)).toBe(false);
+  });
+
+  it("エッジなしではループにならない", () => {
+    expect(wouldMergeCreateLoop("A", ["B"], [])).toBe(false);
+  });
+
+  it("複数吸収ノードでのループ検出", () => {
+    // B → A (B is premise for A), C is independent
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "A",
+        premiseNodeId: "B",
+        variableName: "x",
+        conclusionText: "phi",
+      },
+    ];
+    // merge B and C into A: B's premise rewired to A → self-loop on A
+    expect(wouldMergeCreateLoop("A", ["B", "C"], edges)).toBe(true);
+  });
+
+  it("3ノード間接サイクル: A→B→C→D, merge D into A", () => {
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "B",
+        premiseNodeId: "A",
+        variableName: "x",
+        conclusionText: "phi",
+      },
+      {
+        _tag: "gen",
+        conclusionNodeId: "C",
+        premiseNodeId: "B",
+        variableName: "y",
+        conclusionText: "psi",
+      },
+      {
+        _tag: "gen",
+        conclusionNodeId: "D",
+        premiseNodeId: "C",
+        variableName: "z",
+        conclusionText: "chi",
+      },
+    ];
+    // merge D into A: D's conclusion edge deleted.
+    // remaining: A→B, B→C. No reference to D.
+    // No loop.
+    expect(wouldMergeCreateLoop("A", ["D"], edges)).toBe(false);
+  });
+
+  it("逆方向の間接サイクル: D→C→B→A, merge D into A", () => {
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "A",
+        premiseNodeId: "B",
+        variableName: "x",
+        conclusionText: "phi",
+      },
+      {
+        _tag: "gen",
+        conclusionNodeId: "B",
+        premiseNodeId: "C",
+        variableName: "y",
+        conclusionText: "psi",
+      },
+      {
+        _tag: "gen",
+        conclusionNodeId: "C",
+        premiseNodeId: "D",
+        variableName: "z",
+        conclusionText: "chi",
+      },
+    ];
+    // merge D into A: edge C←D becomes C←A (D replaced by A)
+    // Now: A←B←C←A → cycle!
+    expect(wouldMergeCreateLoop("A", ["D"], edges)).toBe(true);
+  });
+});
+
+// --- mergeNodes with loop detection ---
+
+describe("mergeNodes loop detection", () => {
+  it("自己ループを作るマージはWouldCreateLoopエラー", () => {
+    const nodes = [makeNode("A", "phi"), makeNode("B", "phi")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "mp",
+        conclusionNodeId: "A",
+        leftPremiseNodeId: "B",
+        rightPremiseNodeId: undefined,
+        conclusionText: "phi",
+      },
+    ];
+    const result = mergeNodes("A", ["B"], nodes, [], edges, emptyProtected);
+    expect(result._tag).toBe("Error");
+    if (result._tag !== "Error") return;
+    expect(result.error._tag).toBe("WouldCreateLoop");
+  });
+
+  it("ループを作らないマージは成功する", () => {
+    const nodes = [
+      makeNode("A", "phi"),
+      makeNode("B", "phi"),
+      makeNode("C", "psi"),
+    ];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "C",
+        premiseNodeId: "B",
+        variableName: "x",
+        conclusionText: "psi",
+      },
+    ];
+    const result = mergeNodes("A", ["B"], nodes, [], edges, emptyProtected);
+    expect(result._tag).toBe("Success");
+  });
+});
+
+// --- findMergeTargets with loop filtering ---
+
+describe("findMergeTargets loop filtering", () => {
+  it("ループを作るターゲットは除外される", () => {
+    const nodes = [makeNode("A", "phi"), makeNode("B", "phi")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "mp",
+        conclusionNodeId: "A",
+        leftPremiseNodeId: "B",
+        rightPremiseNodeId: undefined,
+        conclusionText: "phi",
+      },
+    ];
+    const targets = findMergeTargets("A", nodes, emptyProtected, edges);
+    expect(targets.size).toBe(0);
+  });
+
+  it("ループを作らないターゲットは含まれる", () => {
+    const nodes = [makeNode("A", "phi"), makeNode("B", "phi")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "C",
+        premiseNodeId: "B",
+        variableName: "x",
+        conclusionText: "psi",
+      },
+    ];
+    const targets = findMergeTargets("A", nodes, emptyProtected, edges);
+    expect(targets).toEqual(new Set(["B"]));
+  });
+});
+
+// --- canMergeSelectedNodes with loop filtering ---
+
+describe("canMergeSelectedNodes loop filtering", () => {
+  it("全グループがループを作る場合はfalse", () => {
+    const nodes = [makeNode("A", "phi"), makeNode("B", "phi")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "mp",
+        conclusionNodeId: "A",
+        leftPremiseNodeId: "B",
+        rightPremiseNodeId: undefined,
+        conclusionText: "phi",
+      },
+    ];
+    expect(
+      canMergeSelectedNodes(["A", "B"], nodes, emptyProtected, edges),
+    ).toBe(false);
   });
 });

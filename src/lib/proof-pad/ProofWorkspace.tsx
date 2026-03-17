@@ -2349,6 +2349,7 @@ export const ProofWorkspace = forwardRef<
       mergeSelection.leaderNodeId,
       workspace.nodes,
       protectedIds,
+      workspace.inferenceEdges,
     );
   }, [mergeSelection, workspace]);
 
@@ -3829,6 +3830,7 @@ export const ProofWorkspace = forwardRef<
           .map((n) => n.id),
         /* v8 ignore stop */
       ),
+      workspace.inferenceEdges,
     );
   }, [selectedNodeIds, workspace]);
 
@@ -3847,6 +3849,7 @@ export const ProofWorkspace = forwardRef<
       [...selectedNodeIds],
       workspace.nodes,
       protectedIds,
+      workspace.inferenceEdges,
     );
     /* v8 ignore start -- 防御的: findMergeableGroupsが空を返すケースはUIレベルで制御 */
     if (groups.length === 0) return;

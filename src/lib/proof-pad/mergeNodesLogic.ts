@@ -15,7 +15,10 @@
 import { equalFormula } from "../logic-core/equality";
 import { parseNodeFormula } from "./goalCheckLogic";
 import type { InferenceEdge } from "./inferenceEdge";
-import { replaceNodeIdInEdge } from "./inferenceEdge";
+import {
+  replaceNodeIdInEdge,
+  getInferenceEdgePremiseNodeIds,
+} from "./inferenceEdge";
 import type { WorkspaceNode, WorkspaceConnection } from "./workspaceState";
 
 // --- 論理式等価判定 ---
@@ -50,7 +53,8 @@ export function areFormulasEquivalent(a: string, b: string): boolean {
 export type MergeError =
   | { readonly _tag: "NotEnoughNodes" }
   | { readonly _tag: "FormulaTextMismatch" }
-  | { readonly _tag: "ProtectedNode"; readonly nodeId: string };
+  | { readonly _tag: "ProtectedNode"; readonly nodeId: string }
+  | { readonly _tag: "WouldCreateLoop" };
 
 /** マージ結果 */
 export type MergeResult =
@@ -82,6 +86,85 @@ function regenerateConnectionId(conn: WorkspaceConnection): string {
 }
 
 /** @see replaceNodeIdInEdge in inferenceEdge.ts */
+
+// --- ループ検出 ---
+
+/**
+ * マージ操作がループ（循環依存）を生じさせるかどうかを判定する。
+ *
+ * マージ後のInferenceEdgeグラフをシミュレーションし、
+ * リーダーノードから順方向（前提→結論）に辿ってリーダー自身に到達するかを検査する。
+ *
+ * 原理: 元のグラフがDAGであれば、マージで生じる新しい循環は
+ * 必ずリーダーノードを通る（absorbed→leaderの置換のみが新しい経路を作るため）。
+ *
+ * @param leaderNodeId リーダーノードのID
+ * @param absorbedNodeIds 吸収されるノードのID一覧
+ * @param allInferenceEdges 全InferenceEdge
+ * @returns ループが生じる場合true
+ */
+/* v8 ignore start -- V8集約アーティファクト */
+export function wouldMergeCreateLoop(
+  leaderNodeId: string,
+  absorbedNodeIds: readonly string[],
+  allInferenceEdges: readonly InferenceEdge[],
+): boolean {
+  /* v8 ignore stop */
+  const absorbedIdSet = new Set(absorbedNodeIds);
+
+  // マージ後のエッジをシミュレーション
+  // 1. 吸収ノードが結論のエッジは削除
+  let simulatedEdges = allInferenceEdges.filter(
+    (edge) => !absorbedIdSet.has(edge.conclusionNodeId),
+  );
+
+  // 2. 前提ノードIDの absorbed → leader 置換
+  for (const absorbedId of absorbedNodeIds) {
+    simulatedEdges = simulatedEdges.map((edge) =>
+      replaceNodeIdInEdge(edge, absorbedId, leaderNodeId),
+    );
+  }
+
+  // 3. 前提→結論の順方向マップを構築
+  const conclusionsByPremise = new Map<string, readonly string[]>();
+  for (const edge of simulatedEdges) {
+    const premiseIds = getInferenceEdgePremiseNodeIds(edge);
+    for (const premiseId of premiseIds) {
+      const existing = conclusionsByPremise.get(premiseId);
+      if (existing !== undefined) {
+        conclusionsByPremise.set(premiseId, [
+          ...existing,
+          edge.conclusionNodeId,
+        ]);
+      } else {
+        conclusionsByPremise.set(premiseId, [edge.conclusionNodeId]);
+      }
+    }
+  }
+
+  // 4. リーダーから順方向にBFS — リーダー自身に到達したらループ
+  const directConclusions = conclusionsByPremise.get(leaderNodeId);
+  if (directConclusions === undefined) return false;
+
+  const visited = new Set<string>();
+  const queue = [...directConclusions];
+
+  while (queue.length > 0) {
+    const current = queue.pop()!;
+    if (current === leaderNodeId) return true;
+    if (visited.has(current)) continue;
+    visited.add(current);
+
+    const next = conclusionsByPremise.get(current);
+    if (next !== undefined) {
+      for (const n of next) {
+        queue.push(n);
+      }
+    }
+  }
+
+  return false;
+}
 
 // --- メインロジック ---
 
@@ -142,6 +225,11 @@ export function mergeNodes(
     if (!areFormulasEquivalent(absorbed.formulaText, leaderNode.formulaText)) {
       return { _tag: "Error", error: { _tag: "FormulaTextMismatch" } };
     }
+  }
+
+  // ループ検出: マージ後にDAGが壊れないか確認
+  if (wouldMergeCreateLoop(leaderNodeId, absorbedNodeIds, allInferenceEdges)) {
+    return { _tag: "Error", error: { _tag: "WouldCreateLoop" } };
   }
 
   const absorbedIdSet = new Set(absorbedNodeIds);
@@ -246,6 +334,7 @@ export function findMergeableGroups(
   selectedNodeIds: readonly string[],
   allNodes: readonly WorkspaceNode[],
   protectedNodeIds: ReadonlySet<string>,
+  allInferenceEdges: readonly InferenceEdge[],
 ): readonly {
   readonly leaderNodeId: string;
   readonly absorbedNodeIds: readonly string[];
@@ -275,7 +364,7 @@ export function findMergeableGroups(
     }
   }
 
-  // 2つ以上のノードがあるグループのみ返す
+  // 2つ以上のノードがあるグループのみ返す（ループを作るグループは除外）
   const result: {
     readonly leaderNodeId: string;
     readonly absorbedNodeIds: readonly string[];
@@ -284,7 +373,9 @@ export function findMergeableGroups(
     if (nodeIds.length >= 2) {
       // 先頭がリーダー（選択順序が反映される前提）
       const [leader, ...absorbed] = nodeIds;
-      result.push({ leaderNodeId: leader, absorbedNodeIds: absorbed });
+      if (!wouldMergeCreateLoop(leader, absorbed, allInferenceEdges)) {
+        result.push({ leaderNodeId: leader, absorbedNodeIds: absorbed });
+      }
     }
   }
 
@@ -300,10 +391,16 @@ export function canMergeSelectedNodes(
   selectedNodeIds: readonly string[],
   allNodes: readonly WorkspaceNode[],
   protectedNodeIds: ReadonlySet<string>,
+  allInferenceEdges: readonly InferenceEdge[],
 ): boolean {
   /* v8 ignore stop */
   return (
-    findMergeableGroups(selectedNodeIds, allNodes, protectedNodeIds).length > 0
+    findMergeableGroups(
+      selectedNodeIds,
+      allNodes,
+      protectedNodeIds,
+      allInferenceEdges,
+    ).length > 0
   );
 }
 
@@ -323,6 +420,7 @@ export function findMergeTargets(
   sourceNodeId: string,
   allNodes: readonly WorkspaceNode[],
   protectedNodeIds: ReadonlySet<string>,
+  allInferenceEdges: readonly InferenceEdge[],
 ): ReadonlySet<string> {
   /* v8 ignore stop */
   const sourceNode = allNodes.find((n) => n.id === sourceNodeId);
@@ -334,9 +432,14 @@ export function findMergeTargets(
   for (const node of allNodes) {
     if (node.id === sourceNodeId) continue;
     if (protectedNodeIds.has(node.id)) continue;
-    if (areFormulasEquivalent(node.formulaText, sourceNode.formulaText)) {
-      targets.add(node.id);
+    if (!areFormulasEquivalent(node.formulaText, sourceNode.formulaText)) {
+      continue;
     }
+    // sourceがリーダー、nodeが吸収 → ループチェック
+    if (wouldMergeCreateLoop(sourceNodeId, [node.id], allInferenceEdges)) {
+      continue;
+    }
+    targets.add(node.id);
   }
   return targets;
 }

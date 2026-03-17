@@ -97,6 +97,7 @@ export {
   canMergeSelectedNodes,
   findMergeTargets,
   areFormulasEquivalent,
+  wouldMergeCreateLoop,
 } from "./mergeNodesLogic";
 export type { MergeResult, MergeError } from "./mergeNodesLogic";
 export {

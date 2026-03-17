@@ -24,3 +24,5 @@
   - [x] 提供されるAPIなどの説明を網羅 (索引と、それぞれの項目は分けてよいだろう)
     - ツールバーに「API Ref」トグルボタン追加、エディタ横にリファレンスパネル表示（3カテゴリ28API、検索フィルタ付き）
 - [x] 体系の情報を取れるAPIはあってもよいだろう — `getDeductionSystemInfo()` をWorkspace Bridgeに追加。style, systemName, isHilbertStyle, rules を返す（3カテゴリ29API）
+- [x] マージ操作において、ループを作ってしまうノードは選択できない。 — `wouldMergeCreateLoop` で事前検出、`findMergeTargets`/`findMergeableGroups`/`canMergeSelectedNodes` でフィルタリング
+- [x] ノードセレクションからのマージ操作において、ループを作ってしまう場合は続行できない — `mergeNodes` に `WouldCreateLoop` エラーを追加

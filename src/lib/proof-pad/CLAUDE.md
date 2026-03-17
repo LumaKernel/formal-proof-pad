@@ -44,6 +44,8 @@ logic-core, logic-lang, formula-input, infinite-canvas を統合する層。
   - 変更時は `mergeNodesLogic.test.ts`, `workspaceState.ts`, `index.ts` も同期
   - リーダーノード保持、吸収ノードの定理利用コネクションをリーダーに付替え
   - InferenceEdgeの前提ノードIDも付替え、結論が吸収ノードのEdgeは削除
+  - `wouldMergeCreateLoop`: マージ後のエッジをシミュレーションしDAGサイクルを検出
+  - `findMergeTargets`, `findMergeableGroups`, `canMergeSelectedNodes` は `allInferenceEdges` を受け取りループを作るマージを事前除外
 - `workspaceState.ts`: `mergeSelectedNodes()` で純粋ロジックをラップ + syncInferenceEdges + revalidate
 - UI: ProofWorkspace.tsx の選択バナーにMergeボタン + Ctrl/Cmd+M ショートカット
 
