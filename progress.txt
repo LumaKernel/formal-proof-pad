@@ -15017,3 +15017,15 @@
   - ポインターキャプチャを使うリサイズは、jsdomではsetPointerCaptureをモック化する必要がある
   - fireEventでpointerDown/pointerMove/pointerUpを使ってリサイズをテストできる
 ---
+
+## 2026-03-17 - スクリプトエディタWeb API抑制
+- Monaco Editor の compilerOptions.lib を ['es2020'] のみに限定
+- alert, document, window, fetch 等のDOM/ブラウザAPIが補完候補から除去
+- ES標準関数（Array, Map, decodeURI等）とカスタムAPI（addNode等）は維持
+- 変更ファイル: ScriptEditorComponent.tsx（1箇所のみ）
+- カバレッジ: 変化なし (Stmts 99.99%, Branch 99.89%, Funcs 90.41%, Lines 100%)
+- **今後のイテレーションへの学び:**
+  - Monaco Editor の lib 値は小文字必須（'es2020' ◯, 'ES2020' ✕）— issue #3225
+  - noLib: true + addExtraLib パターンはより厳密だが、lib: ['es2020'] で十分な場合が多い
+  - Monaco Editor のテストはjsdomでは困難、ブラウザでの目視確認が実質的なテスト
+---

@@ -385,3 +385,7 @@ Infinity Canvasについて。
 
 - [x] スクリプトエディタは最低幅はありつつ、ウィンドウ幅をひっぱって調整できるようにしてほしい
   - 左端にリサイズハンドル追加、ポインターキャプチャでドラッグ、320px〜960px範囲
+- [x] スクリプトエディタで、alertとかのweb apiとか、使えないものも出てきてしまう。それらは抑制してほしい。
+  - [x] searchやcontext7, 特に、github mcpで根拠のある対処法を調べて進めて。
+  - Monaco Editor compilerOptions.lib を ['es2020'] に限定（DOM型定義を除外）
+  - 参考: github.com/microsoft/monaco-editor/issues/3225（lib値は小文字必須）
