@@ -332,8 +332,7 @@ export const defaultProofMessages: ProofMessages = {
   genErrorVariableEmpty: "Enter a variable name",
   genErrorNotEnabled: "Gen is not enabled in this logic system",
   genErrorGeneric: "Generalization failed",
-  genBannerSelectPremise:
-    "Click the premise (\u03C6) to apply Gen",
+  genBannerSelectPremise: "Click the premise (\u03C6) to apply Gen",
 
   // Goal
   goalLabel: "Goal:",
