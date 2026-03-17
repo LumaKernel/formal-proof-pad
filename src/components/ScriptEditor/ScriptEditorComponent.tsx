@@ -281,11 +281,14 @@ export const ScriptEditorComponent: React.FC<ScriptEditorComponentProps> = ({
   // ── Monaco beforeMount: 型定義を注入 ────────────────────────
 
   const handleBeforeMount: BeforeMount = useCallback((monaco) => {
+    // DOM型定義を除外し、alert/fetch/document等のブラウザAPIを補完候補から除去
+    // lib に 'es2020' のみ指定（小文字必須: github.com/microsoft/monaco-editor/issues/3225）
     monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
       target: monaco.languages.typescript.ScriptTarget.ES2020,
       allowNonTsExtensions: true,
       allowJs: true,
       noEmit: true,
+      lib: ["es2020"],
     });
 
     monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
