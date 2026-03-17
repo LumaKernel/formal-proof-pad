@@ -15096,3 +15096,17 @@
   - SC/TABの模範解答は単一axiomステップ（ゴール式をそのままaxiomノードとして配置）
   - AT-01フルフローストーリーが未対応（残りの章）
 ---
+
+## 2026-03-17 - Gen適用の変数選択UI改善
+- ヘッダーのGen UIを変更: 変数テキスト入力を削除し、Genボタンクリックで直接「ノード選択モード」に入る
+- ノードクリック後にプロンプトモーダルを表示（自由変数サジェストチップ付き）
+- `extractFreeVariablesFromNode` ヘルパーを `genApplicationLogic.ts` に追加（6テスト）
+- ヘッダーパスとコンテキストメニューパスを同じプロンプトモーダルに統一
+- proofMessages.ts の genBannerSelectPremise から `{variableName}` プレースホルダーを削除
+- 変更ファイル: genApplicationLogic.ts, genApplicationLogic.test.ts, ProofWorkspace.tsx, ProofWorkspace.test.tsx, proofMessages.ts, proofMessages.test.ts, index.ts
+- カバレッジ: Stmts 99.95%, Branch 99.77%, Funcs 90.43%, Lines 99.95% (変化なし)
+- **今後のイテレーションへの学び:**
+  - `freeVariablesInFormula` は `logic-core/freeVariables` から取得可能（term変数の自由変数）
+  - GenSelectionState の `phase` discriminated union はシンプルに保つのが良い（variableNameはphase内に含めない）
+  - prettier check は CI で実行されるため、ローカルでも `prettier --check` を実行してからコミットすべき
+---
