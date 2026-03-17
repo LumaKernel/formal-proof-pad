@@ -1237,9 +1237,7 @@ export const QuestCompleteProp01FullFlow: Story = {
     await expect(
       canvas.getByTestId("workspace-axiom-palette"),
     ).toBeInTheDocument();
-    await expect(
-      canvas.getByTestId("workspace-mp-button"),
-    ).toBeInTheDocument();
+    await expect(canvas.getByTestId("workspace-mp-button")).toBeInTheDocument();
 
     // --- Step 1: A2スキーマをパレットから追加 → node-1 ---
     await userEvent.click(
