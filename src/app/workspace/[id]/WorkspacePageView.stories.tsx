@@ -1420,3 +1420,157 @@ export const QuestCompleteNd01FullFlow: Story = {
     );
   },
 };
+
+/**
+ * sc-01完全フロー: 空のワークスペースから φ→φ の証明完了まで
+ *
+ * 証明手順（SC Identity）:
+ *   1. 「シーケントを追加」→ node-1（空シーケントノード）
+ *   2. node-1の式を phi -> phi に編集 → ゴール達成
+ */
+export const QuestCompleteSc01FullFlow: Story = {
+  render: () => {
+    const quest = findQuestById(builtinQuests, "sc-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: sc-01");
+    }
+    const preset = resolveSystemPreset(quest.systemPresetId);
+    if (preset === undefined) {
+      throw new Error("System preset not found");
+    }
+    const initialWorkspace = createQuestWorkspace(preset.deductionSystem, [
+      { formulaText: quest.goals[0]!.formulaText },
+    ]);
+    const questInfo: GoalQuestInfo = {
+      description: quest.description,
+      hints: quest.hints,
+      learningPoint: quest.learningPoint,
+    };
+    return (
+      <StatefulWorkspace
+        initialWorkspace={initialWorkspace}
+        initialNotebookName={quest.title}
+        onBack={fn()}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- 初期状態: 空のSCワークスペース ---
+    await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // SCパレットが表示される
+    await expect(
+      canvas.getByTestId("workspace-sc-rule-palette"),
+    ).toBeInTheDocument();
+
+    // --- Step 1: 「シーケントを追加」→ node-1 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-sc-rule-palette-add-sequent"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // --- Step 2: node-1の式を phi -> phi に編集 ---
+    const display = canvas.getByTestId("proof-node-node-1-editor-display");
+    await userEvent.dblClick(display);
+    const input = canvas.getByTestId("proof-node-node-1-editor-input-input");
+    await userEvent.type(input, "phi -> phi");
+    await userEvent.tab();
+
+    // --- 最終確認: ゴール達成 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
+    });
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+  },
+};
+
+/**
+ * tab-01完全フロー: 空のワークスペースから ¬(φ→φ) の反駁完了まで
+ *
+ * 証明手順（TAB 反駁）:
+ *   1. 「シーケントを追加」→ node-1（空シーケントノード）
+ *   2. node-1の式を ~(phi -> phi) に編集 → ゴール達成
+ */
+export const QuestCompleteTab01FullFlow: Story = {
+  render: () => {
+    const quest = findQuestById(builtinQuests, "tab-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: tab-01");
+    }
+    const preset = resolveSystemPreset(quest.systemPresetId);
+    if (preset === undefined) {
+      throw new Error("System preset not found");
+    }
+    const initialWorkspace = createQuestWorkspace(preset.deductionSystem, [
+      { formulaText: quest.goals[0]!.formulaText },
+    ]);
+    const questInfo: GoalQuestInfo = {
+      description: quest.description,
+      hints: quest.hints,
+      learningPoint: quest.learningPoint,
+    };
+    return (
+      <StatefulWorkspace
+        initialWorkspace={initialWorkspace}
+        initialNotebookName={quest.title}
+        onBack={fn()}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- 初期状態: 空のTABワークスペース ---
+    await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // TABパレットが表示される
+    await expect(
+      canvas.getByTestId("workspace-tab-rule-palette"),
+    ).toBeInTheDocument();
+
+    // --- Step 1: 「シーケントを追加」→ node-1 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-tab-rule-palette-add-sequent"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // --- Step 2: node-1の式を ~(phi -> phi) に編集 ---
+    const display = canvas.getByTestId("proof-node-node-1-editor-display");
+    await userEvent.dblClick(display);
+    const input = canvas.getByTestId("proof-node-node-1-editor-input-input");
+    await userEvent.type(input, "~(phi -> phi)");
+    await userEvent.tab();
+
+    // --- 最終確認: ゴール達成 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
+    });
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+  },
+};
