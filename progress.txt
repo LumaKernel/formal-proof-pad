@@ -15125,3 +15125,19 @@
   - メモリ圧迫時はvitestのfork workerがtimeoutする（60秒）。Storybookや多数のnodeプロセスが走っている場合に発生
   - ScriptEditorComponentのレイアウトはflexbox横並びで、エディタとリファレンスパネルを分割表示
 ---
+
+## 2026-03-17T17:00 - script-runner: 演繹体系情報API
+- `getDeductionSystemInfo()` をWorkspace Bridgeに追加
+  - style, systemName, isHilbertStyle, rules を返す
+  - スクリプトから体系判別・ガードが可能に
+- 変更ファイル:
+  - src/lib/script-runner/workspaceBridge.ts — API追加（インターフェース、ブリッジ関数、API定義）
+  - src/lib/script-runner/workspaceBridge.test.ts — 5テスト追加（Hilbert/ND/SC情報取得、スクリプト内分岐、ガード）
+  - src/lib/script-runner/templates.test.ts — モックハンドラー更新
+  - src/components/ScriptEditor/ScriptEditorComponent.stories.tsx — モックハンドラー更新
+  - src/lib/proof-pad/ProofWorkspace.tsx — scriptCommandHandler に実装追加
+- カバレッジ: Stmts 99.92%, Branch 99.70%, Funcs 90.42%, Lines 99.94% (変化なし)
+- **今後のイテレーションへの学び:**
+  - WorkspaceCommandHandler インターフェースを変更すると、workspaceBridge.test.ts, templates.test.ts, ScriptEditorComponent.stories.tsx, ProofWorkspace.tsx の4箇所のモック/実装を更新する必要がある
+  - API追加時は WORKSPACE_BRIDGE_API_DEFS も更新することで API Reference パネルに自動反映される
+---

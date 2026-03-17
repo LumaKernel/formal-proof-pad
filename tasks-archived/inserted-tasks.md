@@ -23,3 +23,4 @@
 - [x] スクリプトエディタからすぐにスクリプトに関するリファレンスを開けるように
   - [x] 提供されるAPIなどの説明を網羅 (索引と、それぞれの項目は分けてよいだろう)
     - ツールバーに「API Ref」トグルボタン追加、エディタ横にリファレンスパネル表示（3カテゴリ28API、検索フィルタ付き）
+- [x] 体系の情報を取れるAPIはあってもよいだろう — `getDeductionSystemInfo()` をWorkspace Bridgeに追加。style, systemName, isHilbertStyle, rules を返す（3カテゴリ29API）
