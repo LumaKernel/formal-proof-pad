@@ -55,6 +55,7 @@ import {
   formatVariableValue,
 } from "./scriptEditorLogic";
 import type { ScriptEditorState } from "./scriptEditorLogic";
+import { ScriptApiReferencePanel } from "./ScriptApiReferencePanel";
 import {
   initialSavedScriptsState,
   addScript,
@@ -174,6 +175,15 @@ export const ScriptEditorComponent: React.FC<ScriptEditorComponentProps> = ({
   const decorationsRef = useRef<ReturnType<
     Parameters<OnMount>[0]["createDecorationsCollection"]
   > | null>(null);
+
+  // ── API リファレンスパネル ────────────────────────────────────
+  const [apiReferenceOpen, setApiReferenceOpen] = useState(false);
+  const handleToggleApiReference = useCallback(() => {
+    setApiReferenceOpen((prev) => !prev);
+  }, []);
+  const handleCloseApiReference = useCallback(() => {
+    setApiReferenceOpen(false);
+  }, []);
 
   // ── 保存スクリプト管理 ────────────────────────────────────────
 
@@ -678,17 +688,38 @@ declare var console: {
       }}
       data-testid="script-editor"
     >
-      <div style={{ flex: 1, minHeight: "200px", height }}>
-        <Editor
-          height="100%"
-          defaultLanguage="javascript"
-          value={state.code}
-          theme="vs-dark"
-          beforeMount={handleBeforeMount}
-          onMount={handleEditorMount}
-          onChange={handleChange}
-          options={defaultEditorOptions}
-        />
+      <div
+        style={{
+          flex: 1,
+          minHeight: "200px",
+          height,
+          display: "flex",
+          flexDirection: "row",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Editor
+            height="100%"
+            defaultLanguage="javascript"
+            value={state.code}
+            theme="vs-dark"
+            beforeMount={handleBeforeMount}
+            onMount={handleEditorMount}
+            onChange={handleChange}
+            options={defaultEditorOptions}
+          />
+        </div>
+        {apiReferenceOpen && (
+          <div
+            style={{
+              width: "320px",
+              minWidth: "240px",
+              borderLeft: "1px solid var(--color-border,#333333)",
+            }}
+          >
+            <ScriptApiReferencePanel onClose={handleCloseApiReference} />
+          </div>
+        )}
       </div>
 
       <div
@@ -977,6 +1008,26 @@ declare var console: {
             data-testid="step-count"
           >{`${String(state.currentStep) satisfies string} steps`}</span>
         )}
+        <button
+          type="button"
+          className="se-toolbar-btn"
+          style={{
+            ...toolbarBtnStyle,
+            marginLeft: state.currentStep > 0 ? "8px" : "auto",
+            ...(apiReferenceOpen
+              ? {
+                  backgroundColor: "var(--color-accent,#555ab9)",
+                  color: "white",
+                  borderColor: "var(--color-accent,#555ab9)",
+                }
+              : {}),
+          }}
+          onClick={handleToggleApiReference}
+          data-testid="api-reference-toggle"
+          title="Toggle API Reference"
+        >
+          API Ref
+        </button>
       </div>
 
       <div

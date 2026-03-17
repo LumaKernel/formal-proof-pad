@@ -26,3 +26,12 @@ export type {
   ErrorLocation,
   ScriptEditorState,
 } from "./scriptEditorLogic";
+export { ScriptApiReferencePanel } from "./ScriptApiReferencePanel";
+export type { ScriptApiReferencePanelProps } from "./ScriptApiReferencePanel";
+export {
+  API_CATEGORIES,
+  filterApis,
+  filterCategories,
+  getTotalApiCount,
+} from "./scriptApiReferenceLogic";
+export type { ApiCategory, ApiCategoryInfo } from "./scriptApiReferenceLogic";
