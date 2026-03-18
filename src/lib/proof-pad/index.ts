@@ -399,10 +399,7 @@ export {
   sequentToDisplayData,
   isSequentText,
 } from "./sequentDisplayLogic";
-export type {
-  FormulaSlot,
-  SequentDisplayData,
-} from "./sequentDisplayLogic";
+export type { FormulaSlot, SequentDisplayData } from "./sequentDisplayLogic";
 export {
   getNdRuleLabel,
   convertNdWorkspaceToProofTree,

@@ -487,7 +487,10 @@ export function EditableProofNode({
 
   /** read-only表示用: シーケントテキストかどうかを判定 */
   const isSequent = useMemo(
-    () => !effectiveEditable && readonlyFormula === null && isSequentText(formulaText),
+    () =>
+      !effectiveEditable &&
+      readonlyFormula === null &&
+      isSequentText(formulaText),
     [effectiveEditable, readonlyFormula, formulaText],
   );
 

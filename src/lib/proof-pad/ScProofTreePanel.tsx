@@ -180,10 +180,7 @@ function ProofTreeNode({
         }
       >
         {node.conclusionSequent !== undefined ? (
-          <SequentDisplay
-            sequent={node.conclusionSequent}
-            fontSize={11}
-          />
+          <SequentDisplay sequent={node.conclusionSequent} fontSize={11} />
         ) : (
           node.conclusionText
         )}
