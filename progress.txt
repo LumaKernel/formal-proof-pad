@@ -15511,3 +15511,27 @@
   - ScriptLibraryPanelストーリーはpropsで独自テンプレートを渡すので、BUILTIN_TEMPLATES変更はストーリーに反映されない
   - 複数のvitest runを並行実行するとcoverage/.tmpのファイル競合でENOENTエラーが発生する。1プロセスずつ実行すること
 ---
+
+## 2026-03-18T13:13 - スクリプトライブラリ充実
+- 実装した内容:
+  - 汎用テンプレート2種追加（全DeductionStyle共通）:
+    - formula-explorer: parseFormula/formatFormula/equalFormulaの使い方デモ
+    - unification-demo: unifyFormulas/substituteFormulaの使い方デモ
+  - Hilbert追加テンプレート2種:
+    - axiom-explorer: identifyAxiomによる公理スキーマ同定デモ
+    - syllogism-proof: (φ→ψ)→((ψ→χ)→(φ→χ))の証明構築+演繹定理3回適用
+  - テンプレート総数: 14 → 18
+- テスト: 41テスト全通過（新規テスト8追加）
+- カバレッジ: Stmts 99.70%, Branch 98.36% (ベースラインと同等)
+- 変更ファイル:
+  - src/lib/script-runner/templates.ts（4テンプレート追加）
+  - src/lib/script-runner/templates.test.ts（8テスト追加、フィルタテスト更新）
+  - tasks/prd-inserted-tasks.md（タスク完了マーク）
+  - tasks-archived/prd-inserted-tasks.md（完了項目アーカイブ）
+- スクリーンショット: .screenshots/script-library-enriched-templates.png
+- **今後のイテレーションへの学び:**
+  - unifyFormulasでは同じメタ変数がsourceとtargetに現れるとOccursCheckになる。デモでは別の変数名を使う
+  - js-interpreterのtry/catchは動作するが、テンプレートでは失敗例の代わりにコメントで説明する方が安全
+  - displayHilbertProofは演繹定理変換後の大きな証明木を展開するため、addNode/connectMPの呼び出し回数が大幅に増える
+  - 汎用テンプレート（compatibleStyles undefined）のテストでは、既存の「全テンプレートがcompatibleStylesを持つ」アサーションを緩和する必要がある
+---
