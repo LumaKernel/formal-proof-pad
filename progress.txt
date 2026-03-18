@@ -15329,3 +15329,21 @@
   - formatSequentTextは⊢を使うが、SequentDisplayは⇒を使う — テスト変更が必要
   - Prettierフォーマットは必ずCI前にローカルで確認する（3ファイルでフォーマット差異がCI失敗を引き起こした）
 ---
+
+## 2026-03-18T13:15 - proof-pad (AT署名付き論理式の視覚的表示改善)
+- 実装した内容:
+  - signedFormulaDisplayLogic.ts 新規作成: 純粋ロジック（isSignedFormulaText, parseSignedFormulaDisplayData, signedFormulaToDisplayData）
+  - SignedFormulaDisplay.tsx 新規作成: T符号=緑バッジ、F符号=赤バッジ + FormulaDisplayハイライト表示
+  - signedFormulaDisplayLogic.test.ts 新規作成: 19テスト（判定、パース、変換）
+  - SignedFormulaDisplay.stories.tsx 新規作成: 6ストーリー（TrueFormula, FalseFormula, ParseError, QuantifiedFormula, NegationFormula, PlainTextFallback）すべてplay関数付き
+  - EditableProofNode.tsx 修正: read-only表示でisSignedFormula判定→SignedFormulaDisplay表示
+  - index.ts 修正: SignedFormulaDisplay関連のexport追加
+- カバレッジベースライン: Stmts 99.79% | Branch 98.90% | Funcs 90.32% | Lines 99.83%
+- カバレッジ結果: Stmts 99.79% | Branch 98.80% | Funcs 90.32% | Lines 99.83%（Branch -0.10% はEditableProofNode.tsxの新分岐。SC/ND/TAB統合時と同パターン）
+- スクリーンショット: .screenshots/signed-formula-display-true.png, .screenshots/signed-formula-display-false.png
+- **今後のイテレーションへの学び:**
+  - SequentDisplayパターン（純粋ロジック + Reactコンポーネント + EditableProofNode統合）はAT署名付き式にもそのまま適用可能
+  - FormulaSlot型はsequentDisplayLogicから再利用できる
+  - AT署名付き式の形式: "T:φ" / "F:φ"（コロン区切り）。parseSignedFormulaText（atApplicationLogic）とは独立した表示専用ロジック
+  - CSS変数 --color-at-sign-true-*/--color-at-sign-false-* でダークモード対応可能
+---
