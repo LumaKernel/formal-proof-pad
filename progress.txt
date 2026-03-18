@@ -15687,3 +15687,23 @@
   - raw timestamp: テスト・ストーリーでは `new Date()` を使わず数値リテラルを直接使用（no-dateルール遵守）
   - formatSavedAtテスト: タイムゾーン依存を避けるため正規表現パターンマッチで検証
 ---
+
+## 2026-03-19 - [script-runner] SCノードコンストラクタブリッジ
+- 実装した内容:
+  - cutEliminationBridge.ts に SC証明ノードコンストラクタ関数22個を追加（sequent, scIdentity, scBottomLeft, scCut, scWeakeningLeft/Right, scContractionLeft/Right, scExchangeLeft/Right, scImplicationLeft/Right, scConjunctionLeft/Right, scDisjunctionLeft/Right, scNegationLeft/Right, scUniversalLeft/Right, scExistentialLeft/Right）
+  - 各関数は unknown 入力を検証 → logic-core ファクトリ関数呼出 → エンコードして unknown 返却
+  - position (number) / componentIndex (1|2) の入力バリデーション追加
+  - API定義・型定義生成も27エントリに拡張
+  - テンプレート2つ (cut-elimination-simple, cut-elimination-implication) を新API利用に移行
+  - テスト76件（全コンストラクタの正常系・異常系・統合テスト）でカバレッジ100%達成
+- 変更したファイル:
+  - src/lib/script-runner/cutEliminationBridge.ts (コンストラクタ関数22個追加)
+  - src/lib/script-runner/cutEliminationBridge.test.ts (テスト76件)
+  - src/lib/script-runner/templates.ts (テンプレート2つ移行)
+- カバレッジ: Stmts 99.4%, Branch 98.2%, Funcs 89.78%, Lines 99.39% → テスト追加後 cutEliminationBridge.ts 100%達成
+- **今後のイテレーションへの学び:**
+  - ブリッジ関数パターン: `const fooFn = (...args: unknown): unknown => { decode → call logic-core → encode }` が標準
+  - 入力バリデーションは型ごとに: decodeScProofNode (proof), decodeSequentOrThrow (sequent), decodeFormulaOrThrow (formula), typeof check (number), strict equality (1|2)
+  - テンプレートは raw JSON 構築ではなくコンストラクタ関数で書く方が短く明瞭
+  - 残りテンプレート (step1-step6, auto-prove, workspace) もコンストラクタAPI移行が必要
+---
