@@ -232,6 +232,7 @@ import { CutEliminationStepper } from "./CutEliminationStepper";
 import { ScProofTreePanel } from "./ScProofTreePanel";
 import { NdProofTreePanel } from "./NdProofTreePanel";
 import { TabProofTreePanel } from "./TabProofTreePanel";
+import { AtProofTreePanel } from "./AtProofTreePanel";
 import type { CutEliminationStepperData } from "./cutEliminationStepperLogic";
 import {
   computeCutEliminationStepperData,
@@ -5936,6 +5937,18 @@ export const ProofWorkspace = forwardRef<
         />
       ) : null}
 
+      {/* AT分析的タブロー証明木パネル（AT体系時に常駐表示） */}
+      {workspace.deductionSystem.style === "analytic-tableau" ? (
+        <AtProofTreePanel
+          nodes={workspace.nodes}
+          inferenceEdges={workspace.inferenceEdges}
+          testId={
+            /* v8 ignore start -- V8集約アーティファクト */
+            testId ? `${testId satisfies string}-at-proof-tree` : undefined
+            /* v8 ignore stop */
+          }
+        />
+      ) : null}
       {/* コレクション管理パネル（常駐表示） */}
       {collectionEntries !== undefined &&
       onRenameCollectionEntry !== undefined &&

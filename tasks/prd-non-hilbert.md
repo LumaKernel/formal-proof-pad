@@ -14,4 +14,4 @@
 ### 分析的タブロー (AT)
 
 - [x] 符号付き式の視覚的表示改善 — SignedFormulaDisplayコンポーネント追加。T=緑バッジ/F=赤バッジ + FormulaDisplayハイライト。EditableProofNode統合
-- [ ] 証明木/反駁木の視覚的フロー表示
+- [-] 証明木/反駁木の視覚的フロー表示

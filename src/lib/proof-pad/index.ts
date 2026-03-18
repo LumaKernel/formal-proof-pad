@@ -430,6 +430,20 @@ export type {
 } from "./tabProofTreeRendererLogic";
 export { TabProofTreePanel } from "./TabProofTreePanel";
 export type { TabProofTreePanelProps } from "./TabProofTreePanel";
+export {
+  convertAtWorkspaceToTreeDisplay,
+  convertAtWorkspaceToTreeDisplayAuto,
+  findAtTreeRoots,
+  computeAtTreeStats,
+} from "./atProofTreeRendererLogic";
+export type {
+  AtBranchStatus,
+  AtTreeDisplayNode,
+  AtTreeDisplayData,
+  AtTreeStats,
+} from "./atProofTreeRendererLogic";
+export { AtProofTreePanel } from "./AtProofTreePanel";
+export type { AtProofTreePanelProps } from "./AtProofTreePanel";
 export { parseGoalFormula, checkGoal } from "./goalCheckLogic";
 export type {
   GoalNotSet,
