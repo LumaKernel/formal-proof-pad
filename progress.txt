@@ -15630,3 +15630,27 @@
   - タブ切替時のエディタ同期: 新しいactiveTabのcode/readonlyをsetStateで即座に反映
   - ライブラリタブのdedup: openLibraryTab/openSavedTabが同じsourceIdのタブを再利用する
 ---
+
+## 2026-03-19 01:00 - [script-editor] Ctrl/Cmd+S キーボードショートカット
+- 実装した内容:
+  - `scriptEditorKeyboardShortcuts.ts`: キーボードショートカットの純粋ロジック
+    - ScriptEditorKeyboardAction: "save-new" | "save-overwrite" | "none"
+    - classifyScriptEditorKeyDown: キーイベント + タブコンテキスト → アクション
+    - Unnamed タブ → save-new（保存ダイアログ）、Saved タブ → save-overwrite（上書き）、Library → none
+  - `scriptEditorKeyboardShortcuts.test.ts`: 11テスト（全パス）
+  - `ScriptEditorComponent.tsx`: onKeyDown ハンドラ統合
+    - save-new: 保存ダイアログを開く
+    - save-overwrite: updateScriptCode + markTabSynced で即座に上書き保存
+  - `index.ts`: エクスポート追加
+- 変更したファイル:
+  - src/components/ScriptEditor/scriptEditorKeyboardShortcuts.ts (新規)
+  - src/components/ScriptEditor/scriptEditorKeyboardShortcuts.test.ts (新規)
+  - src/components/ScriptEditor/ScriptEditorComponent.tsx (統合)
+  - src/components/ScriptEditor/index.ts (エクスポート追加)
+- カバレッジ: Stmts 99.7%, Branch 98.28%, Funcs 90.29%, Lines 99.74%（ベースラインとほぼ同一、v8 merging quirk範囲）
+- スクリーンショット: .screenshots/script-editor-keyboard-shortcut-default.png
+- **今後のイテレーションへの学び:**
+  - キーボードショートカットは純粋ロジック（classifyKeyDown）+ コンポーネント統合（onKeyDown）の2層パターン
+  - ScriptEditorComponentのonKeyDownはコンテナdivに配置。Monaco Editorはiframe内なので、Monaco外のUI操作時にのみ発火する点に注意
+  - 上書き保存はsavedScriptsLogic.updateScriptCode + scriptWorkspaceState.markTabSyncedの2ステップ
+---
