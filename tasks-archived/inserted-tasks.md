@@ -62,3 +62,13 @@
   - [x] Effect.ts と Tagged Class (schema) へ完全に移行し、コンストラクタによる作成のみ許容され、scriptに提供する関数はすべてunknown前提でのクラスの検証(パース)を行う
     - [x] 構造体の形、つくりかたを知っていないと書けないような箇所は排除される — SCノードコンストラクタ22関数追加、全テンプレート移行完了
   - [x] parseFormulaとかも、any返す形で提供されてるのはやめたい — FormulaJson等のブランド型宣言をaddExtraLibに追加
+
+- [x] スクリプトエディタのテンプレートは、より強くしよう
+  - [x] 下記を達成するために必要な追加のスクリプトユーザー向けの機能提供があれば、タスク化してまず先にやる
+    - getLogicSystem() API追加（identifyAxiom/applyGenにそのまま渡せるLogicSystemJson返却）
+    - 述語論理テンプレート（predicateLogicProof）新規追加
+    - 自動証明テンプレートを4定理に拡充（φ→φ、対偶、排中律、De Morgan）
+    - 公理探索テンプレートをgetLogicSystem()利用に更新
+  - [x] テンプレート本体の強化
+    - Hilbert定理ギャラリーテンプレート追加（DT ワークフロー実演: φ→φ、三段論法）
+    - buildIdentityProofTreeにidentifyAxiom検証を追加（公理ノードの同定結果表示）

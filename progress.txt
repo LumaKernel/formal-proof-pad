@@ -15754,3 +15754,13 @@
   - LogicSystem.theoryAxiomsはTheoryAxiom型のオブジェクト配列（string[]ではない）。bridgeでは`unknown[]`として透過的に渡す
   - テンプレートでのシステム情報取得はgetLogicSystem()を使う（getDeductionSystemInfo()はUIメタ情報のみ）
 ---
+
+## 2026-03-19 - [script-runner] テンプレート本体の強化
+- Hilbert定理ギャラリーテンプレート追加: 演繹定理ワークフロー（仮定付き証明構築 → extractHilbertProof → applyDeductionTheorem）で φ→φ、三段論法の2定理を自動証明
+- buildIdentityProofTreeテンプレート改善: getLogicSystem + identifyAxiom で各公理ノードを同定・検証結果を表示
+- 変更ファイル: templates.ts, templates.test.ts
+- カバレッジ変化なし: Stmts 99.65%, Branch 98.24%, Funcs 89.98%, Lines 99.69%
+- **今後のイテレーションへの学び:**
+  - テンプレートの console.log 出力をテストで検証する際、テンプレートのコード内で実際にログされる文字列と一致させる必要がある（タイトルやコメントは出力されない）
+  - hilbert-theorem-gallery のextractHilbertProofモックは最初のclearWorkspace後の証明構造を返す必要がある（定理ごとにclearWorkspaceされるため状態がリセットされる）
+---
