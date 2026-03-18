@@ -9,8 +9,8 @@ import type { WorkspaceCommandHandler } from "./workspaceBridge";
 import type { NativeFunctionBridge } from "./scriptRunner";
 
 describe("BUILTIN_TEMPLATES", () => {
-  it("4つのテンプレートを含む", () => {
-    expect(BUILTIN_TEMPLATES).toHaveLength(4);
+  it("5つのテンプレートを含む", () => {
+    expect(BUILTIN_TEMPLATES).toHaveLength(5);
   });
 
   it("各テンプレートが必須フィールドを持つ", () => {
@@ -168,6 +168,95 @@ describe("テンプレート実行テスト", () => {
     expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);
   });
 
+  it("build-identity-proof-tree: 正常に実行され、ワークスペースに証明木が構築される", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "build-identity-proof-tree",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    // addNode は呼び出しごとに異なるIDを返す
+    let nodeCounter = 0;
+    (handler.addNode as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      nodeCounter++;
+      return `node-${String(nodeCounter) satisfies string}`;
+    });
+    // connectMP も呼び出しごとに異なるIDを返す
+    let mpCounter = 100;
+    (handler.connectMP as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      mpCounter++;
+      return `mp-${String(mpCounter) satisfies string}`;
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    // 体系チェックが通ること
+    expect(handler.getDeductionSystemInfo).toHaveBeenCalled();
+    // clearWorkspaceが呼ばれること
+    expect(handler.clearWorkspace).toHaveBeenCalled();
+    // 公理ノードが3つ追加されること
+    expect(handler.addNode).toHaveBeenCalledTimes(3);
+    // 公理設定が3つされること
+    expect(handler.setNodeRoleAxiom).toHaveBeenCalledTimes(3);
+    // MP接続が2回されること
+    expect(handler.connectMP).toHaveBeenCalledTimes(2);
+    // ゴール設定されること
+    expect(handler.addGoal).toHaveBeenCalledWith("φ → φ");
+    // レイアウトが適用されること
+    expect(handler.applyLayout).toHaveBeenCalled();
+    // コンソール出力の確認
+    expect(consoleLogs.some((l) => l.includes("証明ツリーを構築"))).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);
+  });
+
+  it("build-identity-proof-tree: ヒルベルト流以外ではエラー", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "build-identity-proof-tree",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    // ND体系のモック
+    (
+      handler.getDeductionSystemInfo as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      style: "natural-deduction",
+      systemName: "Natural Deduction",
+      isHilbertStyle: false,
+      rules: [],
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    // エラーで停止することを確認
+    expect(result._tag).toBe("Error");
+    // ワークスペースは操作されないこと
+    expect(handler.clearWorkspace).not.toHaveBeenCalled();
+    expect(handler.addNode).not.toHaveBeenCalled();
+  });
+
   it("auto-prove-lk: 正常に実行される", () => {
     const tmpl = BUILTIN_TEMPLATES.find((t) => t.id === "auto-prove-lk")!;
     const result = runTemplate(tmpl);
@@ -257,8 +346,10 @@ describe("filterTemplatesByStyle", () => {
 
   it("BUILTIN_TEMPLATESでhilbertフィルタ", () => {
     const result = filterTemplatesByStyle(BUILTIN_TEMPLATES, "hilbert");
-    expect(result.every((t) => t.id === "build-identity-proof")).toBe(true);
-    expect(result).toHaveLength(1);
+    const ids = result.map((t) => t.id);
+    expect(ids).toContain("build-identity-proof");
+    expect(ids).toContain("build-identity-proof-tree");
+    expect(result).toHaveLength(2);
   });
 
   it("BUILTIN_TEMPLATESでsequent-calculusフィルタ", () => {

@@ -261,6 +261,88 @@ console.log("Q.E.D.");
 };
 
 /**
+ * φ→φ の証明を証明ツリーとしてキャンバスに表示するスクリプト。
+ *
+ * Hilbert公理系で φ→φ を導出し、ワークスペースに証明木を構築する。
+ * ヒルベルト流以外の体系で実行するとエラーで停止する。
+ *
+ * 証明:
+ *   1. (φ→((ψ→φ)→φ))→((φ→(ψ→φ))→(φ→φ))  [A2]
+ *   2. φ→((ψ→φ)→φ)                          [A1]
+ *   3. (φ→(ψ→φ))→(φ→φ)                      [MP 2,1]
+ *   4. φ→(ψ→φ)                               [A1]
+ *   5. φ→φ                                    [MP 4,3]
+ */
+const buildIdentityProofTree: ScriptTemplate = {
+  id: "build-identity-proof-tree",
+  title: "φ→φ の証明ツリー構築",
+  description:
+    "ヒルベルト公理系で φ→φ の証明木をワークスペースに構築する。公理ノードの追加・MP接続・レイアウトを自動実行。",
+  compatibleStyles: ["hilbert"],
+  code: `// φ→φ の証明ツリー構築
+// ワークスペースに証明木を構築します。
+//
+// 使用公理:
+//   A1: φ→(ψ→φ)
+//   A2: (φ→(ψ→χ))→((φ→ψ)→(φ→χ))
+//
+// 導出:
+//   1. (φ→((ψ→φ)→φ))→((φ→(ψ→φ))→(φ→φ))  ... A2 のインスタンス
+//   2. φ→((ψ→φ)→φ)                          ... A1 のインスタンス
+//   3. (φ→(ψ→φ))→(φ→φ)                      ... MP(2, 1)
+//   4. φ→(ψ→φ)                               ... A1 のインスタンス
+//   5. φ→φ                                    ... MP(4, 3)
+
+// 体系チェック: ヒルベルト流以外ではエラー
+var sysInfo = getDeductionSystemInfo();
+if (!sysInfo.isHilbertStyle) {
+  throw new Error("このスクリプトはヒルベルト流の体系でのみ実行できます。現在の体系: " + sysInfo.style);
+}
+
+// ワークスペースをクリアして証明木を構築
+clearWorkspace();
+
+console.log("=== φ→φ の証明ツリー構築 ===");
+console.log("体系: " + sysInfo.systemName);
+console.log("");
+
+// ステップ 1: A2 のインスタンス
+var a2Text = "(φ → ((ψ → φ) → φ)) → ((φ → (ψ → φ)) → (φ → φ))";
+var node1 = addNode(a2Text);
+setNodeRoleAxiom(node1);
+console.log("1. " + formatFormula(parseFormula(a2Text)) + "  [A2]");
+
+// ステップ 2: A1 のインスタンス
+var a1Text1 = "φ → ((ψ → φ) → φ)";
+var node2 = addNode(a1Text1);
+setNodeRoleAxiom(node2);
+console.log("2. " + formatFormula(parseFormula(a1Text1)) + "  [A1]");
+
+// ステップ 3: MP(2, 1) → (φ→(ψ→φ))→(φ→φ)
+var node3 = connectMP(node2, node1);
+console.log("3. " + formatFormula(parseFormula("(φ → (ψ → φ)) → (φ → φ)")) + "  [MP 2,1]");
+
+// ステップ 4: A1 のインスタンス
+var a1Text2 = "φ → (ψ → φ)";
+var node4 = addNode(a1Text2);
+setNodeRoleAxiom(node4);
+console.log("4. " + formatFormula(parseFormula(a1Text2)) + "  [A1]");
+
+// ステップ 5: MP(4, 3) → φ→φ
+var node5 = connectMP(node4, node3);
+console.log("5. " + formatFormula(parseFormula("φ → φ")) + "  [MP 4,3]");
+
+// ゴール設定とレイアウト適用
+addGoal("φ → φ");
+applyLayout();
+
+console.log("");
+console.log("証明ツリーを構築しました。");
+console.log("Q.E.D.");
+`,
+};
+
+/**
  * 自動証明探索テンプレート: proveSequentLK で証明木を生成する例。
  */
 const autoProveTemplate: ScriptTemplate = {
@@ -301,6 +383,7 @@ export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
   cutEliminationSimple,
   cutEliminationImplication,
   buildIdentityProof,
+  buildIdentityProofTree,
   autoProveTemplate,
 ];
 
