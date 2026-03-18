@@ -15380,3 +15380,30 @@
   - `getDeductionSystemInfo().isHilbertStyle` で体系チェック後にthrowするパターンで、非対応体系のガードが実現できる
   - テストではmockImplementationでnodeCounter/mpCounterを使い、呼び出しごとに異なるIDを返すことでリアルなシナリオを再現
 ---
+
+## 2026-03-18T16:50 - script-runner (ワークスペースSC証明木抽出API + カット除去テンプレート)
+- ベースライン: Stmts 99.77%, Branch 98.59%, Funcs 90.32%, Lines 99.82%
+- カバレッジ結果: Stmts 99.77%, Branch 98.59%, Funcs 90.34%, Lines 99.82%（変化なし、Funcs微増+0.02%）
+- 実装した内容:
+  - WorkspaceCommandHandler に `extractScProof(rootNodeId?)` メソッド追加
+  - workspaceBridge.ts にブリッジ関数実装（引数バリデーション + ハンドラー委譲）
+  - ProofWorkspace.tsx にハンドラー実装（findScRootNodeIds + buildScProofTree + encodeScProofNode）
+  - cut-elimination-workspace テンプレート追加: ワークスペースからSC証明木を自動抽出し、カット除去を適用。各ステップをコンソール表示、最終結果をキャンバスに展開
+  - ScriptEditorComponent.stories.tsx: extractScProof ハンドラー追加
+- テスト:
+  - workspaceBridge.test.ts: +4テスト（extractScProof引数なし/rootNodeId指定/型エラー/ハンドラーエラー）
+  - templates.test.ts: +3テスト（カット付き証明のカット除去/カットフリー時/非SC体系エラー）
+  - ブリッジ数 12→13、テンプレート数 5→6
+- 変更ファイル:
+  - src/lib/script-runner/workspaceBridge.ts（extractScProofブリッジ追加）
+  - src/lib/script-runner/workspaceBridge.test.ts（+4テスト）
+  - src/lib/script-runner/templates.ts（cut-elimination-workspaceテンプレート追加）
+  - src/lib/script-runner/templates.test.ts（+3テスト、カウント更新）
+  - src/lib/proof-pad/ProofWorkspace.tsx（extractScProofハンドラー実装）
+  - src/components/ScriptEditor/ScriptEditorComponent.stories.tsx（extractScProofハンドラー追加）
+- スクリーンショット: .screenshots/script-editor-cut-elimination-workspace-template.png
+- **今後のイテレーションへの学び:**
+  - WorkspaceCommandHandlerにメソッド追加時は、ProofWorkspace.tsx, workspaceBridge.test.ts, templates.test.ts, ScriptEditorComponent.stories.tsx の4箇所のモックを更新する必要がある
+  - extractScProofはワークスペースの状態（nodes + inferenceEdges）をworkspaceRef.currentから直接参照するため、ブリッジ側は単純なパススルー
+  - ModelAnswerDemo LargeProof (prop-08) は引き続きCI上でフレーキーに15sタイムアウトする（rerunで成功）
+---
