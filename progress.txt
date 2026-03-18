@@ -15561,3 +15561,24 @@
   - 同じsourceIdのタブは重複して開かない（既存タブをアクティブにする）
   - closeTabの隣接タブ選択ロジック: 右隣優先、なければ左隣、なければundefined
 ---
+
+## 2026-03-18 23:48 - script-editor ワークスペース永続化ロジック
+- 実装した内容:
+  - `scriptWorkspacePersistence.ts`: ワークスペース状態のJSON永続化
+    - serializeWorkspace: WorkspaceState → JSON文字列
+    - deserializeWorkspace: JSON文字列 + テンプレート一覧 → WorkspaceState
+    - ライブラリタブはテンプレートIDのみ保存、復元時にテンプレートから再構築
+    - 存在しないテンプレートのLibraryタブは復元時に除外
+    - 不正データへの堅牢なパース（不正JSON、不正構造はinitialStateにフォールバック）
+  - `scriptWorkspacePersistence.test.ts`: 18テスト（全パス）
+  - `index.ts`: エクスポート追加
+- 変更したファイル:
+  - src/components/ScriptEditor/scriptWorkspacePersistence.ts (新規)
+  - src/components/ScriptEditor/scriptWorkspacePersistence.test.ts (新規)
+  - src/components/ScriptEditor/index.ts (エクスポート追加)
+- カバレッジ: Stmts 99.7%, Branch 98.37%, Funcs 90.34%, Lines 99.75%（全指標維持or改善）
+- **今後のイテレーションへの学び:**
+  - ライブラリタブのシリアライズではコードを保存しない（テンプレートから復元するため）。テンプレートが削除されたら復元をスキップ
+  - `@luma-dev/luma-ts/no-explicit-return-is` により型ガード関数に `is` を使えない。boolean返してasでキャストする
+  - prettier --checkをcommit前に必ず通す。CI lintステップはprettier含む
+---
