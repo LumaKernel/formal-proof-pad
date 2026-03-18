@@ -81,3 +81,12 @@ export {
   serializeWorkspace,
   deserializeWorkspace,
 } from "./scriptWorkspacePersistence";
+export {
+  getSourceIcon,
+  computeTabDisplay,
+  computeAllTabDisplays,
+  formatTabLabel,
+} from "./tabBarLogic";
+export type { TabDisplayInfo } from "./tabBarLogic";
+export { ScriptWorkspaceTabBar } from "./ScriptWorkspaceTabBar";
+export type { ScriptWorkspaceTabBarProps } from "./ScriptWorkspaceTabBar";
