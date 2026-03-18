@@ -86,6 +86,8 @@ import {
 } from "./scriptWorkspacePersistence";
 import { ScriptWorkspaceTabBar } from "./ScriptWorkspaceTabBar";
 import { classifyScriptEditorKeyDown } from "./scriptEditorKeyboardShortcuts";
+import { ScriptFileExplorer } from "./ScriptFileExplorer";
+import { renameScript, findScript } from "./savedScriptsLogic";
 
 // ── Inline style constants ──────────────────────────────────
 
@@ -212,6 +214,12 @@ export const ScriptEditorComponent: React.FC<ScriptEditorComponentProps> = ({
   }, []);
   const handleCloseLibrary = useCallback(() => {
     setLibraryOpen(false);
+  }, []);
+
+  // ── ファイルエクスプローラー ────────────────────────────────────
+  const [fileExplorerOpen, setFileExplorerOpen] = useState(false);
+  const handleToggleFileExplorer = useCallback(() => {
+    setFileExplorerOpen((prev) => !prev);
   }, []);
 
   // ── 保存スクリプト管理 ────────────────────────────────────────
@@ -372,6 +380,13 @@ export const ScriptEditorComponent: React.FC<ScriptEditorComponentProps> = ({
   const handleDeleteSavedScript = useCallback((id: string) => {
     setSavedScripts((prev) => removeScript(prev, id));
   }, []);
+
+  const handleRenameSavedScript = useCallback(
+    (id: string, newTitle: string) => {
+      setSavedScripts((prev) => renameScript(prev, id, newTitle));
+    },
+    [],
+  );
 
   // ── console.log ブリッジ ────────────────────────────────────
 
@@ -672,6 +687,21 @@ declare var console: {
     setState((prev) => resetExecution(prev));
   }, []);
 
+  // ── ファイルエクスプローラーからスクリプトを開く ──────────────────
+
+  const handleOpenSavedScript = useCallback(
+    (id: string) => {
+      const script = findScript(savedScripts, id);
+      if (!script) return;
+      handleReset();
+      const now = getNow();
+      setWorkspace((prev) =>
+        openSavedTab(prev, script.id, script.title, script.code, now),
+      );
+    },
+    [savedScripts, handleReset, getNow],
+  );
+
   // ── エラーマーカーの更新 ──────────────────────────────────────
 
   useEffect(() => {
@@ -845,6 +875,23 @@ declare var console: {
           flexDirection: "row",
         }}
       >
+        {fileExplorerOpen && (
+          <div
+            style={{
+              width: "220px",
+              minWidth: "160px",
+              borderRight: "1px solid var(--color-border,#e2e8f0)",
+              overflow: "hidden",
+            }}
+          >
+            <ScriptFileExplorer
+              scripts={savedScripts.scripts}
+              onOpen={handleOpenSavedScript}
+              onRename={handleRenameSavedScript}
+              onDelete={handleDeleteSavedScript}
+            />
+          </div>
+        )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <Editor
             height="100%"
@@ -887,6 +934,25 @@ declare var console: {
         }}
         data-testid="template-bar"
       >
+        <button
+          type="button"
+          className="se-template-btn"
+          style={{
+            ...templateBtnStyle,
+            ...(fileExplorerOpen
+              ? {
+                  backgroundColor: "var(--color-accent,#555ab9)",
+                  color: "white",
+                  borderColor: "var(--color-accent,#555ab9)",
+                }
+              : {}),
+          }}
+          onClick={handleToggleFileExplorer}
+          data-testid="toggle-file-explorer-button"
+          title="Toggle File Explorer"
+        >
+          Files
+        </button>
         <button
           type="button"
           className="se-template-btn"

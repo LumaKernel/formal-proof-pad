@@ -90,6 +90,23 @@ export {
 export type { TabDisplayInfo } from "./tabBarLogic";
 export { ScriptWorkspaceTabBar } from "./ScriptWorkspaceTabBar";
 export type { ScriptWorkspaceTabBarProps } from "./ScriptWorkspaceTabBar";
+export { ScriptFileExplorer } from "./ScriptFileExplorer";
+export type { ScriptFileExplorerProps } from "./ScriptFileExplorer";
+export {
+  initialFileExplorerState,
+  startRename,
+  updateRenameValue,
+  cancelRename,
+  confirmRename,
+  startDeleteConfirm,
+  cancelDeleteConfirm,
+  computeFileExplorerItems,
+  formatSavedAt,
+} from "./scriptFileExplorerLogic";
+export type {
+  FileExplorerState,
+  FileExplorerItem,
+} from "./scriptFileExplorerLogic";
 export { classifyScriptEditorKeyDown } from "./scriptEditorKeyboardShortcuts";
 export type {
   ScriptEditorKeyboardAction,
