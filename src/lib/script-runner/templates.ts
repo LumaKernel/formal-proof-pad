@@ -276,24 +276,31 @@ if (!sysInfo.isHilbertStyle) {
   throw new Error("このスクリプトはヒルベルト流の体系でのみ実行できます。現在の体系: " + sysInfo.style);
 }
 
+// 公理同定のためにLogicSystemを取得
+var system = getLogicSystem();
+
 // ワークスペースをクリアして証明木を構築
 clearWorkspace();
 
 console.log("=== φ→φ の証明ツリー構築 ===");
-console.log("体系: " + sysInfo.systemName);
+console.log("体系: " + system.name);
 console.log("");
 
 // ステップ 1: A2 のインスタンス
 var a2Text = "(φ → ((ψ → φ) → φ)) → ((φ → (ψ → φ)) → (φ → φ))";
 var node1 = addNode(a2Text);
 setNodeRoleAxiom(node1);
-console.log("1. " + formatFormula(parseFormula(a2Text)) + "  [A2]");
+var id1 = identifyAxiom(parseFormula(a2Text), system);
+console.log("1. " + formatFormula(parseFormula(a2Text)));
+console.log("   公理判定: " + (id1._tag === "Ok" ? id1.axiomName : "ERROR"));
 
 // ステップ 2: A1 のインスタンス
 var a1Text1 = "φ → ((ψ → φ) → φ)";
 var node2 = addNode(a1Text1);
 setNodeRoleAxiom(node2);
-console.log("2. " + formatFormula(parseFormula(a1Text1)) + "  [A1]");
+var id2 = identifyAxiom(parseFormula(a1Text1), system);
+console.log("2. " + formatFormula(parseFormula(a1Text1)));
+console.log("   公理判定: " + (id2._tag === "Ok" ? id2.axiomName : "ERROR"));
 
 // ステップ 3: MP(2, 1) → (φ→(ψ→φ))→(φ→φ)
 var node3 = connectMP(node2, node1);
@@ -303,7 +310,9 @@ console.log("3. " + formatFormula(parseFormula("(φ → (ψ → φ)) → (φ →
 var a1Text2 = "φ → (ψ → φ)";
 var node4 = addNode(a1Text2);
 setNodeRoleAxiom(node4);
-console.log("4. " + formatFormula(parseFormula(a1Text2)) + "  [A1]");
+var id4 = identifyAxiom(parseFormula(a1Text2), system);
+console.log("4. " + formatFormula(parseFormula(a1Text2)));
+console.log("   公理判定: " + (id4._tag === "Ok" ? id4.axiomName : "ERROR"));
 
 // ステップ 5: MP(4, 3) → φ→φ
 var node5 = connectMP(node4, node3);
@@ -315,6 +324,7 @@ applyLayout();
 
 console.log("");
 console.log("証明ツリーを構築しました。");
+console.log("すべての公理ノードが正しく同定されています。");
 console.log("Q.E.D.");
 `,
 };
@@ -967,6 +977,112 @@ console.log("Q.E.D.");
 `,
 };
 
+/**
+ * Hilbert定理ギャラリー: 複数の定理を演繹定理ワークフローで自動証明する。
+ *
+ * 仮定付き証明を構築 → extractHilbertProof → applyDeductionTheorem の
+ * 一連のワークフローを複数定理で実演する。
+ *
+ * 証明する定理:
+ *   1. φ → φ（恒等式）— 仮定 φ ⊢ φ から DT 1回
+ *   2. (φ → ψ) → ((ψ → χ) → (φ → χ))（三段論法）— DT 3回
+ */
+const hilbertTheoremGallery: ScriptTemplate = {
+  id: "hilbert-theorem-gallery",
+  title: "Hilbert定理ギャラリー",
+  description:
+    "複数の定理を演繹定理ワークフロー（仮定付き証明構築 → DT適用）で自動証明する。extractHilbertProof / applyDeductionTheorem の実践的な活用例。",
+  compatibleStyles: ["hilbert"],
+  code: `// Hilbert定理ギャラリー
+//
+// 演繹定理 (DT) ワークフロー:
+//   1. ワークスペースに仮定付き証明を構築
+//   2. extractHilbertProof で証明木を抽出
+//   3. applyDeductionTheorem で仮定を除去
+//   4. displayHilbertProof で変換後の証明木を表示
+//
+// このワークフローで複数の定理を自動証明します。
+
+var sysInfo = getDeductionSystemInfo();
+if (!sysInfo.isHilbertStyle) {
+  throw new Error("このスクリプトはヒルベルト流の体系でのみ実行できます。現在の体系: " + sysInfo.style);
+}
+
+// ── 定理1: φ → φ（恒等式）──
+console.log("========================================");
+console.log("定理1: φ → φ（恒等式）");
+console.log("========================================");
+console.log("戦略: φ を仮定として φ を導出し、DT で仮定を除去");
+console.log("");
+
+clearWorkspace();
+var n1 = addNode("φ");
+setNodeRoleAxiom(n1);
+addGoal("φ");
+applyLayout();
+
+console.log("仮定付き証明: φ ⊢ φ");
+var proof1 = extractHilbertProof();
+
+console.log("--- DT適用: 仮定 φ を除去 ---");
+var dt1 = applyDeductionTheorem(proof1, "φ");
+displayHilbertProof(dt1);
+console.log("結論: ⊢ φ → φ");
+console.log("");
+
+// ── 定理2: (φ → ψ) → ((ψ → χ) → (φ → χ))（三段論法）──
+console.log("========================================");
+console.log("定理2: (φ→ψ) → ((ψ→χ) → (φ→χ))");
+console.log("========================================");
+console.log("戦略: φ→ψ, ψ→χ, φ を仮定 → MP2回で χ を導出 → DT3回");
+console.log("");
+
+clearWorkspace();
+
+var h1 = addNode("φ → ψ");
+setNodeRoleAxiom(h1);
+var h2 = addNode("ψ → χ");
+setNodeRoleAxiom(h2);
+var h3 = addNode("φ");
+setNodeRoleAxiom(h3);
+
+// MP: φ, φ→ψ ⊢ ψ
+var r1 = connectMP(h3, h1);
+// MP: ψ, ψ→χ ⊢ χ
+var r2 = connectMP(r1, h2);
+addGoal("χ");
+applyLayout();
+
+console.log("仮定付き証明: φ→ψ, ψ→χ, φ ⊢ χ");
+var proof2 = extractHilbertProof();
+
+console.log("--- DT適用1: 仮定 φ を除去 ---");
+var dt2a = applyDeductionTheorem(proof2, "φ");
+console.log("結論: φ→ψ, ψ→χ ⊢ φ → χ");
+
+console.log("--- DT適用2: 仮定 ψ→χ を除去 ---");
+var dt2b = applyDeductionTheorem(dt2a, "ψ → χ");
+console.log("結論: φ→ψ ⊢ (ψ→χ) → (φ→χ)");
+
+console.log("--- DT適用3: 仮定 φ→ψ を除去 ---");
+var dt2c = applyDeductionTheorem(dt2b, "φ → ψ");
+displayHilbertProof(dt2c);
+console.log("結論: ⊢ (φ→ψ) → ((ψ→χ) → (φ→χ))");
+console.log("");
+
+console.log("========================================");
+console.log("ギャラリー完了！");
+console.log("========================================");
+console.log("");
+console.log("演繹定理ワークフローのまとめ:");
+console.log("  1. ワークスペースに仮定付き証明を構築");
+console.log("  2. extractHilbertProof() で証明木を抽出");
+console.log("  3. applyDeductionTheorem(proof, hypothesis) で仮定を除去");
+console.log("  4. displayHilbertProof() で結果を表示");
+console.log("必要な回数だけ DT を適用して、すべての仮定を除去します。");
+`,
+};
+
 // ── カット除去 段階的学習テンプレート ────────────────────────
 
 /**
@@ -1508,6 +1624,7 @@ export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
   axiomExplorer,
   predicateLogicProof,
   syllogismProof,
+  hilbertTheoremGallery,
   deductionTheoremWorkspace,
   reverseDeductionTheoremWorkspace,
 ];

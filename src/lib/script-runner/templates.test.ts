@@ -10,8 +10,8 @@ import type { WorkspaceCommandHandler } from "./workspaceBridge";
 import type { NativeFunctionBridge } from "./scriptRunner";
 
 describe("BUILTIN_TEMPLATES", () => {
-  it("19のテンプレートを含む", () => {
-    expect(BUILTIN_TEMPLATES).toHaveLength(19);
+  it("20のテンプレートを含む", () => {
+    expect(BUILTIN_TEMPLATES).toHaveLength(20);
   });
 
   it("各テンプレートが必須フィールドを持つ", () => {
@@ -227,6 +227,8 @@ describe("テンプレート実行テスト", () => {
     expect(result._tag).toBe("Ok");
     // 体系チェックが通ること
     expect(handler.getDeductionSystemInfo).toHaveBeenCalled();
+    // getLogicSystemでidentifyAxiom用のシステム情報を取得
+    expect(handler.getLogicSystem).toHaveBeenCalled();
     // clearWorkspaceが呼ばれること
     expect(handler.clearWorkspace).toHaveBeenCalled();
     // 公理ノードが3つ追加されること
@@ -241,6 +243,9 @@ describe("テンプレート実行テスト", () => {
     expect(handler.applyLayout).toHaveBeenCalled();
     // コンソール出力の確認
     expect(consoleLogs.some((l) => l.includes("証明ツリーを構築"))).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("公理ノードが正しく同定"))).toBe(
+      true,
+    );
     expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);
   });
 
@@ -828,6 +833,86 @@ describe("テンプレート実行テスト", () => {
     expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);
   });
 
+  it("hilbert-theorem-gallery: 正常に実行される", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "hilbert-theorem-gallery",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    let nodeCounter = 0;
+    (handler.addNode as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      nodeCounter++;
+      return `node-${String(nodeCounter) satisfies string}`;
+    });
+    let mpCounter = 100;
+    (handler.connectMP as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      mpCounter++;
+      return `mp-${String(mpCounter) satisfies string}`;
+    });
+    // extractHilbertProofが仮定の証明木を返す（定理1: φ ⊢ φ）
+    (handler.extractHilbertProof as ReturnType<typeof vi.fn>).mockReturnValue({
+      _tag: "AxiomNode",
+      formula: { _tag: "MetaVariable", name: "φ" },
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 500000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(consoleLogs.some((l) => l.includes("定理1"))).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("定理2"))).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("ギャラリー完了"))).toBe(true);
+    // clearWorkspaceが複数回呼ばれること（定理ごとにリセット）
+    expect(
+      (handler.clearWorkspace as ReturnType<typeof vi.fn>).mock.calls.length,
+    ).toBeGreaterThanOrEqual(2);
+  });
+
+  it("hilbert-theorem-gallery: ヒルベルト流以外ではエラー", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "hilbert-theorem-gallery",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    (
+      handler.getDeductionSystemInfo as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      style: "natural-deduction",
+      systemName: "Natural Deduction",
+      isHilbertStyle: false,
+      rules: [],
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    expect(result._tag).toBe("Error");
+    expect(handler.clearWorkspace).not.toHaveBeenCalled();
+  });
+
   it("syllogism-proof: ヒルベルト流以外ではエラー", () => {
     const tmpl = BUILTIN_TEMPLATES.find((t) => t.id === "syllogism-proof")!;
     consoleLogs.length = 0;
@@ -968,8 +1053,9 @@ describe("filterTemplatesByStyle", () => {
     expect(ids).toContain("predicate-logic-proof");
     expect(ids).toContain("syllogism-proof");
     expect(ids).toContain("deduction-theorem-workspace");
+    expect(ids).toContain("hilbert-theorem-gallery");
     expect(ids).toContain("reverse-deduction-theorem-workspace");
-    expect(result).toHaveLength(9);
+    expect(result).toHaveLength(10);
   });
 
   it("BUILTIN_TEMPLATESでsequent-calculusフィルタ", () => {
