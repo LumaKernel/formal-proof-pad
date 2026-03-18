@@ -15407,3 +15407,47 @@
   - extractScProofはワークスペースの状態（nodes + inferenceEdges）をworkspaceRef.currentから直接参照するため、ブリッジ側は単純なパススルー
   - ModelAnswerDemo LargeProof (prop-08) は引き続きCI上でフレーキーに15sタイムアウトする（rerunで成功）
 ---
+
+## 2026-03-18 - 演繹定理スクリプト + Hilbert証明木ブリッジ
+- 実装した内容:
+  - deductionTheorem.ts: 演繹定理の純粋ロジック（Γ∪{A}⊢B → Γ⊢A→B のProofNode変換）
+    - AxiomNode(hypothesis)→A→A証明、AxiomNode(other)→A1+MP、MP→A2+2xMP、Gen→Gen+A5+MP
+    - DeductionTheoremFreeVariableError（Gen変数が仮定に自由出現する場合）
+  - hilbertTreeBuildLogic.ts: ワークスペースのフラットグラフからHilbert ProofNodeツリーを再帰構築
+    - findHilbertRootNodeIds: 結論ノード検出（他のエッジの前提として参照されないノード）
+    - buildHilbertProofTree: MP→ModusPonensNode, Gen→GeneralizationNode, Substitution→AxiomNode
+  - hilbertProofBridge.ts: ProofNode encode/decode、applyDeductionTheorem、displayHilbertProof のサンドボックスブリッジ
+  - workspaceBridge.ts: extractHilbertProof API追加（ブリッジ数13→14）
+  - templates.ts: deduction-theorem-workspace テンプレート（テンプレート数6→7）
+    - 選択ノードの論理式を仮定として演繹定理適用、結果は元の証明木を消さず横に配置
+- テスト:
+  - deductionTheorem.test.ts: 9テスト（hypothesis→A→A、公理→A→C、MP変換、Gen変換、自由変数エラー、複合証明変換）
+  - hilbertTreeBuildLogic.test.ts: 13テスト（ルート検出、ツリー構築、エラーケース）
+  - hilbertProofBridge.test.ts: 25テスト（encode/decode round-trip、ブリッジ関数、API定義）
+  - workspaceBridge.test.ts: +4テスト（extractHilbertProof）
+  - templates.test.ts: +3テスト（正常実行、未選択エラー、非Hilbertエラー）
+- カバレッジ: Stmts 99.70%, Branch 98.38%, Funcs 90.24%, Lines 99.75%（ベースラインStmts 99.77%からわずかな低下はV8 coverage merging quirk）
+- 変更ファイル:
+  - src/lib/logic-core/deductionTheorem.ts（新規）
+  - src/lib/logic-core/deductionTheorem.test.ts（新規）
+  - src/lib/logic-core/index.ts（export追加）
+  - src/lib/proof-pad/hilbertTreeBuildLogic.ts（新規）
+  - src/lib/proof-pad/hilbertTreeBuildLogic.test.ts（新規）
+  - src/lib/proof-pad/index.ts（export追加）
+  - src/lib/proof-pad/ProofWorkspace.tsx（extractHilbertProofハンドラー）
+  - src/lib/script-runner/hilbertProofBridge.ts（新規）
+  - src/lib/script-runner/hilbertProofBridge.test.ts（新規）
+  - src/lib/script-runner/index.ts（export追加）
+  - src/lib/script-runner/workspaceBridge.ts（extractHilbertProof追加）
+  - src/lib/script-runner/workspaceBridge.test.ts（+4テスト）
+  - src/lib/script-runner/templates.ts（deduction-theorem-workspaceテンプレート）
+  - src/lib/script-runner/templates.test.ts（+3テスト）
+  - src/components/ScriptEditor/ScriptEditorComponent.tsx（ブリッジ統合）
+  - src/components/ScriptEditor/ScriptEditorComponent.stories.tsx（モック追加）
+- **今後のイテレーションへの学び:**
+  - 演繹定理アルゴリズム: A→A証明は5ステップ（A1×2, A2×1, MP×2）。MP変換はA2利用で子の変換結果を合成
+  - WorkspaceCommandHandlerにメソッド追加時のモック更新箇所: ProofWorkspace.tsx, workspaceBridge.test.ts, templates.test.ts, ScriptEditorComponent.stories.tsx の4箇所 + hilbertProofBridge.test.ts（新規）
+  - Universal SchemaのフィールドはbodyではなくformulaA（Schema.TaggedClass定義に従う）
+  - SubstitutionEdge/SimplificationEdge/SubstitutionConnectionEdge の結論は公理スキーマの適用結果として扱い、ProofNodeではAxiomNodeに変換
+  - hilbertTreeBuildLogic はscTreeBuildLogicと同じ3層パターン: ルート検出→再帰構築→Either公開API
+---
