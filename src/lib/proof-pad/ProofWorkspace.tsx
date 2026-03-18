@@ -256,7 +256,10 @@ import {
 import { useHistory } from "../history/useHistory";
 import { getScriptCode } from "./scriptNode";
 import { ScriptEditorComponent } from "../../components/ScriptEditor/ScriptEditorComponent";
-import type { WorkspaceCommandHandler } from "../script-runner";
+import {
+  type WorkspaceCommandHandler,
+  encodeScProofNode,
+} from "../script-runner";
 
 // --- ノート編集用ツールバー定数 ---
 const NOTE_EDITOR_TOOLBARS: (
@@ -3641,6 +3644,44 @@ export const ProofWorkspace = forwardRef<
           isHilbertStyle: ds.style === "hilbert",
           rules,
         };
+      },
+      extractScProof: (rootNodeId?: string) => {
+        const ws = workspaceRef.current;
+        if (ws.deductionSystem.style !== "sequent-calculus") {
+          throw new Error(
+            `extractScProof: SC体系でのみ使用可能です。現在の体系: ${ws.deductionSystem.style satisfies string}`,
+          );
+        }
+        let targetRootId = rootNodeId;
+        if (targetRootId === undefined) {
+          const rootIds = findScRootNodeIds(ws.nodes, ws.inferenceEdges);
+          if (rootIds.length === 0) {
+            throw new Error(
+              "extractScProof: ワークスペースにSC証明木が見つかりません。",
+            );
+          }
+          if (rootIds.length > 1) {
+            throw new Error(
+              `extractScProof: 複数のルートノードが見つかりました（${String(rootIds.length) satisfies string}個）。rootNodeIdを指定してください。`,
+            );
+          }
+          targetRootId = rootIds[0];
+        }
+        if (targetRootId === undefined) {
+          throw new Error("extractScProof: ルートノードが見つかりません。");
+        }
+        const treeResult = buildScProofTree(
+          targetRootId,
+          ws.nodes,
+          ws.inferenceEdges,
+        );
+        if (Either.isLeft(treeResult)) {
+          const tag = treeResult.left._tag satisfies string;
+          throw new Error(
+            `extractScProof: 証明木構築に失敗しました: ${tag satisfies string}`,
+          );
+        }
+        return encodeScProofNode(treeResult.right);
       },
     };
   }, [scriptEditorOpen, workspace.system, setWorkspace, selectedNodeIds]);

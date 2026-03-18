@@ -53,6 +53,13 @@ export interface WorkspaceCommandHandler {
     readonly isHilbertStyle: boolean;
     readonly rules: readonly string[];
   };
+  /**
+   * ワークスペースからSC証明木を抽出する。
+   * rootNodeIdを指定しない場合はルートを自動検出する。
+   * SC体系でない場合、証明木構築に失敗した場合はthrow。
+   * 返却値はencodeScProofNode済みのJSON互換オブジェクト。
+   */
+  readonly extractScProof: (rootNodeId?: string) => unknown;
 }
 
 // ── ブリッジ関数の実装 ────────────────────────────────────────
@@ -165,6 +172,20 @@ const createGetSelectedNodeIdsFn =
 const createGetDeductionSystemInfoFn =
   (handler: WorkspaceCommandHandler) => (): unknown => {
     return handler.getDeductionSystemInfo();
+  };
+
+const createExtractScProofFn =
+  (handler: WorkspaceCommandHandler) =>
+  (rootNodeId?: unknown): unknown => {
+    if (rootNodeId !== undefined && typeof rootNodeId !== "string") {
+      const t = typeof rootNodeId satisfies string;
+      throw new Error(
+        `extractScProof: rootNodeId must be string or undefined, got ${t satisfies string}`,
+      );
+    }
+    return handler.extractScProof(
+      typeof rootNodeId === "string" ? rootNodeId : undefined,
+    );
   };
 
 // ── SC証明木のフラット展開 ──────────────────────────────────
@@ -320,6 +341,7 @@ const createDisplayScProofFn =
  * - applyLayout()
  * - getSelectedNodeIds() → string[]
  * - getDeductionSystemInfo() → { style, systemName, isHilbertStyle, rules }
+ * - extractScProof(rootNodeId?) → ScProofNodeJson
  */
 export const createWorkspaceBridges = (
   handler: WorkspaceCommandHandler,
@@ -339,6 +361,7 @@ export const createWorkspaceBridges = (
     name: "getDeductionSystemInfo",
     fn: createGetDeductionSystemInfoFn(handler),
   },
+  { name: "extractScProof", fn: createExtractScProofFn(handler) },
 ];
 
 // ── API 定義（Monaco Editor 補完用）──────────────────────────
@@ -409,6 +432,12 @@ export const WORKSPACE_BRIDGE_API_DEFS: readonly ProofBridgeApiDef[] = [
       "() => { style: string; systemName: string; isHilbertStyle: boolean; rules: string[] }",
     description:
       "現在の演繹体系の情報を返す。style（証明スタイル）、systemName（体系名）、isHilbertStyle（Hilbert流かどうか）、rules（有効な推論規則一覧）を含む。",
+  },
+  {
+    name: "extractScProof",
+    signature: "(rootNodeId?: string) => ScProofNodeJson",
+    description:
+      "ワークスペースからSC証明木を抽出する。rootNodeIdを省略するとルートを自動検出する。SC体系でない場合や証明木構築に失敗した場合はエラーをthrowする。",
   },
 ];
 

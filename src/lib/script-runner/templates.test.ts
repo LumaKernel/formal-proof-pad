@@ -9,8 +9,8 @@ import type { WorkspaceCommandHandler } from "./workspaceBridge";
 import type { NativeFunctionBridge } from "./scriptRunner";
 
 describe("BUILTIN_TEMPLATES", () => {
-  it("5つのテンプレートを含む", () => {
-    expect(BUILTIN_TEMPLATES).toHaveLength(5);
+  it("6つのテンプレートを含む", () => {
+    expect(BUILTIN_TEMPLATES).toHaveLength(6);
   });
 
   it("各テンプレートが必須フィールドを持つ", () => {
@@ -100,6 +100,7 @@ describe("テンプレート実行テスト", () => {
       isHilbertStyle: true,
       rules: [],
     }),
+    extractScProof: vi.fn(),
   });
 
   const runTemplate = (tmpl: ScriptTemplate) => {
@@ -269,6 +270,128 @@ describe("テンプレート実行テスト", () => {
     expect(consoleLogs.some((l) => l.includes("自動証明探索"))).toBe(true);
     expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);
   });
+
+  it("cut-elimination-workspace: カット付き証明のカット除去が正常に実行される", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "cut-elimination-workspace",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    // SC体系のモック
+    (
+      handler.getDeductionSystemInfo as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      style: "sequent-calculus",
+      systemName: "LK",
+      isHilbertStyle: false,
+      rules: ["identity", "cut"],
+    });
+    // extractScProofがカット付き証明を返すモック
+    // Cut(φ): Identity(φ⇒φ) + Identity(φ⇒φ)
+    const phi = { _tag: "MetaVariable", name: "φ" };
+    const idPhi = {
+      _tag: "ScIdentity",
+      conclusion: { antecedents: [phi], succedents: [phi] },
+    };
+    (handler.extractScProof as ReturnType<typeof vi.fn>).mockReturnValue({
+      _tag: "ScCut",
+      conclusion: { antecedents: [phi], succedents: [phi] },
+      left: idPhi,
+      right: idPhi,
+      cutFormula: phi,
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(handler.extractScProof).toHaveBeenCalled();
+    expect(
+      consoleLogs.some((l) => l.includes("ワークスペース証明のカット除去")),
+    ).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("カット数: 1"))).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("Success"))).toBe(true);
+    expect(handler.clearWorkspace).toHaveBeenCalled();
+  });
+
+  it("cut-elimination-workspace: 既にカットフリーの場合は変更なし", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "cut-elimination-workspace",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    (
+      handler.getDeductionSystemInfo as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      style: "sequent-calculus",
+      systemName: "LK",
+      isHilbertStyle: false,
+      rules: ["identity"],
+    });
+    // カットフリー証明（Identity のみ）
+    const phi = { _tag: "MetaVariable", name: "φ" };
+    (handler.extractScProof as ReturnType<typeof vi.fn>).mockReturnValue({
+      _tag: "ScIdentity",
+      conclusion: { antecedents: [phi], succedents: [phi] },
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(consoleLogs.some((l) => l.includes("既にカットフリー"))).toBe(true);
+    // displayScProofは呼ばれない（変更なしのため）
+    expect(handler.clearWorkspace).not.toHaveBeenCalled();
+  });
+
+  it("cut-elimination-workspace: SC体系以外ではエラー", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "cut-elimination-workspace",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    // Hilbert体系（デフォルトモック）のまま
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    expect(result._tag).toBe("Error");
+    expect(handler.extractScProof).not.toHaveBeenCalled();
+  });
 });
 
 describe("filterTemplatesByStyle", () => {
@@ -360,8 +483,9 @@ describe("filterTemplatesByStyle", () => {
     const ids = result.map((t) => t.id);
     expect(ids).toContain("cut-elimination-simple");
     expect(ids).toContain("cut-elimination-implication");
+    expect(ids).toContain("cut-elimination-workspace");
     expect(ids).toContain("auto-prove-lk");
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(4);
   });
 
   it("空配列に対してフィルタしても空配列を返す", () => {

@@ -377,11 +377,88 @@ console.log("Q.E.D.");
 };
 
 /**
+ * ワークスペースの証明に対してカット除去を実行するテンプレート。
+ *
+ * ワークスペースからSC証明木を自動抽出し、カット除去を適用する。
+ * SC体系でない場合はエラーで停止する。
+ */
+const cutEliminationWorkspace: ScriptTemplate = {
+  id: "cut-elimination-workspace",
+  title: "ワークスペース証明のカット除去",
+  description:
+    "ワークスペース上のSC証明木を抽出し、カット除去を適用する。結果はキャンバスに表示される。",
+  compatibleStyles: ["sequent-calculus"],
+  code: `// ワークスペース証明のカット除去
+//
+// ワークスペース上に構築されたSC証明木を自動抽出し、
+// カット除去定理を適用します。
+// 各ステップをコンソールに表示し、最終結果をキャンバスに展開します。
+
+// 体系チェック
+var sysInfo = getDeductionSystemInfo();
+if (sysInfo.style !== "sequent-calculus") {
+  throw new Error("このスクリプトはシーケント計算の体系でのみ実行できます。現在の体系: " + sysInfo.style);
+}
+
+console.log("=== ワークスペース証明のカット除去 ===");
+console.log("体系: " + sysInfo.systemName);
+console.log("");
+
+// ワークスペースからSC証明木を抽出
+console.log("--- 証明木を抽出中 ---");
+var proof = extractScProof();
+
+// 証明の情報を表示
+var conclusionSeq = getScConclusion(proof);
+console.log("結論: " + formatSequent(conclusionSeq));
+console.log("カット数: " + countCuts(proof));
+console.log("カットフリー? " + isCutFree(proof));
+console.log("");
+
+if (isCutFree(proof)) {
+  console.log("この証明は既にカットフリーです。変更はありません。");
+} else {
+  // カット除去の実行
+  console.log("--- カット除去開始 ---");
+  var result = eliminateCutsWithSteps(proof);
+
+  // 各ステップの表示
+  for (var i = 0; i < result.steps.length; i++) {
+    var step = result.steps[i];
+    console.log("ステップ " + (i + 1) + ": " + step.description);
+    console.log("  depth=" + step.depth + ", rank=" + step.rank);
+    var stepConc = getScConclusion(step.proof);
+    console.log("  結論: " + formatSequent(stepConc));
+  }
+
+  // 結果の表示
+  console.log("");
+  console.log("--- 結果 ---");
+  console.log("状態: " + result.result._tag);
+  if (result.result._tag === "Success") {
+    var finalConc = getScConclusion(result.result.proof);
+    console.log("最終結論: " + formatSequent(finalConc));
+    console.log("カットフリー? " + isCutFree(result.result.proof));
+    console.log("");
+    console.log("カットフリー証明をキャンバスに表示します。");
+    displayScProof(result.result.proof);
+  } else if (result.result._tag === "StepLimitExceeded") {
+    console.log("ステップ数の上限に達しました。部分的な結果を表示します。");
+    displayScProof(result.result.proof);
+  } else {
+    console.log("カット除去に失敗しました: " + result.result.reason);
+  }
+}
+`,
+};
+
+/**
  * ビルトインテンプレート一覧。
  */
 export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
   cutEliminationSimple,
   cutEliminationImplication,
+  cutEliminationWorkspace,
   buildIdentityProof,
   buildIdentityProofTree,
   autoProveTemplate,

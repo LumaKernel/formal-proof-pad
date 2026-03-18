@@ -290,6 +290,9 @@ function ScriptEditorWithWorkspace() {
         isHilbertStyle: true,
         rules: [],
       }),
+      extractScProof: () => {
+        throw new Error("extractScProof: SC体系でのみ使用可能です。");
+      },
     }),
     [],
   )();

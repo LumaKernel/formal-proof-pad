@@ -31,6 +31,13 @@ const createMockHandler = (): WorkspaceCommandHandler => ({
     isHilbertStyle: true,
     rules: [],
   }),
+  extractScProof: vi.fn().mockReturnValue({
+    _tag: "ScIdentity",
+    conclusion: {
+      antecedents: [{ _tag: "MetaVariable", name: "φ" }],
+      succedents: [{ _tag: "MetaVariable", name: "φ" }],
+    },
+  }),
 });
 
 const getRunner = (
@@ -82,7 +89,7 @@ describe("createWorkspaceBridges", () => {
   it("ブリッジ関数一覧を返す", () => {
     const handler = createMockHandler();
     const bridges = createWorkspaceBridges(handler);
-    expect(bridges.length).toBe(12);
+    expect(bridges.length).toBe(13);
     const names = bridges.map((b) => b.name);
     expect(names).toContain("addNode");
     expect(names).toContain("setNodeFormula");
@@ -96,6 +103,7 @@ describe("createWorkspaceBridges", () => {
     expect(names).toContain("displayScProof");
     expect(names).toContain("getSelectedNodeIds");
     expect(names).toContain("getDeductionSystemInfo");
+    expect(names).toContain("extractScProof");
   });
 });
 
@@ -715,6 +723,45 @@ if (!info.isHilbertStyle) {
   });
 });
 
+describe("extractScProof ブリッジ", () => {
+  it("引数なしでSC証明木を返す", () => {
+    const handler = createMockHandler();
+    const result = runCode(`extractScProof()`, handler);
+    expect(handler.extractScProof).toHaveBeenCalledWith(undefined);
+    expect(result).toEqual({
+      _tag: "ScIdentity",
+      conclusion: {
+        antecedents: [{ _tag: "MetaVariable", name: "φ" }],
+        succedents: [{ _tag: "MetaVariable", name: "φ" }],
+      },
+    });
+  });
+
+  it("rootNodeIdを指定してSC証明木を返す", () => {
+    const handler = createMockHandler();
+    runCode(`extractScProof("root-1")`, handler);
+    expect(handler.extractScProof).toHaveBeenCalledWith("root-1");
+  });
+
+  it("rootNodeIdが文字列でない場合エラー", () => {
+    const handler = createMockHandler();
+    const msg = runCodeError(`extractScProof(123)`, handler);
+    expect(msg).toContain("extractScProof");
+    expect(msg).toContain("string");
+  });
+
+  it("ハンドラーがエラーをthrowした場合はランタイムエラー", () => {
+    const handler = createMockHandler();
+    (handler.extractScProof as ReturnType<typeof vi.fn>).mockImplementation(
+      () => {
+        throw new Error("SC体系でのみ使用可能です");
+      },
+    );
+    const msg = runCodeError(`extractScProof()`, handler);
+    expect(msg).toContain("SC体系でのみ使用可能です");
+  });
+});
+
 describe("generateWorkspaceBridgeTypeDefs", () => {
   it("TypeScript型定義テキストを生成する", () => {
     const typeDefs = generateWorkspaceBridgeTypeDefs();
@@ -725,5 +772,6 @@ describe("generateWorkspaceBridgeTypeDefs", () => {
     expect(typeDefs).toContain("declare function displayScProof");
     expect(typeDefs).toContain("declare function getSelectedNodeIds");
     expect(typeDefs).toContain("declare function getDeductionSystemInfo");
+    expect(typeDefs).toContain("declare function extractScProof");
   });
 });
