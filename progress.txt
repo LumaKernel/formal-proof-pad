@@ -15609,3 +15609,24 @@
   - emoji をソースアイコンとして使用（📝=unnamed, 📚=library, 💾=saved）。CSSアイコンよりシンプル
   - TabItem内でstopPropagationしてcloseボタンクリックがタブ選択にならないようにする
 ---
+
+## 2026-03-19 - [script-editor] ワークスペースタブバーをScriptEditorComponentに統合
+- 実装した内容:
+  - ScriptEditorComponent にワークスペース状態を統合
+  - useState でWorkspaceStateを管理、localStorage永続化（auto-save）
+  - タブバーをエディタ上部に表示（ScriptWorkspaceTabBar）
+  - タブ切替でエディタ内容・実行状態を切り替え
+  - ライブラリ選択時にタブとして開く（immutable, dedup）
+  - 新規タブ作成、タブ閉じる
+  - Monaco Editor readOnly モードをライブラリタブで有効化
+- 変更したファイル:
+  - src/components/ScriptEditor/ScriptEditorComponent.tsx (統合)
+- スクリーンショット:
+  - .screenshots/workspace-tabbar-integration-default.png
+  - .screenshots/workspace-tabbar-integration-workspace.png
+- Storybook: 全ストーリー（Default, WorkspaceIntegration含む）のplay関数がPass
+- **今後のイテレーションへの学び:**
+  - ESLint `react-hooks/set-state-in-effect`: useEffect内でsetStateすると警告。handleSelectTab/handleCloseTabコールバック内でsetState呼び出しに移動
+  - タブ切替時のエディタ同期: 新しいactiveTabのcode/readonlyをsetStateで即座に反映
+  - ライブラリタブのdedup: openLibraryTab/openSavedTabが同じsourceIdのタブを再利用する
+---
