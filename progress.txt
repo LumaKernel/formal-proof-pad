@@ -108,6 +108,24 @@
 
 ---
 
+## 2026-03-19 - [proof-pad] hilbertTreeBuildLogic Branchカバレッジ改善
+- ベースライン: Stmts 99.65%, Branch 98.24%, Funcs 89.98%, Lines 99.69%
+- **結果: Stmts 99.72% (+0.07), Branch 98.45% (+0.21), Funcs 89.98% (±0), Lines 99.75% (+0.06)**
+- 実装内容:
+  - hilbertTreeBuildLogic.test.ts に14テスト追加（14→27テスト）
+  - substitution/simplification/substitution-connection エッジの findHilbertRootNodeIds テスト
+  - premiseNodeId undefined ケースの網羅テスト（mp, gen, substitution, simplification, substitution-connection）
+  - サイクル検出テスト追加
+  - buildHilbertProofTree の simplification / substitution-connection エッジテスト
+- 変更ファイル:
+  - src/lib/proof-pad/hilbertTreeBuildLogic.test.ts（+230行）
+- **今後のイテレーションへの学び:**
+  - Funcs 89.98%の低さはv8カバレッジマージのアーティファクト。単独テスト実行では100%だがフルスイートでは低下する
+  - Branch改善が最も実効的なカバレッジ改善手段
+  - `||` チェーンの分岐はv8が個別条件ごとにブランチカウントするため、全パターン網羅しても100%にならない場合がある
+
+---
+
 ## 2026-03-18 - [script-editor] スクリプトライブラリパネル
 - ベースライン: Stmts 99.7%, Branch 98.38%, Funcs 90.23%, Lines 99.75%
 - **結果: Stmts 99.7% (±0), Branch 98.36% (-0.02), Funcs 90.27% (+0.04), Lines 99.75% (±0)**
