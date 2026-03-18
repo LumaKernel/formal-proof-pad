@@ -3664,9 +3664,7 @@ export const ProofWorkspace = forwardRef<
           predicateLogic: sys.predicateLogic,
           equalityLogic: sys.equalityLogic,
           generalization: sys.generalization,
-          ...(sys.theoryAxioms
-            ? { theoryAxioms: sys.theoryAxioms }
-            : {}),
+          ...(sys.theoryAxioms ? { theoryAxioms: sys.theoryAxioms } : {}),
         };
       },
       extractScProof: (rootNodeId?: string) => {

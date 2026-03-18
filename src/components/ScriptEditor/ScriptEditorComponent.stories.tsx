@@ -304,9 +304,7 @@ function ScriptEditorWithWorkspace() {
       }),
       getLogicSystem: () => ({
         name: lukasiewiczSystem.name,
-        propositionalAxioms: Array.from(
-          lukasiewiczSystem.propositionalAxioms,
-        ),
+        propositionalAxioms: Array.from(lukasiewiczSystem.propositionalAxioms),
         predicateLogic: lukasiewiczSystem.predicateLogic,
         equalityLogic: lukasiewiczSystem.equalityLogic,
         generalization: lukasiewiczSystem.generalization,
