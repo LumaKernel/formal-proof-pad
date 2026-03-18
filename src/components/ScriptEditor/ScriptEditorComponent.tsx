@@ -66,6 +66,23 @@ import {
   STORAGE_KEY,
 } from "./savedScriptsLogic";
 import type { SavedScriptsState } from "./savedScriptsLogic";
+import {
+  initialWorkspaceState,
+  createUnnamedTab,
+  openLibraryTab,
+  openSavedTab,
+  setActiveTab,
+  closeTab,
+  updateTabCode,
+  getActiveTab,
+} from "./scriptWorkspaceState";
+import type { WorkspaceState } from "./scriptWorkspaceState";
+import {
+  WORKSPACE_STORAGE_KEY,
+  serializeWorkspace,
+  deserializeWorkspace,
+} from "./scriptWorkspacePersistence";
+import { ScriptWorkspaceTabBar } from "./ScriptWorkspaceTabBar";
 
 // ── Inline style constants ──────────────────────────────────
 
@@ -220,6 +237,72 @@ export const ScriptEditorComponent: React.FC<ScriptEditorComponentProps> = ({
     }
   }, [savedScripts]);
 
+  // ── ワークスペースタブ管理 ────────────────────────────────────
+
+  const [workspace, setWorkspace] = useState<WorkspaceState>(() => {
+    try {
+      const stored = localStorage.getItem(WORKSPACE_STORAGE_KEY);
+      if (stored !== null) {
+        const restored = deserializeWorkspace(stored, BUILTIN_TEMPLATES);
+        // タブがあれば復元、なければ Unnamed タブを1つ作成
+        if (restored.tabs.length > 0) {
+          return restored;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    // デフォルト: Unnamed タブ1つ
+    return createUnnamedTab(initialWorkspaceState, getNow());
+  });
+
+  // ワークスペース localStorage 永続化
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        WORKSPACE_STORAGE_KEY,
+        serializeWorkspace(workspace),
+      );
+    } catch {
+      // localStorage がフルの場合等は無視
+    }
+  }, [workspace]);
+
+  // アクティブタブのコードをエディタに同期
+  const activeTab = getActiveTab(workspace);
+  const activeTabIdRef = useRef(workspace.activeTabId);
+
+  const handleSelectTab = useCallback((tabId: string) => {
+    setWorkspace((prev) => {
+      const next = setActiveTab(prev, tabId);
+      const newActive = getActiveTab(next);
+      if (newActive) {
+        activeTabIdRef.current = newActive.id;
+        setState((s) =>
+          s.code === newActive.code ? s : updateCode(s, newActive.code),
+        );
+      }
+      return next;
+    });
+  }, []);
+
+  const handleCloseTab = useCallback((tabId: string) => {
+    setWorkspace((prev) => {
+      const next = closeTab(prev, tabId);
+      const newActive = getActiveTab(next);
+      if (newActive) {
+        setState((s) =>
+          s.code === newActive.code ? s : updateCode(s, newActive.code),
+        );
+      }
+      return next;
+    });
+  }, []);
+
+  const handleNewTab = useCallback(() => {
+    setWorkspace((prev) => createUnnamedTab(prev, getNow()));
+  }, [getNow]);
+
   // ダイアログ開いたときにフォーカス
   useEffect(() => {
     if (saveDialogOpen) {
@@ -350,6 +433,12 @@ declare var console: {
     (value: string | undefined) => {
       const code = value ?? "";
       setState((prev) => updateCode(prev, code));
+      // ワークスペースのアクティブタブにもコードを反映
+      setWorkspace((prev) => {
+        const active = getActiveTab(prev);
+        if (!active || active.readonly) return prev;
+        return updateTabCode(prev, active.id, code);
+      });
       onCodeChange?.(code);
     },
     [onCodeChange],
@@ -636,11 +725,19 @@ declare var console: {
   const handleSelectLibraryItem = useCallback(
     (item: LibraryItem) => {
       handleReset();
-      setState((prev) => updateCode(prev, item.code));
-      onCodeChange?.(item.code);
+      const now = getNow();
+      if (item.kind === "builtin") {
+        setWorkspace((prev) =>
+          openLibraryTab(prev, item.id, item.title, item.code, now),
+        );
+      } else {
+        setWorkspace((prev) =>
+          openSavedTab(prev, item.id, item.title, item.code, now),
+        );
+      }
       setLibraryOpen(false);
     },
-    [handleReset, onCodeChange],
+    [handleReset, getNow],
   );
 
   // ── ステータスのインラインスタイル ─────────────────────────────
@@ -694,6 +791,13 @@ declare var console: {
       }}
       data-testid="script-editor"
     >
+      <ScriptWorkspaceTabBar
+        tabs={workspace.tabs}
+        activeTabId={workspace.activeTabId}
+        onSelectTab={handleSelectTab}
+        onCloseTab={handleCloseTab}
+        onNewTab={handleNewTab}
+      />
       <div
         style={{
           flex: 1,
@@ -712,7 +816,10 @@ declare var console: {
             beforeMount={handleBeforeMount}
             onMount={handleEditorMount}
             onChange={handleChange}
-            options={defaultEditorOptions}
+            options={{
+              ...defaultEditorOptions,
+              readOnly: activeTab?.readonly ?? false,
+            }}
           />
         </div>
         {apiReferenceOpen && (
