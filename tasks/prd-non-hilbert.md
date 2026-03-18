@@ -4,7 +4,7 @@
 
 ### シーケント計算 (SC)
 
-- [-] シーケントの視覚的分解表示の改善
+- [x] シーケントの視覚的分解表示の改善 — SequentDisplay コンポーネント追加。FormulaDisplay でハイライト、⇒ セパレータ強調、ScProofTreePanel/EditableProofNode に統合
 
 ### タブロー法 (TAB)
 

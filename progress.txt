@@ -15285,3 +15285,20 @@
   - NdProofTreePanelはnodesとinferenceEdgesをpropsとして受け取る（SC版はScProofNode木構造を直接受け取る）
   - pred-adv系のテストはCIで3-5倍遅くなるため30sタイムアウトが必要
 ---
+
+## 2026-03-18T12:00 - proof-pad (シーケントの視覚的分解表示の改善)
+- sequentDisplayLogic.ts 新規作成: 純粋ロジック（FormulaSlot, SequentDisplayData, isSequentText, parseSequentDisplayData, sequentToDisplayData, textToFormulaSlot）
+- SequentDisplay.tsx 新規作成: FormulaDisplayでシンタックスハイライト付きレンダリング、⇒セパレータを太字紫色で強調
+- sequentDisplayLogic.test.ts 新規作成: 18テスト（isSequentText, textToFormulaSlot, parseSequentDisplayData, sequentToDisplayData）
+- SequentDisplay.stories.tsx 新規作成: 7ストーリー（BasicText, MultipleParts, EmptyAntecedent, EmptySuccedent, FromSequentObject, ComplexFormulas, EmptySequent）すべてplay関数付き
+- scProofTreeRendererLogic.ts 修正: ProofTreeDisplayNodeにconclusionSequent追加（ND用にoptional）
+- ScProofTreePanel.tsx 修正: SequentDisplayで結論表示
+- EditableProofNode.tsx 修正: readonlyモードでシーケントテキスト判定→SequentDisplay表示
+- index.ts 修正: SequentDisplay関連のexport追加
+- ScProofTreePanel.test.tsx 修正: ⊢→⇒ のアサーション変更
+- カバレッジ: Stmts 99.82% | Branch 99.09% | Funcs 90.34% | Lines 99.86%（ベースライン同等、低下なし）
+- **今後のイテレーションへの学び:**
+  - ProofTreeDisplayNodeはSCとNDで共有されるため、SC固有フィールドはoptionalにする
+  - formatSequentTextは⊢を使うが、SequentDisplayは⇒を使う — テスト変更が必要
+  - Prettierフォーマットは必ずCI前にローカルで確認する（3ファイルでフォーマット差異がCI失敗を引き起こした）
+---
