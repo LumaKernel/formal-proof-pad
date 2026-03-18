@@ -136,12 +136,13 @@ describe("createHilbertProofBridges", () => {
     extractHilbertProof: vi.fn(),
   });
 
-  it("2つのブリッジを返す", () => {
+  it("3つのブリッジを返す", () => {
     const handler = createMockHandler();
     const bridges = createHilbertProofBridges(handler);
-    expect(bridges).toHaveLength(2);
+    expect(bridges).toHaveLength(3);
     expect(bridges.map((b) => b.name)).toEqual([
       "applyDeductionTheorem",
+      "applyReverseDeductionTheorem",
       "displayHilbertProof",
     ]);
   });
@@ -259,13 +260,50 @@ describe("createHilbertProofBridges", () => {
       expect(() => displayFn.fn("invalid")).toThrow("input must be an object");
     });
   });
+
+  describe("applyReverseDeductionTheorem bridge", () => {
+    it("正常に逆演繹定理を適用する", () => {
+      const handler = createMockHandler();
+      const bridges = createHilbertProofBridges(handler);
+      const reverseDT = bridges.find(
+        (b) => b.name === "applyReverseDeductionTheorem",
+      )!;
+      // φ→ψ の公理ノードを入力
+      const proofJson = encodeProofNode(axiomNode(implication(phi, psi)));
+      const result = reverseDT.fn(proofJson);
+      expect(result).toBeTruthy();
+      // result should be an encoded ProofNode for ψ
+      const decoded = decodeProofNode(result);
+      expect(decoded._tag).toBe("ModusPonensNode");
+      expect(decoded.formula._tag).toBe("MetaVariable");
+    });
+
+    it("結論が含意でない場合エラー", () => {
+      const handler = createMockHandler();
+      const bridges = createHilbertProofBridges(handler);
+      const reverseDT = bridges.find(
+        (b) => b.name === "applyReverseDeductionTheorem",
+      )!;
+      const proofJson = encodeProofNode(axiomNode(phi));
+      expect(() => reverseDT.fn(proofJson)).toThrow("変換に失敗しました");
+    });
+
+    it("不正な入力でエラー", () => {
+      const handler = createMockHandler();
+      const bridges = createHilbertProofBridges(handler);
+      const reverseDT = bridges.find(
+        (b) => b.name === "applyReverseDeductionTheorem",
+      )!;
+      expect(() => reverseDT.fn("invalid")).toThrow("input must be an object");
+    });
+  });
 });
 
 // ── API 定義テスト ──────────────────────────────────────────
 
 describe("HILBERT_PROOF_BRIDGE_API_DEFS", () => {
-  it("2つのAPI定義を含む", () => {
-    expect(HILBERT_PROOF_BRIDGE_API_DEFS).toHaveLength(2);
+  it("3つのAPI定義を含む", () => {
+    expect(HILBERT_PROOF_BRIDGE_API_DEFS).toHaveLength(3);
   });
 
   it("各定義がname, signature, descriptionを持つ", () => {
@@ -281,6 +319,7 @@ describe("generateHilbertProofBridgeTypeDefs", () => {
   it("型定義テキストを生成する", () => {
     const defs = generateHilbertProofBridgeTypeDefs();
     expect(defs).toContain("declare function applyDeductionTheorem");
+    expect(defs).toContain("declare function applyReverseDeductionTheorem");
     expect(defs).toContain("declare function displayHilbertProof");
   });
 });

@@ -12,7 +12,10 @@ import type { ProofNode } from "../logic-core/proofTree";
 import { encodeFormula, decodeFormula } from "../logic-core/serialization";
 import { formatFormula } from "../logic-lang/formatUnicode";
 import { parseString } from "../logic-lang";
-import { applyDeductionTheorem } from "../logic-core/deductionTheorem";
+import {
+  applyDeductionTheorem,
+  reverseDeductionTheorem,
+} from "../logic-core/deductionTheorem";
 import type { NativeFunctionBridge } from "./scriptRunner";
 import type { ProofBridgeApiDef } from "./proofBridge";
 import type { WorkspaceCommandHandler } from "./workspaceBridge";
@@ -153,6 +156,31 @@ const createApplyDeductionTheoremFn =
     return encodeProofNode(result.right);
   };
 
+// ── 逆演繹定理ブリッジ ────────────────────────────────────────
+
+/**
+ * 逆演繹定理をサンドボックスから呼び出す。
+ * proofJson: encodeProofNode済みのJSON互換オブジェクト（結論が A→B であること）
+ * 返却値: encodeProofNode済みの変換後証明木（B の証明）
+ */
+const createApplyReverseDeductionTheoremFn =
+  () =>
+  (proofJson: unknown): unknown => {
+    // 証明木をデコード
+    const proof = decodeProofNode(proofJson);
+
+    // 逆演繹定理を適用
+    const result = reverseDeductionTheorem(proof);
+    if (Either.isLeft(result)) {
+      const tag = result.left._tag satisfies string;
+      throw new Error(
+        `applyReverseDeductionTheorem: 変換に失敗しました: ${tag satisfies string}`,
+      );
+    }
+
+    return encodeProofNode(result.right);
+  };
+
 // ── 証明木ワークスペース表示 ────────────────────────────────
 
 /**
@@ -216,6 +244,10 @@ export const createHilbertProofBridges = (
     fn: createApplyDeductionTheoremFn(),
   },
   {
+    name: "applyReverseDeductionTheorem",
+    fn: createApplyReverseDeductionTheoremFn(),
+  },
+  {
     name: "displayHilbertProof",
     fn: createDisplayHilbertProofFn(handler),
   },
@@ -243,6 +275,12 @@ export const HILBERT_PROOF_BRIDGE_API_DEFS: readonly ProofBridgeApiDef[] = [
       "(proof: ProofNodeJson, hypothesisText: string) => ProofNodeJson",
     description:
       "演繹定理を適用する。仮定 A を除去し、A → B の証明木を構築する。証明木のJSON表現と仮定の論理式テキストを指定する。",
+  },
+  {
+    name: "applyReverseDeductionTheorem",
+    signature: "(proof: ProofNodeJson) => ProofNodeJson",
+    description:
+      "逆演繹定理を適用する。A → B の証明木から、A を仮定として追加し B の証明木を構築する。結論が含意でない場合はエラー。",
   },
   {
     name: "displayHilbertProof",

@@ -75,7 +75,19 @@ export class DeductionTheoremFreeVariableError extends Data.TaggedError(
   readonly hypothesis: Formula;
 }> {}
 
+/**
+ * 逆演繹定理の入力が含意でないエラー。
+ */
+export class ReverseDeductionTheoremNotImplicationError extends Data.TaggedError(
+  "ReverseDeductionTheoremNotImplicationError",
+)<{
+  readonly formula: Formula;
+}> {}
+
 export type DeductionTheoremError = DeductionTheoremFreeVariableError;
+
+export type ReverseDeductionTheoremError =
+  ReverseDeductionTheoremNotImplicationError;
 
 // ── A → A 証明構築 ──────────────────────────────────────────
 
@@ -245,3 +257,30 @@ export const applyDeductionTheorem = (
   hypothesis: Formula,
 ): Either.Either<ProofNode, DeductionTheoremError> =>
   Effect.runSync(Effect.either(applyDeductionTheoremEffect(proof, hypothesis)));
+
+/**
+ * 演繹定理の逆を適用する。
+ *
+ * Γ ⊢ A → B の証明木を受け取り、Γ ∪ {A} ⊢ B の証明木を返す。
+ * A を AxiomNode として追加し、元の証明木と MP(A, A→B) で B を導出する。
+ *
+ * @param proof 元の証明木（A → B の証明。結論が含意であること）
+ * @returns Either: Right = 変換後の証明木（B の証明）, Left = エラー
+ */
+export const reverseDeductionTheorem = (
+  proof: ProofNode,
+): Either.Either<ProofNode, ReverseDeductionTheoremError> => {
+  const conclusion = proof.formula;
+  if (conclusion._tag !== "Implication") {
+    return Either.left(
+      new ReverseDeductionTheoremNotImplicationError({ formula: conclusion }),
+    );
+  }
+  // conclusion = A → B
+  const a = conclusion.left;
+  const b = conclusion.right;
+  // A を公理として追加
+  const aNode = axiomNode(a);
+  // MP(A, A→B) = B
+  return Either.right(modusPonensNode(b, aNode, proof));
+};

@@ -450,9 +450,14 @@ export type { ProofSearchError } from "./proofSearch";
 // ── Deduction Theorem (演繹定理) ──────────────────────────────
 export {
   applyDeductionTheorem,
+  reverseDeductionTheorem,
   DeductionTheoremFreeVariableError,
+  ReverseDeductionTheoremNotImplicationError,
 } from "./deductionTheorem";
-export type { DeductionTheoremError } from "./deductionTheorem";
+export type {
+  DeductionTheoremError,
+  ReverseDeductionTheoremError,
+} from "./deductionTheorem";
 
 // ── Serialization (Schema decode/encode) ─────────────────────
 export {

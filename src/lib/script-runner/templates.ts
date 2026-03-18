@@ -527,6 +527,56 @@ console.log("Γ ∪ {" + hypothesisText + "} ⊢ B → Γ ⊢ " + hypothesisText
 };
 
 /**
+ * 逆演繹定理の適用テンプレート。
+ *
+ * ワークスペース上のHilbert証明木の結論（A→B）から、
+ * A を仮定として追加し B の証明木を構築する。
+ * 結果は元の証明木を消さず、横に配置される。
+ * Hilbert体系でない場合はエラーで停止する。
+ */
+const reverseDeductionTheoremWorkspace: ScriptTemplate = {
+  id: "reverse-deduction-theorem-workspace",
+  title: "逆演繹定理の適用",
+  description:
+    "ワークスペース上のHilbert証明木（結論が A→B）を抽出し、A を仮定として追加して B の証明木を構築する。結果は横に配置される。",
+  compatibleStyles: ["hilbert"],
+  code: `// 逆演繹定理の適用
+//
+// ワークスペース上に構築されたHilbert証明木を自動抽出し、
+// 結論が A → B の形であることを確認して、
+// A を仮定として追加し B の証明木を構築します。
+// Γ ⊢ A → B を Γ ∪ {A} ⊢ B に変換します。
+// 元の証明木はそのまま残り、変換後の証明木が横に配置されます。
+
+// 体系チェック: ヒルベルト流以外ではエラー
+var sysInfo = getDeductionSystemInfo();
+if (!sysInfo.isHilbertStyle) {
+  throw new Error("このスクリプトはヒルベルト流の体系でのみ実行できます。現在の体系: " + sysInfo.style);
+}
+
+console.log("=== 逆演繹定理の適用 ===");
+console.log("体系: " + sysInfo.systemName);
+console.log("");
+
+// ワークスペースからHilbert証明木を抽出
+console.log("--- 証明木を抽出中 ---");
+var proof = extractHilbertProof();
+
+// 逆演繹定理を適用
+console.log("--- 逆演繹定理を適用中 ---");
+var transformed = applyReverseDeductionTheorem(proof);
+
+// 変換後の証明木をワークスペースに表示（横に配置）
+console.log("--- 変換後の証明木を配置中 ---");
+displayHilbertProof(transformed);
+
+console.log("");
+console.log("逆演繹定理の適用が完了しました。");
+console.log("Γ ⊢ A → B を Γ ∪ {A} ⊢ B に変換しました。");
+`,
+};
+
+/**
  * ビルトインテンプレート一覧。
  */
 export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
@@ -537,6 +587,7 @@ export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
   buildIdentityProofTree,
   autoProveTemplate,
   deductionTheoremWorkspace,
+  reverseDeductionTheoremWorkspace,
 ];
 
 /**

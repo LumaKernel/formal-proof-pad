@@ -10,8 +10,8 @@ import type { WorkspaceCommandHandler } from "./workspaceBridge";
 import type { NativeFunctionBridge } from "./scriptRunner";
 
 describe("BUILTIN_TEMPLATES", () => {
-  it("7つのテンプレートを含む", () => {
-    expect(BUILTIN_TEMPLATES).toHaveLength(7);
+  it("8つのテンプレートを含む", () => {
+    expect(BUILTIN_TEMPLATES).toHaveLength(8);
   });
 
   it("各テンプレートが必須フィールドを持つ", () => {
@@ -482,6 +482,107 @@ describe("テンプレート実行テスト", () => {
     expect(handler.extractHilbertProof).not.toHaveBeenCalled();
   });
 
+  it("reverse-deduction-theorem-workspace: 正常に実行される", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "reverse-deduction-theorem-workspace",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    // extractHilbertProofが φ→ψ の公理ノードを返す
+    (handler.extractHilbertProof as ReturnType<typeof vi.fn>).mockReturnValue({
+      _tag: "AxiomNode",
+      formula: {
+        _tag: "Implication",
+        left: { _tag: "MetaVariable", name: "φ" },
+        right: { _tag: "MetaVariable", name: "ψ" },
+      },
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 100000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(handler.extractHilbertProof).toHaveBeenCalled();
+    expect(consoleLogs.some((l) => l.includes("逆演繹定理の適用"))).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("逆演繹定理の適用が完了"))).toBe(
+      true,
+    );
+    // 元のワークスペースはクリアされない
+    expect(handler.clearWorkspace).not.toHaveBeenCalled();
+  });
+
+  it("reverse-deduction-theorem-workspace: ヒルベルト流以外ではエラー", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "reverse-deduction-theorem-workspace",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    (
+      handler.getDeductionSystemInfo as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      style: "natural-deduction",
+      systemName: "Natural Deduction",
+      isHilbertStyle: false,
+      rules: [],
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    expect(result._tag).toBe("Error");
+    expect(handler.extractHilbertProof).not.toHaveBeenCalled();
+  });
+
+  it("reverse-deduction-theorem-workspace: 結論が含意でない場合エラー", () => {
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "reverse-deduction-theorem-workspace",
+    )!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    // extractHilbertProofが φ（含意でない）の公理ノードを返す
+    (handler.extractHilbertProof as ReturnType<typeof vi.fn>).mockReturnValue({
+      _tag: "AxiomNode",
+      formula: { _tag: "MetaVariable", name: "φ" },
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    expect(result._tag).toBe("Error");
+  });
+
   it("cut-elimination-workspace: SC体系以外ではエラー", () => {
     const tmpl = BUILTIN_TEMPLATES.find(
       (t) => t.id === "cut-elimination-workspace",
@@ -586,7 +687,8 @@ describe("filterTemplatesByStyle", () => {
     expect(ids).toContain("build-identity-proof");
     expect(ids).toContain("build-identity-proof-tree");
     expect(ids).toContain("deduction-theorem-workspace");
-    expect(result).toHaveLength(3);
+    expect(ids).toContain("reverse-deduction-theorem-workspace");
+    expect(result).toHaveLength(4);
   });
 
   it("BUILTIN_TEMPLATESでsequent-calculusフィルタ", () => {
