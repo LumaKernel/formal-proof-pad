@@ -15535,3 +15535,29 @@
   - displayHilbertProofは演繹定理変換後の大きな証明木を展開するため、addNode/connectMPの呼び出し回数が大幅に増える
   - 汎用テンプレート（compatibleStyles undefined）のテストでは、既存の「全テンプレートがcompatibleStylesを持つ」アサーションを緩和する必要がある
 ---
+
+## 2026-03-18 23:30 - script-editor ワークスペース純粋ロジック層
+- 実装した内容:
+  - `scriptWorkspaceState.ts`: 複数タブ管理の純粋ロジック層を新規作成
+    - TabSource型: "unnamed" | "library" | "saved" の3種別
+    - WorkspaceTab: id, source, title, code, originalCode, sourceId, readonly
+    - WorkspaceState: tabs配列, activeTabId, nextUnnamedCounter
+    - タブ作成: createUnnamedTab, openLibraryTab(immutable), openSavedTab
+    - タブ操作: setActiveTab, closeTab(隣接タブ自動選択), updateTabCode(readonly保護), updateTabTitle
+    - 状態クエリ: getActiveTab, isTabModified, hasModifiedTabs, findTabBySourceId
+    - 高度な操作: duplicateAsUnnamed(ライブラリ複製), markTabAsSaved, markTabSynced
+  - `scriptWorkspaceState.test.ts`: 41テスト（全パス）
+  - `index.ts`: 全関数・型をエクスポート
+- 変更したファイル:
+  - src/components/ScriptEditor/scriptWorkspaceState.ts (新規)
+  - src/components/ScriptEditor/scriptWorkspaceState.test.ts (新規)
+  - src/components/ScriptEditor/index.ts (エクスポート追加)
+  - tasks/prd-inserted-tasks.md (実行中マーク)
+  - task-processing.md (タスク記録)
+- カバレッジ: Stmts 99.7%, Branch 98.36%, Funcs 90.32%, Lines 99.75%（ベースライン維持、Funcs微増）
+- **今後のイテレーションへの学び:**
+  - スクリプトワークスペースは savedScriptsLogic.ts（CRUD）+ scriptWorkspaceState.ts（タブ管理）の2層で構成。保存はsavedScriptsLogicに委譲し、タブ状態の追跡のみworkspaceStateが担う
+  - ライブラリタブは readonly=true でコード変更を拒否。編集したい場合は duplicateAsUnnamed で複製する設計
+  - 同じsourceIdのタブは重複して開かない（既存タブをアクティブにする）
+  - closeTabの隣接タブ選択ロジック: 右隣優先、なければ左隣、なければundefined
+---
