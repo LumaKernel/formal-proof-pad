@@ -17,7 +17,6 @@
 
 import { Data, Either, Effect } from "effect";
 import { type Formula, implication, universal } from "./formula";
-import type { TermVariable } from "./term";
 import { equalFormula } from "./equality";
 import {
   substituteFormulaMetaVariables,
@@ -155,7 +154,6 @@ const applyDeductionTheoremEffect = (
         // 元: D と D→E から E
         // 再帰で A→D と A→(D→E) を得る
         const d = proof.antecedent.formula;
-        const dImplE = proof.conditional.formula;
         const e = proof.formula;
 
         const aImplD = yield* applyDeductionTheoremEffect(

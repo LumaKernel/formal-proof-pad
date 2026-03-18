@@ -23,7 +23,6 @@ import {
   createCutEliminationBridges,
   generateCutEliminationBridgeTypeDefs,
   createHilbertProofBridges,
-  HILBERT_PROOF_BRIDGE_API_DEFS,
   generateHilbertProofBridgeTypeDefs,
 } from "@/lib/script-runner";
 import {

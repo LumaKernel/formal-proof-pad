@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Either } from "effect";
-import {
-  applyDeductionTheorem,
-  DeductionTheoremFreeVariableError,
-} from "./deductionTheorem";
+import { applyDeductionTheorem } from "./deductionTheorem";
 import {
   axiomNode,
   modusPonensNode,
@@ -20,10 +17,7 @@ import {
 } from "./formula";
 import { termVariable } from "./term";
 import { equalFormula } from "./equality";
-import {
-  lukasiewiczSystem,
-  predicateLogicSystem,
-} from "./inferenceRule";
+import { lukasiewiczSystem } from "./inferenceRule";
 
 // ── ヘルパー ──────────────────────────────────────────────
 
