@@ -638,6 +638,193 @@ describe("SC証明ノードコンストラクタ ブリッジ", () => {
     });
   });
 
+  describe("scBottomLeft", () => {
+    const fn = findFn("scBottomLeft");
+
+    it("⊥左規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = fn(seq) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScBottomLeft");
+    });
+  });
+
+  describe("scContractionLeft / scContractionRight", () => {
+    it("左縮約ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const clFn = findFn("scContractionLeft");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = clFn(premise, phiFormulaJson[0], concl) as Record<
+        string,
+        unknown
+      >;
+      expect(result["_tag"]).toBe("ScContractionLeft");
+    });
+
+    it("右縮約ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const crFn = findFn("scContractionRight");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = crFn(premise, phiFormulaJson[0], concl) as Record<
+        string,
+        unknown
+      >;
+      expect(result["_tag"]).toBe("ScContractionRight");
+    });
+  });
+
+  describe("scExchangeLeft / scExchangeRight (正常系)", () => {
+    it("左交換ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const elFn = findFn("scExchangeLeft");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = elFn(premise, 0, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScExchangeLeft");
+    });
+
+    it("右交換ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const erFn = findFn("scExchangeRight");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = erFn(premise, 0, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScExchangeRight");
+    });
+  });
+
+  describe("scConjunctionLeft (正常系) / scConjunctionRight", () => {
+    it("連言左規則ノードを構築する（componentIndex=1）", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const clFn = findFn("scConjunctionLeft");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = clFn(premise, 1, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScConjunctionLeft");
+    });
+
+    it("連言右規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const crFn = findFn("scConjunctionRight");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const left = idFn(seq);
+      const right = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = crFn(left, right, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScConjunctionRight");
+    });
+  });
+
+  describe("scDisjunctionLeft / scDisjunctionRight (正常系)", () => {
+    it("選言左規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const dlFn = findFn("scDisjunctionLeft");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const left = idFn(seq);
+      const right = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = dlFn(left, right, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScDisjunctionLeft");
+    });
+
+    it("選言右規則ノードを構築する（componentIndex=2）", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const drFn = findFn("scDisjunctionRight");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = drFn(premise, 2, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScDisjunctionRight");
+    });
+  });
+
+  describe("scNegationLeft / scNegationRight", () => {
+    it("否定左規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const nlFn = findFn("scNegationLeft");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = nlFn(premise, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScNegationLeft");
+    });
+
+    it("否定右規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const nrFn = findFn("scNegationRight");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = nrFn(premise, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScNegationRight");
+    });
+  });
+
+  describe("scUniversalLeft / scUniversalRight", () => {
+    it("全称左規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const ulFn = findFn("scUniversalLeft");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = ulFn(premise, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScUniversalLeft");
+    });
+
+    it("全称右規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const urFn = findFn("scUniversalRight");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = urFn(premise, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScUniversalRight");
+    });
+  });
+
+  describe("scExistentialLeft / scExistentialRight", () => {
+    it("存在左規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const elFn = findFn("scExistentialLeft");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = elFn(premise, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScExistentialLeft");
+    });
+
+    it("存在右規則ノードを構築する", () => {
+      const seqFn = findFn("sequent");
+      const idFn = findFn("scIdentity");
+      const erFn = findFn("scExistentialRight");
+      const seq = seqFn(phiFormulaJson, phiFormulaJson);
+      const premise = idFn(seq);
+      const concl = seqFn(phiFormulaJson, phiFormulaJson);
+      const result = erFn(premise, concl) as Record<string, unknown>;
+      expect(result["_tag"]).toBe("ScExistentialRight");
+    });
+  });
+
   describe("全コンストラクタの出力が isCutFree で検証可能", () => {
     it("コンストラクタで作った証明が isCutFree/countCuts で使える", () => {
       const seqFn = findFn("sequent");
