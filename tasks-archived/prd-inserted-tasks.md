@@ -389,3 +389,6 @@ Infinity Canvasについて。
   - [x] searchやcontext7, 特に、github mcpで根拠のある対処法を調べて進めて。
   - Monaco Editor compilerOptions.lib を ['es2020'] に限定（DOM型定義を除外）
   - 参考: github.com/microsoft/monaco-editor/issues/3225（lib値は小文字必須）
+- [x] ヒルベルトスタイルのphi->phiの証明を実際に証明ツリーとして出すもの — `build-identity-proof-tree` テンプレート追加。ワークスペースに3公理ノード+2MP接続+ゴール+レイアウトを自動構築
+  - [x] ヒルベルト流以外でやろうとしたら、スクリプトの提供API側のガードで失敗する想定(非対応として) — `getDeductionSystemInfo().isHilbertStyle` チェックでthrow
+  - [x] 体系の情報を取れるAPIはあってもよいだろう — `getDeductionSystemInfo()` をWorkspace Bridgeに追加。style, systemName, isHilbertStyle, rules を返す

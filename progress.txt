@@ -15366,3 +15366,17 @@
   - Storybook URLパスは `proof-pad-atprooftreepanel` 形式（ハイフン小文字区切り）
   - prd-non-hilbert.md の全タスク完了 — SC, TAB, AT すべてのUI/UX完全性タスク達成
 ---
+
+## 2026-03-18T14:30 - script-runner (ヒルベルトφ→φ証明木テンプレート)
+- 実装した内容:
+  - templates.ts: `build-identity-proof-tree` テンプレート追加。ワークスペースに証明木を自動構築（3公理ノード+2MP接続+ゴール+レイアウト）
+  - templates.test.ts: 2テスト追加（正常実行テスト: addNode×3, setNodeRoleAxiom×3, connectMP×2, addGoal, applyLayout検証 / ND体系エラーテスト）
+  - テンプレート数 4→5、hilbertフィルタ結果 1→2 に更新
+  - `compatibleStyles: ["hilbert"]` でヒルベルト流専用に設定
+- カバレッジベースライン: Stmts 99.77% | Branch 98.59% | Funcs 90.32% | Lines 99.82%
+- カバレッジ結果: Stmts 99.77% | Branch 98.59% | Funcs 90.32% | Lines 99.82%（変化なし）
+- **今後のイテレーションへの学び:**
+  - ワークスペースAPI（addNode, setNodeRoleAxiom, connectMP, addGoal, applyLayout, clearWorkspace）はスクリプトテンプレートから直接利用可能
+  - `getDeductionSystemInfo().isHilbertStyle` で体系チェック後にthrowするパターンで、非対応体系のガードが実現できる
+  - テストではmockImplementationでnodeCounter/mpCounterを使い、呼び出しごとに異なるIDを返すことでリアルなシナリオを再現
+---
