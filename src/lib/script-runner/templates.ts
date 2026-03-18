@@ -334,10 +334,7 @@ const autoProveTemplate: ScriptTemplate = {
 // 証明木は displayScProof でキャンバスに表示されます。
 
 // 証明したいシーケント: ⇒ φ → φ
-var goal = {
-  antecedents: [],
-  succedents: [parseFormula("phi -> phi")]
-};
+var goal = sequent([], [parseFormula("phi -> phi")]);
 
 console.log("=== 自動証明探索 (LK) ===");
 console.log("ゴール: ⇒ φ → φ");
@@ -878,46 +875,30 @@ const cutEliminationStep1: ScriptTemplate = {
 //         formatSequent(sequent) を使う。
 
 // ── 証明の構築（変更不要）──
-var phi = { _tag: "MetaVariable", name: "φ" };
-var psi = { _tag: "MetaVariable", name: "ψ" };
-var phiImplPsi = { _tag: "Implication", left: phi, right: psi };
+var phi = parseFormula("φ");
+var psi = parseFormula("ψ");
+var phiImplPsi = parseFormula("φ → ψ");
 
 // ID 公理: φ ⇒ φ
-var idPhi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [phi], succedents: [phi] }
-};
+var idPhi = scIdentity(sequent([phi], [phi]));
 
 // WR: φ ⇒ φ, φ→ψ
-var wrNode = {
-  _tag: "ScWeakeningRight",
-  conclusion: { antecedents: [phi], succedents: [phi, phiImplPsi] },
-  premise: idPhi,
-  weakenedFormula: phiImplPsi
-};
+var wrNode = scWeakeningRight(
+  idPhi, phiImplPsi, sequent([phi], [phi, phiImplPsi])
+);
 
 // ID 公理: ψ ⇒ ψ
-var idPsi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [psi], succedents: [psi] }
-};
+var idPsi = scIdentity(sequent([psi], [psi]));
 
 // →L: φ→ψ, φ ⇒ ψ
-var implLeft = {
-  _tag: "ScImplicationLeft",
-  conclusion: { antecedents: [phiImplPsi, phi], succedents: [psi] },
-  left: idPhi,
-  right: idPsi
-};
+var implLeft = scImplicationLeft(
+  idPhi, idPsi, sequent([phiImplPsi, phi], [psi])
+);
 
 // Cut: φ, φ ⇒ ψ
-var proofWithCut = {
-  _tag: "ScCut",
-  conclusion: { antecedents: [phi, phi], succedents: [psi] },
-  left: wrNode,
-  right: implLeft,
-  cutFormula: phiImplPsi
-};
+var proofWithCut = scCut(
+  wrNode, implLeft, phiImplPsi, sequent([phi, phi], [psi])
+);
 
 console.log("=== カット除去 段階1: カット判定 ===");
 console.log("");
@@ -974,21 +955,12 @@ const cutEliminationStep2: ScriptTemplate = {
 // 目標: 手動で「カットを除去した結果」の証明を構築し、
 //        eliminateCutsWithSteps の結果と比較する。
 
-var phi = { _tag: "MetaVariable", name: "φ" };
+var phi = parseFormula("φ");
 
-var idPhi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [phi], succedents: [phi] }
-};
+var idPhi = scIdentity(sequent([phi], [phi]));
 
 // カット付き証明
-var proof = {
-  _tag: "ScCut",
-  conclusion: { antecedents: [phi], succedents: [phi] },
-  left: idPhi,
-  right: idPhi,
-  cutFormula: phi
-};
+var proof = scCut(idPhi, idPhi, phi, sequent([phi], [phi]));
 
 console.log("=== カット除去 段階2: ID公理のカット ===");
 console.log("");
@@ -999,10 +971,7 @@ console.log("カット数: " + countCuts(proof));
 // ── TODO: カットを除去した結果を手動で構築 ──
 // ヒント: 左がID公理のとき、結果は右前提そのもの（結論を調整）
 // つまり: φ ⇒ φ のID公理1つで済む
-var manualResult = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [phi], succedents: [phi] }
-};
+var manualResult = scIdentity(sequent([phi], [phi]));
 
 console.log("");
 console.log("--- 手動でカット除去した結果 ---");
@@ -1058,35 +1027,21 @@ const cutEliminationStep3: ScriptTemplate = {
 //
 // 目標: 弱化のみでカットと同じ結論を導出する。
 
-var phi = { _tag: "MetaVariable", name: "φ" };
-var psi = { _tag: "MetaVariable", name: "ψ" };
+var phi = parseFormula("φ");
+var psi = parseFormula("ψ");
 
-var idPsi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [psi], succedents: [psi] }
-};
-
-var idPhi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [phi], succedents: [phi] }
-};
+var idPsi = scIdentity(sequent([psi], [psi]));
+var idPhi = scIdentity(sequent([phi], [phi]));
 
 // ψ ⇒ ψ に WR で φ を追加
-var wrPsi = {
-  _tag: "ScWeakeningRight",
-  conclusion: { antecedents: [psi], succedents: [psi, phi] },
-  premise: idPsi,
-  weakenedFormula: phi
-};
+var wrPsi = scWeakeningRight(
+  idPsi, phi, sequent([psi], [psi, phi])
+);
 
 // カット付き証明: ψ ⇒ ψ, φ
-var proofWithCut = {
-  _tag: "ScCut",
-  conclusion: { antecedents: [psi], succedents: [psi, phi] },
-  left: wrPsi,
-  right: idPhi,
-  cutFormula: phi
-};
+var proofWithCut = scCut(
+  wrPsi, idPhi, phi, sequent([psi], [psi, phi])
+);
 
 console.log("=== カット除去 段階3: ランク0 ===");
 console.log("");
@@ -1103,12 +1058,9 @@ console.log("カット数: " + countCuts(proofWithCut));
 // 2. 右前提の右辺 [φ] を右弱化(WR)で追加
 //    → ψ ⇒ ψ, φ (これが最終結論)
 
-var manualResult = {
-  _tag: "ScWeakeningRight",
-  conclusion: { antecedents: [psi], succedents: [psi, phi] },
-  premise: idPsi,
-  weakenedFormula: phi
-};
+var manualResult = scWeakeningRight(
+  idPsi, phi, sequent([psi], [psi, phi])
+);
 
 console.log("");
 console.log("--- 手動でカット除去した結果 ---");
@@ -1167,29 +1119,19 @@ const cutEliminationStep4: ScriptTemplate = {
 //   ──────────── (WR: φ を追加)
 //      φ ⇒ φ, φ
 
-var phi = { _tag: "MetaVariable", name: "φ" };
+var phi = parseFormula("φ");
 
-var idPhi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [phi], succedents: [phi] }
-};
+var idPhi = scIdentity(sequent([phi], [phi]));
 
 // φ ⇒ φ にWRでφを追加 → φ ⇒ φ, φ
-var wrNode = {
-  _tag: "ScWeakeningRight",
-  conclusion: { antecedents: [phi], succedents: [phi, phi] },
-  premise: idPhi,
-  weakenedFormula: phi
-};
+var wrNode = scWeakeningRight(
+  idPhi, phi, sequent([phi], [phi, phi])
+);
 
 // Cut: φ ⇒ φ, φ (rank=2: φが左の右辺に2回)
-var proofWithCut = {
-  _tag: "ScCut",
-  conclusion: { antecedents: [phi], succedents: [phi, phi] },
-  left: wrNode,
-  right: idPhi,
-  cutFormula: phi
-};
+var proofWithCut = scCut(
+  wrNode, idPhi, phi, sequent([phi], [phi, phi])
+);
 
 console.log("=== カット除去 段階4: ランク削減 ===");
 console.log("");
@@ -1206,12 +1148,9 @@ console.log("カット数: " + countCuts(proofWithCut));
 // ここでは最終結果（完全にカットフリー）を構築:
 // φ ⇒ φ に WR でφを追加 → φ ⇒ φ, φ
 
-var manualResult = {
-  _tag: "ScWeakeningRight",
-  conclusion: { antecedents: [phi], succedents: [phi, phi] },
-  premise: idPhi,
-  weakenedFormula: phi
-};
+var manualResult = scWeakeningRight(
+  idPhi, phi, sequent([phi], [phi, phi])
+);
 
 console.log("");
 console.log("--- 手動でカット除去した結果 ---");
@@ -1270,56 +1209,39 @@ const cutEliminationStep5: ScriptTemplate = {
 //
 // 目標: 含意のカットを分解するプロセスを理解する。
 
-var phi = { _tag: "MetaVariable", name: "φ" };
-var psi = { _tag: "MetaVariable", name: "ψ" };
-var phiImplPsi = { _tag: "Implication", left: phi, right: psi };
+var phi = parseFormula("φ");
+var psi = parseFormula("ψ");
+var phiImplPsi = parseFormula("φ → ψ");
 
 // 左前提の前提: φ, ⇒ φ → 簡略化して φ ⇒ ψ として (⇒→)
 // 左: φ ⇒ ψ を (⇒→) で Γ=∅, Δ=∅ として構築
 //   φ ⇒ ψ / ⇒ φ→ψ
-var idPhi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [phi], succedents: [phi] }
-};
-var idPsi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [psi], succedents: [psi] }
-};
+var idPhi = scIdentity(sequent([phi], [phi]));
+var idPsi = scIdentity(sequent([psi], [psi]));
 
 // φ ⇒ φ (ID) から WR で ψ を追加
-var wrPhiPsi = {
-  _tag: "ScWeakeningRight",
-  conclusion: { antecedents: [phi], succedents: [phi, psi] },
-  premise: idPhi,
-  weakenedFormula: psi
-};
+var wrPhiPsi = scWeakeningRight(
+  idPhi, psi, sequent([phi], [phi, psi])
+);
 
 // (⇒→): φ ⇒ φ, ψ → ⇒ φ→ψ, φ
 // ※ ⇒→ は前件の先頭の α を除いて右辺に α→β を追加
-var implRight = {
-  _tag: "ScImplicationRight",
-  conclusion: { antecedents: [], succedents: [phiImplPsi, phi] },
-  premise: wrPhiPsi
-};
+var implRight = scImplicationRight(
+  wrPhiPsi, sequent([], [phiImplPsi, phi])
+);
 
 // 右前提: (→⇒)
 // φ ⇒ φ (ID)    ψ ⇒ ψ (ID)  → φ→ψ, φ ⇒ ψ
-var implLeft = {
-  _tag: "ScImplicationLeft",
-  conclusion: { antecedents: [phiImplPsi, phi], succedents: [psi] },
-  left: idPhi,
-  right: idPsi
-};
+var implLeft = scImplicationLeft(
+  idPhi, idPsi, sequent([phiImplPsi, phi], [psi])
+);
 
 // Cut(φ→ψ): ⇒ φ→ψ, φ  +  φ→ψ, φ ⇒ ψ  → φ ⇒ ψ
 // ※ 実際にはΓ=∅, Σ=∅, Σ'=φ
-var proofWithCut = {
-  _tag: "ScCut",
-  conclusion: { antecedents: [phi], succedents: [psi, phi] },
-  left: implRight,
-  right: implLeft,
-  cutFormula: phiImplPsi
-};
+var proofWithCut = scCut(
+  implRight, implLeft, phiImplPsi,
+  sequent([phi], [psi, phi])
+);
 
 console.log("=== カット除去 段階5: 深さ削減 ===");
 console.log("");
@@ -1387,56 +1309,25 @@ const cutEliminationStep6: ScriptTemplate = {
 //
 // 目標: 複数カットを含む証明で全体の動作を確認する。
 
-var phi = { _tag: "MetaVariable", name: "φ" };
-var psi = { _tag: "MetaVariable", name: "ψ" };
-var chi = { _tag: "MetaVariable", name: "χ" };
+var phi = parseFormula("φ");
+var psi = parseFormula("ψ");
+var chi = parseFormula("χ");
 
-var idPhi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [phi], succedents: [phi] }
-};
-var idPsi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [psi], succedents: [psi] }
-};
-var idChi = {
-  _tag: "ScIdentity",
-  conclusion: { antecedents: [chi], succedents: [chi] }
-};
+var idPhi = scIdentity(sequent([phi], [phi]));
+var idPsi = scIdentity(sequent([psi], [psi]));
+var idChi = scIdentity(sequent([chi], [chi]));
 
 // 証明1: φ ⇒ φ + φ ⇒ φ を Cut(φ) → φ ⇒ φ
-var cut1 = {
-  _tag: "ScCut",
-  conclusion: { antecedents: [phi], succedents: [phi] },
-  left: idPhi,
-  right: idPhi,
-  cutFormula: phi
-};
+var cut1 = scCut(idPhi, idPhi, phi, sequent([phi], [phi]));
 
 // WR: φ ⇒ φ, ψ (cut1の結果に弱化)
-var wr1 = {
-  _tag: "ScWeakeningRight",
-  conclusion: { antecedents: [phi], succedents: [phi, psi] },
-  premise: cut1,
-  weakenedFormula: psi
-};
+var wr1 = scWeakeningRight(cut1, psi, sequent([phi], [phi, psi]));
 
 // 証明2: ψ ⇒ ψ にWLでφを追加 → φ, ψ ⇒ ψ
-var wl2 = {
-  _tag: "ScWeakeningLeft",
-  conclusion: { antecedents: [phi, psi], succedents: [psi] },
-  premise: idPsi,
-  weakenedFormula: phi
-};
+var wl2 = scWeakeningLeft(idPsi, phi, sequent([phi, psi], [psi]));
 
 // Cut(ψ): φ ⇒ φ, ψ + φ, ψ ⇒ ψ → φ, φ ⇒ φ, ψ
-var cut2 = {
-  _tag: "ScCut",
-  conclusion: { antecedents: [phi, phi], succedents: [phi, psi] },
-  left: wr1,
-  right: wl2,
-  cutFormula: psi
-};
+var cut2 = scCut(wr1, wl2, psi, sequent([phi, phi], [phi, psi]));
 
 console.log("=== カット除去 段階6: 全体統合 ===");
 console.log("");
