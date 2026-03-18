@@ -1,6 +1,7 @@
 ## タスク
 
 from: tasks/prd-inserted-tasks.md
+
 > 演繹定理の逆 (同様)
 
 ### 概要
