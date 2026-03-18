@@ -5,7 +5,14 @@ import {
   buildHilbertProofTree,
 } from "./hilbertTreeBuildLogic";
 import type { WorkspaceNode } from "./workspaceState";
-import type { InferenceEdge, MPEdge, GenEdge } from "./inferenceEdge";
+import type {
+  InferenceEdge,
+  MPEdge,
+  GenEdge,
+  SubstitutionEdge,
+  SimplificationEdge,
+  SubstitutionConnectionEdge,
+} from "./inferenceEdge";
 
 // ── ヘルパー ──────────────────────────────────────────────
 
@@ -35,6 +42,20 @@ describe("findHilbertRootNodeIds", () => {
       },
     ];
     expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n3"]);
+  });
+
+  it("MP エッジの premiseNodeId が undefined でもルート検出できる", () => {
+    const nodes = [mkNode("n1", "ψ")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "mp",
+        conclusionNodeId: "n1",
+        leftPremiseNodeId: undefined,
+        rightPremiseNodeId: undefined,
+        conclusionText: "ψ",
+      } satisfies MPEdge,
+    ];
+    expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n1"]);
   });
 
   it("チェーンMPで最終結論のみがルート", () => {
@@ -76,6 +97,103 @@ describe("findHilbertRootNodeIds", () => {
       },
     ];
     expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n2"]);
+  });
+
+  it("Substitution エッジの前提ノードはルートにならない", () => {
+    const nodes = [
+      mkNode("n1", "φ → (ψ → φ)"),
+      mkNode("n2", "P(x) → (Q(y) → P(x))"),
+    ];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "substitution",
+        conclusionNodeId: "n2",
+        premiseNodeId: "n1",
+        entries: [],
+        conclusionText: "P(x) → (Q(y) → P(x))",
+      } satisfies SubstitutionEdge,
+    ];
+    expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n2"]);
+  });
+
+  it("Simplification エッジの前提ノードはルートにならない", () => {
+    const nodes = [mkNode("n1", "φ → ψ"), mkNode("n2", "φ → ψ")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "simplification",
+        conclusionNodeId: "n2",
+        premiseNodeId: "n1",
+        conclusionText: "φ → ψ",
+      } satisfies SimplificationEdge,
+    ];
+    expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n2"]);
+  });
+
+  it("SubstitutionConnection エッジの前提ノードはルートにならない", () => {
+    const nodes = [mkNode("n1", "P(x)"), mkNode("n2", "P(a)")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "substitution-connection",
+        conclusionNodeId: "n2",
+        premiseNodeId: "n1",
+        conclusionText: "P(a)",
+      } satisfies SubstitutionConnectionEdge,
+    ];
+    expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n2"]);
+  });
+
+  it("Substitution エッジの premiseNodeId が undefined でもルート検出できる", () => {
+    const nodes = [mkNode("n1", "P(x)")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "substitution",
+        conclusionNodeId: "n1",
+        premiseNodeId: undefined,
+        entries: [],
+        conclusionText: "P(x)",
+      } satisfies SubstitutionEdge,
+    ];
+    expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n1"]);
+  });
+
+  it("Gen エッジの premiseNodeId が undefined でもルート検出できる", () => {
+    const nodes = [mkNode("n1", "∀x. P(x)")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "n1",
+        premiseNodeId: undefined,
+        variableName: "x",
+        conclusionText: "∀x. P(x)",
+      } satisfies GenEdge,
+    ];
+    expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n1"]);
+  });
+
+  it("Simplification エッジの premiseNodeId が undefined でもルート検出できる", () => {
+    const nodes = [mkNode("n1", "φ → ψ")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "simplification",
+        conclusionNodeId: "n1",
+        premiseNodeId: undefined,
+        conclusionText: "φ → ψ",
+      } satisfies SimplificationEdge,
+    ];
+    expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n1"]);
+  });
+
+  it("SubstitutionConnection エッジの premiseNodeId が undefined でもルート検出できる", () => {
+    const nodes = [mkNode("n1", "P(a)")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "substitution-connection",
+        conclusionNodeId: "n1",
+        premiseNodeId: undefined,
+        conclusionText: "P(a)",
+      } satisfies SubstitutionConnectionEdge,
+    ];
+    expect(findHilbertRootNodeIds(nodes, edges)).toEqual(["n1"]);
   });
 });
 
@@ -188,6 +306,31 @@ describe("buildHilbertProofTree", () => {
     expect(result.left._tag).toBe("HilbertTreeIncompleteProof");
   });
 
+  it("サイクルがある場合はCycleDetectedエラーを返す", () => {
+    const nodes = [mkNode("n1", "φ"), mkNode("n2", "ψ")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "mp",
+        conclusionNodeId: "n1",
+        leftPremiseNodeId: "n2",
+        rightPremiseNodeId: "n2",
+        conclusionText: "φ",
+      } satisfies MPEdge,
+      {
+        _tag: "mp",
+        conclusionNodeId: "n2",
+        leftPremiseNodeId: "n1",
+        rightPremiseNodeId: "n1",
+        conclusionText: "ψ",
+      } satisfies MPEdge,
+    ];
+    const result = buildHilbertProofTree("n1", nodes, edges);
+
+    expect(Either.isLeft(result)).toBe(true);
+    if (!Either.isLeft(result)) return;
+    expect(result.left._tag).toBe("HilbertTreeCycleDetected");
+  });
+
   it("SubstitutionエッジはAxiomNodeとして扱う", () => {
     const nodes = [
       mkNode("n1", "φ → (ψ → φ)"),
@@ -207,6 +350,92 @@ describe("buildHilbertProofTree", () => {
     expect(Either.isRight(result)).toBe(true);
     if (!Either.isRight(result)) return;
     // Substitution結果はAxiomNode（公理インスタンス）として扱われる
+    expect(result.right._tag).toBe("AxiomNode");
+  });
+
+  it("premiseNodeId未設定のSubstitutionエッジはAxiomNodeとして扱う", () => {
+    const nodes = [mkNode("n1", "P(x) → (Q(y) → P(x))")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "substitution",
+        conclusionNodeId: "n1",
+        premiseNodeId: undefined,
+        entries: [],
+        conclusionText: "P(x) → (Q(y) → P(x))",
+      } satisfies SubstitutionEdge,
+    ];
+    const result = buildHilbertProofTree("n1", nodes, edges);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (!Either.isRight(result)) return;
+    expect(result.right._tag).toBe("AxiomNode");
+  });
+
+  it("SimplificationエッジはAxiomNodeとして扱う", () => {
+    const nodes = [mkNode("n1", "φ → ψ"), mkNode("n2", "φ → ψ")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "simplification",
+        conclusionNodeId: "n2",
+        premiseNodeId: "n1",
+        conclusionText: "φ → ψ",
+      } satisfies SimplificationEdge,
+    ];
+    const result = buildHilbertProofTree("n2", nodes, edges);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (!Either.isRight(result)) return;
+    expect(result.right._tag).toBe("AxiomNode");
+  });
+
+  it("premiseNodeId未設定のSimplificationエッジはAxiomNodeとして扱う", () => {
+    const nodes = [mkNode("n1", "φ → ψ")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "simplification",
+        conclusionNodeId: "n1",
+        premiseNodeId: undefined,
+        conclusionText: "φ → ψ",
+      } satisfies SimplificationEdge,
+    ];
+    const result = buildHilbertProofTree("n1", nodes, edges);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (!Either.isRight(result)) return;
+    expect(result.right._tag).toBe("AxiomNode");
+  });
+
+  it("SubstitutionConnectionエッジはAxiomNodeとして扱う", () => {
+    const nodes = [mkNode("n1", "P(x)"), mkNode("n2", "P(a)")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "substitution-connection",
+        conclusionNodeId: "n2",
+        premiseNodeId: "n1",
+        conclusionText: "P(a)",
+      } satisfies SubstitutionConnectionEdge,
+    ];
+    const result = buildHilbertProofTree("n2", nodes, edges);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (!Either.isRight(result)) return;
+    expect(result.right._tag).toBe("AxiomNode");
+  });
+
+  it("premiseNodeId未設定のSubstitutionConnectionエッジはAxiomNodeとして扱う", () => {
+    const nodes = [mkNode("n1", "P(a)")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "substitution-connection",
+        conclusionNodeId: "n1",
+        premiseNodeId: undefined,
+        conclusionText: "P(a)",
+      } satisfies SubstitutionConnectionEdge,
+    ];
+    const result = buildHilbertProofTree("n1", nodes, edges);
+
+    expect(Either.isRight(result)).toBe(true);
+    if (!Either.isRight(result)) return;
     expect(result.right._tag).toBe("AxiomNode");
   });
 
