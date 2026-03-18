@@ -576,6 +576,309 @@ console.log("Γ ⊢ A → B を Γ ∪ {A} ⊢ B に変換しました。");
 `,
 };
 
+// ── 汎用テンプレート（全演繹スタイル共通）────────────────────
+
+/**
+ * 論理式の探索テンプレート: parseFormula / formatFormula / equalFormula を紹介。
+ *
+ * 全スタイル共通。論理式のパース・整形・比較の基本操作を学ぶ。
+ */
+const formulaExplorer: ScriptTemplate = {
+  id: "formula-explorer",
+  title: "論理式の探索",
+  description:
+    "parseFormula / formatFormula / equalFormula を使って、論理式のパース・整形・構造比較を学ぶ。全スタイル共通。",
+  code: `// 論理式の探索
+//
+// parseFormula: テキスト → 論理式 JSON
+// formatFormula: 論理式 JSON → Unicode テキスト
+// equalFormula: 構造的同値判定
+
+console.log("=== 論理式の探索 ===");
+console.log("");
+
+// 1. 論理式のパースと表示
+var f1 = parseFormula("phi -> (psi -> phi)");
+console.log("パース結果: " + formatFormula(f1));
+console.log("JSON構造: " + JSON.stringify(f1));
+console.log("");
+
+// 2. 様々な結合子
+var impl = parseFormula("phi -> psi");
+var conj = parseFormula("phi /\\\\ psi");
+var disj = parseFormula("phi \\\\/ psi");
+var neg = parseFormula("~phi");
+var univ = parseFormula("forall x. P(x)");
+
+console.log("含意: " + formatFormula(impl));
+console.log("連言: " + formatFormula(conj));
+console.log("選言: " + formatFormula(disj));
+console.log("否定: " + formatFormula(neg));
+console.log("全称: " + formatFormula(univ));
+console.log("");
+
+// 3. 構造的同値判定
+var a = parseFormula("phi -> psi");
+var b = parseFormula("phi -> psi");
+var c = parseFormula("psi -> phi");
+console.log("phi->psi == phi->psi ? " + equalFormula(a, b));
+console.log("phi->psi == psi->phi ? " + equalFormula(a, c));
+console.log("");
+
+// 4. 複雑な論理式
+var complex = parseFormula("(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))");
+console.log("A2公理スキーマ: " + formatFormula(complex));
+
+console.log("");
+console.log("探索完了！");
+`,
+};
+
+/**
+ * ユニフィケーション・代入のデモ。
+ *
+ * unifyFormulas / substituteFormula を使って
+ * パターンマッチと代入の操作を学ぶ。全スタイル共通。
+ */
+const unificationDemo: ScriptTemplate = {
+  id: "unification-demo",
+  title: "ユニフィケーション・代入",
+  description:
+    "unifyFormulas / substituteFormula を使って、論理式のパターンマッチと代入を学ぶ。全スタイル共通。",
+  code: `// ユニフィケーション・代入
+//
+// unifyFormulas(source, target): 2つの論理式を単一化し代入写像を返す
+// substituteFormula(formula, map): メタ変数に代入を適用
+//
+// ユニフィケーションは「2つの論理式を同じにする代入」を見つける操作。
+// 公理スキーマのインスタンス確認などに使える。
+
+console.log("=== ユニフィケーション・代入 ===");
+console.log("");
+
+// 1. 基本的なユニフィケーション
+// φ → ψ と (χ ∧ α) → β を単一化
+var pattern = parseFormula("phi -> psi");
+var target = parseFormula("(chi /\\\\ alpha) -> beta");
+
+console.log("パターン: " + formatFormula(pattern));
+console.log("ターゲット: " + formatFormula(target));
+
+var result = unifyFormulas(pattern, target);
+console.log("代入写像: " + JSON.stringify(result.formulaSubstitution));
+console.log("");
+
+// 2. 代入の適用
+// メタ変数 φ に具体的な論理式を代入
+var schema = parseFormula("phi -> (psi -> phi)");
+console.log("スキーマ: " + formatFormula(schema));
+
+var substituted = substituteFormula(schema, {
+  "φ": parseFormula("chi -> chi"),
+  "ψ": parseFormula("chi")
+});
+console.log("代入後: " + formatFormula(substituted));
+console.log("");
+
+// 3. A1公理スキーマのインスタンス確認
+// A1: φ → (ψ → φ)
+var a1 = parseFormula("phi -> (psi -> phi)");
+var candidate = parseFormula("(chi -> chi) -> (chi -> (chi -> chi))");
+console.log("A1パターン: " + formatFormula(a1));
+console.log("候補: " + formatFormula(candidate));
+
+var match = unifyFormulas(a1, candidate);
+console.log("マッチ成功！");
+console.log("  φ = " + JSON.stringify(match.formulaSubstitution));
+console.log("");
+
+// 4. 同じ構造同士のユニフィケーション
+var d1 = parseFormula("phi /\\\\ psi");
+var d2 = parseFormula("(chi -> chi) /\\\\ alpha");
+console.log("連言パターン: " + formatFormula(d1));
+console.log("連言ターゲット: " + formatFormula(d2));
+var r4 = unifyFormulas(d1, d2);
+console.log("マッチ: " + JSON.stringify(r4.formulaSubstitution));
+console.log("");
+
+// 注意: → と ∧ のように異なるトップレベル結合子は単一化できない
+// （StructureMismatch エラーになる）
+console.log("注意: 異なる結合子（→ と ∧）は単一化できません。");
+
+console.log("");
+console.log("デモ完了！");
+`,
+};
+
+// ── Hilbert 追加テンプレート ──────────────────────────────
+
+/**
+ * 公理同定テンプレート: identifyAxiom で公理スキーマのインスタンスを判定する。
+ */
+const axiomExplorer: ScriptTemplate = {
+  id: "axiom-explorer",
+  title: "公理スキーマの探索",
+  description:
+    "identifyAxiom を使って、論理式が公理スキーマのインスタンスかどうかを判定する。",
+  compatibleStyles: ["hilbert"],
+  code: `// 公理スキーマの探索
+//
+// identifyAxiom(formula, system): 論理式が公理スキーマのインスタンスか判定
+//
+// 返り値は discriminated union:
+//   { _tag: "Ok", axiomName: "A1", ... }      → 公理のインスタンス
+//   { _tag: "TheoryAxiom" }                    → 理論公理のインスタンス
+//   { _tag: "Error", reason: "..." }           → 公理ではない
+
+// 現在の体系を取得
+var sysInfo = getDeductionSystemInfo();
+if (!sysInfo.isHilbertStyle) {
+  throw new Error("このスクリプトはヒルベルト流の体系でのみ実行できます。現在の体系: " + sysInfo.style);
+}
+
+console.log("=== 公理スキーマの探索 ===");
+console.log("体系: " + sysInfo.systemName);
+console.log("");
+
+// 体系情報をsystem JSONに変換
+var system = {
+  name: sysInfo.systemName,
+  propositionalAxioms: sysInfo.rules,
+  predicateLogic: false,
+  equalityLogic: false,
+  generalization: false
+};
+
+// A1公理のインスタンス: φ → (ψ → φ)
+var a1Instance = parseFormula("(chi -> chi) -> (psi -> (chi -> chi))");
+console.log("候補1: " + formatFormula(a1Instance));
+var r1 = identifyAxiom(a1Instance, system);
+console.log("結果: _tag=" + r1._tag);
+if (r1._tag === "Ok") {
+  console.log("  公理: " + r1.axiomName);
+}
+console.log("");
+
+// A2公理のインスタンス
+var a2Instance = parseFormula("(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))");
+console.log("候補2: " + formatFormula(a2Instance));
+var r2 = identifyAxiom(a2Instance, system);
+console.log("結果: _tag=" + r2._tag);
+if (r2._tag === "Ok") {
+  console.log("  公理: " + r2.axiomName);
+}
+console.log("");
+
+// 公理でない例
+var notAxiom = parseFormula("phi -> phi");
+console.log("候補3: " + formatFormula(notAxiom));
+var r3 = identifyAxiom(notAxiom, system);
+console.log("結果: _tag=" + r3._tag);
+if (r3._tag === "Error") {
+  console.log("  φ→φ は公理ではない（証明が必要）");
+}
+
+console.log("");
+console.log("探索完了！");
+`,
+};
+
+/**
+ * 三段論法の証明: (φ→ψ) → ((ψ→χ) → (φ→χ))
+ *
+ * Hilbert公理系でのより複雑な証明構築の例。
+ * 演繹定理を意識した構成: φ→ψ, ψ→χ, φ ⊢ χ → 演繹定理3回で結論。
+ */
+const syllogismProof: ScriptTemplate = {
+  id: "syllogism-proof",
+  title: "三段論法の証明構築",
+  description:
+    "Hilbert公理系で (φ→ψ)→((ψ→χ)→(φ→χ)) を導出する。MP の連鎖とA1/A2の活用を学ぶ。",
+  compatibleStyles: ["hilbert"],
+  code: `// 三段論法の証明構築
+//
+// 目標: (φ→ψ) → ((ψ→χ) → (φ→χ)) を Hilbert 公理系で証明する。
+//
+// アイデア:
+//   φ→ψ, ψ→χ, φ を仮定すると:
+//   1. φ→ψ (仮定)
+//   2. φ (仮定)
+//   3. ψ ... MP(2,1)
+//   4. ψ→χ (仮定)
+//   5. χ ... MP(3,4)
+//
+// これを演繹定理で3回巻き戻せば (φ→ψ)→((ψ→χ)→(φ→χ))。
+// ここでは直接的な証明をワークスペースに構築する。
+
+var sysInfo = getDeductionSystemInfo();
+if (!sysInfo.isHilbertStyle) {
+  throw new Error("このスクリプトはヒルベルト流の体系でのみ実行できます。現在の体系: " + sysInfo.style);
+}
+
+clearWorkspace();
+
+console.log("=== 三段論法の証明 ===");
+console.log("目標: (φ→ψ) → ((ψ→χ) → (φ→χ))");
+console.log("");
+console.log("仮定 φ→ψ, ψ→χ, φ のもとで χ を導出し、");
+console.log("演繹定理で仮定を除去します。");
+console.log("");
+
+// 仮定つき証明を構築: φ→ψ, ψ→χ, φ ⊢ χ
+var nodeHyp1 = addNode("φ → ψ");
+setNodeRoleAxiom(nodeHyp1);
+console.log("仮定1: φ → ψ");
+
+var nodeHyp2 = addNode("ψ → χ");
+setNodeRoleAxiom(nodeHyp2);
+console.log("仮定2: ψ → χ");
+
+var nodePhi = addNode("φ");
+setNodeRoleAxiom(nodePhi);
+console.log("仮定3: φ");
+
+// MP: φ, φ→ψ ⊢ ψ
+var nodePsi = connectMP(nodePhi, nodeHyp1);
+console.log("MP(3,1): ψ");
+
+// MP: ψ, ψ→χ ⊢ χ
+var nodeChi = connectMP(nodePsi, nodeHyp2);
+console.log("MP(4,2): χ");
+
+addGoal("χ");
+applyLayout();
+
+console.log("");
+console.log("仮定つき証明を構築しました。");
+console.log("演繹定理を3回適用すると:");
+console.log("  (φ→ψ) → ((ψ→χ) → (φ→χ))");
+console.log("が得られます。");
+console.log("");
+
+// 演繹定理を適用して仮定を除去
+console.log("--- 演繹定理で仮定 φ を除去 ---");
+var proof1 = extractHilbertProof();
+var dt1 = applyDeductionTheorem(proof1, "φ");
+displayHilbertProof(dt1);
+console.log("結論: φ→ψ, ψ→χ ⊢ φ → χ");
+
+console.log("");
+console.log("--- 演繹定理で仮定 ψ→χ を除去 ---");
+var dt2 = applyDeductionTheorem(dt1, "ψ → χ");
+displayHilbertProof(dt2);
+console.log("結論: φ→ψ ⊢ (ψ→χ) → (φ→χ)");
+
+console.log("");
+console.log("--- 演繹定理で仮定 φ→ψ を除去 ---");
+var dt3 = applyDeductionTheorem(dt2, "φ → ψ");
+displayHilbertProof(dt3);
+console.log("結論: ⊢ (φ→ψ) → ((ψ→χ) → (φ→χ))");
+
+console.log("");
+console.log("Q.E.D.");
+`,
+};
+
 // ── カット除去 段階的学習テンプレート ────────────────────────
 
 /**
@@ -1203,6 +1506,10 @@ console.log("各カットは有限ステップで消去されます。");
  * ビルトインテンプレート一覧。
  */
 export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
+  // 汎用テンプレート（全スタイル共通）
+  formulaExplorer,
+  unificationDemo,
+  // SC テンプレート
   cutEliminationSimple,
   cutEliminationImplication,
   cutEliminationWorkspace,
@@ -1212,9 +1519,12 @@ export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
   cutEliminationStep4,
   cutEliminationStep5,
   cutEliminationStep6,
+  autoProveTemplate,
+  // Hilbert テンプレート
   buildIdentityProof,
   buildIdentityProofTree,
-  autoProveTemplate,
+  axiomExplorer,
+  syllogismProof,
   deductionTheoremWorkspace,
   reverseDeductionTheoremWorkspace,
 ];

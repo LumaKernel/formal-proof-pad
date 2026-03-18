@@ -10,8 +10,8 @@ import type { WorkspaceCommandHandler } from "./workspaceBridge";
 import type { NativeFunctionBridge } from "./scriptRunner";
 
 describe("BUILTIN_TEMPLATES", () => {
-  it("14のテンプレートを含む", () => {
-    expect(BUILTIN_TEMPLATES).toHaveLength(14);
+  it("18のテンプレートを含む", () => {
+    expect(BUILTIN_TEMPLATES).toHaveLength(18);
   });
 
   it("各テンプレートが必須フィールドを持つ", () => {
@@ -23,12 +23,21 @@ describe("BUILTIN_TEMPLATES", () => {
     }
   });
 
-  it("各テンプレートがcompatibleStylesを持つ", () => {
+  it("各テンプレートがcompatibleStylesを持つか、汎用テンプレートである", () => {
     for (const tmpl of BUILTIN_TEMPLATES) {
-      // 全ビルトインテンプレートは特定の演繹スタイルに紐づく
-      expect(tmpl.compatibleStyles).toBeDefined();
-      expect(tmpl.compatibleStyles!.length).toBeGreaterThan(0);
+      // compatibleStyles が undefined → 汎用テンプレート（全スタイル共通）
+      // compatibleStyles が配列 → 特定スタイルに紐づく
+      if (tmpl.compatibleStyles !== undefined) {
+        expect(tmpl.compatibleStyles.length).toBeGreaterThan(0);
+      }
     }
+  });
+
+  it("汎用テンプレートが存在する", () => {
+    const universal = BUILTIN_TEMPLATES.filter(
+      (t) => t.compatibleStyles === undefined,
+    );
+    expect(universal.length).toBeGreaterThan(0);
   });
 
   it("IDが一意", () => {
@@ -602,6 +611,185 @@ describe("テンプレート実行テスト", () => {
     expect(consoleLogs.some((l) => l.includes(keyword))).toBe(true);
   });
 
+  // ── 汎用テンプレートのテスト ──
+
+  it("formula-explorer: 正常に実行される", () => {
+    const tmpl = BUILTIN_TEMPLATES.find((t) => t.id === "formula-explorer")!;
+    const result = runTemplate(tmpl);
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(consoleLogs.some((l) => l.includes("論理式の探索"))).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("探索完了"))).toBe(true);
+  });
+
+  it("unification-demo: 正常に実行される", () => {
+    const tmpl = BUILTIN_TEMPLATES.find((t) => t.id === "unification-demo")!;
+    const result = runTemplate(tmpl);
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(consoleLogs.some((l) => l.includes("ユニフィケーション"))).toBe(
+      true,
+    );
+    expect(consoleLogs.some((l) => l.includes("デモ完了"))).toBe(true);
+  });
+
+  // ── Hilbert追加テンプレートのテスト ──
+
+  it("axiom-explorer: 正常に実行される", () => {
+    const tmpl = BUILTIN_TEMPLATES.find((t) => t.id === "axiom-explorer")!;
+    const result = runTemplate(tmpl);
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(consoleLogs.some((l) => l.includes("公理スキーマの探索"))).toBe(
+      true,
+    );
+    expect(consoleLogs.some((l) => l.includes("探索完了"))).toBe(true);
+  });
+
+  it("axiom-explorer: ヒルベルト流以外ではエラー", () => {
+    const tmpl = BUILTIN_TEMPLATES.find((t) => t.id === "axiom-explorer")!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    (
+      handler.getDeductionSystemInfo as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      style: "natural-deduction",
+      systemName: "Natural Deduction",
+      isHilbertStyle: false,
+      rules: [],
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    expect(result._tag).toBe("Error");
+  });
+
+  it("syllogism-proof: 正常に実行される", () => {
+    const tmpl = BUILTIN_TEMPLATES.find((t) => t.id === "syllogism-proof")!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    let nodeCounter = 0;
+    (handler.addNode as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      nodeCounter++;
+      return `node-${String(nodeCounter) satisfies string}`;
+    });
+    let mpCounter = 100;
+    (handler.connectMP as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      mpCounter++;
+      return `mp-${String(mpCounter) satisfies string}`;
+    });
+    // extractHilbertProofが仮定つき証明を返す
+    (handler.extractHilbertProof as ReturnType<typeof vi.fn>).mockReturnValue({
+      _tag: "ModusPonensNode",
+      formula: { _tag: "MetaVariable", name: "χ" },
+      antecedent: {
+        _tag: "ModusPonensNode",
+        formula: { _tag: "MetaVariable", name: "ψ" },
+        antecedent: {
+          _tag: "AxiomNode",
+          formula: { _tag: "MetaVariable", name: "φ" },
+        },
+        conditional: {
+          _tag: "AxiomNode",
+          formula: {
+            _tag: "Implication",
+            left: { _tag: "MetaVariable", name: "φ" },
+            right: { _tag: "MetaVariable", name: "ψ" },
+          },
+        },
+      },
+      conditional: {
+        _tag: "AxiomNode",
+        formula: {
+          _tag: "Implication",
+          left: { _tag: "MetaVariable", name: "ψ" },
+          right: { _tag: "MetaVariable", name: "χ" },
+        },
+      },
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 500000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(handler.clearWorkspace).toHaveBeenCalled();
+    // addNode: 3 (initial) + many from displayHilbertProof (deduction theorem output)
+    expect(
+      (handler.addNode as ReturnType<typeof vi.fn>).mock.calls.length,
+    ).toBeGreaterThanOrEqual(3);
+    // connectMP: 2 (initial) + many from displayHilbertProof
+    expect(
+      (handler.connectMP as ReturnType<typeof vi.fn>).mock.calls.length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(consoleLogs.some((l) => l.includes("三段論法"))).toBe(true);
+    expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);
+  });
+
+  it("syllogism-proof: ヒルベルト流以外ではエラー", () => {
+    const tmpl = BUILTIN_TEMPLATES.find((t) => t.id === "syllogism-proof")!;
+    consoleLogs.length = 0;
+    const handler = createMockHandler();
+    (
+      handler.getDeductionSystemInfo as ReturnType<typeof vi.fn>
+    ).mockReturnValue({
+      style: "natural-deduction",
+      systemName: "Natural Deduction",
+      isHilbertStyle: false,
+      rules: [],
+    });
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    expect(result._tag).toBe("Error");
+    expect(handler.clearWorkspace).not.toHaveBeenCalled();
+  });
+
   it("cut-elimination-workspace: SC体系以外ではエラー", () => {
     const tmpl = BUILTIN_TEMPLATES.find(
       (t) => t.id === "cut-elimination-workspace",
@@ -703,11 +891,17 @@ describe("filterTemplatesByStyle", () => {
   it("BUILTIN_TEMPLATESでhilbertフィルタ", () => {
     const result = filterTemplatesByStyle(BUILTIN_TEMPLATES, "hilbert");
     const ids = result.map((t) => t.id);
+    // 汎用テンプレート
+    expect(ids).toContain("formula-explorer");
+    expect(ids).toContain("unification-demo");
+    // Hilbert固有
     expect(ids).toContain("build-identity-proof");
     expect(ids).toContain("build-identity-proof-tree");
+    expect(ids).toContain("axiom-explorer");
+    expect(ids).toContain("syllogism-proof");
     expect(ids).toContain("deduction-theorem-workspace");
     expect(ids).toContain("reverse-deduction-theorem-workspace");
-    expect(result).toHaveLength(4);
+    expect(result).toHaveLength(8);
   });
 
   it("BUILTIN_TEMPLATESでsequent-calculusフィルタ", () => {
@@ -716,6 +910,10 @@ describe("filterTemplatesByStyle", () => {
       "sequent-calculus",
     );
     const ids = result.map((t) => t.id);
+    // 汎用テンプレート
+    expect(ids).toContain("formula-explorer");
+    expect(ids).toContain("unification-demo");
+    // SC固有
     expect(ids).toContain("cut-elimination-simple");
     expect(ids).toContain("cut-elimination-implication");
     expect(ids).toContain("cut-elimination-workspace");
@@ -727,7 +925,7 @@ describe("filterTemplatesByStyle", () => {
     expect(ids).toContain("cut-elimination-step4");
     expect(ids).toContain("cut-elimination-step5");
     expect(ids).toContain("cut-elimination-step6");
-    expect(result).toHaveLength(10);
+    expect(result).toHaveLength(12);
   });
 
   it("空配列に対してフィルタしても空配列を返す", () => {
