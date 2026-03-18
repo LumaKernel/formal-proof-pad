@@ -108,6 +108,33 @@
 
 ---
 
+## 2026-03-18 - [proof-pad] TABタブロー証明木の視覚的フロー表示
+- ベースライン: Stmts 99.82%, Branch 99.09%, Funcs 90.34%, Lines 99.86%
+- **結果: Stmts 99.79% (-0.03), Branch 98.90% (-0.19), Funcs 90.32% (-0.02), Lines 99.83% (-0.03)**
+  - Branch低下はProofWorkspace.tsxの `style === "tableau-calculus"` 条件分岐（UI統合点）による。ND/SC同等パターン
+- 実装内容:
+  - tabProofTreeRendererLogic.ts: ワークスペースグラフ→タブロースタイル（上→下）証明木表示データ変換の純粋ロジック
+  - tabProofTreeRendererLogic.test.ts: 17テスト（公理、単項規則、分岐、チェーン、統計）
+  - TabProofTreePanel.tsx: タブロー証明木パネルUI（分岐表示、×/○マーカー、ルートサイクル）
+  - TabProofTreePanel.stories.tsx: 5ストーリー（AxiomOnly, SinglePremiseChain, BranchingTree, CompleteProof, Empty）+play関数
+  - ProofWorkspace.tsx: TAB体系時にTabProofTreePanelを常駐表示
+  - index.ts: エクスポート追加
+- 変更ファイル:
+  - src/lib/proof-pad/tabProofTreeRendererLogic.ts（新規）
+  - src/lib/proof-pad/tabProofTreeRendererLogic.test.ts（新規）
+  - src/lib/proof-pad/TabProofTreePanel.tsx（新規）
+  - src/lib/proof-pad/TabProofTreePanel.stories.tsx（新規）
+  - src/lib/proof-pad/ProofWorkspace.tsx（TABパネル統合）
+  - src/lib/proof-pad/index.ts（エクスポート追加）
+- **今後のイテレーションへの学び:**
+  - TABはワークスペースノード+エッジベース（NDパターン）。SC直接ツリーとは異なる
+  - TABのconclusion→premiseは上→下方向（SCのGentzenスタイルとは逆）
+  - Storybookのストーリーデータヘルパー関数はpropName一致に注意（`edges`ではなく`inferenceEdges`）
+  - ESLint: `root?.childIds[0]!` パターンは禁止。`expect(root).toBeDefined(); root!.childIds[0]` に分離する
+  - スクリーンショット: .screenshots/tab-proof-tree-axiom-only.png, .screenshots/tab-proof-tree-branching-iframe.png, .screenshots/tab-proof-tree-complete.png
+
+---
+
 ## 2026-03-18 - [proof-pad] 整理接続の置換正規化テストケース完了
 - ベースライン: Stmts 99.84%, Branch 99.18%, Funcs 90.28%, Lines 99.87%
 - **結果: カバレッジ変化なし（99.84% / 99.18% / 90.3% / 99.87%）**
