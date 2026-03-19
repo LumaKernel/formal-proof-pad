@@ -16004,3 +16004,21 @@
 - 変更ファイル: src/app/workspace/[id]/WorkspacePageView.stories.tsx
 - スクリーンショット: .screenshots/quest-complete-sc01-from-hub.png, .screenshots/quest-complete-at01-from-hub.png
 ---
+
+## 2026-03-19 21:47 - pred-01フルフローストーリー + FormulaSubstitution解決バグ修正
+- pred-01（述語論理基礎）のQuestCompletePred01FullFlowストーリーを追加
+  - A4公理パレット → 代入[φ:=P(x), τ:=x] → ゴール (∀x.P(x)) → P(x) 達成
+- バグ修正: `substitutionApplicationLogic.ts` の `validateSubstitutionApplicationEffect` で代入適用後に `resolveFormulaSubstitution` を呼び出すように修正
+  - 原因: A4公理の代入結果が `P(x)[x/x]` (FormulaSubstitutionノード) のままで、ゴール式 `P(x)` と `equalFormula` で一致しなかった
+  - 影響: 述語論理公理(A4等)で `φ[τ/x]` を含む代入を行う全てのケースに影響
+- カバレッジ: Stmts 99.61%, Branch 98.14%, Funcs 89.99%, Lines 99.71% (変化なし/微改善)
+- 変更ファイル:
+  - src/lib/proof-pad/substitutionApplicationLogic.ts (import + resolveFormulaSubstitution呼び出し追加)
+  - src/app/workspace/[id]/WorkspacePageView.stories.tsx (pred-01ストーリー追加)
+  - src/lib/proof-pad/CLAUDE.md (代入解決パターンの学び追記)
+- スクリーンショット: .screenshots/pred01-fullflow-pass.png
+- **今後のイテレーションへの学び:**
+  - 代入操作後は必ず `resolveFormulaSubstitution` で FormulaSubstitution ASTノードを解決すること
+  - `formatFormula` は FormulaSubstitution ノードをそのまま表示するため、テキスト比較でなくAST比較(equalFormula)でバグが顕在化する
+  - 述語論理のテストは項メタ変数(τ)を含む代入フローが必要で、命題論理のテストでは発見できない
+---
