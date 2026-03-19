@@ -16039,3 +16039,18 @@
   - Łukasiewicz体系の命題論理上級(propositional-advanced)は全クエスト20步以上でCI制限に収まらない
   - 同一体系のストーリーは冗長なので、最軽量のクエストを代表として1つ選べば十分
 ---
+
+## 2026-03-20 - クエストカテゴリデモストーリー追加 + CIタイムアウト修正
+- ModelAnswerDemo LargeProof: prop-08（43ステップ）→ prop-07（19ステップ）に差替え（CIタイムアウト修正）
+- 不足していた8カテゴリのデモストーリーを新規作成:
+  - PropositionalDemo.stories.tsx: propositional-basics(prop-01), propositional-intermediate(prop-10), propositional-negation(prop-19), propositional-advanced(prop-44)
+  - PredicateDemo.stories.tsx: predicate-basics(pred-01), predicate-advanced(pred-adv-11)
+  - EqualityDemo.stories.tsx: equality-basics(eq-01)
+  - ScAutoProofDemo.stories.tsx: sc-auto-proof(sc-ap-01)
+- CIタイムアウト修正: prop-15→prop-19, pred-adv-07→pred-adv-11
+- カバレッジ: Stmts 99.61%, Branch 98.14%, Funcs 90.25%, Lines 99.71%（変動なし）
+- **今後のイテレーションへの学び:**
+  - CI Storybook テストの15秒タイムアウト: 43ステップ(prop-08)でもタイムアウトする。安全ラインは20ステップ程度
+  - prop-19は否定カテゴリ最小（4ステップ）、pred-adv-11は述語上級最小（26ステップ）
+  - デモストーリーのModelAnswerWorkspaceパターンは buildModelAnswerForQuest + useState で簡潔に書ける
+---

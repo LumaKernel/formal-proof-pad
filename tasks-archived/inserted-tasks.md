@@ -94,3 +94,4 @@
   - 全17カテゴリをカバー: 6つのFullFlowストーリー + 8つのModelAnswerストーリー + 既存2つ
   - バグ修正: substitutionApplicationLogicでFormulaSubstitutionノードの解決漏れを修正
   - CI 15秒制限対応: prop-08→prop-42, prop-15→prop-19, pred-adv-01→pred-adv-11に差替え。prop-22(propositional-advanced)は同一体系冗長のため削除
+  - 追加修正: ModelAnswerDemo LargeProof prop-08→prop-07差替え、PropositionalDemo/PredicateDemo/EqualityDemo/ScAutoProofDemo新規追加
