@@ -114,9 +114,9 @@ export const Intermediate: Story = {
   },
 };
 
-/** propositional-negation: prop-15 二重否定導入（15ステップ） */
+/** propositional-negation: prop-19 ¬φ→(φ→ψ)（4ステップ） */
 export const Negation: Story = {
-  render: () => <ModelAnswerWorkspace questId="prop-15" />,
+  render: () => <ModelAnswerWorkspace questId="prop-19" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();

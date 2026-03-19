@@ -97,9 +97,9 @@ export const Basics: Story = {
   },
 };
 
-/** predicate-advanced: pred-adv-07 （小規模） */
+/** predicate-advanced: pred-adv-11 （26ステップ） */
 export const Advanced: Story = {
-  render: () => <ModelAnswerWorkspace questId="pred-adv-07" />,
+  render: () => <ModelAnswerWorkspace questId="pred-adv-11" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
