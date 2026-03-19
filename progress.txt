@@ -15817,3 +15817,19 @@
   - computeFitToContentViewportはnodeSearch.tsのcomputeFocusViewportでも使われている。ノードフォーカスも100%上限が適用される
   - ZoomControlsComponentのhandleFitはminScale/maxScaleをpropsから受け取っていたが、fit-to-contentのmaxScaleは一般的なzoom maxScaleとは別概念
 ---
+
+## 2026-03-19 - ズームコントロールi18n対応
+- ZoomControlsComponentのツールチップ/aria-labelを国際化対応
+- 変更ファイル:
+  - src/lib/infinite-canvas/ZoomControlsComponent.tsx: ZoomControlsLabels型追加、labels prop追加、ハードコード文字列を置換
+  - src/lib/infinite-canvas/index.ts: ZoomControlsLabelsエクスポート追加
+  - src/lib/proof-pad/proofMessages.ts: zoom関連7キー追加（zoomOut, zoomIn, zoomCurrentZoom, zoomSelectPreset, zoomResetTo100, zoomFitToContent, zoomToSelection）
+  - src/lib/proof-pad/ProofWorkspace.tsx: zoomLabels構築してZoomControlsComponentに渡す
+  - src/app/workspace/[id]/WorkspaceContent.tsx: intl→ProofMessagesマッピング追加
+  - messages/en.json, messages/ja.json: ズームコントロール翻訳追加
+- カバレッジ: Stmts 99.72%, Branch 98.46%（変化なし）
+- **今後のイテレーションへの学び:**
+  - ZoomControlsComponentは汎用ライブラリ(infinite-canvas)なのでi18nフレームワーク非依存。labels propでオプショナルに翻訳を注入するパターンが適切
+  - ProofMessages → ZoomControlsLabels のマッピングはProofWorkspace内のuseMemoで構築。キー名の衝突を避けるためProofMessages側は"zoom"プレフィックス付き
+  - NodeSearchComponent, CommandPaletteComponentにも同様のハードコード英語文字列が残っている（別タスク）
+---
