@@ -380,14 +380,6 @@ export function FormulaInput({
           }
           onBlur={onBlur}
         />
-        {/* オーバーレイがあるときの高さ確保（inputがabsoluteのため） */}
-        {hasOverlay && (
-          <div style={{ visibility: "hidden", ...highlightContainerStyle }}>
-            {/* v8 ignore start -- deferredValue is always non-empty when overlay exists */}
-            {deferredValue || placeholder}
-            {/* v8 ignore stop */}
-          </div>
-        )}
         {/* 補完ポップアップ */}
         {comp.isOpen && (
           <CompletionPopup

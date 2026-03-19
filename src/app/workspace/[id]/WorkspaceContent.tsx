@@ -129,6 +129,8 @@ function useProofMessagesFromIntl(): ProofMessages {
       substErrorFormulaParse: t("substErrorFormulaParse"),
       substErrorTermParse: t("substErrorTermParse"),
       substEntryPrompt: t("substEntryPrompt"),
+      substFormulaPlaceholder: t("substFormulaPlaceholder"),
+      substTermPlaceholder: t("substTermPlaceholder"),
       normalizeFormula: t("normalizeFormula"),
       normalizeApplied: t("normalizeApplied"),
       normalizeNoChange: t("normalizeNoChange"),

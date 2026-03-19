@@ -137,6 +137,8 @@
     "substErrorFormulaParse": "Invalid formula in substitution entry",
     "substErrorTermParse": "Invalid term in substitution entry",
     "substEntryPrompt": "Substitution entries:",
+    "substFormulaPlaceholder": "Enter formula",
+    "substTermPlaceholder": "Enter term",
     "normalizeFormula": "Normalize Formula",
     "normalizeApplied": "Formula normalized",
     "normalizeNoChange": "Formula is already normalized",

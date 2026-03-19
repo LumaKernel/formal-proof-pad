@@ -3763,16 +3763,16 @@ describe("ProofWorkspace", () => {
       const metaVarLabel1 = screen.getByTestId("workspace-subst-metavar-1");
       expect(metaVarLabel1).toHaveTextContent("τ");
 
-      // Verify placeholders: formula uses "alpha -> beta", term uses "S(0)"
+      // Verify placeholders: formula uses default message, term uses default message
       // FormulaEditor/TermEditor display mode shows placeholder text
       const placeholder0 = screen.getByTestId(
         "workspace-subst-value-0-placeholder",
       );
-      expect(placeholder0).toHaveTextContent("alpha -> beta");
+      expect(placeholder0).toHaveTextContent("Enter formula");
       const placeholder1 = screen.getByTestId(
         "workspace-subst-value-1-placeholder",
       );
-      expect(placeholder1).toHaveTextContent("S(0)");
+      expect(placeholder1).toHaveTextContent("Enter term");
     });
   });
 

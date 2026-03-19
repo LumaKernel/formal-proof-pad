@@ -331,7 +331,7 @@ function SubstitutionPopover({
               onChange={(value) => {
                 setEntries(updateSubstEditEntryValue(entries, i, value));
               }}
-              placeholder="alpha -> beta"
+              placeholder={msg.substFormulaPlaceholder}
               fontSize={12}
               style={{ flex: 1, minWidth: 0 }}
               onOpenSyntaxHelp={onOpenSyntaxHelp}
@@ -351,7 +351,7 @@ function SubstitutionPopover({
               onChange={(value) => {
                 setEntries(updateSubstEditEntryValue(entries, i, value));
               }}
-              placeholder="S(0)"
+              placeholder={msg.substTermPlaceholder}
               fontSize={12}
               style={{ flex: 1, minWidth: 0 }}
               onOpenSyntaxHelp={onOpenSyntaxHelp}

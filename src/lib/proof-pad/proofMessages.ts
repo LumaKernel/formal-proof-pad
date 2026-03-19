@@ -111,6 +111,8 @@ export type ProofMessages = {
   readonly substErrorFormulaParse: string;
   readonly substErrorTermParse: string;
   readonly substEntryPrompt: string;
+  readonly substFormulaPlaceholder: string;
+  readonly substTermPlaceholder: string;
 
   // --- Normalize ---
   readonly normalizeFormula: string;
@@ -409,6 +411,8 @@ export const defaultProofMessages: ProofMessages = {
   substErrorFormulaParse: "Invalid formula in substitution entry",
   substErrorTermParse: "Invalid term in substitution entry",
   substEntryPrompt: "Substitution entries:",
+  substFormulaPlaceholder: "Enter formula",
+  substTermPlaceholder: "Enter term",
 
   // Normalize
   normalizeFormula: "Normalize Formula",

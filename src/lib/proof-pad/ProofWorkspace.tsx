@@ -5493,7 +5493,7 @@ export const ProofWorkspace = forwardRef<
                   onChange={(value) => {
                     handleSubstEntryValueChange(i, value);
                   }}
-                  placeholder="alpha -> beta"
+                  placeholder={msg.substFormulaPlaceholder}
                   fontSize={12}
                   style={{ flex: 1, minWidth: 0, width: 120 }}
                   onOpenSyntaxHelp={onOpenSyntaxHelp}
@@ -5515,7 +5515,7 @@ export const ProofWorkspace = forwardRef<
                     }
                     /* v8 ignore stop */
                   }
-                  placeholder="S(0)"
+                  placeholder={msg.substTermPlaceholder}
                   fontSize={12}
                   style={{ flex: 1, minWidth: 0, width: 120 }}
                   onOpenSyntaxHelp={onOpenSyntaxHelp}
