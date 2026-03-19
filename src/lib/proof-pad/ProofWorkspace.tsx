@@ -245,6 +245,7 @@ import { findScRootNodeIds, buildScProofTree } from "./scTreeBuildLogic";
 import { useEdgeScroll } from "../infinite-canvas/useEdgeScroll";
 import { EdgeScrollIndicator } from "../infinite-canvas/EdgeScrollIndicator";
 import { useMarquee } from "../infinite-canvas/useMarquee";
+import { useClampedMenuPosition } from "../infinite-canvas/useClampedMenuPosition";
 import { MinimapComponent } from "../infinite-canvas/MinimapComponent";
 import type { MinimapItem } from "../infinite-canvas/minimap";
 import { ZoomControlsComponent } from "../infinite-canvas/ZoomControlsComponent";
@@ -1087,6 +1088,21 @@ export const ProofWorkspace = forwardRef<
     worldPosition: { x: 0, y: 0 },
   });
   const canvasMenuRef = useRef<HTMLDivElement>(null);
+
+  // コンテキストメニューの画面端クランプ
+  const zeroPoint: Point = useMemo(() => ({ x: 0, y: 0 }), []);
+  useClampedMenuPosition(
+    nodeMenuRef,
+    nodeMenuState.open ? nodeMenuState.screenPosition : zeroPoint,
+  );
+  useClampedMenuPosition(
+    lineMenuRef,
+    lineMenuState.open ? lineMenuState.screenPosition : zeroPoint,
+  );
+  useClampedMenuPosition(
+    canvasMenuRef,
+    canvasMenuState.open ? canvasMenuState.screenPosition : zeroPoint,
+  );
 
   // コンテナサイズ（Viewport Culling用）
   const [containerSize, setContainerSize] = useState<Size>({

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef } from "react";
-import { clampMenuPosition, type ContextMenuItem } from "./contextMenu";
+import { useCallback, useRef } from "react";
+import type { ContextMenuItem } from "./contextMenu";
 import type { Point } from "./types";
+import { useClampedMenuPosition } from "./useClampedMenuPosition";
 
 export interface ContextMenuProps {
   /** Menu items to display */
@@ -26,21 +27,7 @@ export function ContextMenuComponent({
   const innerRef = useRef<HTMLDivElement | null>(null);
 
   // Adjust position to stay within viewport after measuring
-  useEffect(() => {
-    const el = innerRef.current;
-    /* v8 ignore start -- defensive: el is always non-null when component is mounted */
-    if (el === null) return;
-    /* v8 ignore stop */
-    const clamped = clampMenuPosition(
-      screenPosition,
-      el.offsetWidth,
-      el.offsetHeight,
-      window.innerWidth,
-      window.innerHeight,
-    );
-    el.style.left = `${String(clamped.x) satisfies string}px`;
-    el.style.top = `${String(clamped.y) satisfies string}px`;
-  }, [screenPosition]);
+  useClampedMenuPosition(innerRef, screenPosition);
 
   const setRef = useCallback(
     (node: HTMLDivElement | null) => {
