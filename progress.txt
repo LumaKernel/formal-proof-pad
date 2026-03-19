@@ -15886,3 +15886,19 @@
   - オーバーレイ構造（transparent input + 背後のhighlight div）では、border, padding, boxSizing, width がすべて一致している必要がある。1pxのborderの差でもカーソル位置がズレる
   - FormulaInput/TermInputは同じオーバーレイ構造を共有しているため、片方を修正したら必ず他方も確認する
 ---
+
+## 2026-03-19 - クエストローカライズ（EN翻訳）
+- 実装した内容:
+  - `questLocalization.ts`: ロケールに応じた純粋ローカライズ関数（localizeQuest, localizeCategory, localizeCategoryGroups等）
+  - `questTranslationsEn.ts`: 全258クエスト＋17カテゴリの英語翻訳データ
+  - `HubContent.tsx`: クエスト一覧・推薦クエスト・ノートブック名にローカライズ適用
+  - `WorkspaceContent.tsx`: ワークスペース内のクエスト情報にローカライズ適用
+  - `questLocalization.test.ts`: 20テスト（ローカライズ関数＋翻訳データ整合性）
+  - `index.ts`: ローカライズ関数・翻訳データのエクスポート追加
+- カバレッジ: Stmts 99.72%, Branch 98.46%, Funcs 89.89%, Lines 99.75%（ベースラインとほぼ同等）
+- **今後のイテレーションへの学び:**
+  - ローカライズは QuestDefinition 型を変更せず、別ファイルの翻訳マップ＋純粋関数で実現（既存コードへの影響最小化）
+  - UI層（HubContent, WorkspaceContent）でローカライズを適用し、プレゼンテーション層は変更不要
+  - 翻訳データの整合性テスト（全クエストに翻訳存在、hints数一致、空文字チェック）が重要
+  - Storybook の HubPageView ストーリーはハードコードデータを使うため、ローカライズの確認にはライブアプリが必要
+---
