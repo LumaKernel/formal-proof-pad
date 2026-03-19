@@ -121,6 +121,13 @@ const formulaContainerReadonlyStyle: Readonly<CSSProperties> = {
   fontSize: 13,
 };
 
+const formulaContainerReadonlyErrorStyle: Readonly<CSSProperties> = {
+  ...formulaContainerReadonlyStyle,
+  textDecoration: "underline wavy var(--color-error, #e06060)",
+  textUnderlineOffset: 3,
+  color: "var(--color-error, #e06060)",
+};
+
 const noteTextStyle: Readonly<CSSProperties> = {
   fontFamily: "var(--font-ui)",
   fontStyle: "normal",
@@ -509,6 +516,17 @@ export function EditableProofNode({
     [effectiveEditable, readonlyFormula, isSequent, formulaText],
   );
 
+  /** read-only表示用: パースエラー状態かどうかを判定 */
+  const hasParseError = useMemo(
+    () =>
+      !effectiveEditable &&
+      readonlyFormula === null &&
+      !isSequent &&
+      !isSignedFormula &&
+      formulaText.trim() !== "",
+    [effectiveEditable, readonlyFormula, isSequent, isSignedFormula, formulaText],
+  );
+
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
   }, []);
@@ -654,10 +672,15 @@ export function EditableProofNode({
           />
         ) : (
           <div
-            style={formulaContainerReadonlyStyle}
+            style={
+              hasParseError
+                ? formulaContainerReadonlyErrorStyle
+                : formulaContainerReadonlyStyle
+            }
             data-testid={
               testId ? `${testId satisfies string}-formula` : undefined
             }
+            data-has-parse-error={hasParseError ? "true" : undefined}
           >
             {readonlyFormula ? (
               <FormulaDisplay formula={readonlyFormula} fontSize={13} />

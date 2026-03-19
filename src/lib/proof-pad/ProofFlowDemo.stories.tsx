@@ -27,6 +27,17 @@ import {
 } from "./workspaceState";
 import type { WorkspaceState } from "./workspaceState";
 
+/**
+ * パースエラーを持つノードがないことを検証するヘルパー。
+ * 正常な証明ではすべてのノードが正しくパースされるべき。
+ */
+async function assertNoParseErrors(canvasElement: HTMLElement) {
+  const errorNodes = canvasElement.querySelectorAll(
+    '[data-has-parse-error="true"]',
+  );
+  await expect(errorNodes.length).toBe(0);
+}
+
 // --- φ→φ 完成済み証明 ---
 
 function IdentityProofComplete() {
@@ -612,6 +623,9 @@ export const IdentityProofCompleted: Story = {
     await expect(
       canvas.getByTestId("workspace-proof-complete-banner"),
     ).toBeInTheDocument();
+
+    // パースエラーがないことを確認
+    await assertNoParseErrors(canvasElement);
   },
 };
 
@@ -801,6 +815,9 @@ export const LargeProofTree: Story = {
     await expect(
       canvas.getByTestId("workspace-proof-complete-banner"),
     ).toBeInTheDocument();
+
+    // パースエラーがないことを確認
+    await assertNoParseErrors(canvasElement);
   },
 };
 

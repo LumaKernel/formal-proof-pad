@@ -640,3 +640,74 @@ export const DependencyVisibilityToggle: Story = {
     await expect(canvas.getByTestId("dep-hidden-status")).toBeInTheDocument();
   },
 };
+
+/** 共通readonly propsヘルパー */
+const readonlyBaseProps = {
+  kind: "axiom" as const,
+  label: "Axiom",
+  editable: false,
+  onFormulaTextChange: () => {},
+};
+
+/**
+ * パースエラーの readonly ノード。
+ *
+ * editable=false で無効な論理式テキストが設定されている場合、
+ * 赤い波線アンダーラインとエラー色のテキストで視覚的に区別される。
+ */
+export const ReadonlyParseError: Story = {
+  render: () => (
+    <div style={{ padding: 40, background: "var(--color-canvas-bg, #f8f6f0)" }}>
+      <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
+        <div>
+          <div style={{ marginBottom: 8, fontSize: 12, fontFamily: "var(--font-ui)" }}>
+            Parse Error (readonly)
+          </div>
+          <EditableProofNode
+            {...readonlyBaseProps}
+            id="error-node"
+            formulaText="-> -> invalid"
+            testId="error-node"
+          />
+        </div>
+        <div>
+          <div style={{ marginBottom: 8, fontSize: 12, fontFamily: "var(--font-ui)" }}>
+            Valid (readonly)
+          </div>
+          <EditableProofNode
+            {...readonlyBaseProps}
+            id="valid-node"
+            formulaText="phi -> psi"
+            testId="valid-node"
+          />
+        </div>
+        <div>
+          <div style={{ marginBottom: 8, fontSize: 12, fontFamily: "var(--font-ui)" }}>
+            Empty (readonly)
+          </div>
+          <EditableProofNode
+            {...readonlyBaseProps}
+            id="empty-node"
+            formulaText=""
+            testId="empty-node"
+          />
+        </div>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // パースエラーノードにエラー属性がある
+    const errorFormula = canvas.getByTestId("error-node-formula");
+    await expect(errorFormula.getAttribute("data-has-parse-error")).toBe("true");
+
+    // 正常ノードにはエラー属性がない
+    const validFormula = canvas.getByTestId("valid-node-formula");
+    await expect(validFormula.getAttribute("data-has-parse-error")).toBeNull();
+
+    // 空ノードにはエラー属性がない
+    const emptyFormula = canvas.getByTestId("empty-node-formula");
+    await expect(emptyFormula.getAttribute("data-has-parse-error")).toBeNull();
+  },
+};

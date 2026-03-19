@@ -76,13 +76,24 @@ type Story = StoryObj<typeof meta>;
 
 // --- ストーリー ---
 
+/**
+ * パースエラーを持つノードがないことを検証するヘルパー。
+ * 模範解答ではすべてのノードが正しくパースされるべき。
+ */
+async function assertNoParseErrors(canvasElement: HTMLElement) {
+  const errorNodes = canvasElement.querySelectorAll(
+    '[data-has-parse-error="true"]',
+  );
+  await expect(errorNodes.length).toBe(0);
+}
+
 /** prop-01: 恒等律 φ→φ（5ステップ, 小規模） */
 export const SmallProof: Story = {
   render: () => <ModelAnswerWorkspace questId="prop-01" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // ノードが存在することを確認
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+    await assertNoParseErrors(canvasElement);
   },
 };
 
@@ -92,6 +103,7 @@ export const MediumProof: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+    await assertNoParseErrors(canvasElement);
   },
 };
 
@@ -101,5 +113,6 @@ export const LargeProof: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
+    await assertNoParseErrors(canvasElement);
   },
 };

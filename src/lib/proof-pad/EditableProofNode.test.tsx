@@ -240,6 +240,33 @@ describe("EditableProofNode", () => {
       );
     });
 
+    it("パース失敗時にエラースタイルが適用される", () => {
+      renderNode({ editable: false, formulaText: "invalid @@@ syntax" });
+      const formula = screen.getByTestId("test-node-formula");
+      expect(formula.getAttribute("data-has-parse-error")).toBe("true");
+      const styleAttr = formula.getAttribute("style") ?? "";
+      expect(styleAttr).toContain("text-decoration");
+      expect(styleAttr).toContain("wavy");
+    });
+
+    it("空テキストではエラー表示しない", () => {
+      renderNode({ editable: false, formulaText: "" });
+      const formula = screen.getByTestId("test-node-formula");
+      expect(formula.getAttribute("data-has-parse-error")).toBeNull();
+    });
+
+    it("空白のみのテキストではエラー表示しない", () => {
+      renderNode({ editable: false, formulaText: "   " });
+      const formula = screen.getByTestId("test-node-formula");
+      expect(formula.getAttribute("data-has-parse-error")).toBeNull();
+    });
+
+    it("パース成功時にはエラー表示しない", () => {
+      renderNode({ editable: false, formulaText: "phi -> psi" });
+      const formula = screen.getByTestId("test-node-formula");
+      expect(formula.getAttribute("data-has-parse-error")).toBeNull();
+    });
+
     it("FormulaDisplay の role=math 属性が存在する（パース成功時）", () => {
       renderNode({ editable: false, formulaText: "phi -> psi" });
       const formulaContainer = screen.getByTestId("test-node-formula");
