@@ -15983,3 +15983,14 @@
   - HubPageViewはprops-onlyの純粋コンポーネント。onStartQuestコールバックで遷移ロジックを外部注入
   - buildCatalogByCategory + createEmptyProgress でCIタイムアウトを避けつつ必要なクエストだけ表示可能
 ---
+
+## 2026-03-19 20:25 - クエスト一覧→ワークスペース フルフローストーリー（prop-01）
+- QuestCompleteProp01FromHubストーリーを追加
+  - HubPageView → prop-01開始 → Łukasiewicz体系ワークスペース → Hilbert証明フロー（A2/A1/MP 8ステップ）→ Proved!
+  - 74インタラクション、約1.9秒で完了
+- 変更ファイル: src/app/workspace/[id]/WorkspacePageView.stories.tsx
+- スクリーンショット: .screenshots/quest-complete-prop01-from-hub.png
+- **今後のイテレーションへの学び:**
+  - FromHub render部分は完全にテンプレート化可能（questId以外同一）
+  - play関数のPhase 1/2もテンプレート化可能、Phase 3のみ体系依存
+---
