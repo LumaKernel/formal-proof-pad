@@ -270,10 +270,7 @@ function parseDeductionSystem(raw: unknown): DeductionSystem | undefined {
   }
 
   if (style === "analytic-tableau") {
-    const rules = parseRuleSet<AtRuleId>(
-      systemObj["rules"],
-      VALID_AT_RULE_IDS,
-    );
+    const rules = parseRuleSet<AtRuleId>(systemObj["rules"], VALID_AT_RULE_IDS);
     if (rules === undefined) return undefined;
     return analyticTableauDeduction({ name: systemObj["name"], rules });
   }
@@ -378,9 +375,7 @@ export function serializeCollection(collection: NotebookCollection): string {
           generalization: n.workspace.system.generalization,
         },
         // 新フォーマット: deductionSystem を明示的に保存
-        deductionSystem: serializeDeductionSystem(
-          n.workspace.deductionSystem,
-        ),
+        deductionSystem: serializeDeductionSystem(n.workspace.deductionSystem),
       },
       ...(n.questId !== undefined ? { questId: n.questId } : {}),
       ...(n.questVersion !== undefined ? { questVersion: n.questVersion } : {}),
