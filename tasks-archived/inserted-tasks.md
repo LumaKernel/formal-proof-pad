@@ -81,3 +81,8 @@
 - [x] 代入モーダルについて。hidden divのレイアウト崩れ修正 + placeholderのi18n対応
 - [x] 論理式入力のカーソルが、シンタックスエラー状態のとき、実際の文字の位置とズレている — highlightContainerStyleにborder/boxSizing/widthを追加して修正
 - [x] EN設定でもクエストタイトル、詳細がすべて日本語のままだ。 → questLocalization.ts + questTranslationsEn.ts で全258クエスト＋17カテゴリの英語翻訳を実装
+- [x] カットの基本: 推移律 のクエストの模範解答 - ⇒ が Unexpected Characterで怒られてる
+  - [x] エラーになってる状態の論理式ノードがノーマル状態で分かりにくい — readonly表示で赤い波線アンダーライン+エラー色テキストを適用。data-has-parse-error属性追加
+  - [x] エラーになってる状態の論理式ノードがあるなら、フルストーリーは失敗すべきだ — ModelAnswerDemo/ProofFlowDemoのplay関数にassertNoParseErrors検証を追加
+  - [x] Γ⇒Δのそれぞれの論理式列を、論理式列入力コンポーネントで入れる形にしよう — SequentExpandedEditor, allowSequentText, SC体系判定で自動切替
+  - [x] FormulaEditor displayモードでsequentテキストをSequentDisplay経由で表示 — displayFallbackプロップ追加、EditableProofNodeからuseSequentEditor時にSequentDisplayを渡す

@@ -15937,3 +15937,20 @@
   - data-has-parse-error属性はreadonlyノードのみに適用。editableノードはFormulaEditorが独自にエラー表示を担当
   - Prettierフォーマットのチェックを忘れずにCI前に実行すること
 ---
+
+## 2026-03-19 - FormulaEditor displayFallbackプロップ追加
+- 実装した内容:
+  - FormulaEditor に `displayFallback` プロップを追加。パース失敗時にカスタムフォールバック表示をサポート
+  - EditableProofNode で `useSequentEditor && isSequentText(formulaText)` の場合に SequentDisplay をフォールバックとして渡す
+  - FormulaEditor.test.tsx: displayFallback テスト4件追加
+  - EditableProofNode.test.tsx: シーケントテキスト表示テスト2件追加
+- 変更したファイル:
+  - src/lib/formula-input/FormulaEditor.tsx
+  - src/lib/formula-input/FormulaEditor.test.tsx
+  - src/lib/proof-pad/EditableProofNode.tsx
+  - src/lib/proof-pad/EditableProofNode.test.tsx
+- カバレッジ: Stmts 99.61%, Branch 98.14%, Funcs 89.9%, Lines 99.71% (ベースライン比ほぼ同等)
+- **今後のイテレーションへの学び:**
+  - FormulaEditorはformulaパーサーでパースできないテキスト（⇒含むシーケントテキスト等）にはdisplayFallbackで対応する設計
+  - EditorWrapper等のテストヘルパーにpropを追加する際は、型定義とdestructuringの両方を更新すること
+---
