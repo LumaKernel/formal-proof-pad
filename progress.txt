@@ -108,6 +108,27 @@
 
 ---
 
+## 2026-03-19 - [minimap] ビューポート追従による拡大を廃止しノード固定視点に変更
+- ベースライン: Stmts 99.61%, Branch 98.14%, Funcs 90.26%, Lines 99.71%
+- **結果: Stmts 99.61% (±0), Branch 98.14% (±0), Funcs 90.26% (±0), Lines 99.71% (±0)**
+- 実装内容:
+  - `expandBoundingBoxWithViewport` 関数を `minimap.ts` から削除
+  - `MinimapComponent.tsx` でノードのみのbounding box + 固定マージンで表示するように変更
+  - ノードがない場合のフォールバック（現在のビューポート領域を表示）を追加
+  - barrel export (`index.ts`) から `expandBoundingBoxWithViewport` を除去
+  - `minimap.test.ts` から `expandBoundingBoxWithViewport` のテストを削除
+- 変更ファイル:
+  - src/lib/infinite-canvas/minimap.ts（関数削除）
+  - src/lib/infinite-canvas/MinimapComponent.tsx（bounding box計算変更）
+  - src/lib/infinite-canvas/index.ts（export削除）
+  - src/lib/infinite-canvas/minimap.test.ts（テスト削除）
+- スクリーンショット: .screenshots/minimap-fixed-viewport.png, .screenshots/minimap-default-story-full.png
+- **今後のイテレーションへの学び:**
+  - minimapのbounding boxはノードのみから計算し、ビューポート位置で拡張しない方がUX的に安定する
+  - overflow:hidden が既にminimapコンテナに設定されているため、ビューポートインジケータがはみ出てもSVGクリップで問題なし
+
+---
+
 ## 2026-03-19 - [formula-input] 代入モーダルのレイアウト崩れ修正・placeholderのi18n対応
 - ベースライン: Stmts 99.72%, Branch 98.46%, Funcs 89.95%, Lines 99.75%
 - **結果: Stmts 99.72% (±0), Branch 98.46% (±0), Funcs 89.95% (±0), Lines 99.75% (±0)**
