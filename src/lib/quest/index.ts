@@ -47,6 +47,23 @@ export {
 export { builtinQuests } from "./builtinQuests";
 
 export {
+  type QuestTranslation,
+  type CategoryTranslation,
+  type QuestTranslationMap,
+  type CategoryTranslationMap,
+  localizeQuest,
+  localizeCategory,
+  localizeQuests,
+  localizeCategories,
+  localizeCategoryGroups,
+} from "./questLocalization";
+
+export {
+  questTranslationsEn,
+  categoryTranslationsEn,
+} from "./questTranslationsEn";
+
+export {
   type CompletionFilter,
   type CatalogFilterState,
   defaultFilterState,

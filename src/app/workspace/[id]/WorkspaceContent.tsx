@@ -11,7 +11,12 @@ import type { ProofMessages } from "../../../lib/proof-pad";
 import type { WorkspaceState } from "../../../lib/proof-pad/workspaceState";
 import type { ProofSaveParams } from "../../../lib/proof-collection";
 import { useProofCollection } from "../../../lib/proof-collection";
-import { useQuestProgress, builtinQuests } from "../../../lib/quest";
+import {
+  useQuestProgress,
+  builtinQuests,
+  localizeQuest,
+  questTranslationsEn,
+} from "../../../lib/quest";
 import type { GoalQuestInfo } from "../../../lib/proof-pad";
 import {
   checkQuestVersion,
@@ -410,12 +415,13 @@ function WorkspaceInner() {
     if (questId === undefined) return undefined;
     const quest = builtinQuests.find((q) => q.id === questId);
     if (quest === undefined) return undefined;
+    const localized = localizeQuest(quest, locale, questTranslationsEn);
     return {
-      description: quest.description,
-      hints: quest.hints,
-      learningPoint: quest.learningPoint,
+      description: localized.description,
+      hints: localized.hints,
+      learningPoint: localized.learningPoint,
     };
-  }, [questId]);
+  }, [questId, locale]);
 
   const questVersionWarning = useMemo(
     () =>

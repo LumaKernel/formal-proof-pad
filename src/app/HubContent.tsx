@@ -21,6 +21,10 @@ import {
   enrichListItemsWithQuestProgress,
   mergeWithBuiltinQuests,
   findQuestById,
+  localizeCategoryGroups,
+  localizeQuest,
+  questTranslationsEn,
+  categoryTranslationsEn,
   addCustomQuest,
   duplicateAsCustomQuest,
   removeCustomQuest,
@@ -244,10 +248,16 @@ function HubInner({ initialTab }: HubContentProps) {
     [router],
   );
 
-  // Build quest catalog groups
+  // Build quest catalog groups (localized)
   const groups = useMemo(
-    () => buildCatalogByCategory(builtinQuests, questProgress.progress),
-    [questProgress.progress],
+    () =>
+      localizeCategoryGroups(
+        buildCatalogByCategory(builtinQuests, questProgress.progress),
+        locale,
+        questTranslationsEn,
+        categoryTranslationsEn,
+      ),
+    [questProgress.progress, locale],
   );
 
   // Build custom quest catalog items
@@ -293,15 +303,16 @@ function HubInner({ initialTab }: HubContentProps) {
     tab === "notebooks" &&
     shouldShowLandingPage(listItems.length, hasEverHadNotebooks);
 
-  // Build recommended quests for landing page
+  // Build recommended quests for landing page (localized)
   const recommendedQuests = useMemo(
     (): readonly RecommendedQuest[] =>
       recommendedQuestIds.flatMap((id) => {
         const quest = findQuestById(allQuests, id);
         if (quest === undefined) return [];
-        return [{ id: quest.id, title: quest.title }];
+        const localized = localizeQuest(quest, locale, questTranslationsEn);
+        return [{ id: localized.id, title: localized.title }];
       }),
-    [allQuests],
+    [allQuests, locale],
   );
 
   // Compute notebook counts per quest
@@ -345,8 +356,14 @@ function HubInner({ initialTab }: HubContentProps) {
       const quest = findQuestById(allQuests, questId);
       const { params } = result;
       const nextId = predictNextNotebookId();
+      // Localize notebook name
+      const localizedQuest =
+        quest !== undefined
+          ? localizeQuest(quest, locale, questTranslationsEn)
+          : undefined;
+      const notebookName = localizedQuest?.title ?? params.name;
       notebookCollection.createQuest(
-        params.name,
+        notebookName,
         params.deductionSystem,
         params.goals,
         questId,
@@ -354,7 +371,7 @@ function HubInner({ initialTab }: HubContentProps) {
       );
       router.push(`/workspace/${nextId satisfies string}`);
     },
-    [allQuests, notebookCollection, router, predictNextNotebookId],
+    [allQuests, notebookCollection, router, predictNextNotebookId, locale],
   );
 
   // Create notebook
@@ -507,8 +524,10 @@ function HubInner({ initialTab }: HubContentProps) {
       if (result._tag !== "Ok") return;
       // 模範解答ノートブックを作成してワークスペースに遷移
       const nextId = predictNextNotebookId();
+      const localized = localizeQuest(quest, locale, questTranslationsEn);
+      const modelAnswerSuffix = locale === "ja" ? "模範解答" : "Model Answer";
       notebookCollection.createQuest(
-        `${quest.title satisfies string} (模範解答)`,
+        `${localized.title satisfies string} (${modelAnswerSuffix satisfies string})`,
         result.workspace.system,
         quest.goals,
         questId,
@@ -518,7 +537,7 @@ function HubInner({ initialTab }: HubContentProps) {
       notebookCollection.updateWorkspace(nextId, result.workspace);
       router.push(`/workspace/${nextId satisfies string}`);
     },
-    [allQuests, notebookCollection, router, predictNextNotebookId],
+    [allQuests, notebookCollection, router, predictNextNotebookId, locale],
   );
 
   // Share quest via URL (copy to clipboard)
