@@ -79,3 +79,4 @@
 - [x] 日本語のときでも、ホバーしたときのヒントが英語のままだ。 Fit to content など — ZoomControlsLabels型追加、ProofMessagesにzoom関連7キー追加、ja.json翻訳追加
 - [x] コンテキストメニューは画面下側で見切れそうなら、上に調整されて出るべき — useClampedMenuPositionフックを作成し、ProofWorkspaceの3メニューに適用
 - [x] 代入モーダルについて。hidden divのレイアウト崩れ修正 + placeholderのi18n対応
+- [x] 論理式入力のカーソルが、シンタックスエラー状態のとき、実際の文字の位置とズレている — highlightContainerStyleにborder/boxSizing/widthを追加して修正

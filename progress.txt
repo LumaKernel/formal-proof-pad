@@ -15873,3 +15873,16 @@
   - useClampedMenuPositionフックでパターンを統一。discriminated union型のメニュー状態(open: false時にscreenPositionなし)はzeroPointフォールバックで対応
   - フックの依存配列にscreenPositionを含めるため、閉じた状態ではuseMemoで安定したゼロ点を渡す
 ---
+
+## 2026-03-19 - 論理式入力カーソル位置ズレ修正
+- シンタックスエラー状態でカーソル位置が文字位置と1pxズレる問題を修正
+- 原因: inputは`border: 1px solid`を持つが、highlightContainerStyleにはborderがなかった。inputがabsolute配置時にテキスト開始位置が1pxズレていた
+- 変更ファイル:
+  - src/lib/formula-input/FormulaInput.tsx: highlightContainerStyleにborder/boxSizing/width追加
+  - src/lib/formula-input/TermInput.tsx: 同上
+- スクリーンショット: .screenshots/formula-input-error-cursor-fix.png, .screenshots/formula-input-error-cursor-longer-text.png
+- カバレッジ: Stmts 99.72%, Branch 98.46%（変化なし）
+- **今後のイテレーションへの学び:**
+  - オーバーレイ構造（transparent input + 背後のhighlight div）では、border, padding, boxSizing, width がすべて一致している必要がある。1pxのborderの差でもカーソル位置がズレる
+  - FormulaInput/TermInputは同じオーバーレイ構造を共有しているため、片方を修正したら必ず他方も確認する
+---
