@@ -95,9 +95,7 @@ export function SequentPreview({
   );
   const succedentSlots = useMemo(
     () =>
-      succedents
-        .filter((t) => t.trim() !== "")
-        .map((t) => parseFormulaSlot(t)),
+      succedents.filter((t) => t.trim() !== "").map((t) => parseFormulaSlot(t)),
     [succedents],
   );
 

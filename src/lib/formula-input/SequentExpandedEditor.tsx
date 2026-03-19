@@ -11,10 +11,7 @@ import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FormulaListEditor } from "./FormulaListEditor";
 import { SequentPreview } from "./SequentPreview";
-import {
-  splitSequentToLists,
-  composeSequentText,
-} from "./sequentEditorLogic";
+import { splitSequentToLists, composeSequentText } from "./sequentEditorLogic";
 
 // --- Props ---
 
@@ -207,20 +204,14 @@ export function SequentExpandedEditor({
   );
 
   // --- 前件操作 ---
-  const handleAntecedentChange = useCallback(
-    (formulas: readonly string[]) => {
-      setAntecedents(formulas);
-    },
-    [],
-  );
+  const handleAntecedentChange = useCallback((formulas: readonly string[]) => {
+    setAntecedents(formulas);
+  }, []);
 
   // --- 後件操作 ---
-  const handleSuccedentChange = useCallback(
-    (formulas: readonly string[]) => {
-      setSuccedents(formulas);
-    },
-    [],
-  );
+  const handleSuccedentChange = useCallback((formulas: readonly string[]) => {
+    setSuccedents(formulas);
+  }, []);
 
   return (
     <div
@@ -282,9 +273,7 @@ export function SequentExpandedEditor({
               onChange={handleAntecedentChange}
               onOpenSyntaxHelp={onOpenSyntaxHelp}
               testId={
-                testId
-                  ? `${testId satisfies string}-antecedents`
-                  : undefined
+                testId ? `${testId satisfies string}-antecedents` : undefined
               }
             />
           </div>
@@ -316,9 +305,7 @@ export function SequentExpandedEditor({
               onChange={handleSuccedentChange}
               onOpenSyntaxHelp={onOpenSyntaxHelp}
               testId={
-                testId
-                  ? `${testId satisfies string}-succedents`
-                  : undefined
+                testId ? `${testId satisfies string}-succedents` : undefined
               }
             />
           </div>

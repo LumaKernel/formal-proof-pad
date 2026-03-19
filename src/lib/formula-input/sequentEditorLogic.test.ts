@@ -63,9 +63,7 @@ describe("splitSequentToLists", () => {
   });
 
   it("handles multiple formulas on both sides", () => {
-    expect(
-      splitSequentToLists("phi -> psi, psi -> chi, phi ⇒ chi"),
-    ).toEqual({
+    expect(splitSequentToLists("phi -> psi, psi -> chi, phi ⇒ chi")).toEqual({
       antecedents: ["phi -> psi", "psi -> chi", "phi"],
       succedents: ["chi"],
     });
@@ -80,26 +78,27 @@ describe("composeSequentText", () => {
   });
 
   it("composes with empty antecedents", () => {
-    expect(
-      composeSequentText({ antecedents: [], succedents: ["φ"] }),
-    ).toBe(" ⇒ φ");
+    expect(composeSequentText({ antecedents: [], succedents: ["φ"] })).toBe(
+      " ⇒ φ",
+    );
   });
 
   it("composes with empty succedents", () => {
-    expect(
-      composeSequentText({ antecedents: ["φ"], succedents: [] }),
-    ).toBe("φ ⇒ ");
+    expect(composeSequentText({ antecedents: ["φ"], succedents: [] })).toBe(
+      "φ ⇒ ",
+    );
   });
 
   it("composes both sides empty", () => {
-    expect(
-      composeSequentText({ antecedents: [], succedents: [] }),
-    ).toBe(" ⇒ ");
+    expect(composeSequentText({ antecedents: [], succedents: [] })).toBe(" ⇒ ");
   });
 
   it("filters out empty strings", () => {
     expect(
-      composeSequentText({ antecedents: ["φ", "", "ψ"], succedents: ["", "χ"] }),
+      composeSequentText({
+        antecedents: ["φ", "", "ψ"],
+        succedents: ["", "χ"],
+      }),
     ).toBe("φ, ψ ⇒ χ");
   });
 
