@@ -107,9 +107,9 @@ export const MediumProof: Story = {
   },
 };
 
-/** prop-08: 推移律3段チェイン (φ→ψ)→((ψ→χ)→((χ→θ)→(φ→θ)))（43ステップ, 大規模） */
+/** prop-07: 含意の交換 (φ→(ψ→χ))→(ψ→(φ→χ))（19ステップ, 大規模） */
 export const LargeProof: Story = {
-  render: () => <ModelAnswerWorkspace questId="prop-08" />,
+  render: () => <ModelAnswerWorkspace questId="prop-07" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
