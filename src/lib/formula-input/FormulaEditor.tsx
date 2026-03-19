@@ -15,7 +15,12 @@ import { FormulaDisplay } from "./FormulaDisplay";
 import { FormulaExpandedEditor } from "./FormulaExpandedEditor";
 import { computeParseState, FormulaInput } from "./FormulaInput";
 import { FormulaKaTeX } from "./FormulaKaTeX";
-import type { DisplayRenderer, EditTrigger, EditorMode } from "./editorLogic";
+import type {
+  DisplayRenderer,
+  EditTrigger,
+  EditorMode,
+  ExitOptions,
+} from "./editorLogic";
 import { computeExitAction } from "./editorLogic";
 
 // --- Props ---
@@ -47,6 +52,8 @@ export interface FormulaEditorProps {
   readonly onOpenExpanded?: () => void;
   /** 外部から編集モードを強制的に開始するフラグ（trueにすると編集モードに遷移、使用後はfalseに戻すこと） */
   readonly forceEditMode?: boolean;
+  /** パースエラーでもシーケントテキスト（⇒含む）なら編集モードを離脱できるようにする */
+  readonly allowSequentText?: boolean;
   /** data-testid */
   readonly testId?: string;
 }
@@ -144,6 +151,7 @@ export function FormulaEditor({
   onOpenSyntaxHelp,
   onOpenExpanded,
   forceEditMode,
+  allowSequentText,
   testId,
 }: FormulaEditorProps) {
   const [mode, setModeInternal] = useState<EditorMode>("display");
@@ -190,16 +198,22 @@ export function FormulaEditor({
     }
   }, [forceEditMode, mode, enterEditMode]);
 
+  const exitOptions: ExitOptions | undefined = useMemo(
+    () =>
+      allowSequentText ? { allowSequentText: true, text: value } : undefined,
+    [allowSequentText, value],
+  );
+
   const tryExitEditMode = useCallback(() => {
     // forceEditMode が有効な場合は編集モードに留まる
     if (forceEditMode) return;
     const currentParseState = computeParseState(value);
-    const result = computeExitAction(currentParseState);
+    const result = computeExitAction(currentParseState, exitOptions);
     if (result !== null) {
       setMode(result);
     }
     // パースエラーの場合は何もしない（編集モードに留まる）
-  }, [value, setMode, forceEditMode]);
+  }, [value, setMode, forceEditMode, exitOptions]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

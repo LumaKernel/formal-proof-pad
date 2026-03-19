@@ -19,17 +19,32 @@ export type ParseStateStatus = {
 
 // --- モード遷移ロジック ---
 
+/** editorモード離脱判定のオプション */
+export interface ExitOptions {
+  /** trueの場合、パースエラーでもシーケントテキスト（⇒含む）なら離脱を許可する */
+  readonly allowSequentText?: boolean;
+  /** allowSequentText=true時に参照する入力テキスト */
+  readonly text?: string;
+}
+
 /**
  * 編集モードを離れられるかどうかを判定する。
  * パースエラー時は編集モードに留まらなければならない。
+ * ただし allowSequentText=true かつテキストに ⇒ が含まれる場合は許可する。
  */
-export const canExitEditMode = (parseState: ParseStateStatus): boolean => {
+export const canExitEditMode = (
+  parseState: ParseStateStatus,
+  options?: ExitOptions,
+): boolean => {
   switch (parseState.status) {
     case "empty":
       return true;
     case "success":
       return true;
     case "error":
+      if (options?.allowSequentText && options.text?.includes("⇒")) {
+        return true;
+      }
       return false;
   }
 };
@@ -54,8 +69,9 @@ export type EditTrigger = "click" | "dblclick" | "none";
  */
 export const computeExitAction = (
   parseState: ParseStateStatus,
+  options?: ExitOptions,
 ): EditorMode | null => {
-  if (canExitEditMode(parseState)) {
+  if (canExitEditMode(parseState, options)) {
     return "display";
   }
   return null;

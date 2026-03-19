@@ -94,6 +94,8 @@ export interface EditableProofNodeProps {
   readonly substitutionEntries?: SubstitutionEntries;
   /** 外部から編集モードを強制的に開始するフラグ */
   readonly forceEditMode?: boolean;
+  /** シーケントエディタモード（SC系でのシーケント入力に使用） */
+  readonly useSequentEditor?: boolean;
   /** ノートノードの編集開始コールバック（kind="note"のダブルクリック時） */
   readonly onEditNote?: (id: string) => void;
   /** data-testid */
@@ -412,6 +414,7 @@ export function EditableProofNode({
   onOpenExpanded,
   substitutionEntries,
   forceEditMode,
+  useSequentEditor,
   onEditNote,
   testId,
 }: EditableProofNodeProps) {
@@ -640,6 +643,7 @@ export function EditableProofNode({
             }
             editTrigger={editTrigger}
             forceEditMode={forceEditMode}
+            allowSequentText={useSequentEditor}
             onOpenSyntaxHelp={onOpenSyntaxHelp}
             onOpenExpanded={handleOpenExpanded}
             testId={testId ? `${testId satisfies string}-editor` : undefined}

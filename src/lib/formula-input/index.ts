@@ -21,8 +21,19 @@ export type {
   DisplayRenderer,
   EditTrigger,
   EditorMode,
+  ExitOptions,
   ParseStateStatus,
 } from "./editorLogic";
+export {
+  splitSequentToLists,
+  composeSequentText,
+  isSequentEditorText,
+} from "./sequentEditorLogic";
+export type { SequentParts } from "./sequentEditorLogic";
+export { SequentExpandedEditor } from "./SequentExpandedEditor";
+export type { SequentExpandedEditorProps } from "./SequentExpandedEditor";
+export { SequentPreview } from "./SequentPreview";
+export type { SequentPreviewProps } from "./SequentPreview";
 export { FormulaListEditor } from "./FormulaListEditor";
 export type { FormulaListEditorProps } from "./FormulaListEditor";
 export {

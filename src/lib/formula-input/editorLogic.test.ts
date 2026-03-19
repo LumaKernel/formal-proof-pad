@@ -67,6 +67,67 @@ describe("computeExitAction", () => {
   });
 });
 
+describe("allowSequentText オプション", () => {
+  const errorState: FormulaParseState = {
+    status: "error",
+    errors: [
+      new ParseError({
+        message: "unexpected character",
+        span: {
+          start: { line: 1, column: 1 },
+          end: { line: 1, column: 2 },
+        },
+      }),
+    ],
+  };
+
+  it("allowSequentText=true かつ ⇒ 含むテキストでは exit を許可する", () => {
+    expect(
+      canExitEditMode(errorState, {
+        allowSequentText: true,
+        text: "⇒ phi -> psi",
+      }),
+    ).toBe(true);
+  });
+
+  it("allowSequentText=true でも ⇒ がなければ exit を拒否する", () => {
+    expect(
+      canExitEditMode(errorState, {
+        allowSequentText: true,
+        text: "phi -> psi",
+      }),
+    ).toBe(false);
+  });
+
+  it("allowSequentText=false では ⇒ 含むテキストでも exit を拒否する", () => {
+    expect(
+      canExitEditMode(errorState, {
+        allowSequentText: false,
+        text: "⇒ phi -> psi",
+      }),
+    ).toBe(false);
+  });
+
+  it("options 未指定では従来通り error で exit 拒否", () => {
+    expect(canExitEditMode(errorState)).toBe(false);
+  });
+
+  it("computeExitAction も allowSequentText を反映する", () => {
+    expect(
+      computeExitAction(errorState, {
+        allowSequentText: true,
+        text: "phi ⇒ psi",
+      }),
+    ).toBe("display");
+    expect(
+      computeExitAction(errorState, {
+        allowSequentText: true,
+        text: "phi -> psi",
+      }),
+    ).toBeNull();
+  });
+});
+
 describe("TermParseState との互換性", () => {
   it("canExitEditMode は TermParseState でも動作する", () => {
     const empty: TermParseState = { status: "empty" };

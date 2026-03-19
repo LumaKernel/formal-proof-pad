@@ -28,6 +28,7 @@ import type { Formula } from "../logic-core/formula";
 import type { EditorMode } from "../formula-input/editorLogic";
 import { FormulaEditor } from "../formula-input/FormulaEditor";
 import { FormulaExpandedEditor } from "../formula-input/FormulaExpandedEditor";
+import { SequentExpandedEditor } from "../formula-input/SequentExpandedEditor";
 import { TermEditor } from "../formula-input/TermEditor";
 import { InfiniteCanvas } from "../infinite-canvas/InfiniteCanvas";
 import { CanvasItem } from "../infinite-canvas/CanvasItem";
@@ -1495,6 +1496,8 @@ export const ProofWorkspace = forwardRef<
   // --- 演繹スタイル判定 ---
 
   const isHilbertStyle = workspace.deductionSystem.style === "hilbert";
+  const isSequentCalculusStyle =
+    workspace.deductionSystem.style === "sequent-calculus";
 
   // --- 公理パレット ---
 
@@ -4817,6 +4820,7 @@ export const ProofWorkspace = forwardRef<
                   : undefined;
               })()}
               forceEditMode={editRequestNodeId === node.id}
+              useSequentEditor={isSequentCalculusStyle}
               onEditNote={handleEditNote}
               testId={`proof-node-${node.id satisfies string}`}
             />
@@ -4863,6 +4867,7 @@ export const ProofWorkspace = forwardRef<
       notifyDragEnd,
       editRequestNodeId,
       handleEditNote,
+      isSequentCalculusStyle,
     ],
   );
 
@@ -6867,20 +6872,37 @@ export const ProofWorkspace = forwardRef<
         const node = workspace.nodes.find((n) => n.id === expandedEditorNodeId);
         return node !== undefined;
       })() ? (
-        <FormulaExpandedEditor
-          value={
-            workspace.nodes.find((n) => n.id === expandedEditorNodeId)
-              ?.formulaText ?? ""
-          }
-          onChange={handleExpandedChange}
-          onClose={handleCloseExpanded}
-          onOpenSyntaxHelp={onOpenSyntaxHelp}
-          testId={
-            testId
-              ? `${testId satisfies string}-expanded-editor`
-              : "expanded-editor"
-          }
-        />
+        isSequentCalculusStyle ? (
+          <SequentExpandedEditor
+            value={
+              workspace.nodes.find((n) => n.id === expandedEditorNodeId)
+                ?.formulaText ?? ""
+            }
+            onChange={handleExpandedChange}
+            onClose={handleCloseExpanded}
+            onOpenSyntaxHelp={onOpenSyntaxHelp}
+            testId={
+              testId
+                ? `${testId satisfies string}-expanded-editor`
+                : "expanded-editor"
+            }
+          />
+        ) : (
+          <FormulaExpandedEditor
+            value={
+              workspace.nodes.find((n) => n.id === expandedEditorNodeId)
+                ?.formulaText ?? ""
+            }
+            onChange={handleExpandedChange}
+            onClose={handleCloseExpanded}
+            onOpenSyntaxHelp={onOpenSyntaxHelp}
+            testId={
+              testId
+                ? `${testId satisfies string}-expanded-editor`
+                : "expanded-editor"
+            }
+          />
+        )
       ) : null}
     </div>
   );
