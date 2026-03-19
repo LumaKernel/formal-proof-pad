@@ -15782,3 +15782,24 @@
   - テンプレートの console.log 出力をテストで検証する際、テンプレートのコード内で実際にログされる文字列と一致させる必要がある（タイトルやコメントは出力されない）
   - hilbert-theorem-gallery のextractHilbertProofモックは最初のclearWorkspace後の証明構造を返す必要がある（定理ごとにclearWorkspaceされるため状態がリセットされる）
 ---
+
+## 2026-03-19 - [notebook] DeductionSystemシリアライゼーション修正
+- **問題:** ND/SC/TAB/AT体系のクエストを開くと「Empty (non-Hilbert)」と表示されていた
+- **原因:** `notebookSerialization.ts` が `deductionSystem` を常に `hilbertDeduction()` で復元していた
+- **修正内容:**
+  - シリアライズ: `deductionSystem` の `style` と体系固有データ（rules, maxSuccedentLength等）を保存
+  - デシリアライズ: `style` に基づき適切なファクトリ関数で `DeductionSystem` を復元
+  - 後方互換性: `deductionSystem` フィールドなしの旧データは Hilbert にフォールバック
+  - 全5スタイル（hilbert/natural-deduction/sequent-calculus/tableau-calculus/analytic-tableau）の規則IDバリデーション追加
+- **i18n修正:** ndBannerSelectNode, ndCancel, ndDischargedFormulaPrompt を en.json/ja.json に追加。t()→t.raw()でプレースホルダー対応
+- **変更ファイル:**
+  - `src/lib/notebook/notebookSerialization.ts` - 全体系対応シリアライズ/デシリアライズ
+  - `src/lib/notebook/notebookSerialization.test.ts` - 14+7テスト追加（50→57テスト、100%カバレッジ）
+  - `messages/en.json`, `messages/ja.json` - NDメッセージ3件追加
+  - `src/app/workspace/[id]/WorkspaceContent.tsx` - t()→t.raw()修正
+- **カバレッジ:** Stmts 99.72%, Branch 98.46%, Funcs 89.94%, Lines 99.75%（ベースラインとほぼ同等）
+- **今後のイテレーションへの学び:**
+  - `notebookSerialization.ts` は新しい DeductionSystem スタイル追加時に必ず更新が必要。VALID_*_RULE_IDS セットと serializeDeductionSystem/parseDeductionSystem の分岐を追加する
+  - next-intl の `t()` はプレースホルダー `{xxx}` を自動解決しようとするため、テンプレートとして渡す場合は `t.raw()` を使う
+  - 旧フォーマットとの後方互換性テストは手動JSON構築で行う（既存コードは新フォーマットしか生成しないため）
+---

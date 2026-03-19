@@ -72,3 +72,6 @@
   - [x] テンプレート本体の強化
     - Hilbert定理ギャラリーテンプレート追加（DT ワークフロー実演: φ→φ、三段論法）
     - buildIdentityProofTreeにidentifyAxiom検証を追加（公理ノードの同定結果表示）
+- [x] 体系が Empty non-Hilbert のままだ — notebookSerialization.ts で DeductionSystem の style を保存・復元するよう修正
+- [x] pw cli で http://localhost:13000 に対しての確認もせよ — 確認済み、修正後は正しく Natural Deduction NM が表示される
+- [x] MISSING_MESSAGE: Could not resolve `ProofWorkspace.ndBannerSelectNode` in messages for locale `ja`. — en.json/ja.json に ndBannerSelectNode, ndCancel, ndDischargedFormulaPrompt を追加。t() → t.raw() に修正
