@@ -1867,3 +1867,184 @@ export const QuestCompleteNd01FromHub: Story = {
     );
   },
 };
+
+/**
+ * prop-01: クエスト一覧 → ワークスペース → φ→φ証明完了の完全フロー（Hilbert体系）
+ *
+ * 実際のユーザーフローを再現:
+ *   1. HubPageViewのクエストタブが表示される
+ *   2. prop-01「恒等律」の開始ボタンをクリック
+ *   3. ワークスペースに遷移（Łukasiewicz体系）
+ *   4. A2→代入→A1→代入→MP→A1→代入→MP → φ→φ証明完了
+ */
+export const QuestCompleteProp01FromHub: Story = {
+  render: () => {
+    const [view, setView] = useState<"hub" | "workspace">("hub");
+    const [workspace, setWorkspace] = useState<WorkspaceState | null>(null);
+    const [questInfo, setQuestInfo] = useState<GoalQuestInfo | undefined>(
+      undefined,
+    );
+    const [notebookName, setNotebookName] = useState("");
+
+    const quest = findQuestById(builtinQuests, "prop-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: prop-01");
+    }
+    const groups = buildCatalogByCategory([quest], createEmptyProgress());
+
+    const handleStartQuest = useCallback((questId: string) => {
+      const q = findQuestById(builtinQuests, questId);
+      if (q === undefined) return;
+      const preset = resolveSystemPreset(q.systemPresetId);
+      if (preset === undefined) return;
+      const ws = createQuestWorkspace(preset.deductionSystem, [
+        { formulaText: q.goals[0]!.formulaText },
+      ]);
+      setWorkspace(ws);
+      setQuestInfo({
+        description: q.description,
+        hints: q.hints,
+        learningPoint: q.learningPoint,
+      });
+      setNotebookName(q.title);
+      setView("workspace");
+    }, []);
+
+    const handleWorkspaceChange = useCallback((ws: WorkspaceState) => {
+      setWorkspace(ws);
+    }, []);
+
+    if (view === "hub") {
+      return (
+        <HubPageView
+          tab={"quests" as HubTab}
+          onTabChange={fn()}
+          listItems={[]}
+          groups={groups}
+          onOpenNotebook={fn()}
+          onDeleteNotebook={fn()}
+          onDuplicateNotebook={fn()}
+          onRenameNotebook={fn()}
+          onConvertToFree={fn()}
+          onStartQuest={handleStartQuest}
+          onCreateNotebook={fn()}
+          languageToggle={{ locale: "en", onLocaleChange: fn() }}
+        />
+      );
+    }
+
+    if (workspace === null) return <div>Loading...</div>;
+
+    return (
+      <WorkspacePageView
+        found={true}
+        notebookName={notebookName}
+        onNotebookRename={fn()}
+        workspace={workspace}
+        messages={defaultProofMessages}
+        onBack={() => setView("hub")}
+        onWorkspaceChange={handleWorkspaceChange}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        languageToggle={{ locale: "en", onLocaleChange: () => {} }}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- Phase 1: クエスト一覧（HubPageView） ---
+    await expect(canvas.getByTestId("quest-catalog")).toBeInTheDocument();
+    const startBtn = canvas.getByTestId("start-btn-prop-01");
+    await userEvent.click(startBtn);
+
+    // --- Phase 2: ワークスペースに遷移 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    });
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Łukasiewicz",
+    );
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // --- Phase 3: Hilbert φ→φ 証明フロー ---
+    // Step 1: A2スキーマをパレットから追加 → node-1
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A2"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // Step 2: node-1に代入 [φ:=phi, ψ:=phi->phi, χ:=phi] → node-2
+    await applySubstitutionViaContextMenu(canvas, "proof-node-node-1", [
+      "phi",
+      "phi -> phi",
+      "phi",
+    ]);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument();
+    });
+
+    // Step 3: A1スキーマをパレットから追加 → node-3
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A1"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-3")).toBeInTheDocument();
+    });
+
+    // Step 4: node-3に代入 [φ:=phi, ψ:=phi->phi] → node-4
+    await applySubstitutionViaContextMenu(canvas, "proof-node-node-3", [
+      "phi",
+      "phi -> phi",
+    ]);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-4")).toBeInTheDocument();
+    });
+
+    // Step 5: MP₁(left=node-4, right=node-2) → node-5
+    await applyMPViaSelection(canvas, "proof-node-node-4", "proof-node-node-2");
+    await fitToContent(canvas);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-5")).toBeInTheDocument();
+    });
+
+    // Step 6: A1スキーマをパレットから追加 → node-6
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A1"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-6")).toBeInTheDocument();
+    });
+
+    // Step 7: node-6に代入 [φ:=phi, ψ:=phi] → node-7
+    await applySubstitutionViaContextMenu(canvas, "proof-node-node-6", [
+      "phi",
+      "phi",
+    ]);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-7")).toBeInTheDocument();
+    });
+
+    // Step 8: MP₂(left=node-7, right=node-5) → node-8 (φ→φ)
+    await applyMPViaSelection(canvas, "proof-node-node-7", "proof-node-node-5");
+    await fitToContent(canvas);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-8")).toBeInTheDocument();
+    });
+
+    // --- 最終確認: ゴール達成 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
+    });
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+  },
+};
