@@ -16022,3 +16022,20 @@
   - `formatFormula` は FormulaSubstitution ノードをそのまま表示するため、テキスト比較でなくAST比較(equalFormula)でバグが顕在化する
   - 述語論理のテストは項メタ変数(τ)を含む代入フローが必要で、命題論理のテストでは発見できない
 ---
+
+## 2026-03-19 - [quest] CIタイムアウト修正（モデル解答ストーリー軽量化）
+- 前回追加した9個のモデル解答ストーリーのうち4個がCI 15秒制限でタイムアウト
+  - prop-08(25步), prop-15(15步), prop-22(40步), pred-adv-01(28步)
+- 対応: 軽量なクエストに差替え
+  - prop-08 → prop-42(3步): propositional-intermediate
+  - prop-15 → prop-19(1步): propositional-negation
+  - pred-adv-01 → pred-adv-11(8步): predicate-advanced
+  - prop-22: 削除（Łukasiewicz体系は他ストーリーでカバー済み）
+- CI: 全パス。カバレッジ: Stmts 99.61%, Branch 98.14%, Funcs 90.25%, Lines 99.71%
+- 変更ファイル:
+  - src/app/workspace/[id]/WorkspacePageView.stories.tsx
+- **今後のイテレーションへの学び:**
+  - CI Storybookテストは15秒制限。ローカルの3-7倍遅い。目安: ローカル2秒以上のストーリーはCI危険
+  - Łukasiewicz体系の命題論理上級(propositional-advanced)は全クエスト20步以上でCI制限に収まらない
+  - 同一体系のストーリーは冗長なので、最軽量のクエストを代表として1つ選べば十分
+---

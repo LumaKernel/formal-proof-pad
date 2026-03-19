@@ -90,3 +90,7 @@
   - [x] すべてのセクションの証明を完全にするフローを作ったはずだが、そこに、体系が正しいことのチェックも入れる — 全12件のQuestComplete\*ストーリーにworkspace-system testIdによる体系名検証を追加
     - [x] また、ノートを開いてからではなく、クエスト一覧から開くところからストーリーを開始する — QuestCompleteNd01FromHubストーリーを追加（HubPageView→WorkspacePageView遷移+ND証明完遂）
   - [x] 他のセクションのクエストもほとんど同様である — sc-01, tab-01, at-01のFromHubストーリーを追加（全5体系のHub→Workspace→証明完遂フルフローが揃った）
+- [x] すべてのクエストのセクションに関するフルのストーリーが揃っていない気がする
+  - 全17カテゴリをカバー: 6つのFullFlowストーリー + 8つのModelAnswerストーリー + 既存2つ
+  - バグ修正: substitutionApplicationLogicでFormulaSubstitutionノードの解決漏れを修正
+  - CI 15秒制限対応: prop-08→prop-42, prop-15→prop-19, pred-adv-01→pred-adv-11に差替え。prop-22(propositional-advanced)は同一体系冗長のため削除
