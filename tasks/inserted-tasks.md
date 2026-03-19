@@ -17,4 +17,3 @@
       `<div style="visibility: hidden; position: relative; font-family: var(--font-mono); font-size: inherit; white-space: pre; padding: 6px 8px; pointer-events: none; overflow: hidden; line-height: normal;">alpha</div>`
       これが論理式編集中の文字入力の下に隠れてるだけで存在してるせいでレイアウトが崩れてる
   - [ ] あと、プレースホルダーは alpha -> beta ではなくて、 "クリックで論理式を入力" とかでいいのに
-
