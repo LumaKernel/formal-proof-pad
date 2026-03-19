@@ -15954,3 +15954,18 @@
   - FormulaEditorはformulaパーサーでパースできないテキスト（⇒含むシーケントテキスト等）にはdisplayFallbackで対応する設計
   - EditorWrapper等のテストヘルパーにpropを追加する際は、型定義とdestructuringの両方を更新すること
 ---
+
+## 2026-03-19 - クエスト完了ストーリー体系名検証
+- 全12件のQuestComplete*ストーリーにworkspace-system testIdによる体系名バッジ検証を追加
+  - prop-01: "Łukasiewicz" (静的・インタラクティブ・模範解答・フルフロー)
+  - nd-01: "Natural Deduction NM" (静的・インタラクティブ・フルフロー)
+  - tab-01: "Tableau Calculus TAB (Propositional)" (静的・フルフロー)
+  - sc-01: "Sequent Calculus LK" (静的・フルフロー)
+  - at-01: "Analytic Tableau" (静的・フルフロー)
+- 変更ファイル: WorkspacePageView.stories.tsx
+- CI: 全テスト通過
+- カバレッジ変化なし（テストコードのみの変更）
+- **今後のイテレーションへの学び:**
+  - Storybookの体系名検証パターン: `await expect(canvas.getByTestId("workspace-system")).toHaveTextContent("体系名")`
+  - クエスト→体系名マッピング: prop→Łukasiewicz, nd→Natural Deduction NM, tab→Tableau Calculus TAB (Propositional), sc→Sequent Calculus LK, at→Analytic Tableau
+---
