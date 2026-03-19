@@ -806,6 +806,10 @@ export const QuestCompleteProp01: Story = {
 
     // --- 初期状態: 公理インスタンスが配置済み、ゴール未達成 ---
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Łukasiewicz",
+    );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toHaveTextContent("0 / 1");
 
@@ -886,6 +890,10 @@ export const QuestCompleteProp01ModelAnswer: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Łukasiewicz",
+    );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toBeInTheDocument();
     await expect(goalPanel).toHaveTextContent("1 / 1");
@@ -940,6 +948,10 @@ export const QuestCompleteNd01Interactive: Story = {
 
     // --- 初期状態: 空のNDワークスペース、ゴール未達成 ---
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Natural Deduction NM",
+    );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toHaveTextContent("0 / 1");
 
@@ -1007,6 +1019,10 @@ export const QuestCompleteNd01: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Natural Deduction NM",
+    );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toBeInTheDocument();
     await expect(goalPanel).toHaveTextContent("1 / 1");
@@ -1033,6 +1049,10 @@ export const QuestCompleteTab01: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Tableau Calculus TAB (Propositional)",
+    );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toBeInTheDocument();
     await expect(goalPanel).toHaveTextContent("1 / 1");
@@ -1059,6 +1079,10 @@ export const QuestCompleteSc01: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Sequent Calculus LK",
+    );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toBeInTheDocument();
     await expect(goalPanel).toHaveTextContent("1 / 1");
@@ -1085,6 +1109,10 @@ export const QuestCompleteAt01: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Analytic Tableau",
+    );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toBeInTheDocument();
     await expect(goalPanel).toHaveTextContent("1 / 1");
@@ -1229,6 +1257,10 @@ export const QuestCompleteProp01FullFlow: Story = {
 
     // --- 初期状態: 空のクエストワークスペース ---
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Łukasiewicz",
+    );
     await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
       "0 / 1",
     );
@@ -1364,6 +1396,10 @@ export const QuestCompleteNd01FullFlow: Story = {
 
     // --- 初期状態: 空のNDワークスペース ---
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Natural Deduction NM",
+    );
     await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
       "0 / 1",
     );
@@ -1462,6 +1498,10 @@ export const QuestCompleteSc01FullFlow: Story = {
 
     // --- 初期状態: 空のSCワークスペース ---
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Sequent Calculus LK",
+    );
     await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
       "0 / 1",
     );
@@ -1539,6 +1579,10 @@ export const QuestCompleteTab01FullFlow: Story = {
 
     // --- 初期状態: 空のTABワークスペース ---
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Tableau Calculus TAB (Propositional)",
+    );
     await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
       "0 / 1",
     );
@@ -1616,6 +1660,10 @@ export const QuestCompleteAt01FullFlow: Story = {
 
     // --- 初期状態: 空のATワークスペース ---
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Analytic Tableau",
+    );
     await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
       "0 / 1",
     );
