@@ -43,9 +43,12 @@ import {
   modelAnswerRegistry,
   buildModelAnswerWorkspace,
   resolveSystemPreset,
+  buildCatalogByCategory,
+  createEmptyProgress,
 } from "../../../lib/quest";
 import type { ModelAnswer } from "../../../lib/quest";
 import type { GoalQuestInfo } from "../../../lib/proof-pad";
+import { HubPageView, type HubTab } from "../../HubPageView";
 import { WorkspacePageView } from "./WorkspacePageView";
 
 // --- Stateful wrapper for interactive stories ---
@@ -1687,6 +1690,171 @@ export const QuestCompleteAt01FullFlow: Story = {
     const input = canvas.getByTestId("proof-node-node-1-editor-input-input");
     await userEvent.type(input, "phi \\/ ~phi");
     await userEvent.tab();
+
+    // --- 最終確認: ゴール達成 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
+    });
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+  },
+};
+
+// =============================================================================
+// Quest From Hub Full Flow Stories
+// クエスト一覧（HubPageView）から開始し、ワークスペースで証明を完遂するフルフロー
+// =============================================================================
+
+/**
+ * nd-01: クエスト一覧 → ワークスペース → φ→φ証明完了の完全フロー
+ *
+ * 実際のユーザーフローを再現:
+ *   1. HubPageViewのクエストタブが表示される
+ *   2. nd-01「恒等律 (→I)」の開始ボタンをクリック
+ *   3. ワークスペースに遷移（Natural Deduction NM体系）
+ *   4. 仮定追加 → phi入力 → →I適用 → φ→φ証明完了
+ */
+export const QuestCompleteNd01FromHub: Story = {
+  render: () => {
+    const [view, setView] = useState<"hub" | "workspace">("hub");
+    const [workspace, setWorkspace] = useState<WorkspaceState | null>(null);
+    const [questInfo, setQuestInfo] = useState<GoalQuestInfo | undefined>(
+      undefined,
+    );
+    const [notebookName, setNotebookName] = useState("");
+
+    // nd-01を含むクエストグループを生成
+    const quest = findQuestById(builtinQuests, "nd-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: nd-01");
+    }
+    const groups = buildCatalogByCategory([quest], createEmptyProgress());
+
+    const handleStartQuest = useCallback((questId: string) => {
+      const q = findQuestById(builtinQuests, questId);
+      if (q === undefined) return;
+      const preset = resolveSystemPreset(q.systemPresetId);
+      if (preset === undefined) return;
+      const ws = createQuestWorkspace(preset.deductionSystem, [
+        { formulaText: q.goals[0]!.formulaText },
+      ]);
+      setWorkspace(ws);
+      setQuestInfo({
+        description: q.description,
+        hints: q.hints,
+        learningPoint: q.learningPoint,
+      });
+      setNotebookName(q.title);
+      setView("workspace");
+    }, []);
+
+    const handleWorkspaceChange = useCallback((ws: WorkspaceState) => {
+      setWorkspace(ws);
+    }, []);
+
+    if (view === "hub") {
+      return (
+        <HubPageView
+          tab={"quests" as HubTab}
+          onTabChange={fn()}
+          listItems={[]}
+          groups={groups}
+          onOpenNotebook={fn()}
+          onDeleteNotebook={fn()}
+          onDuplicateNotebook={fn()}
+          onRenameNotebook={fn()}
+          onConvertToFree={fn()}
+          onStartQuest={handleStartQuest}
+          onCreateNotebook={fn()}
+          languageToggle={{ locale: "en", onLocaleChange: fn() }}
+        />
+      );
+    }
+
+    if (workspace === null) return <div>Loading...</div>;
+
+    return (
+      <WorkspacePageView
+        found={true}
+        notebookName={notebookName}
+        onNotebookRename={fn()}
+        workspace={workspace}
+        messages={defaultProofMessages}
+        onBack={() => setView("hub")}
+        onWorkspaceChange={handleWorkspaceChange}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        languageToggle={{ locale: "en", onLocaleChange: () => {} }}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- Phase 1: クエスト一覧（HubPageView） ---
+    // クエストカタログが表示される
+    await expect(canvas.getByTestId("quest-catalog")).toBeInTheDocument();
+
+    // nd-01の開始ボタンをクリック
+    const startBtn = canvas.getByTestId("start-btn-nd-01");
+    await userEvent.click(startBtn);
+
+    // --- Phase 2: ワークスペースに遷移 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    });
+
+    // 体系バッジに正しい体系名が表示される
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Natural Deduction NM",
+    );
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // --- Phase 3: ND φ→φ 証明フロー ---
+    // Step 1: 「仮定を追加」→ node-1
+    await userEvent.click(
+      canvas.getByTestId("workspace-nd-rule-palette-add-assumption"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // Step 2: node-1の式をphiに編集
+    const display = canvas.getByTestId("proof-node-node-1-editor-display");
+    await userEvent.dblClick(display);
+    const input = canvas.getByTestId("proof-node-node-1-editor-input-input");
+    await userEvent.type(input, "phi");
+    await userEvent.tab();
+
+    // Step 3: →I規則をパレットからクリック → 選択モード
+    await userEvent.click(
+      canvas.getByTestId("workspace-nd-rule-palette-rule-implication-intro"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-nd-banner")).toBeInTheDocument();
+    });
+
+    // Step 4: node-1をクリック → prompt → φ→φ
+    const originalPrompt = globalThis.prompt;
+    globalThis.prompt = () => "phi";
+    try {
+      await fitToContent(canvas);
+      await userEvent.click(canvas.getByTestId("proof-node-node-1"));
+    } finally {
+      globalThis.prompt = originalPrompt;
+    }
+
+    // 結論ノード(node-2)が生成される
+    await fitToContent(canvas);
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument();
+    });
 
     // --- 最終確認: ゴール達成 ---
     await waitFor(() => {
