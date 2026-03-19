@@ -15994,3 +15994,13 @@
   - FromHub render部分は完全にテンプレート化可能（questId以外同一）
   - play関数のPhase 1/2もテンプレート化可能、Phase 3のみ体系依存
 ---
+
+## 2026-03-19 20:50 - クエスト一覧→ワークスペース フルフローストーリー（sc-01, tab-01, at-01）
+- 3つのFromHubストーリーを追加:
+  - QuestCompleteSc01FromHub: SC LK体系、シーケント追加→phi->phi入力→証明完了
+  - QuestCompleteTab01FromHub: TAB体系、シーケント追加→~(phi->phi)入力→反駁完了
+  - QuestCompleteAt01FromHub: AT体系、式追加→phi\/~phi入力→証明完了
+- これで全5体系（prop/nd/sc/tab/at）のHub→Workspace→証明完遂フルフローストーリーが揃った
+- 変更ファイル: src/app/workspace/[id]/WorkspacePageView.stories.tsx
+- スクリーンショット: .screenshots/quest-complete-sc01-from-hub.png, .screenshots/quest-complete-at01-from-hub.png
+---

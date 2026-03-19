@@ -2048,3 +2048,393 @@ export const QuestCompleteProp01FromHub: Story = {
     );
   },
 };
+
+/**
+ * sc-01: クエスト一覧 → ワークスペース → ⊢ φ→φ 証明完了の完全フロー（SC LK体系）
+ *
+ * 実際のユーザーフローを再現:
+ *   1. HubPageViewのクエストタブが表示される
+ *   2. sc-01の開始ボタンをクリック
+ *   3. ワークスペースに遷移（Sequent Calculus LK体系）
+ *   4. シーケント追加 → phi -> phi 入力 → 証明完了
+ */
+export const QuestCompleteSc01FromHub: Story = {
+  render: () => {
+    const [view, setView] = useState<"hub" | "workspace">("hub");
+    const [workspace, setWorkspace] = useState<WorkspaceState | null>(null);
+    const [questInfo, setQuestInfo] = useState<GoalQuestInfo | undefined>(
+      undefined,
+    );
+    const [notebookName, setNotebookName] = useState("");
+
+    const quest = findQuestById(builtinQuests, "sc-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: sc-01");
+    }
+    const groups = buildCatalogByCategory([quest], createEmptyProgress());
+
+    const handleStartQuest = useCallback((questId: string) => {
+      const q = findQuestById(builtinQuests, questId);
+      if (q === undefined) return;
+      const preset = resolveSystemPreset(q.systemPresetId);
+      if (preset === undefined) return;
+      const ws = createQuestWorkspace(preset.deductionSystem, [
+        { formulaText: q.goals[0]!.formulaText },
+      ]);
+      setWorkspace(ws);
+      setQuestInfo({
+        description: q.description,
+        hints: q.hints,
+        learningPoint: q.learningPoint,
+      });
+      setNotebookName(q.title);
+      setView("workspace");
+    }, []);
+
+    const handleWorkspaceChange = useCallback((ws: WorkspaceState) => {
+      setWorkspace(ws);
+    }, []);
+
+    if (view === "hub") {
+      return (
+        <HubPageView
+          tab={"quests" as HubTab}
+          onTabChange={fn()}
+          listItems={[]}
+          groups={groups}
+          onOpenNotebook={fn()}
+          onDeleteNotebook={fn()}
+          onDuplicateNotebook={fn()}
+          onRenameNotebook={fn()}
+          onConvertToFree={fn()}
+          onStartQuest={handleStartQuest}
+          onCreateNotebook={fn()}
+          languageToggle={{ locale: "en", onLocaleChange: fn() }}
+        />
+      );
+    }
+
+    if (workspace === null) return <div>Loading...</div>;
+
+    return (
+      <WorkspacePageView
+        found={true}
+        notebookName={notebookName}
+        onNotebookRename={fn()}
+        workspace={workspace}
+        messages={defaultProofMessages}
+        onBack={() => setView("hub")}
+        onWorkspaceChange={handleWorkspaceChange}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        languageToggle={{ locale: "en", onLocaleChange: () => {} }}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- Phase 1: クエスト一覧（HubPageView） ---
+    await expect(canvas.getByTestId("quest-catalog")).toBeInTheDocument();
+    const startBtn = canvas.getByTestId("start-btn-sc-01");
+    await userEvent.click(startBtn);
+
+    // --- Phase 2: ワークスペースに遷移 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    });
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Sequent Calculus LK",
+    );
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // --- Phase 3: SC φ→φ 証明フロー ---
+    // Step 1: 「シーケントを追加」→ node-1
+    await userEvent.click(
+      canvas.getByTestId("workspace-sc-rule-palette-add-sequent"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // Step 2: node-1の式を phi -> phi に編集
+    const display = canvas.getByTestId("proof-node-node-1-editor-display");
+    await userEvent.dblClick(display);
+    const input = canvas.getByTestId("proof-node-node-1-editor-input-input");
+    await userEvent.type(input, "phi -> phi");
+    await userEvent.tab();
+
+    // --- 最終確認: ゴール達成 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
+    });
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+  },
+};
+
+/**
+ * tab-01: クエスト一覧 → ワークスペース → ¬(φ→φ) 反駁完了の完全フロー（TAB体系）
+ *
+ * 実際のユーザーフローを再現:
+ *   1. HubPageViewのクエストタブが表示される
+ *   2. tab-01の開始ボタンをクリック
+ *   3. ワークスペースに遷移（Tableau Calculus TAB体系）
+ *   4. シーケント追加 → ~(phi -> phi) 入力 → 反駁完了
+ */
+export const QuestCompleteTab01FromHub: Story = {
+  render: () => {
+    const [view, setView] = useState<"hub" | "workspace">("hub");
+    const [workspace, setWorkspace] = useState<WorkspaceState | null>(null);
+    const [questInfo, setQuestInfo] = useState<GoalQuestInfo | undefined>(
+      undefined,
+    );
+    const [notebookName, setNotebookName] = useState("");
+
+    const quest = findQuestById(builtinQuests, "tab-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: tab-01");
+    }
+    const groups = buildCatalogByCategory([quest], createEmptyProgress());
+
+    const handleStartQuest = useCallback((questId: string) => {
+      const q = findQuestById(builtinQuests, questId);
+      if (q === undefined) return;
+      const preset = resolveSystemPreset(q.systemPresetId);
+      if (preset === undefined) return;
+      const ws = createQuestWorkspace(preset.deductionSystem, [
+        { formulaText: q.goals[0]!.formulaText },
+      ]);
+      setWorkspace(ws);
+      setQuestInfo({
+        description: q.description,
+        hints: q.hints,
+        learningPoint: q.learningPoint,
+      });
+      setNotebookName(q.title);
+      setView("workspace");
+    }, []);
+
+    const handleWorkspaceChange = useCallback((ws: WorkspaceState) => {
+      setWorkspace(ws);
+    }, []);
+
+    if (view === "hub") {
+      return (
+        <HubPageView
+          tab={"quests" as HubTab}
+          onTabChange={fn()}
+          listItems={[]}
+          groups={groups}
+          onOpenNotebook={fn()}
+          onDeleteNotebook={fn()}
+          onDuplicateNotebook={fn()}
+          onRenameNotebook={fn()}
+          onConvertToFree={fn()}
+          onStartQuest={handleStartQuest}
+          onCreateNotebook={fn()}
+          languageToggle={{ locale: "en", onLocaleChange: fn() }}
+        />
+      );
+    }
+
+    if (workspace === null) return <div>Loading...</div>;
+
+    return (
+      <WorkspacePageView
+        found={true}
+        notebookName={notebookName}
+        onNotebookRename={fn()}
+        workspace={workspace}
+        messages={defaultProofMessages}
+        onBack={() => setView("hub")}
+        onWorkspaceChange={handleWorkspaceChange}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        languageToggle={{ locale: "en", onLocaleChange: () => {} }}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- Phase 1: クエスト一覧（HubPageView） ---
+    await expect(canvas.getByTestId("quest-catalog")).toBeInTheDocument();
+    const startBtn = canvas.getByTestId("start-btn-tab-01");
+    await userEvent.click(startBtn);
+
+    // --- Phase 2: ワークスペースに遷移 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    });
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Tableau Calculus TAB (Propositional)",
+    );
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // --- Phase 3: TAB ¬(φ→φ) 反駁フロー ---
+    // Step 1: 「シーケントを追加」→ node-1
+    await userEvent.click(
+      canvas.getByTestId("workspace-tab-rule-palette-add-sequent"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // Step 2: node-1の式を ~(phi -> phi) に編集
+    const display = canvas.getByTestId("proof-node-node-1-editor-display");
+    await userEvent.dblClick(display);
+    const input = canvas.getByTestId("proof-node-node-1-editor-input-input");
+    await userEvent.type(input, "~(phi -> phi)");
+    await userEvent.tab();
+
+    // --- 最終確認: ゴール達成 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
+    });
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+  },
+};
+
+/**
+ * at-01: クエスト一覧 → ワークスペース → φ∨¬φ 証明完了の完全フロー（AT体系）
+ *
+ * 実際のユーザーフローを再現:
+ *   1. HubPageViewのクエストタブが表示される
+ *   2. at-01の開始ボタンをクリック
+ *   3. ワークスペースに遷移（Analytic Tableau体系）
+ *   4. 式追加 → phi \/ ~phi 入力 → 証明完了
+ */
+export const QuestCompleteAt01FromHub: Story = {
+  render: () => {
+    const [view, setView] = useState<"hub" | "workspace">("hub");
+    const [workspace, setWorkspace] = useState<WorkspaceState | null>(null);
+    const [questInfo, setQuestInfo] = useState<GoalQuestInfo | undefined>(
+      undefined,
+    );
+    const [notebookName, setNotebookName] = useState("");
+
+    const quest = findQuestById(builtinQuests, "at-01");
+    if (quest === undefined) {
+      throw new Error("Quest not found: at-01");
+    }
+    const groups = buildCatalogByCategory([quest], createEmptyProgress());
+
+    const handleStartQuest = useCallback((questId: string) => {
+      const q = findQuestById(builtinQuests, questId);
+      if (q === undefined) return;
+      const preset = resolveSystemPreset(q.systemPresetId);
+      if (preset === undefined) return;
+      const ws = createQuestWorkspace(preset.deductionSystem, [
+        { formulaText: q.goals[0]!.formulaText },
+      ]);
+      setWorkspace(ws);
+      setQuestInfo({
+        description: q.description,
+        hints: q.hints,
+        learningPoint: q.learningPoint,
+      });
+      setNotebookName(q.title);
+      setView("workspace");
+    }, []);
+
+    const handleWorkspaceChange = useCallback((ws: WorkspaceState) => {
+      setWorkspace(ws);
+    }, []);
+
+    if (view === "hub") {
+      return (
+        <HubPageView
+          tab={"quests" as HubTab}
+          onTabChange={fn()}
+          listItems={[]}
+          groups={groups}
+          onOpenNotebook={fn()}
+          onDeleteNotebook={fn()}
+          onDuplicateNotebook={fn()}
+          onRenameNotebook={fn()}
+          onConvertToFree={fn()}
+          onStartQuest={handleStartQuest}
+          onCreateNotebook={fn()}
+          languageToggle={{ locale: "en", onLocaleChange: fn() }}
+        />
+      );
+    }
+
+    if (workspace === null) return <div>Loading...</div>;
+
+    return (
+      <WorkspacePageView
+        found={true}
+        notebookName={notebookName}
+        onNotebookRename={fn()}
+        workspace={workspace}
+        messages={defaultProofMessages}
+        onBack={() => setView("hub")}
+        onWorkspaceChange={handleWorkspaceChange}
+        onGoalAchieved={fn()}
+        questInfo={questInfo}
+        languageToggle={{ locale: "en", onLocaleChange: () => {} }}
+        workspaceTestId="workspace"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // --- Phase 1: クエスト一覧（HubPageView） ---
+    await expect(canvas.getByTestId("quest-catalog")).toBeInTheDocument();
+    const startBtn = canvas.getByTestId("start-btn-at-01");
+    await userEvent.click(startBtn);
+
+    // --- Phase 2: ワークスペースに遷移 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+    });
+    await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
+      "Analytic Tableau",
+    );
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "0 / 1",
+    );
+
+    // --- Phase 3: AT φ∨¬φ 証明フロー ---
+    // Step 1: 「式を追加」→ node-1
+    await userEvent.click(
+      canvas.getByTestId("workspace-at-rule-palette-add-formula"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // Step 2: node-1の式を phi \/ ~phi に編集
+    const display = canvas.getByTestId("proof-node-node-1-editor-display");
+    await userEvent.dblClick(display);
+    const input = canvas.getByTestId("proof-node-node-1-editor-input-input");
+    await userEvent.type(input, "phi \\/ ~phi");
+    await userEvent.tab();
+
+    // --- 最終確認: ゴール達成 ---
+    await waitFor(() => {
+      expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+        "1 / 1",
+      );
+    });
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+  },
+};
