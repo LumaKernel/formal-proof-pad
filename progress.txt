@@ -15919,3 +15919,21 @@
   - Storybook Meta<typeof Component>で必須propsがある場合、argsが必要。WrapperコンポーネントをcomponentにすればargsなしでOK
   - InfiniteCanvas内のボタンはdivによるpointer events interceptがあるため、Playwright MCPでは`evaluate('(el) => el.click()')`でクリックする必要がある
 ---
+
+## 2026-03-19 - パースエラー視覚表示
+- readonlyモードの論理式ノードでパースエラー時に赤い波線アンダーライン+エラー色テキストを表示
+- data-has-parse-error属性を追加し、Storybookのplay関数でパースエラー検出可能に
+- ModelAnswerDemo/ProofFlowDemoのplay関数にassertNoParseErrors検証を追加
+- EditableProofNode.stories.tsxにReadonlyParseErrorストーリーを追加
+- カバレッジ: Stmts 99.61%, Branch 98.15%(98.14%→), Funcs 89.88%, Lines 99.71%
+- 変更ファイル:
+  - src/lib/proof-pad/EditableProofNode.tsx
+  - src/lib/proof-pad/EditableProofNode.test.tsx
+  - src/lib/proof-pad/EditableProofNode.stories.tsx
+  - src/lib/proof-pad/ModelAnswerDemo.stories.tsx
+  - src/lib/proof-pad/ProofFlowDemo.stories.tsx
+- **今後のイテレーションへの学び:**
+  - readonlyノードとeditableノードで表示パスが異なる。readonlyはdiv直接レンダリング、editableはFormulaEditorコンポーネント経由
+  - data-has-parse-error属性はreadonlyノードのみに適用。editableノードはFormulaEditorが独自にエラー表示を担当
+  - Prettierフォーマットのチェックを忘れずにCI前に実行すること
+---
