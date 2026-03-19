@@ -108,6 +108,32 @@
 
 ---
 
+## 2026-03-19 - [formula-input] 代入モーダルのレイアウト崩れ修正・placeholderのi18n対応
+- ベースライン: Stmts 99.72%, Branch 98.46%, Funcs 89.95%, Lines 99.75%
+- **結果: Stmts 99.72% (±0), Branch 98.46% (±0), Funcs 89.95% (±0), Lines 99.75% (±0)**
+- 実装内容:
+  - FormulaInput.tsx / TermInput.tsx の冗長な `visibility: hidden` div を削除
+    - オーバーレイ時にハイライトdivが既にフロー内にあるため高さ確保divは不要
+    - 代入ポップオーバー内での余計な高さ（レイアウト崩れ）を解消
+  - 代入エントリのplaceholderをハードコード("alpha -> beta", "S(0)")からi18nメッセージに変更
+    - ProofMessages に `substFormulaPlaceholder` / `substTermPlaceholder` を追加
+    - EdgeParameterPopover.tsx, ProofWorkspace.tsx 両方を修正
+- 変更ファイル:
+  - src/lib/formula-input/FormulaInput.tsx（hidden div削除）
+  - src/lib/formula-input/TermInput.tsx（hidden div削除）
+  - src/lib/proof-pad/proofMessages.ts（新メッセージキー追加）
+  - src/lib/proof-pad/EdgeParameterPopover.tsx（placeholder i18n化）
+  - src/lib/proof-pad/ProofWorkspace.tsx（placeholder i18n化）
+  - src/lib/proof-pad/ProofWorkspace.test.tsx（テスト期待値更新）
+  - src/app/workspace/[id]/WorkspaceContent.tsx（i18nキー追加）
+  - messages/en.json, messages/ja.json（翻訳追加）
+- **今後のイテレーションへの学び:**
+  - FormulaInput/TermInputのオーバーレイ構造: hasOverlay=true時は必ずハイライトdivがフローにあるため、追加の高さ確保divは不要
+  - ProofMessages に新キー追加時は proofMessages.ts 型 → defaultProofMessages → WorkspaceContent.tsx → en.json → ja.json の5箇所を同期
+  - スクリーンショット: .screenshots/substitution-applied-after-fix.png, .screenshots/formula-input-error-after-fix.png
+
+---
+
 ## 2026-03-19 - [proof-pad] hilbertTreeBuildLogic Branchカバレッジ改善
 - ベースライン: Stmts 99.65%, Branch 98.24%, Funcs 89.98%, Lines 99.69%
 - **結果: Stmts 99.72% (+0.07), Branch 98.45% (+0.21), Funcs 89.98% (±0), Lines 99.75% (+0.06)**
