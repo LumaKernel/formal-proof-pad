@@ -44,6 +44,7 @@ const meta = {
     onSelectTab: fn(),
     onCloseTab: fn(),
     onNewTab: fn(),
+    onTabContextMenuAction: fn(),
   },
   decorators: [
     (Story) => (
@@ -185,5 +186,97 @@ export const EmptyTabs: Story = {
     await expect(
       canvas.getByTestId("workspace-new-tab-btn"),
     ).toBeInTheDocument();
+  },
+};
+
+export const ContextMenu: Story = {
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // 2番目のタブを右クリックしてコンテキストメニューを表示
+    const secondTab = canvas.getByTestId("workspace-tab-tab-2");
+    await userEvent.pointer({
+      target: secondTab,
+      keys: "[MouseRight]",
+    });
+
+    // コンテキストメニューが表示される
+    const menu = canvas.getByTestId("context-menu");
+    await expect(menu).toBeInTheDocument();
+
+    // メニュー項目が表示される
+    await expect(
+      canvas.getByTestId("context-menu-item-copy-script-name"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("context-menu-item-duplicate"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("context-menu-item-close"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("context-menu-item-close-others"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("context-menu-item-close-to-right"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("context-menu-item-close-all"),
+    ).toBeInTheDocument();
+
+    // メニュー項目をクリックするとコールバックが呼ばれる
+    await userEvent.click(
+      canvas.getByTestId("context-menu-item-copy-script-name"),
+    );
+    await expect(args.onTabContextMenuAction).toHaveBeenCalledWith(
+      "copy-script-name",
+      "tab-2",
+    );
+  },
+};
+
+export const ContextMenuLastTab: Story = {
+  args: {
+    tabs: sampleTabs,
+    activeTabId: "tab-3",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // 最後のタブを右クリック
+    const lastTab = canvas.getByTestId("workspace-tab-tab-3");
+    await userEvent.pointer({
+      target: lastTab,
+      keys: "[MouseRight]",
+    });
+
+    // close-to-right が無効
+    const closeToRight = canvas.getByTestId("context-menu-item-close-to-right");
+    await expect(closeToRight).toBeDisabled();
+  },
+};
+
+export const ContextMenuSingleTab: Story = {
+  args: {
+    tabs: [mkTab({ id: "tab-1", title: "Only Tab" })],
+    activeTabId: "tab-1",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // 唯一のタブを右クリック
+    const tab = canvas.getByTestId("workspace-tab-tab-1");
+    await userEvent.pointer({
+      target: tab,
+      keys: "[MouseRight]",
+    });
+
+    // close-others が無効
+    const closeOthers = canvas.getByTestId("context-menu-item-close-others");
+    await expect(closeOthers).toBeDisabled();
+
+    // close-to-right が無効
+    const closeToRight = canvas.getByTestId("context-menu-item-close-to-right");
+    await expect(closeToRight).toBeDisabled();
   },
 };

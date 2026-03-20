@@ -79,6 +79,10 @@ import {
   openSavedTab,
   setActiveTab,
   closeTab,
+  closeOtherTabs,
+  closeTabsToRight,
+  closeAllTabs,
+  duplicateAsUnnamed,
   updateTabCode,
   getActiveTab,
   markTabSynced,
@@ -90,6 +94,7 @@ import {
   deserializeWorkspace,
 } from "./scriptWorkspacePersistence";
 import { ScriptWorkspaceTabBar } from "./ScriptWorkspaceTabBar";
+import type { TabContextMenuAction } from "./tabContextMenuLogic";
 import { classifyScriptEditorKeyDown } from "./scriptEditorKeyboardShortcuts";
 import { ScriptFileExplorer } from "./ScriptFileExplorer";
 import { renameScript, findScript } from "./savedScriptsLogic";
@@ -321,6 +326,66 @@ export const ScriptEditorComponent: React.FC<ScriptEditorComponentProps> = ({
   const handleNewTab = useCallback(() => {
     setWorkspace((prev) => createUnnamedTab(prev, getNow()));
   }, [getNow]);
+
+  const handleTabContextMenuAction = useCallback(
+    (action: TabContextMenuAction, tabId: string) => {
+      const syncActiveTabToEditor = (next: WorkspaceState) => {
+        const newActive = getActiveTab(next);
+        if (newActive) {
+          setState((s) =>
+            s.code === newActive.code ? s : updateCode(s, newActive.code),
+          );
+        }
+      };
+
+      switch (action) {
+        case "copy-script-name": {
+          const tab = workspace.tabs.find((t) => t.id === tabId);
+          if (tab) {
+            void navigator.clipboard.writeText(tab.title);
+          }
+          break;
+        }
+        case "duplicate": {
+          setWorkspace((prev) => {
+            const next = duplicateAsUnnamed(prev, tabId, getNow());
+            syncActiveTabToEditor(next);
+            return next;
+          });
+          break;
+        }
+        case "close": {
+          handleCloseTab(tabId);
+          break;
+        }
+        case "close-others": {
+          setWorkspace((prev) => {
+            const next = closeOtherTabs(prev, tabId);
+            syncActiveTabToEditor(next);
+            return next;
+          });
+          break;
+        }
+        case "close-to-right": {
+          setWorkspace((prev) => {
+            const next = closeTabsToRight(prev, tabId);
+            syncActiveTabToEditor(next);
+            return next;
+          });
+          break;
+        }
+        case "close-all": {
+          setWorkspace((prev) => {
+            const next = closeAllTabs(prev);
+            setState((s) => (s.code === "" ? s : updateCode(s, "")));
+            return next;
+          });
+          break;
+        }
+      }
+    },
+    [workspace.tabs, getNow, handleCloseTab],
+  );
 
   // ── Ctrl/Cmd+S キーボードショートカット ──────────────────────────
 
@@ -875,6 +940,7 @@ declare var console: {
         onSelectTab={handleSelectTab}
         onCloseTab={handleCloseTab}
         onNewTab={handleNewTab}
+        onTabContextMenuAction={handleTabContextMenuAction}
       />
       <div
         style={{

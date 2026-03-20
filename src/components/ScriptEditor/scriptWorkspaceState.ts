@@ -216,6 +216,55 @@ export const closeTab = (
   };
 };
 
+/**
+ * 指定タブ以外のすべてのタブを閉じる。
+ * 指定タブが存在しない場合は状態を変更しない。
+ */
+export const closeOtherTabs = (
+  state: WorkspaceState,
+  tabId: string,
+): WorkspaceState => {
+  const tab = state.tabs.find((t) => t.id === tabId);
+  if (!tab) {
+    return state;
+  }
+  return {
+    ...state,
+    tabs: [tab],
+    activeTabId: tabId,
+  };
+};
+
+/**
+ * 指定タブより右にあるすべてのタブを閉じる。
+ * 指定タブが存在しない場合は状態を変更しない。
+ */
+export const closeTabsToRight = (
+  state: WorkspaceState,
+  tabId: string,
+): WorkspaceState => {
+  const tabIndex = state.tabs.findIndex((t) => t.id === tabId);
+  if (tabIndex === -1) {
+    return state;
+  }
+  const newTabs = state.tabs.slice(0, tabIndex + 1);
+  const activeStillExists = newTabs.some((t) => t.id === state.activeTabId);
+  return {
+    ...state,
+    tabs: newTabs,
+    activeTabId: activeStillExists ? state.activeTabId : tabId,
+  };
+};
+
+/**
+ * すべてのタブを閉じる。
+ */
+export const closeAllTabs = (state: WorkspaceState): WorkspaceState => ({
+  ...state,
+  tabs: [],
+  activeTabId: undefined,
+});
+
 // ── コード編集 ──────────────────────────────────────────────────
 
 /**

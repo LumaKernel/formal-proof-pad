@@ -7,6 +7,9 @@ import {
   openSavedTab,
   setActiveTab,
   closeTab,
+  closeOtherTabs,
+  closeTabsToRight,
+  closeAllTabs,
   updateTabCode,
   updateTabTitle,
   getActiveTab,
@@ -224,6 +227,102 @@ describe("scriptWorkspaceState", () => {
       const state = createUnnamedTab(initialWorkspaceState, 1000);
       const result = closeTab(state, "nonexistent");
       expect(result).toBe(state);
+    });
+  });
+
+  describe("closeOtherTabs", () => {
+    it("指定タブ以外を閉じる", () => {
+      const s1 = createUnnamedTab(initialWorkspaceState, 1000);
+      const s2 = createUnnamedTab(s1, 2000);
+      const s3 = createUnnamedTab(s2, 3000);
+      const targetId = s2.tabs[1]?.id ?? "";
+      const result = closeOtherTabs(s3, targetId);
+      expect(result.tabs).toHaveLength(1);
+      expect(result.tabs[0]?.id).toBe(targetId);
+      expect(result.activeTabId).toBe(targetId);
+    });
+
+    it("存在しないタブIDでは状態を変更しない", () => {
+      const state = createUnnamedTab(initialWorkspaceState, 1000);
+      const result = closeOtherTabs(state, "nonexistent");
+      expect(result).toBe(state);
+    });
+
+    it("1つのタブのみの場合はそのまま", () => {
+      const state = createUnnamedTab(initialWorkspaceState, 1000);
+      const tabId = state.tabs[0]?.id ?? "";
+      const result = closeOtherTabs(state, tabId);
+      expect(result.tabs).toHaveLength(1);
+      expect(result.activeTabId).toBe(tabId);
+    });
+  });
+
+  describe("closeTabsToRight", () => {
+    it("指定タブより右のタブを閉じる", () => {
+      const s1 = createUnnamedTab(initialWorkspaceState, 1000);
+      const s2 = createUnnamedTab(s1, 2000);
+      const s3 = createUnnamedTab(s2, 3000);
+      const targetId = s1.tabs[0]?.id ?? "";
+      const result = closeTabsToRight(s3, targetId);
+      expect(result.tabs).toHaveLength(1);
+      expect(result.tabs[0]?.id).toBe(targetId);
+    });
+
+    it("アクティブタブが右側にあればターゲットをアクティブにする", () => {
+      const s1 = createUnnamedTab(initialWorkspaceState, 1000);
+      const s2 = createUnnamedTab(s1, 2000);
+      const s3 = createUnnamedTab(s2, 3000);
+      // アクティブは3番目（最後に作成）
+      const targetId = s1.tabs[0]?.id ?? "";
+      const result = closeTabsToRight(s3, targetId);
+      expect(result.activeTabId).toBe(targetId);
+    });
+
+    it("アクティブタブが左側にあれば維持される", () => {
+      const s1 = createUnnamedTab(initialWorkspaceState, 1000);
+      const s2 = createUnnamedTab(s1, 2000);
+      const s3 = createUnnamedTab(s2, 3000);
+      const withFirst = setActiveTab(s3, s1.tabs[0]?.id ?? "");
+      const secondId = s2.tabs[1]?.id ?? "";
+      const result = closeTabsToRight(withFirst, secondId);
+      expect(result.activeTabId).toBe(s1.tabs[0]?.id);
+    });
+
+    it("最後のタブを指定すると何も閉じない", () => {
+      const s1 = createUnnamedTab(initialWorkspaceState, 1000);
+      const s2 = createUnnamedTab(s1, 2000);
+      const lastId = s2.tabs[1]?.id ?? "";
+      const result = closeTabsToRight(s2, lastId);
+      expect(result.tabs).toHaveLength(2);
+    });
+
+    it("存在しないタブIDでは状態を変更しない", () => {
+      const state = createUnnamedTab(initialWorkspaceState, 1000);
+      const result = closeTabsToRight(state, "nonexistent");
+      expect(result).toBe(state);
+    });
+  });
+
+  describe("closeAllTabs", () => {
+    it("すべてのタブを閉じる", () => {
+      const s1 = createUnnamedTab(initialWorkspaceState, 1000);
+      const s2 = createUnnamedTab(s1, 2000);
+      const result = closeAllTabs(s2);
+      expect(result.tabs).toHaveLength(0);
+      expect(result.activeTabId).toBeUndefined();
+    });
+
+    it("空の状態でも動作する", () => {
+      const result = closeAllTabs(initialWorkspaceState);
+      expect(result.tabs).toHaveLength(0);
+      expect(result.activeTabId).toBeUndefined();
+    });
+
+    it("nextUnnamedCounterは保持される", () => {
+      const s1 = createUnnamedTab(initialWorkspaceState, 1000);
+      const s2 = createUnnamedTab(s1, 2000);
+      const result = closeAllTabs(s2);
+      expect(result.nextUnnamedCounter).toBe(3);
     });
   });
 
