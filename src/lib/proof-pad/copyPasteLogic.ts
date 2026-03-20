@@ -20,6 +20,7 @@ import {
   remapEdgeNodeIds,
 } from "./inferenceEdge";
 import type { DeductionStyle } from "../logic-core/deductionSystem";
+import { getProofNodeKindLabel } from "./proofNodeUI";
 
 // --- クリップボードデータ型 ---
 
@@ -93,18 +94,6 @@ export function buildClipboardData(
   const selectedNodes = allNodes.filter((n) => selectedNodeIds.has(n.id));
   const centroid = computeCentroid(selectedNodes);
 
-  const copiedNodes: readonly CopiedNode[] = selectedNodes.map((n) => ({
-    originalId: n.id,
-    kind: n.kind,
-    label: n.label,
-    formulaText: n.formulaText,
-    relativePosition: {
-      x: n.position.x - centroid.x,
-      y: n.position.y - centroid.y,
-    },
-    ...(n.role !== undefined ? { role: n.role } : {}),
-  }));
-
   // 選択ノード間の接続のみ
   const copiedConnections: readonly CopiedConnection[] = allConnections
     .filter(
@@ -124,6 +113,27 @@ export function buildClipboardData(
     const premiseIds = getInferenceEdgePremiseNodeIds(edge);
     return premiseIds.every((id) => selectedNodeIds.has(id));
   });
+
+  // InferenceEdgeの結論ノードIDセット（エッジが含まれるノードのみラベル保持）
+  const conclusionNodeIdsWithEdge = new Set(
+    copiedInferenceEdges.map((e) => e.conclusionNodeId),
+  );
+
+  const copiedNodes: readonly CopiedNode[] = selectedNodes.map((n) => ({
+    originalId: n.id,
+    kind: n.kind,
+    // InferenceEdgeが含まれないノードはラベルをデフォルトに戻す
+    // （"MP"/"Gen"/"Subst"などの派生ラベルがエッジなしで残留するのを防ぐ）
+    label: conclusionNodeIdsWithEdge.has(n.id)
+      ? n.label
+      : getProofNodeKindLabel(n.kind),
+    formulaText: n.formulaText,
+    relativePosition: {
+      x: n.position.x - centroid.x,
+      y: n.position.y - centroid.y,
+    },
+    ...(n.role !== undefined ? { role: n.role } : {}),
+  }));
 
   return {
     _tag: "ProofPadClipboard",

@@ -421,6 +421,53 @@ describe("buildClipboardData with InferenceEdges", () => {
     );
     expect(result.inferenceEdges ?? []).toHaveLength(0);
   });
+
+  it("InferenceEdgeが含まれるノードのラベルは保持される", () => {
+    // node-1, node-2, node-3 を選択: node-3 は MP edge の結論
+    const result = buildClipboardData(
+      new Set(["node-1", "node-2", "node-3"]),
+      allNodes,
+      allConnections,
+      testInferenceEdges,
+    );
+    const node3 = result.nodes.find((n) => n.originalId === "node-3");
+    expect(node3!.label).toBe("MP");
+  });
+
+  it("InferenceEdgeなしで複製されるノードのラベルはデフォルトに戻る", () => {
+    // node-3 のみを選択: MP edge は前提が範囲外で含まれない → ラベルリセット
+    const result = buildClipboardData(
+      new Set(["node-3"]),
+      allNodes,
+      allConnections,
+      testInferenceEdges,
+    );
+    expect(result.inferenceEdges ?? []).toHaveLength(0);
+    const node3 = result.nodes.find((n) => n.originalId === "node-3");
+    expect(node3!.label).toBe("Axiom"); // "MP" ではなくデフォルトラベル
+  });
+
+  it("InferenceEdgeなしのGenノードもラベルがデフォルトに戻る", () => {
+    // node-4 (Gen) のみを選択: Gen edge なし → ラベルリセット
+    const genEdges: readonly InferenceEdge[] = [
+      {
+        _tag: "gen",
+        conclusionNodeId: "node-4",
+        premiseNodeId: "node-3",
+        variableName: "x",
+        conclusionText: "forall x . phi",
+      },
+    ];
+    const result = buildClipboardData(
+      new Set(["node-4"]),
+      allNodes,
+      allConnections,
+      genEdges,
+    );
+    expect(result.inferenceEdges ?? []).toHaveLength(0);
+    const node4 = result.nodes.find((n) => n.originalId === "node-4");
+    expect(node4!.label).toBe("Axiom"); // "Gen" ではなくデフォルトラベル
+  });
 });
 
 describe("pasteClipboardData with InferenceEdges", () => {
