@@ -116,6 +116,25 @@ function StatefulWorkspace({
   );
 }
 
+// --- 規則プロンプトモーダル操作ヘルパー ---
+
+/** モーダルが表示されるのを待ち、値を入力してconfirmする */
+async function confirmRulePrompt(
+  user: ReturnType<typeof userEvent.setup>,
+  value: string,
+) {
+  const input = await screen.findByTestId("workspace-rule-prompt-input");
+  await user.clear(input);
+  await user.type(input, value);
+  await user.click(screen.getByTestId("workspace-rule-prompt-confirm"));
+}
+
+/** モーダルが表示されるのを待ち、cancelする */
+async function cancelRulePrompt(user: ReturnType<typeof userEvent.setup>) {
+  await screen.findByTestId("workspace-rule-prompt-input");
+  await user.click(screen.getByTestId("workspace-rule-prompt-cancel"));
+}
+
 describe("ProofWorkspace", () => {
   describe("empty workspace", () => {
     it("renders with Łukasiewicz system", () => {
@@ -4025,7 +4044,6 @@ describe("ProofWorkspace", () => {
     it("applies conjunction rule when node is clicked during TAB selection", async () => {
       const user = userEvent.setup();
       // conjunction (φ∧ψ) を分解する — TABのシーケントテキストは論理式のみ
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("0");
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ∧ psi");
 
@@ -4040,6 +4058,7 @@ describe("ProofWorkspace", () => {
 
       // ノードをクリック
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
 
       // バナーが消える（規則が適用された）
       await waitFor(() => {
@@ -4047,13 +4066,10 @@ describe("ProofWorkspace", () => {
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels TAB rule when prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue(null);
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "T:phi & psi");
 
@@ -4064,6 +4080,7 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-conjunction"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await cancelRulePrompt(user);
 
       // promptがnullを返したのでバナーが消える（キャンセル）
       await waitFor(() => {
@@ -4071,13 +4088,10 @@ describe("ProofWorkspace", () => {
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels TAB rule when prompt returns NaN", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("abc");
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "T:phi & psi");
 
@@ -4087,6 +4101,7 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-conjunction"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "abc");
 
       // NaN入力でバナーが消える（キャンセル）
       await waitFor(() => {
@@ -4094,13 +4109,10 @@ describe("ProofWorkspace", () => {
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("applies exchange rule with position prompt", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("0");
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi, psi |- chi");
 
@@ -4110,23 +4122,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-exchange"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("applies universal rule with term prompt", async () => {
       const user = userEvent.setup();
       // 最初のpromptは位置(0), 次はterm
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce("a");
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "T:forall x. P(x)");
 
@@ -4136,22 +4143,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-universal"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await confirmRulePrompt(user, "a");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("applies existential rule with eigenVariable prompt", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce("c");
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "T:exists x. P(x)");
 
@@ -4161,19 +4164,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-existential"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await confirmRulePrompt(user, "c");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("exchange rule cancels when prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue(null);
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi, psi |- chi");
 
@@ -4183,19 +4185,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-exchange"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("exchange rule cancels when prompt returns NaN", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("abc");
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi, psi |- chi");
 
@@ -4205,23 +4205,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-exchange"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "abc");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("universal rule cancels when term prompt returns null", async () => {
       const user = userEvent.setup();
       // 最初のprompt(位置)は成功、次のprompt(term)はnull
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce(null);
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "T:forall x. P(x)");
 
@@ -4231,22 +4226,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-universal"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("existential rule cancels when eigenVariable prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce(null);
       let ws = createEmptyWorkspace(tableauCalculusDeduction(tabSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "T:exists x. P(x)");
 
@@ -4256,19 +4247,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-existential"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-tab-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("shows alert when TAB rule application fails", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("0");
       const alertMock = vi
         .spyOn(globalThis, "alert")
         .mockImplementation(() => {});
@@ -4282,13 +4272,13 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-tab-rule-palette-rule-conjunction"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
 
       // エラー時はalertが呼ばれる
       await waitFor(() => {
         expect(alertMock).toHaveBeenCalled();
       });
 
-      promptMock.mockRestore();
       alertMock.mockRestore();
     });
   });
@@ -4473,7 +4463,6 @@ describe("ProofWorkspace", () => {
 
     it("gamma rule prompts for term", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("a");
       let ws = createEmptyWorkspace(analyticTableauDeduction(atSystem));
       ws = addNode(ws, "axiom", "SF", { x: 100, y: 300 }, "T:forall x. P(x)");
 
@@ -4483,22 +4472,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-at-rule-palette-rule-gamma-univ"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
-
-      // promptが呼ばれた
-      expect(promptMock).toHaveBeenCalled();
+      await confirmRulePrompt(user, "a");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-at-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("gamma rule cancels when prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue(null);
       let ws = createEmptyWorkspace(analyticTableauDeduction(atSystem));
       ws = addNode(ws, "axiom", "SF", { x: 100, y: 300 }, "T:forall x. P(x)");
 
@@ -4508,19 +4492,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-at-rule-palette-rule-gamma-univ"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-at-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("delta rule prompts for eigen variable", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("c");
       let ws = createEmptyWorkspace(analyticTableauDeduction(atSystem));
       ws = addNode(ws, "axiom", "SF", { x: 100, y: 300 }, "T:exists x. P(x)");
 
@@ -4530,21 +4512,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-at-rule-palette-rule-delta-exist"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
-
-      expect(promptMock).toHaveBeenCalled();
+      await confirmRulePrompt(user, "c");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-at-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("delta rule cancels when prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue(null);
       let ws = createEmptyWorkspace(analyticTableauDeduction(atSystem));
       ws = addNode(ws, "axiom", "SF", { x: 100, y: 300 }, "T:exists x. P(x)");
 
@@ -4554,14 +4532,13 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-at-rule-palette-rule-delta-exist"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-at-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("AT rule selection clears other selection modes", async () => {
@@ -4690,7 +4667,6 @@ describe("ProofWorkspace", () => {
 
     it("applies conjunction-right rule with position prompt", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("0");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ⇒ psi ∧ chi");
 
@@ -4700,19 +4676,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-conjunction-right"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("applies exchange-left rule with exchange position prompt", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("0");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi, psi ⇒ chi");
 
@@ -4722,19 +4696,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-exchange-left"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC exchange-left when prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue(null);
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi, psi ⇒ chi");
 
@@ -4744,19 +4716,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-exchange-left"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC exchange-left when prompt returns NaN", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("abc");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi, psi ⇒ chi");
 
@@ -4766,19 +4736,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-exchange-left"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "abc");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("applies cut rule with cut formula prompt", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("phi");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ⇒ psi");
 
@@ -4788,19 +4756,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-cut"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "phi");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC cut rule when prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue(null);
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ⇒ psi");
 
@@ -4810,22 +4776,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-cut"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("applies conjunction-left rule with component index prompt", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce("1");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ∧ psi ⇒ chi");
 
@@ -4835,22 +4796,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-conjunction-left"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await confirmRulePrompt(user, "1");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC conjunction-left when component index prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce(null);
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ∧ psi ⇒ chi");
 
@@ -4860,22 +4817,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-conjunction-left"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC conjunction-left when component index is invalid (not 1 or 2)", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce("3");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ∧ psi ⇒ chi");
 
@@ -4885,22 +4838,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-conjunction-left"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await confirmRulePrompt(user, "3");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("applies universal-left rule with term prompt", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce("a");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(
         ws,
@@ -4916,22 +4865,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-universal-left"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await confirmRulePrompt(user, "a");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC universal-left when term prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce(null);
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(
         ws,
@@ -4947,22 +4892,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-universal-left"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("applies universal-right rule with eigenVariable prompt", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce("c");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "⇒ forall x. P(x)");
 
@@ -4972,22 +4913,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-universal-right"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await confirmRulePrompt(user, "c");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC universal-right when eigenVariable prompt returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi
-        .spyOn(globalThis, "prompt")
-        .mockReturnValueOnce("0")
-        .mockReturnValueOnce(null);
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "⇒ forall x. P(x)");
 
@@ -4997,19 +4934,18 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-universal-right"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "0");
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC position prompt when returns null", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue(null);
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ⇒ psi ∧ chi");
 
@@ -5019,19 +4955,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-conjunction-right"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await cancelRulePrompt(user);
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("cancels SC position prompt when returns NaN", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("abc");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ⇒ psi ∧ chi");
 
@@ -5041,19 +4975,17 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-sc-rule-palette-rule-conjunction-right"),
       );
       await user.click(screen.getByTestId("proof-node-node-1"));
+      await confirmRulePrompt(user, "abc");
 
       await waitFor(() => {
         expect(
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("SC node click dispatches to handleNodeClickForSc", async () => {
       const user = userEvent.setup();
-      const promptMock = vi.spyOn(globalThis, "prompt").mockReturnValue("0");
       let ws = createEmptyWorkspace(sequentCalculusDeduction(lkSystem));
       ws = addNode(ws, "axiom", "S1", { x: 100, y: 300 }, "phi ⇒ phi");
 
@@ -5070,8 +5002,6 @@ describe("ProofWorkspace", () => {
           screen.queryByTestId("workspace-sc-banner"),
         ).not.toBeInTheDocument();
       });
-
-      promptMock.mockRestore();
     });
 
     it("shows SC error alert when rule application fails", async () => {

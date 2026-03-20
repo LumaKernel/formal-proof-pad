@@ -232,6 +232,7 @@ import {
 } from "./inferenceEdgeLabelLogic";
 import { InferenceEdgeBadge } from "./InferenceEdgeBadge";
 import { EdgeParameterPopover } from "./EdgeParameterPopover";
+import { RulePromptModal } from "./RulePromptModal";
 import type { EdgeBadgeEditState } from "./edgeBadgeEditLogic";
 import { createEditStateFromEdge } from "./edgeBadgeEditLogic";
 import { CutEliminationStepper } from "./CutEliminationStepper";
@@ -1967,8 +1968,38 @@ export const ProofWorkspace = forwardRef<
     setNdSelection({ phase: "idle" });
   }, []);
 
+  // --- 規則パラメータプロンプト（globalThis.promptの代替） ---
+  const [rulePromptState, setRulePromptState] = useState<{
+    readonly message: string;
+    readonly defaultValue: string;
+  } | null>(null);
+  const rulePromptResolveRef = useRef<((value: string | null) => void) | null>(
+    null,
+  );
+
+  const showRulePrompt = useCallback(
+    (message: string, defaultValue: string): Promise<string | null> =>
+      new Promise((resolve) => {
+        rulePromptResolveRef.current = resolve;
+        setRulePromptState({ message, defaultValue });
+      }),
+    [],
+  );
+
+  const handleRulePromptConfirm = useCallback((value: string) => {
+    rulePromptResolveRef.current?.(value);
+    rulePromptResolveRef.current = null;
+    setRulePromptState(null);
+  }, []);
+
+  const handleRulePromptCancel = useCallback(() => {
+    rulePromptResolveRef.current?.(null);
+    rulePromptResolveRef.current = null;
+    setRulePromptState(null);
+  }, []);
+
   const handleNodeClickForNd = useCallback(
-    (nodeId: string) => {
+    async (nodeId: string) => {
       /* v8 ignore start -- 防御的: ディスパッチャでphaseチェック済み */
       if (ndSelection.phase !== "selecting-node") return;
       /* v8 ignore stop */
@@ -1982,8 +2013,8 @@ export const ProofWorkspace = forwardRef<
 
       // 現在は→Iのみサポート
       if (ruleId === "implication-intro") {
-        // 打ち消す仮定のformulaTextをpromptで取得
-        const dischargedText = globalThis.prompt(
+        // 打ち消す仮定のformulaTextをカスタムモーダルで取得
+        const dischargedText = await showRulePrompt(
           msg.ndDischargedFormulaPrompt,
           premiseNode.formulaText,
         );
@@ -2021,7 +2052,7 @@ export const ProofWorkspace = forwardRef<
 
       setNdSelection({ phase: "idle" });
     },
-    [ndSelection, workspace, setWorkspace, msg],
+    [ndSelection, workspace, setWorkspace, msg, showRulePrompt],
   );
 
   // --- TAB規則選択モードハンドラ ---
@@ -2043,7 +2074,7 @@ export const ProofWorkspace = forwardRef<
   }, []);
 
   const handleNodeClickForTab = useCallback(
-    (nodeId: string) => {
+    async (nodeId: string) => {
       /* v8 ignore start -- 防御的: ディスパッチャでphaseチェック済み */
       if (tabSelection.phase !== "selecting-node") return;
       /* v8 ignore stop */
@@ -2063,7 +2094,7 @@ export const ProofWorkspace = forwardRef<
 
       // 交換規則: 位置入力
       if (ruleId === "exchange") {
-        const input = globalThis.prompt(msg.tabExchangePositionPrompt, "0");
+        const input = await showRulePrompt(msg.tabExchangePositionPrompt, "0");
         if (input === null) {
           setTabSelection({ phase: "idle" });
           return;
@@ -2077,7 +2108,7 @@ export const ProofWorkspace = forwardRef<
 
       // 公理規則以外: 主論理式の位置入力（デフォルト0）
       if (!isTabAxiomRule(ruleId) && ruleId !== "exchange") {
-        const input = globalThis.prompt(msg.tabPositionPrompt, "0");
+        const input = await showRulePrompt(msg.tabPositionPrompt, "0");
         if (input === null) {
           setTabSelection({ phase: "idle" });
           return;
@@ -2091,7 +2122,7 @@ export const ProofWorkspace = forwardRef<
 
       // 量化子規則: 追加パラメータ入力
       if (ruleId === "universal" || ruleId === "neg-existential") {
-        const input = globalThis.prompt(msg.tabTermPrompt, "");
+        const input = await showRulePrompt(msg.tabTermPrompt, "");
         if (input === null) {
           setTabSelection({ phase: "idle" });
           return;
@@ -2099,7 +2130,7 @@ export const ProofWorkspace = forwardRef<
         termText = input;
       }
       if (ruleId === "neg-universal" || ruleId === "existential") {
-        const input = globalThis.prompt(msg.tabEigenVariablePrompt, "");
+        const input = await showRulePrompt(msg.tabEigenVariablePrompt, "");
         if (input === null) {
           setTabSelection({ phase: "idle" });
           return;
@@ -2141,7 +2172,7 @@ export const ProofWorkspace = forwardRef<
 
       setTabSelection({ phase: "idle" });
     },
-    [tabSelection, workspace, setWorkspace, msg],
+    [tabSelection, workspace, setWorkspace, msg, showRulePrompt],
   );
 
   // --- AT規則選択モードハンドラ ---
@@ -2167,7 +2198,7 @@ export const ProofWorkspace = forwardRef<
   }, []);
 
   const handleNodeClickForAt = useCallback(
-    (nodeId: string) => {
+    async (nodeId: string) => {
       if (atSelection.phase === "selecting-contradiction") {
         // closure: 矛盾ノード選択 → 適用
         const principalNode = findNode(workspace, atSelection.principalNodeId);
@@ -2232,7 +2263,7 @@ export const ProofWorkspace = forwardRef<
       // γ規則: 代入項入力
       let termText: string | undefined;
       if (isAtGammaRule(ruleId)) {
-        const input = globalThis.prompt(msg.atTermPrompt, "");
+        const input = await showRulePrompt(msg.atTermPrompt, "");
         if (input === null) {
           setAtSelection({ phase: "idle" });
           return;
@@ -2243,7 +2274,7 @@ export const ProofWorkspace = forwardRef<
       // δ規則: 固有変数入力
       let eigenVariable: string | undefined;
       if (isAtDeltaRule(ruleId)) {
-        const input = globalThis.prompt(msg.atEigenVariablePrompt, "");
+        const input = await showRulePrompt(msg.atEigenVariablePrompt, "");
         if (input === null) {
           setAtSelection({ phase: "idle" });
           return;
@@ -2283,7 +2314,7 @@ export const ProofWorkspace = forwardRef<
 
       setAtSelection({ phase: "idle" });
     },
-    [atSelection, workspace, setWorkspace, msg],
+    [atSelection, workspace, setWorkspace, msg, showRulePrompt],
   );
 
   // --- SC規則選択モードハンドラ ---
@@ -2304,7 +2335,7 @@ export const ProofWorkspace = forwardRef<
   }, []);
 
   const handleNodeClickForSc = useCallback(
-    (nodeId: string) => {
+    async (nodeId: string) => {
       /* v8 ignore start -- 防御的: ディスパッチャでphaseチェック済み */
       if (scSelection.phase !== "selecting-node") return;
       /* v8 ignore stop */
@@ -2326,7 +2357,7 @@ export const ProofWorkspace = forwardRef<
 
       // 交換規則: 位置入力
       if (ruleId === "exchange-left" || ruleId === "exchange-right") {
-        const input = globalThis.prompt(msg.scExchangePositionPrompt, "0");
+        const input = await showRulePrompt(msg.scExchangePositionPrompt, "0");
         if (input === null) {
           setScSelection({ phase: "idle" });
           return;
@@ -2340,7 +2371,7 @@ export const ProofWorkspace = forwardRef<
 
       // カット規則: カット式入力
       if (ruleId === "cut") {
-        const input = globalThis.prompt(msg.scCutFormulaPrompt, "");
+        const input = await showRulePrompt(msg.scCutFormulaPrompt, "");
         if (input === null) {
           setScSelection({ phase: "idle" });
           return;
@@ -2355,7 +2386,7 @@ export const ProofWorkspace = forwardRef<
         ruleId !== "exchange-right" &&
         ruleId !== "cut"
       ) {
-        const input = globalThis.prompt(msg.scPositionPrompt, "0");
+        const input = await showRulePrompt(msg.scPositionPrompt, "0");
         if (input === null) {
           setScSelection({ phase: "idle" });
           return;
@@ -2369,7 +2400,7 @@ export const ProofWorkspace = forwardRef<
 
       // ∧左/∨右: 成分インデックス入力
       if (ruleId === "conjunction-left" || ruleId === "disjunction-right") {
-        const input = globalThis.prompt(msg.scComponentIndexPrompt, "1");
+        const input = await showRulePrompt(msg.scComponentIndexPrompt, "1");
         if (input === null) {
           setScSelection({ phase: "idle" });
           return;
@@ -2384,7 +2415,7 @@ export const ProofWorkspace = forwardRef<
 
       // ∀左/∃右: 項テキスト入力
       if (ruleId === "universal-left" || ruleId === "existential-right") {
-        const input = globalThis.prompt(msg.scTermPrompt, "");
+        const input = await showRulePrompt(msg.scTermPrompt, "");
         if (input === null) {
           setScSelection({ phase: "idle" });
           return;
@@ -2394,7 +2425,7 @@ export const ProofWorkspace = forwardRef<
 
       // ⇒∀/∃⇒: 固有変数入力
       if (ruleId === "universal-right" || ruleId === "existential-left") {
-        const input = globalThis.prompt(msg.scEigenVariablePrompt, "");
+        const input = await showRulePrompt(msg.scEigenVariablePrompt, "");
         if (input === null) {
           setScSelection({ phase: "idle" });
           return;
@@ -2438,7 +2469,7 @@ export const ProofWorkspace = forwardRef<
 
       setScSelection({ phase: "idle" });
     },
-    [scSelection, workspace, setWorkspace, msg],
+    [scSelection, workspace, setWorkspace, msg, showRulePrompt],
   );
 
   // --- カット除去ステッパー ---
@@ -5777,6 +5808,21 @@ export const ProofWorkspace = forwardRef<
             }
           />
         </div>
+      ) : null}
+
+      {/* 規則パラメータプロンプトモーダル */}
+      {rulePromptState !== null ? (
+        <RulePromptModal
+          message={rulePromptState.message}
+          defaultValue={rulePromptState.defaultValue}
+          onConfirm={handleRulePromptConfirm}
+          onCancel={handleRulePromptCancel}
+          testId={
+            /* v8 ignore start -- V8集約アーティファクト */
+            testId ? `${testId satisfies string}-rule-prompt` : "rule-prompt"
+            /* v8 ignore stop */
+          }
+        />
       ) : null}
 
       {/* 選択バナー */}

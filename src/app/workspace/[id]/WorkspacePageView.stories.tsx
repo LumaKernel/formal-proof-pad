@@ -1658,16 +1658,17 @@ export const QuestCompleteNd01FullFlow: Story = {
       expect(canvas.getByTestId("workspace-nd-banner")).toBeInTheDocument();
     });
 
-    // --- Step 4: node-1をクリック → prompt → φ→φ ---
-    // globalThis.promptをモックしてφ(discharged formula)を返す
-    const originalPrompt = globalThis.prompt;
-    globalThis.prompt = () => "phi";
-    try {
-      await fitToContent(canvas);
-      await userEvent.click(canvas.getByTestId("proof-node-node-1"));
-    } finally {
-      globalThis.prompt = originalPrompt;
-    }
+    // --- Step 4: node-1をクリック → モーダルでφを入力 → φ→φ ---
+    await fitToContent(canvas);
+    await userEvent.click(canvas.getByTestId("proof-node-node-1"));
+
+    // 規則パラメータモーダルが表示される
+    const promptInput = await canvas.findByTestId(
+      "workspace-rule-prompt-input",
+    );
+    await userEvent.clear(promptInput);
+    await userEvent.type(promptInput, "phi");
+    await userEvent.click(canvas.getByTestId("workspace-rule-prompt-confirm"));
 
     // 結論ノード(node-2)が生成される
     await fitToContent(canvas);
@@ -2150,15 +2151,17 @@ export const QuestCompleteNd01FromHub: Story = {
       expect(canvas.getByTestId("workspace-nd-banner")).toBeInTheDocument();
     });
 
-    // Step 4: node-1をクリック → prompt → φ→φ
-    const originalPrompt = globalThis.prompt;
-    globalThis.prompt = () => "phi";
-    try {
-      await fitToContent(canvas);
-      await userEvent.click(canvas.getByTestId("proof-node-node-1"));
-    } finally {
-      globalThis.prompt = originalPrompt;
-    }
+    // Step 4: node-1をクリック → モーダルでφを入力 → φ→φ
+    await fitToContent(canvas);
+    await userEvent.click(canvas.getByTestId("proof-node-node-1"));
+
+    // 規則パラメータモーダルが表示される
+    const promptInput2 = await canvas.findByTestId(
+      "workspace-rule-prompt-input",
+    );
+    await userEvent.clear(promptInput2);
+    await userEvent.type(promptInput2, "phi");
+    await userEvent.click(canvas.getByTestId("workspace-rule-prompt-confirm"));
 
     // 結論ノード(node-2)が生成される
     await fitToContent(canvas);
