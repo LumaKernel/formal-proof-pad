@@ -880,4 +880,10 @@ describe("generateWorkspaceBridgeTypeDefs", () => {
     expect(typeDefs).toContain("declare function extractScProof");
     expect(typeDefs).toContain("declare function extractHilbertProof");
   });
+
+  it("declare function の戻り値は : 構文を使う（=> は不正）", () => {
+    const typeDefs = generateWorkspaceBridgeTypeDefs();
+    expect(typeDefs).not.toMatch(/declare function \w+\([^)]*\)\s*=>/);
+    expect(typeDefs).toMatch(/declare function \w+\([^)]*\):/);
+  });
 });

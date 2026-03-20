@@ -329,4 +329,10 @@ describe("generateHilbertProofBridgeTypeDefs", () => {
     expect(defs).toContain("declare function applyReverseDeductionTheorem");
     expect(defs).toContain("declare function displayHilbertProof");
   });
+
+  it("declare function の戻り値は : 構文を使う（=> は不正）", () => {
+    const defs = generateHilbertProofBridgeTypeDefs();
+    expect(defs).not.toMatch(/declare function \w+\([^)]*\)\s*=>/);
+    expect(defs).toMatch(/declare function \w+\([^)]*\):/);
+  });
 });

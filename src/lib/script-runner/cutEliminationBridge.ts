@@ -936,7 +936,9 @@ export const generateCutEliminationBridgeTypeDefs = (): string => {
   const lines = CUT_ELIMINATION_BRIDGE_API_DEFS.map((def) => {
     const desc = def.description satisfies string;
     const name = def.name satisfies string;
-    const sig = def.signature.replace(/^\(/, "(") satisfies string;
+    // "(params) => ReturnType" → "(params): ReturnType" に変換
+    // declare function では => ではなく : を使う
+    const sig = def.signature.replace(") =>", "):") satisfies string;
     return `/** ${desc satisfies string} */\ndeclare function ${name satisfies string}${sig satisfies string};\n`;
   });
   return lines.join("\n");

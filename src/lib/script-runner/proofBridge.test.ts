@@ -556,4 +556,12 @@ describe("generateProofBridgeTypeDefs", () => {
     expect(typeDefs).toContain("declare function identifyAxiom");
     expect(typeDefs).toContain("declare function proveSequentLK");
   });
+
+  it("declare function の戻り値は : 構文を使う（=> は不正）", () => {
+    const typeDefs = generateProofBridgeTypeDefs();
+    // "declare function name(...) => " は不正な TS 構文で戻り値が any になる
+    expect(typeDefs).not.toMatch(/declare function \w+\([^)]*\)\s*=>/);
+    // 正しい ": " 構文が使われていることを確認
+    expect(typeDefs).toMatch(/declare function \w+\([^)]*\):/);
+  });
 });

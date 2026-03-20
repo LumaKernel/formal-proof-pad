@@ -458,6 +458,12 @@ describe("generateCutEliminationBridgeTypeDefs", () => {
     expect(defs).toContain("declare function scWeakeningLeft");
     expect(defs).toContain("declare function scImplicationLeft");
   });
+
+  it("declare function の戻り値は : 構文を使う（=> は不正）", () => {
+    const defs = generateCutEliminationBridgeTypeDefs();
+    expect(defs).not.toMatch(/declare function \w+\([^)]*\)\s*=>/);
+    expect(defs).toMatch(/declare function \w+\([^)]*\):/);
+  });
 });
 
 // ── SC証明ノードコンストラクタのテスト ────────────────────────
