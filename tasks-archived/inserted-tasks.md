@@ -108,3 +108,5 @@
 - [x] ノードのメニューに論理式をコピー、論理式をコピー (ASCII)、論理式をコピー (LaTeX) など欲しい (ネストメニューで)
   - formulaCopyLogic.ts (純粋ロジック) + WorkspaceMenuSubmenu (ホバー展開サブメニュー) で実装。Unicode/ASCII(DSL)/LaTeX の3形式
 - [x] マージなどの対象ノードを選択する操作や、モーダル入力は、エスケープキーでキャンセルできてほしい。(ただし、モーダル内などの編集しているテキストエリアから抜けるときなどは別) — 全9選択モード(MP/Gen/Merge/Simplification/SubConn/ND/TAB/AT/SC)でEscapeキャンセル対応
+- [x] MP/GENは相手方が始まったら、終了すべきだ。 — 既に実装済み（handleStartMPSelection/handleStartGenSelectionで互いにidle化）
+- [x] 前提 (φ) をクリックして {variableName} で汎化します ← Genのこの{variableName}はなに？ — Gen選択バナー表示時点では変数名は不明なためプレースホルダーを除去

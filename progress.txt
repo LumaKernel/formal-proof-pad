@@ -16158,3 +16158,15 @@
   - 選択モードは phase !== "idle" で判定、各モードに対応する handleCancel* 関数が存在
   - 新しい選択モードを追加する場合、Escapeハンドラにも追加が必要（useEffectの依存配列も忘れずに）
 ---
+
+## 2026-03-20 17:18 - proof-pad Gen選択バナー{variableName}修正 + MP/GEN相互キャンセル確認
+- 実装した内容:
+  - Gen選択バナーの`{variableName}`プレースホルダーを除去（変数名はノード選択後に入力するためバナー時点では不明）
+  - MP/GEN相互キャンセルは既に実装済みであることを確認（handleStartMPSelection/handleStartGenSelectionで互いにidle化）
+- 変更したファイル:
+  - `messages/ja.json`: genBannerSelectPremise メッセージ修正
+  - `messages/en.json`: genBannerSelectPremise メッセージ修正
+  - `src/app/workspace/[id]/WorkspaceContent.tsx`: `t.raw()` → `t()` に変更
+- **今後のイテレーションへの学び:**
+  - i18n メッセージにプレースホルダーがある場合、`t.raw()` ではなく `t("key", { var: value })` で補間する必要がある。使わないプレースホルダーは除去すべき
+---
