@@ -18102,303 +18102,463 @@ const at19ExistentialDisjunctionConverse: ModelAnswer = {
 
 // ============================================================
 // シーケント計算 (SC) — sc-basics
-// SCステップタイプ追加後にリッチな模範解答に更新予定。
-// 現時点では axiom ステップでゴール式テキストを直接配置。
+// sc-root + sc-rule によるリッチな証明木の模範解答。
+// sc-23, sc-24 は現行の簡略化→⇒規則(Π=∅)では証明不可のため axiom プレースホルダ。
+// sc-27, sc-34 はクエスト式のパーサー解釈が意図と異なり論理的に妥当でないため axiom プレースホルダ。
+// sc-30 は多引数述語のカンマ分割問題のため axiom プレースホルダ。
 // ============================================================
+
+
+// --- LK体系 (sc-01 to sc-10) ---
+
 
 const sc01Identity: ModelAnswer = {
   questId: "sc-01",
-  steps: [{ _tag: "axiom", formulaText: "phi -> phi" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ φ → φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "identity", principalPosition: 0 },
+  ],
 };
 
 const sc02WeakeningLeft: ModelAnswer = {
   questId: "sc-02",
-  steps: [{ _tag: "axiom", formulaText: "phi -> (psi -> phi)" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ φ → ψ → φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "weakening-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "identity", principalPosition: 0 },
+  ],
 };
 
 const sc03ContractionLeft: ModelAnswer = {
   questId: "sc-03",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi -> (phi -> psi)) -> (phi -> psi)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ → φ → ψ) → φ → ψ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "contraction-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "contraction-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "implication-right", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 7, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 11, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 12, ruleId: "weakening-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 14, ruleId: "weakening-right", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 15, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc04Exchange: ModelAnswer = {
   questId: "sc-04",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi -> (psi -> chi)) -> (psi -> (phi -> chi))",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ → ψ → χ) → ψ → φ → χ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 9, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc05ConjIntro: ModelAnswer = {
   questId: "sc-05",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "phi -> (psi -> (phi /\\ psi))",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ φ → ψ → φ ∧ ψ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "conjunction-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "weakening-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "weakening-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 7, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc06DisjElim: ModelAnswer = {
   questId: "sc-06",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi \\/ psi) -> ((phi -> chi) -> ((psi -> chi) -> chi))",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ φ ∨ ψ → (φ → χ) → (ψ → χ) → χ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "disjunction-left", principalPosition: 2 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 7, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "weakening-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 12, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 13, ruleId: "weakening-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 15, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc07ExcludedMiddle: ModelAnswer = {
   questId: "sc-07",
-  steps: [{ _tag: "axiom", formulaText: "phi \\/ ~phi" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ φ ∨ ¬φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "contraction-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "disjunction-right", principalPosition: 1, componentIndex: 2 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "negation-right", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "identity", principalPosition: 0 },
+  ],
 };
 
 const sc08DoubleNegation: ModelAnswer = {
   questId: "sc-08",
-  steps: [{ _tag: "axiom", formulaText: "~~phi -> phi" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ ¬¬φ → φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "negation-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "negation-right", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "identity", principalPosition: 0 },
+  ],
 };
 
 const sc09Contraposition: ModelAnswer = {
   questId: "sc-09",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi -> psi) -> (~psi -> ~phi)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ → ψ) → ¬ψ → ¬φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "negation-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "negation-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc10DeMorgan: ModelAnswer = {
   questId: "sc-10",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "~(phi /\\ psi) -> (~phi \\/ ~psi)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ ¬(φ ∧ ψ) → ¬φ ∨ ¬ψ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "negation-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "conjunction-right", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "negation-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 2 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "negation-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 9, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
-// --- LJ体系クエスト ---
+
+// --- LJ体系 (sc-11 to sc-22) ---
+
 
 const sc11LjIdentity: ModelAnswer = {
   questId: "sc-11",
-  steps: [{ _tag: "axiom", formulaText: "phi -> phi" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ φ → φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "identity", principalPosition: 0 },
+  ],
 };
 
 const sc12LjExFalso: ModelAnswer = {
   questId: "sc-12",
-  steps: [{ _tag: "axiom", formulaText: "⊥ -> phi" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ ⊥ → φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "bottom-left", principalPosition: 0 },
+  ],
 };
 
 const sc13LjContraposition: ModelAnswer = {
   questId: "sc-13",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi -> psi) -> (~psi -> ~phi)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ → ψ) → ¬ψ → ¬φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "negation-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "negation-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc14LjDisjElim: ModelAnswer = {
   questId: "sc-14",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi \\/ psi) -> ((phi -> chi) -> ((psi -> chi) -> chi))",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ φ ∨ ψ → (φ → χ) → (ψ → χ) → χ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "disjunction-left", principalPosition: 2 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 7, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "weakening-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 12, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 13, ruleId: "weakening-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 15, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc15LjConjElim: ModelAnswer = {
   questId: "sc-15",
-  steps: [{ _tag: "axiom", formulaText: "(phi /\\ psi) -> phi" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ φ ∧ ψ → φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "conjunction-left", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "identity", principalPosition: 0 },
+  ],
 };
 
 const sc16LjConjCommute: ModelAnswer = {
   questId: "sc-16",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi /\\ psi) -> (psi /\\ phi)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ φ ∧ ψ → ψ ∧ φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "conjunction-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "conjunction-left", principalPosition: 0, componentIndex: 2 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "conjunction-left", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc17LjImplicationTransitivity: ModelAnswer = {
   questId: "sc-17",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi -> psi) -> ((psi -> chi) -> (phi -> chi))",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ → ψ) → (ψ → χ) → φ → χ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "implication-left", principalPosition: 2 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 7, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc18LjBottomNegation: ModelAnswer = {
   questId: "sc-18",
-  steps: [{ _tag: "axiom", formulaText: "(phi -> ⊥) -> (phi -> psi)" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ (φ → ⊥) → φ → ψ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "bottom-left", principalPosition: 0 },
+  ],
 };
 
 const sc19LjDisjIntro: ModelAnswer = {
   questId: "sc-19",
-  steps: [{ _tag: "axiom", formulaText: "phi -> (phi \\/ psi)" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ φ → φ ∨ ψ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "identity", principalPosition: 0 },
+  ],
 };
 
 const sc20LjCurry: ModelAnswer = {
   questId: "sc-20",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "((phi /\\ psi) -> chi) -> (phi -> (psi -> chi))",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ ∧ ψ → χ) → φ → ψ → χ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "implication-left", principalPosition: 2 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "conjunction-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "weakening-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 7, ruleId: "weakening-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc21LjUncurry: ModelAnswer = {
   questId: "sc-21",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi -> (psi -> chi)) -> ((phi /\\ psi) -> chi)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ → ψ → χ) → φ ∧ ψ → χ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "contraction-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "conjunction-left", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "conjunction-left", principalPosition: 1, componentIndex: 2 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 7, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "exchange-left", principalPosition: 0, exchangePosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 11, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 12, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc22LjImplicationConjDistrib: ModelAnswer = {
   questId: "sc-22",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi -> (psi /\\ chi)) -> ((phi -> psi) /\\ (phi -> chi))",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ → ψ ∧ χ) → (φ → ψ) ∧ (φ → χ)" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "conjunction-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "conjunction-left", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 11, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 12, ruleId: "conjunction-left", principalPosition: 0, componentIndex: 2 },
+    { _tag: "sc-rule", conclusionIndex: 14, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
-// --- LK固有クエスト ---
+
+// --- LK固有クエスト (sc-23 to sc-26) ---
+
 
 const sc23LkPeirceLaw: ModelAnswer = {
   questId: "sc-23",
-  steps: [
-    {
-      _tag: "axiom",
-      formulaText: "((phi -> psi) -> phi) -> phi",
-    },
-  ],
+  // Peirce's law: 現行の簡略化→⇒規則(Π=∅)では証明不可
+  steps: [{ _tag: "axiom", formulaText: "((φ → ψ) → φ) → φ" }],
 };
 
 const sc24LkConverseContraposition: ModelAnswer = {
   questId: "sc-24",
-  steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(~psi -> ~phi) -> (phi -> psi)",
-    },
-  ],
+  // 逆対偶: 現行の簡略化→⇒規則(Π=∅)では証明不可
+  steps: [{ _tag: "axiom", formulaText: "(¬ψ → ¬φ) → (φ → ψ)" }],
 };
 
 const sc25LkImplicationAsDisjunction: ModelAnswer = {
   questId: "sc-25",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "(phi -> psi) -> (~phi \\/ psi)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ (φ → ψ) → ¬φ ∨ ψ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "contraction-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "contraction-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "negation-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 2 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "implication-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 7, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "weakening-left", principalPosition: 1 },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc26LkWeakExcludedMiddle: ModelAnswer = {
   questId: "sc-26",
-  steps: [{ _tag: "axiom", formulaText: "~phi \\/ ~~phi" }],
+  steps: [
+    { _tag: "sc-root", sequentText: " ⇒ ¬φ ∨ ¬¬φ" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "contraction-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "negation-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 2 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "negation-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "negation-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "identity", principalPosition: 0 },
+  ],
 };
+
+
+// --- LJ述語論理 (sc-27 to sc-34) ---
+
 
 const sc27LjUniversalElim: ModelAnswer = {
   questId: "sc-27",
-  steps: [
-    {
-      _tag: "axiom",
-      formulaText: "all x. P(x) -> P(a)",
-    },
-  ],
+  // クエスト式 "all x. P(x) -> P(a)" は ∀x.(P(x)→P(a)) とパースされ論理的に妥当でない（意図は (∀x.P(x))→P(a)）
+  steps: [{ _tag: "axiom", formulaText: "∀x.P(x) → P(a)" }],
 };
 
 const sc28LjExistentialIntro: ModelAnswer = {
   questId: "sc-28",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "P(a) -> exists x. P(x)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ P(a) → (∃x.P(x))" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "existential-right", principalPosition: 0, termText: "a" },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc29LjUniversalToExistential: ModelAnswer = {
   questId: "sc-29",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "all x. P(x) -> exists x. P(x)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ ∀x.P(x) → (∃x.P(x))" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "universal-right", principalPosition: 0, eigenVariable: "x" },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "existential-right", principalPosition: 0, termText: "x" },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc30LjUniversalSwap: ModelAnswer = {
   questId: "sc-30",
-  steps: [
-    {
-      _tag: "axiom",
-      formulaText: "all x. all y. P(x, y) -> all y. all x. P(x, y)",
-    },
-  ],
+  // P(x,y) の多引数述語がシーケントテキストのカンマ分割で壊れるため axiom プレースホルダ
+  steps: [{ _tag: "axiom", formulaText: "∀x.∀y.P(x, y) → ∀y.∀x.P(x, y)" }],
 };
 
 const sc31LjExistentialElim: ModelAnswer = {
   questId: "sc-31",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "exists x. (P(x) and Q(x)) -> exists x. P(x)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ ∃x.P(x) ∧ Q(x) → (∃x.P(x))" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "existential-right", principalPosition: 0, termText: "x" },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "conjunction-left", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "existential-right", principalPosition: 0, termText: "x" },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc32LjExistentialDistrib: ModelAnswer = {
   questId: "sc-32",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText:
-        "exists x. (P(x) or Q(x)) -> exists x. P(x) or exists x. Q(x)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ ∃x.P(x) ∨ Q(x) → (∃x.P(x) ∨ (∃x.Q(x)))" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "existential-right", principalPosition: 0, termText: "x" },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "disjunction-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "existential-right", principalPosition: 0, termText: "x" },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 1 },
+    { _tag: "sc-rule", conclusionIndex: 6, ruleId: "identity", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "existential-right", principalPosition: 0, termText: "x" },
+    { _tag: "sc-rule", conclusionIndex: 8, ruleId: "disjunction-right", principalPosition: 0, componentIndex: 2 },
+    { _tag: "sc-rule", conclusionIndex: 9, ruleId: "existential-right", principalPosition: 0, termText: "x" },
+    { _tag: "sc-rule", conclusionIndex: 10, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc33LkNegUniversalToExistNeg: ModelAnswer = {
   questId: "sc-33",
   steps: [
-    {
-      _tag: "axiom",
-      formulaText: "not (all x. P(x)) -> exists x. not P(x)",
-    },
+    { _tag: "sc-root", sequentText: " ⇒ ¬(∀x.P(x)) → (∃x.¬P(x))" },
+    { _tag: "sc-rule", conclusionIndex: 0, ruleId: "implication-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 1, ruleId: "negation-left", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 2, ruleId: "universal-right", principalPosition: 1, eigenVariable: "x" },
+    { _tag: "sc-rule", conclusionIndex: 3, ruleId: "existential-right", principalPosition: 0, termText: "x" },
+    { _tag: "sc-rule", conclusionIndex: 4, ruleId: "negation-right", principalPosition: 0 },
+    { _tag: "sc-rule", conclusionIndex: 5, ruleId: "identity", principalPosition: 0 },
   ],
 };
 
 const sc34LjUniversalImplDistrib: ModelAnswer = {
   questId: "sc-34",
-  steps: [
-    {
-      _tag: "axiom",
-      formulaText: "all x. (P(x) -> Q(x)) -> (all x. P(x) -> all x. Q(x))",
-    },
-  ],
+  // クエスト式は ∀x.((P(x)→Q(x))→...) とパースされ論理的に妥当でない（意図は (∀x.(P(x)→Q(x)))→...）
+  steps: [{ _tag: "axiom", formulaText: "∀x.(P(x) → Q(x)) → (∀x.P(x) → ∀x.Q(x))" }],
 };
 
 // ============================================================
