@@ -16147,3 +16147,14 @@
   - ProofMessages に新フィールドを追加するときは proofMessages.ts + messages/en.json + messages/ja.json + WorkspaceContent.tsx の4箇所を同期する必要がある
   - コンテキストメニューにサブメニューを追加するパターン: WorkspaceMenuSubmenu コンポーネント（ホバー展開）が再利用可能
 ---
+
+## 2026-03-20 17:05 - proof-pad Escapeキーキャンセル対応
+- 実装した内容: 全9選択モードでEscapeキーによるキャンセルを実装
+  - MP/Gen/Merge（既存3つ）に加え、Simplification/SubConn/ND/TAB/AT/SCの6モードを追加
+  - 選択なしの場合はノード選択解除にフォールバック
+- 変更したファイル:
+  - `src/lib/proof-pad/ProofWorkspace.tsx`: useEffectのkeydownハンドラを拡張（9モード対応 + 依存配列更新）
+- **今後のイテレーションへの学び:**
+  - 選択モードは phase !== "idle" で判定、各モードに対応する handleCancel* 関数が存在
+  - 新しい選択モードを追加する場合、Escapeハンドラにも追加が必要（useEffectの依存配列も忘れずに）
+---
