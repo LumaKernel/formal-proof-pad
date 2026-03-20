@@ -347,4 +347,5 @@ export const defaultEditorOptions = {
   wordWrap: "on" as const,
   lineNumbers: "on" as const,
   glyphMargin: true,
+  fixedOverflowWidgets: true,
 } as const;
