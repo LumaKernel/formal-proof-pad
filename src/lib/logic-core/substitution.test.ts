@@ -1747,9 +1747,7 @@ describe("normalizeFormula", () => {
       formulaSubstitution(phi, tau, x),
     );
     // φ := φ→φ で代入
-    const subst = buildFormulaSubstitutionMap([
-      [phi, implication(phi, phi)],
-    ]);
+    const subst = buildFormulaSubstitutionMap([[phi, implication(phi, phi)]]);
     const instantiated = substituteFormulaMetaVariables(axiomSchema, subst);
     const normalized = normalizeFormula(instantiated);
 
