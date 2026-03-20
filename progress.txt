@@ -16237,3 +16237,21 @@
   - モックハンドラではstale-stateバグを検出できない。ステートフルハンドラ（実際のワークスペース操作）を使った統合テストが重要
   - 残: 他のHilbertテンプレート（syllogism-proof等）のステートフル統合テスト拡充
 ---
+
+## 2026-03-20 20:16 - script-runner 全テンプレートのステートフルテスト拡充
+- 実装した内容:
+  - createStatefulHandlerにextractHilbertProof実装（findHilbertRootNodeIds + buildHilbertProofTree + encodeProofNode）
+  - エッジなし単一ノードケース（定理1: φ⊢φ）のフォールバック処理追加（ゴール式一致ノード or 最後のノード）
+  - syllogism-proof: addNode→connectMP→extractHilbertProof→DT→displayHilbertProofの全パス検証
+  - hilbert-theorem-gallery: 2ラウンドのclearWorkspace→構築→extract→DT→display検証
+  - auto-prove-lk, cut-elimination-simple, cut-elimination-implication: displayScProofパスの検証
+  - CI向けmaxTimeMs: 30000設定（演繹定理テストはCIで5秒超過）
+- 変更したファイル:
+  - `src/lib/script-runner/templates.test.ts`: ステートフルテスト5件追加、extractHilbertProof実装
+- カバレッジ: 99.6% Stmts, 98.11% Branch, 90.16% Functions, 99.7% Lines（低下なし）
+- **今後のイテレーションへの学び:**
+  - findHilbertRootNodeIds はエッジなし（単一公理ノード）で空配列を返す。extractHilbertProof実装時はフォールバック必要
+  - 演繹定理を含むスクリプトはCI（js-interpreter）で5秒超過する。maxTimeMs設定必須
+  - WorkspaceCommandHandlerのプロパティはreadonly。テストで上書きするにはコンストラクタオプションを使う
+  - displayHilbertProof/displayScProofはhandlerのaddNode/connectMPを呼ぶため、ステートフルハンドラで自動的にテストされる
+---

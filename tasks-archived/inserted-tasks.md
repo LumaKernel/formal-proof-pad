@@ -123,3 +123,4 @@
   - [x] 代入はシンプルなことしかせず、簡約は別にしてよい。 → normalizeFormula内で分岐
 - [x] φ→φの証明ツリー構築、のスクリプトは RuntimeError: Modus Ponens failed: LeftParseError というエラーが出て動かない。 → workspaceRef.current同期漏れが原因。全ハンドラに同期更新を追加
   - [x] テストでライブラリのスクリプトすべてについて動くことは保証しておいて。 → ステートフル統合テスト2件追加
+  - [x] 他のスクリプトもすべて同様に対象。 → syllogism-proof, hilbert-theorem-gallery, auto-prove-lk, cut-elimination-simple, cut-elimination-implication の5テンプレート追加。extractHilbertProof実装含む
