@@ -11,7 +11,7 @@
 
 ### テスト計画
 
-- `term.test.ts` に `TermSubstitution` の基本テスト追加（ファクトリ、_tag、フィールド検証）
+- `term.test.ts` に `TermSubstitution` の基本テスト追加（ファクトリ、\_tag、フィールド検証）
 - `formatUnicode.test.ts` / `formatLaTeX.test.ts` にフォーマットテスト追加
 - `parser.test.ts` にパーステスト追加（`x[y/z]`, `f(x)[g(y)/z]`, チェーン `t[a/x][b/y]`）
 - `freeVariables.test.ts` に自由変数収集テスト追加

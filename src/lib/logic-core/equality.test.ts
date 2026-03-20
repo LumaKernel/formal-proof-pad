@@ -133,26 +133,58 @@ describe("equalTerm", () => {
   });
 
   it("returns true for identical TermSubstitution", () => {
-    const a = termSubstitution(termVariable("x"), termVariable("y"), termVariable("z"));
-    const b = termSubstitution(termVariable("x"), termVariable("y"), termVariable("z"));
+    const a = termSubstitution(
+      termVariable("x"),
+      termVariable("y"),
+      termVariable("z"),
+    );
+    const b = termSubstitution(
+      termVariable("x"),
+      termVariable("y"),
+      termVariable("z"),
+    );
     expect(equalTerm(a, b)).toBe(true);
   });
 
   it("returns false for TermSubstitution with different variable", () => {
-    const a = termSubstitution(termVariable("x"), termVariable("y"), termVariable("z"));
-    const b = termSubstitution(termVariable("x"), termVariable("y"), termVariable("w"));
+    const a = termSubstitution(
+      termVariable("x"),
+      termVariable("y"),
+      termVariable("z"),
+    );
+    const b = termSubstitution(
+      termVariable("x"),
+      termVariable("y"),
+      termVariable("w"),
+    );
     expect(equalTerm(a, b)).toBe(false);
   });
 
   it("returns false for TermSubstitution with different term", () => {
-    const a = termSubstitution(termVariable("x"), termVariable("y"), termVariable("z"));
-    const b = termSubstitution(termVariable("u"), termVariable("y"), termVariable("z"));
+    const a = termSubstitution(
+      termVariable("x"),
+      termVariable("y"),
+      termVariable("z"),
+    );
+    const b = termSubstitution(
+      termVariable("u"),
+      termVariable("y"),
+      termVariable("z"),
+    );
     expect(equalTerm(a, b)).toBe(false);
   });
 
   it("returns false for TermSubstitution with different replacement", () => {
-    const a = termSubstitution(termVariable("x"), termVariable("y"), termVariable("z"));
-    const b = termSubstitution(termVariable("x"), termVariable("w"), termVariable("z"));
+    const a = termSubstitution(
+      termVariable("x"),
+      termVariable("y"),
+      termVariable("z"),
+    );
+    const b = termSubstitution(
+      termVariable("x"),
+      termVariable("w"),
+      termVariable("z"),
+    );
     expect(equalTerm(a, b)).toBe(false);
   });
 });
