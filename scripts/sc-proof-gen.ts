@@ -18,27 +18,21 @@ import { termVariable } from "../src/lib/logic-core/term";
 
 // --- Type helpers ---
 
-function isImplication(
-  f: Formula,
-): f is Formula & {
+function isImplication(f: Formula): f is Formula & {
   readonly _tag: "Implication";
   readonly left: Formula;
   readonly right: Formula;
 } {
   return f._tag === "Implication";
 }
-function isConjunction(
-  f: Formula,
-): f is Formula & {
+function isConjunction(f: Formula): f is Formula & {
   readonly _tag: "Conjunction";
   readonly left: Formula;
   readonly right: Formula;
 } {
   return f._tag === "Conjunction";
 }
-function isDisjunction(
-  f: Formula,
-): f is Formula & {
+function isDisjunction(f: Formula): f is Formula & {
   readonly _tag: "Disjunction";
   readonly left: Formula;
   readonly right: Formula;

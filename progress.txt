@@ -16356,3 +16356,20 @@
   - FormulaEditor/FormulaExpandedEditor のパターンをTerm版に横展開する際は、テストも同等レベルで移植すること
   - handleExpandMouseDown の v8 ignore パターンは FormulaEditor と同様に適用
 ---
+
+## 2026-03-21 - SC模範解答リッチ化
+- SC模範解答 29/34クエストをaxiom-onlyからsc-root + sc-ruleステップのリッチ証明木に変換
+- 自動証明生成スクリプト scripts/sc-proof-gen.ts を新規作成
+  - 命題論理・述語論理のシーケント計算証明探索（LK/LJ両対応）
+  - exchange-left + →⇒組み合わせ探索
+  - ∃R/∀⇒で複数項候補試行（term substitution対応）
+- axiomプレースホルダ5件: sc-23,24(→⇒簡略化), sc-27,34(クエスト式パーサーバグ), sc-30(カンマ分割問題)
+- 統合スクリプト scripts/integrate-sc-proofs.local.ts で自動統合
+- テスト: 全12039テスト通過（319ファイル）
+- 変更ファイル: builtinModelAnswers.ts, scripts/sc-proof-gen.ts
+- **今後のイテレーションへの学び:**
+  - SC模範解答の自動生成: scripts/sc-proof-gen.ts を実行し /tmp/sc-proof-output.ts に出力、integrate-sc-proofs.local.ts で統合
+  - クエスト式 "all x. P(x) -> P(a)" は ∀x.(P(x)→P(a)) とパースされる（量化子が最低優先度で右端まで束縛）。(all x. P(x)) -> P(a) と意図する場合は括弧必須
+  - sc-27, sc-34 のクエスト式は論理的に妥当でない（パーサーの量化子優先度問題）。将来的に式を修正する必要あり
+  - splitSequentTextParts の text.split(",") は P(x,y) のような多引数述語で壊れる（sc-30が証明不可の原因）
+---
