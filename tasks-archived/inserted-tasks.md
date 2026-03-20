@@ -112,3 +112,5 @@
 - [x] 前提 (φ) をクリックして {variableName} で汎化します ← Genのこの{variableName}はなに？ — Gen選択バナー表示時点では変数名は不明なためプレースホルダーを除去
 - [x] スクリプトエディタのランタイムエラー、背景赤に赤字で見えにくい。 — --color-error-text CSS変数をlight/darkモードに追加
   - [x] ReadyのとこがErrorになるときも同様 — 同じCSS変数で修正
+- [x] MPやSUBSTされたノードを複製すると、MP/SUBSTの文字が残ってしまう。 — buildClipboardDataでInferenceEdge不在のノードのラベルをデフォルトにリセット
+  - [x] いずれにせよ、detachedなのに MP/SUBSTの文字 が表示できてしまうのは、それを保持する場所があるはずで、そこを削除すべきだ — 複製時にクリーンアップするよう修正

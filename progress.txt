@@ -16181,3 +16181,14 @@
   - CSS変数のfallback値はテーマ定義と乖離しやすい。新しいセマンティックカラーを使うときはglobals.cssに変数が定義されているか確認する
   - ScriptEditorComponentのステータスバッジ/エラーバーは inline style + CSS変数パターン
 ---
+
+## 2026-03-20 17:33 - proof-pad ノード複製時のラベル残留修正
+- 実装した内容: buildClipboardDataで、InferenceEdgeが含まれないノードのラベルをデフォルト(getProofNodeKindLabel)にリセット
+  - MP/Gen/Substノードを単体で複製してもラベルが残留しなくなった
+- 変更したファイル:
+  - `src/lib/proof-pad/copyPasteLogic.ts`: ラベルリセットロジック追加
+  - `src/lib/proof-pad/copyPasteLogic.test.ts`: リグレッションテスト3件追加
+- **今後のイテレーションへの学び:**
+  - ノードのlabelフィールドはまだノードに直接保持されている。将来的にはInferenceEdgeから動的に計算すべき（残タスク）
+  - buildClipboardDataのノード生成とInferenceEdgeフィルタリングの順序に注意: InferenceEdgeを先に計算し、conclusionNodeIdセットを使ってラベルを決定する
+---
