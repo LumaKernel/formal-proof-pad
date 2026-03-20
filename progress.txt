@@ -16192,3 +16192,17 @@
   - ノードのlabelフィールドはまだノードに直接保持されている。将来的にはInferenceEdgeから動的に計算すべき（残タスク）
   - buildClipboardDataのノード生成とInferenceEdgeフィルタリングの順序に注意: InferenceEdgeを先に計算し、conclusionNodeIdセットを使ってラベルを決定する
 ---
+
+## 2026-03-20 17:36 - proof-pad コンテキストメニュー貫通防止
+- 実装した内容:
+  - スクリプトエディタパネル、体系情報ヘッダー、全選択バナー（MP/Gen/Merge/Simplification/SubConn/ND/TAB/AT/SC）、代入プロンプト、Gen変数名入力にonContextMenu stopPropagation追加
+  - ノード複製時のMP/Gen/Substラベル残留修正（buildClipboardDataでInferenceEdge不在のノードのラベルをデフォルトにリセット）
+  - スクリプトエディタのエラーテキスト視認性改善（--color-error-text CSS変数追加）
+- 変更したファイル:
+  - `src/lib/proof-pad/ProofWorkspace.tsx`: onContextMenu stopPropagation 13箇所追加
+  - `src/lib/proof-pad/copyPasteLogic.ts`: ラベルリセットロジック
+  - `src/lib/proof-pad/copyPasteLogic.test.ts`: リグレッションテスト3件
+  - `src/app/globals.css`: CSS変数追加
+- **今後のイテレーションへの学び:**
+  - キャンバス上のUI要素（パネル、バナー、モーダル等）には必ずonContextMenu stopPropagationを付ける。onClick/onPointerDownだけでは不十分
+---

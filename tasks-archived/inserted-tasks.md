@@ -114,3 +114,6 @@
   - [x] ReadyのとこがErrorになるときも同様 — 同じCSS変数で修正
 - [x] MPやSUBSTされたノードを複製すると、MP/SUBSTの文字が残ってしまう。 — buildClipboardDataでInferenceEdge不在のノードのラベルをデフォルトにリセット
   - [x] いずれにせよ、detachedなのに MP/SUBSTの文字 が表示できてしまうのは、それを保持する場所があるはずで、そこを削除すべきだ — 複製時にクリーンアップするよう修正
+- [x] スクリプトエディタの中では、右クリックしても、キャンバス空白上にでるコンテキストメニューは開かなくていい — onContextMenu stopPropagation追加
+  - [x] MP/GEN適用のモーダル上も同様。 — 全選択バナー+代入プロンプトにstopPropagation追加
+  - [x] 体系が書かれたメニューバー?でも同様 — ヘッダーにstopPropagation追加
