@@ -193,6 +193,8 @@ import {
   checkPasteCompatibility,
 } from "./copyPasteLogic";
 import type { ClipboardData } from "./copyPasteLogic";
+import { formatForCopy } from "./formulaCopyLogic";
+import type { FormulaCopyFormat } from "./formulaCopyLogic";
 import { getDeductionStyleLabel } from "../logic-core/deductionSystem";
 import {
   computeDetailLevel,
@@ -808,6 +810,76 @@ function WorkspaceMenuItem({
     </button>
   );
 }
+
+/**
+ * ホバーで展開するサブメニュー付きメニュー項目。
+ * 親メニュー項目にホバーすると子アイテムが右側に展開する。
+ */
+/* v8 ignore start -- UIコンポーネント: ホバー展開サブメニュー */
+function WorkspaceMenuSubmenu({
+  label,
+  testId,
+  children,
+}: {
+  readonly label: string;
+  readonly testId: string | undefined;
+  readonly children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      style={{ position: "relative" }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      data-testid={testId}
+    >
+      <button
+        type="button"
+        style={{
+          display: "block",
+          width: "100%",
+          padding: "6px 16px",
+          border: "none",
+          background: open
+            ? "var(--color-surface-hover, #f0f0f0)"
+            : "transparent",
+          textAlign: "left" as const,
+          cursor: "pointer",
+          color: "var(--color-text-primary, #333)",
+          fontSize: 13,
+          lineHeight: "1.4",
+          whiteSpace: "nowrap" as const,
+        }}
+      >
+        {label} ▸
+      </button>
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            left: "100%",
+            top: 0,
+            minWidth: 120,
+            background: "var(--color-panel-bg, rgba(252, 249, 243, 0.96))",
+            border:
+              "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
+            borderRadius: 8,
+            boxShadow:
+              "0 4px 16px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
+            padding: "4px 0",
+            fontFamily: "var(--font-ui)",
+            fontSize: 13,
+            userSelect: "none",
+            zIndex: 1,
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+/* v8 ignore stop */
 
 // --- コンポーネント ---
 
@@ -3823,6 +3895,22 @@ export const ProofWorkspace = forwardRef<
     setNodeMenuState(closeNodeMenu());
   }, [nodeMenuState, workspace, setWorkspace]);
 
+  /* v8 ignore start -- クリップボードAPI: JSDOMではnavigator.clipboard未対応 */
+  const handleCopyFormula = useCallback(
+    (format: FormulaCopyFormat) => {
+      if (!nodeMenuState.open) return;
+      const node = findNode(workspace, nodeMenuState.nodeId);
+      if (!node) return;
+      const result = formatForCopy(node.formulaText, format);
+      if (result.success) {
+        void navigator.clipboard.writeText(result.text);
+      }
+      setNodeMenuState(closeNodeMenu());
+    },
+    [nodeMenuState, workspace],
+  );
+  /* v8 ignore stop */
+
   // ノードコンテキストメニュー外クリックで閉じる
   /* v8 ignore start -- メニュー外クリック: ref.contains使用でJSDOMではテスト不安定 */
   useEffect(() => {
@@ -6351,6 +6439,50 @@ export const ProofWorkspace = forwardRef<
                   /* v8 ignore stop */
                 }
               />
+              <WorkspaceMenuSubmenu
+                label={msg.copyFormula}
+                testId={
+                  /* v8 ignore start -- V8集約アーティファクト */
+                  testId
+                    ? `${testId satisfies string}-copy-formula`
+                    : "copy-formula"
+                  /* v8 ignore stop */
+                }
+              >
+                <WorkspaceMenuItem
+                  label={msg.copyFormulaUnicode}
+                  onClick={() => handleCopyFormula("unicode")}
+                  testId={
+                    /* v8 ignore start -- V8集約アーティファクト */
+                    testId
+                      ? `${testId satisfies string}-copy-formula-unicode`
+                      : "copy-formula-unicode"
+                    /* v8 ignore stop */
+                  }
+                />
+                <WorkspaceMenuItem
+                  label={msg.copyFormulaAscii}
+                  onClick={() => handleCopyFormula("ascii")}
+                  testId={
+                    /* v8 ignore start -- V8集約アーティファクト */
+                    testId
+                      ? `${testId satisfies string}-copy-formula-ascii`
+                      : "copy-formula-ascii"
+                    /* v8 ignore stop */
+                  }
+                />
+                <WorkspaceMenuItem
+                  label={msg.copyFormulaLatex}
+                  onClick={() => handleCopyFormula("latex")}
+                  testId={
+                    /* v8 ignore start -- V8集約アーティファクト */
+                    testId
+                      ? `${testId satisfies string}-copy-formula-latex`
+                      : "copy-formula-latex"
+                    /* v8 ignore stop */
+                  }
+                />
+              </WorkspaceMenuSubmenu>
               <div
                 style={{
                   height: 1,

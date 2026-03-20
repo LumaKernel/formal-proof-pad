@@ -221,6 +221,13 @@ function useProofMessagesFromIntl(): ProofMessages {
       substitutionKindFormula: t("substitutionKindFormula"),
       substitutionKindTerm: t("substitutionKindTerm"),
 
+      // Copy formula
+      copyFormula: t("copyFormula"),
+      copyFormulaUnicode: t("copyFormulaUnicode"),
+      copyFormulaAscii: t("copyFormulaAscii"),
+      copyFormulaLatex: t("copyFormulaLatex"),
+      formulaCopied: t("formulaCopied"),
+
       // Palette headers
       axiomPaletteHeader: t("axiomPaletteHeader"),
       ndPaletteHeader: t("ndPaletteHeader"),

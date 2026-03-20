@@ -233,6 +233,18 @@ export type ProofMessages = {
   readonly substitutionKindFormula: string;
   readonly substitutionKindTerm: string;
 
+  // --- 論理式コピー ---
+  /** コンテキストメニュー: 論理式をコピー（サブメニュー親） */
+  readonly copyFormula: string;
+  /** コンテキストメニュー: Unicode形式でコピー */
+  readonly copyFormulaUnicode: string;
+  /** コンテキストメニュー: ASCII (DSL)形式でコピー */
+  readonly copyFormulaAscii: string;
+  /** コンテキストメニュー: LaTeX形式でコピー */
+  readonly copyFormulaLatex: string;
+  /** コピー完了メッセージ */
+  readonly formulaCopied: string;
+
   // --- パレットヘッダー ---
   readonly axiomPaletteHeader: string;
   readonly ndPaletteHeader: string;
@@ -514,6 +526,13 @@ export const defaultProofMessages: ProofMessages = {
   editFormula: "Edit Formula",
   substitutionKindFormula: "Formula",
   substitutionKindTerm: "Term",
+
+  // Copy formula
+  copyFormula: "Copy Formula",
+  copyFormulaUnicode: "Unicode",
+  copyFormulaAscii: "ASCII (DSL)",
+  copyFormulaLatex: "LaTeX",
+  formulaCopied: "Copied!",
 
   // Palette headers
   axiomPaletteHeader: "Axioms",

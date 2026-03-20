@@ -123,6 +123,8 @@ export type {
   PasteResult,
   PasteCompatibilityError,
 } from "./copyPasteLogic";
+export { formatForCopy, getAllFormulaCopyFormats } from "./formulaCopyLogic";
+export type { FormulaCopyFormat, FormulaCopyResult } from "./formulaCopyLogic";
 export {
   getMPPremises,
   parseNodeFormula,
