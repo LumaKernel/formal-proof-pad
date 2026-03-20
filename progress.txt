@@ -16432,3 +16432,23 @@
   - 既存のガイド/コンセプトエントリを活用できる場合、新規リファレンスエントリ作成は不要
 
 ---
+
+---
+
+## 2026-03-20 - [app] faviconの視認性改善
+- ベースライン: Stmts 99.37%, Branch 97.63%, Funcs 90.17%, Lines 99.48%
+- **結果: Stmts 99.37% (±0), Branch 97.63% (±0), Funcs 90.17% (±0), Lines 99.48% (±0)**
+- 実装内容:
+  - icon.svg: ストローク幅3→4、グラデーション明るく（#93a0ff→#c4b5fd）、見えない小円ドット削除
+  - favicon.ico: sharpで16/32/48pxの3サイズを含むICO再生成
+  - apple-icon.png: sharpで180x180px再生成
+- 変更ファイル:
+  - src/app/icon.svg（デザイン変更）
+  - src/app/favicon.ico（再生成）
+  - src/app/apple-icon.png（再生成）
+- スクリーンショット: .screenshots/favicon-improved.png
+- **今後のイテレーションへの学び:**
+  - ImageMagickのSVGレンダリングはグラデーション等を正しく処理しない。sharpを使うべき
+  - ICOファイルフォーマット: header(6B) + dir entries(16B each) + PNG data。sharpで各サイズPNGを生成してICOに組み立て
+
+---
