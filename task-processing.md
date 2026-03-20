@@ -10,12 +10,14 @@
 ND/SC/TAB/AT系はマッピングがなく、システムバッジがクリック不可。
 
 既存のガイドエントリ:
+
 - `guide-intro-natural-deduction` — ND系(NM/NJ/NK)に対応
 - `guide-intro-sequent-calculus` — SC系(LM/LJ/LK)に対応
 - `guide-intro-tableau` — TAB系に対応
 - AT系は `concept-analytic-tableau` がある
 
 システム名:
+
 - "Natural Deduction NM", "Natural Deduction NJ", "Natural Deduction NK"
 - "Sequent Calculus LM", "Sequent Calculus LJ", "Sequent Calculus LK"
 - "Tableau Calculus TAB", "Tableau Calculus TAB (Propositional)"

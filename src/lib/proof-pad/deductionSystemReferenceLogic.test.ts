@@ -77,60 +77,62 @@ describe("getDeductionSystemReferenceEntryId", () => {
 
   // 自然演繹
   it("Natural Deduction NM → guide-intro-natural-deduction", () => {
-    expect(
-      getDeductionSystemReferenceEntryId("Natural Deduction NM"),
-    ).toBe("guide-intro-natural-deduction");
+    expect(getDeductionSystemReferenceEntryId("Natural Deduction NM")).toBe(
+      "guide-intro-natural-deduction",
+    );
   });
 
   it("Natural Deduction NJ → guide-intro-natural-deduction", () => {
-    expect(
-      getDeductionSystemReferenceEntryId("Natural Deduction NJ"),
-    ).toBe("guide-intro-natural-deduction");
+    expect(getDeductionSystemReferenceEntryId("Natural Deduction NJ")).toBe(
+      "guide-intro-natural-deduction",
+    );
   });
 
   it("Natural Deduction NK → guide-intro-natural-deduction", () => {
-    expect(
-      getDeductionSystemReferenceEntryId("Natural Deduction NK"),
-    ).toBe("guide-intro-natural-deduction");
+    expect(getDeductionSystemReferenceEntryId("Natural Deduction NK")).toBe(
+      "guide-intro-natural-deduction",
+    );
   });
 
   // シーケント計算
   it("Sequent Calculus LM → guide-intro-sequent-calculus", () => {
-    expect(
-      getDeductionSystemReferenceEntryId("Sequent Calculus LM"),
-    ).toBe("guide-intro-sequent-calculus");
+    expect(getDeductionSystemReferenceEntryId("Sequent Calculus LM")).toBe(
+      "guide-intro-sequent-calculus",
+    );
   });
 
   it("Sequent Calculus LJ → guide-intro-sequent-calculus", () => {
-    expect(
-      getDeductionSystemReferenceEntryId("Sequent Calculus LJ"),
-    ).toBe("guide-intro-sequent-calculus");
+    expect(getDeductionSystemReferenceEntryId("Sequent Calculus LJ")).toBe(
+      "guide-intro-sequent-calculus",
+    );
   });
 
   it("Sequent Calculus LK → guide-intro-sequent-calculus", () => {
-    expect(
-      getDeductionSystemReferenceEntryId("Sequent Calculus LK"),
-    ).toBe("guide-intro-sequent-calculus");
+    expect(getDeductionSystemReferenceEntryId("Sequent Calculus LK")).toBe(
+      "guide-intro-sequent-calculus",
+    );
   });
 
   // タブロー
   it("Tableau Calculus TAB → guide-intro-tableau", () => {
-    expect(
-      getDeductionSystemReferenceEntryId("Tableau Calculus TAB"),
-    ).toBe("guide-intro-tableau");
+    expect(getDeductionSystemReferenceEntryId("Tableau Calculus TAB")).toBe(
+      "guide-intro-tableau",
+    );
   });
 
   it("Tableau Calculus TAB (Propositional) → guide-intro-tableau", () => {
     expect(
-      getDeductionSystemReferenceEntryId("Tableau Calculus TAB (Propositional)"),
+      getDeductionSystemReferenceEntryId(
+        "Tableau Calculus TAB (Propositional)",
+      ),
     ).toBe("guide-intro-tableau");
   });
 
   // 分析タブロー
   it("Analytic Tableau → concept-analytic-tableau", () => {
-    expect(
-      getDeductionSystemReferenceEntryId("Analytic Tableau"),
-    ).toBe("concept-analytic-tableau");
+    expect(getDeductionSystemReferenceEntryId("Analytic Tableau")).toBe(
+      "concept-analytic-tableau",
+    );
   });
 
   it("Analytic Tableau (Propositional) → concept-analytic-tableau", () => {
