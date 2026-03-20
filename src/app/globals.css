@@ -157,6 +157,10 @@
   --color-panel-shadow: rgba(120, 100, 70, 0.1);
   --color-panel-rule-line: rgba(180, 160, 130, 0.15);
 
+  /* Translucent Panel (script editor etc.) */
+  --color-panel-translucent-bg: rgba(252, 249, 243, 0.82);
+  --color-panel-translucent-shadow: rgba(120, 100, 70, 0.15);
+
   /* Paper-like Button */
   --color-paper-button-bg: rgba(255, 253, 248, 0.9);
   --color-paper-button-border: rgba(180, 160, 130, 0.3);
@@ -363,6 +367,10 @@
   --color-panel-border: rgba(100, 90, 75, 0.3);
   --color-panel-shadow: rgba(0, 0, 0, 0.3);
   --color-panel-rule-line: rgba(100, 90, 75, 0.15);
+
+  /* Translucent Panel (script editor etc.) */
+  --color-panel-translucent-bg: rgba(36, 33, 30, 0.82);
+  --color-panel-translucent-shadow: rgba(0, 0, 0, 0.35);
 
   /* Paper-like Button */
   --color-paper-button-bg: rgba(42, 38, 34, 0.9);

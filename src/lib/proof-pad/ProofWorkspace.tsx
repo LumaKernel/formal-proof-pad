@@ -5911,13 +5911,16 @@ export const ProofWorkspace = forwardRef<
             zIndex: 11,
             display: "flex",
             flexDirection: "column",
-            background: "var(--color-panel-bg, rgba(252, 249, 243, 0.96))",
+            background:
+              "var(--color-panel-translucent-bg, rgba(252, 249, 243, 0.82))",
             border:
               "1px solid var(--color-panel-border, rgba(180, 160, 130, 0.2))",
             borderRadius: 8,
             boxShadow:
-              "0 4px 16px var(--color-panel-shadow, rgba(120, 100, 70, 0.1))",
+              "0 4px 16px var(--color-panel-translucent-shadow, rgba(120, 100, 70, 0.15))",
             overflow: "hidden",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
           }}
           data-testid={
             /* v8 ignore start -- V8集約アーティファクト */
