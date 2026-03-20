@@ -16206,3 +16206,19 @@
 - **今後のイテレーションへの学び:**
   - キャンバス上のUI要素（パネル、バナー、モーダル等）には必ずonContextMenu stopPropagationを付ける。onClick/onPointerDownだけでは不十分
 ---
+
+## 2026-03-20 18:25 - logic-core normalizeFormula メタ変数代入保持修正
+- 実装した内容:
+  - normalizeFormulaがメタ変数を含む複合式（例: (φ→φ)[τ/x]）のFormulaSubstitutionノードを誤って解決・除去するバグを修正
+  - containsMetaVariable関数を新設（再帰的に全サブフォーミュラを探索しMetaVariable存在を検出）
+  - FormulaSubstitution/FreeVariableAbsenceのnormalize処理にcontainsMetaVariableチェック追加
+  - 7つの回帰テスト追加（各複合式タイプ + 公理A5インスタンス化シナリオ）
+- 変更したファイル:
+  - `src/lib/logic-core/substitution.ts`: containsMetaVariable関数追加、normalizeFormulaRec修正
+  - `src/lib/logic-core/substitution.test.ts`: 回帰テスト7件追加
+- カバレッジ: 99.6% Stmts, 98.11% Branch, 90.18% Functions, 99.7% Lines（低下なし）
+- **今後のイテレーションへの学び:**
+  - hasMetaVariableBase（チェーンのベースのみ判定）とcontainsMetaVariable（全サブフォーミュラ探索）は異なるセマンティクス。置換チェーン正規化にはhasMetaVariableBase、簡約判定にはcontainsMetaVariableが必要
+  - resolveFormulaSubstitutionはメタ変数含有チェックなしで実行するため、メタ変数がある論理式に対しては使用しないこと
+  - 項ASTにはまだSubstitutionノードがなく、tau[tau'/x]の表現ができない（残タスク）
+---

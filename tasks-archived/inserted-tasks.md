@@ -117,3 +117,7 @@
 - [x] スクリプトエディタの中では、右クリックしても、キャンバス空白上にでるコンテキストメニューは開かなくていい — onContextMenu stopPropagation追加
   - [x] MP/GEN適用のモーダル上も同様。 — 全選択バナー+代入プロンプトにstopPropagation追加
   - [x] 体系が書かれたメニューバー?でも同様 — ヘッダーにstopPropagation追加
+- [x] (all x. phi) -> phi[tau/x] への代入で phi := phi -> phi でも [tau/x] が消えるのはおかしい。簡約の域ではない。(phi -> phi)[tau/x]になるべきだ。 — normalizeFormulaでcontainsMetaVariable判定を追加し、メタ変数を含む複合式の代入を保持するよう修正
+  - [x] このあたりの整理とテストのより厳密、充実さを追求 → 7つの回帰テスト追加
+  - [x] 整理で繋ぐこともできてはいけない。 → containsMetaVariable判定で保持
+  - [x] 代入はシンプルなことしかせず、簡約は別にしてよい。 → normalizeFormula内で分岐
