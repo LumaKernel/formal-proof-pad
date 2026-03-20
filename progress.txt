@@ -16476,3 +16476,22 @@
   - ポップオーバーパターン: useRef + useEffect(mousedown+keydown) + position:absolute + zIndex:1600
 
 ---
+
+## 2026-03-21 - TABエッジ詳細ポップオーバー
+- TABエッジバッジクリックで詳細ポップオーバーを表示する機能を実装
+- 新規ファイル:
+  - src/lib/proof-pad/tabEdgeDetailLogic.ts (純粋ロジック: createTabEdgeDetailData)
+  - src/lib/proof-pad/tabEdgeDetailLogic.test.ts (8テスト)
+- 変更ファイル:
+  - src/lib/proof-pad/ProofWorkspace.tsx (TABエッジクリック→ポップオーバー表示、バッジ検索修正)
+  - src/lib/proof-pad/ProofWorkspace.stories.tsx (TabEdgeDetailPopoverストーリー追加)
+  - src/lib/proof-pad/proofMessages.ts (7キー追加)
+  - src/app/workspace/[id]/WorkspaceContent.tsx (i18nマッピング7件)
+  - messages/en.json, messages/ja.json (7キー追加)
+- スクリーンショット: .screenshots/tab-edge-detail-popover-open.png
+- **今後のイテレーションへの学び:**
+  - TABエッジのconclusionNodeIdは「親ノード」(分解元)。Hilbert/NDでは「導出先ノード」。この違いでバッジ検索時にconn.fromNodeIdも参照する必要がある
+  - PortConnectionのlabelはSVG外のdivとしてレンダリングされる（foreignObjectではない）
+  - バッジ検索: findInferenceEdgeForConclusionNode(edges, conn.toNodeId) ?? findInferenceEdgeForConclusionNode(edges, conn.fromNodeId) でTAB/Hilbert両方対応
+
+---
