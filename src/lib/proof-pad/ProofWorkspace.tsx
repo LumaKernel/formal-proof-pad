@@ -4350,12 +4350,24 @@ export const ProofWorkspace = forwardRef<
         e.preventDefault();
         handleDeleteSelected();
       } else if (e.key === "Escape") {
-        if (mergeSelection.phase !== "idle") {
+        if (mpSelection.phase !== "idle") {
+          handleCancelMPSelection();
+        } else if (genSelection.phase !== "idle") {
+          handleCancelGenSelection();
+        } else if (mergeSelection.phase !== "idle") {
           handleCancelMerge();
         } else if (simplificationSelection.phase !== "idle") {
           handleCancelSimplification();
         } else if (subConnSelection.phase !== "idle") {
           handleCancelSubstitutionConnection();
+        } else if (ndSelection.phase !== "idle") {
+          handleCancelNdSelection();
+        } else if (tabSelection.phase !== "idle") {
+          handleCancelTabSelection();
+        } else if (atSelection.phase !== "idle") {
+          handleCancelAtSelection();
+        } else if (scSelection.phase !== "idle") {
+          handleCancelScSelection();
         } else {
           setSelectedNodeIds(clearSelection());
         }
@@ -4396,12 +4408,24 @@ export const ProofWorkspace = forwardRef<
     handleDuplicate,
     handleDeleteSelected,
     handleMergeSelected,
+    mpSelection,
+    handleCancelMPSelection,
+    genSelection,
+    handleCancelGenSelection,
     mergeSelection,
     handleCancelMerge,
     simplificationSelection,
     handleCancelSimplification,
     subConnSelection,
     handleCancelSubstitutionConnection,
+    ndSelection,
+    handleCancelNdSelection,
+    tabSelection,
+    handleCancelTabSelection,
+    atSelection,
+    handleCancelAtSelection,
+    scSelection,
+    handleCancelScSelection,
     handleTreeLayout,
     workspace.nodes,
     containerSize,
