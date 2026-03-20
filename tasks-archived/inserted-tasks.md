@@ -102,3 +102,4 @@
 - [x] スクリプトエディタって半透明にできる？
   - backdrop-filter: blur(12px) + rgba alpha 0.82 でグラスモーフィズム効果を適用
 - [x] 各種ウィンドウが「証明完了」より上にくるようにして — 証明完了バナーのz-indexを30→5に下げ、パネル群(z-index:10)より下に配置
+- [x] ノードのドラッグ中エッジ描画を簡易化 — draggingNodeIdsRefでドラッグ中ノード追跡、computeStraightPortConnectionPathで直線パス描画、ドラッグ終了時にベジェ曲線に復帰

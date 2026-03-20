@@ -16106,3 +16106,18 @@
 - **今後のイテレーションへの学び:**
   - z-indexレイヤリング: パネル群=10, 証明完了バナー=5, ズームコントロール=20, コンテキストメニュー=2000, モーダル=3000
 ---
+
+## 2026-03-20 15:40 - ドラッグ中エッジ簡略化
+- ドラッグ中のノードに接続するエッジを直線表示に簡略化（ベジェ曲線+障害物回避をスキップ）
+- 変更ファイル:
+  - src/lib/infinite-canvas/connectionPath.ts (computeStraightPortConnectionPath追加)
+  - src/lib/infinite-canvas/connectionPath.test.ts (5テスト追加)
+  - src/lib/infinite-canvas/PortConnection.tsx (simplified prop追加)
+  - src/lib/infinite-canvas/PortConnection.test.tsx (2テスト追加)
+  - src/lib/proof-pad/ProofWorkspace.tsx (draggingNodeIdsRef追跡, handleNodeDragEnd)
+- **今後のイテレーションへの学び:**
+  - ドラッグ中のノード追跡はrefで管理（stateだと不要な再レンダーを起こす可能性）
+  - useMemoの依存配列にworkspaceがあるため、ドラッグ中もrefの値を参照できる
+  - connectionElements内でrefを読んでも依存配列に入れる必要はない（workspaceの変更で十分）
+  - PortConnectionのsimplified propはhandDrawnも無効化する（SVGフィルタも省略）
+---
