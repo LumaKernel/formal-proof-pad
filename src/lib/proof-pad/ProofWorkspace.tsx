@@ -3710,6 +3710,7 @@ export const ProofWorkspace = forwardRef<
         nextScriptYRef.current += 80;
         ws = addNode(ws, "axiom", "Node", { x: 200, y }, formulaText);
         const newNodeId = `node-${String(ws.nextNodeId - 1) satisfies string}`;
+        workspaceRef.current = ws;
         setWorkspace(ws);
         return newNodeId;
       },
@@ -3719,6 +3720,7 @@ export const ProofWorkspace = forwardRef<
           nodeId,
           formulaText,
         );
+        workspaceRef.current = ws;
         setWorkspace(ws);
       },
       getNodes: () =>
@@ -3742,27 +3744,34 @@ export const ProofWorkspace = forwardRef<
           const tag = result.validation.left._tag satisfies string;
           throw new Error(`Modus Ponens failed: ${tag satisfies string}`);
         }
+        workspaceRef.current = result.workspace;
         setWorkspace(result.workspace);
         return result.mpNodeId;
       },
       addGoal: (formulaText: string) => {
         const ws = addGoal(workspaceRef.current, formulaText);
+        workspaceRef.current = ws;
         setWorkspace(ws);
       },
       removeNode: (nodeId: string) => {
         const ws = removeNode(workspaceRef.current, nodeId);
+        workspaceRef.current = ws;
         setWorkspace(ws);
       },
       setNodeRoleAxiom: (nodeId: string) => {
         const ws = updateNodeRole(workspaceRef.current, nodeId, "axiom");
+        workspaceRef.current = ws;
         setWorkspace(ws);
       },
       applyLayout: () => {
         const ws = applyTreeLayout(workspaceRef.current, "bottom-to-top");
+        workspaceRef.current = ws;
         setWorkspace(ws);
       },
       clearWorkspace: () => {
-        setWorkspace(createEmptyWorkspace(workspace.system));
+        const emptyWs = createEmptyWorkspace(workspace.system);
+        workspaceRef.current = emptyWs;
+        setWorkspace(emptyWs);
         nextScriptYRef.current = 50;
       },
       getSelectedNodeIds: () => [...selectedNodeIds],

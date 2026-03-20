@@ -1,3 +1,4 @@
+import { Either } from "effect";
 import { describe, it, expect, vi } from "vitest";
 import { BUILTIN_TEMPLATES, filterTemplatesByStyle } from "./templates";
 import type { ScriptTemplate } from "./templates";
@@ -8,6 +9,19 @@ import { createWorkspaceBridges } from "./workspaceBridge";
 import { createHilbertProofBridges } from "./hilbertProofBridge";
 import type { WorkspaceCommandHandler } from "./workspaceBridge";
 import type { NativeFunctionBridge } from "./scriptRunner";
+import { lukasiewiczSystem } from "../logic-core/inferenceRule";
+import { hilbertDeduction } from "../logic-core/deductionSystem";
+import {
+  createEmptyWorkspace,
+  addNode,
+  updateNodeRole,
+  updateNodeFormulaText,
+  applyMPAndConnect,
+  addGoal,
+  applyTreeLayout,
+  removeNode,
+} from "../proof-pad/workspaceState";
+import type { WorkspaceState } from "../proof-pad/workspaceState";
 
 describe("BUILTIN_TEMPLATES", () => {
   it("20のテンプレートを含む", () => {
@@ -1085,5 +1099,213 @@ describe("filterTemplatesByStyle", () => {
   it("空配列に対してフィルタしても空配列を返す", () => {
     const result = filterTemplatesByStyle([], "hilbert");
     expect(result).toHaveLength(0);
+  });
+});
+
+// ── ステートフル統合テスト ────────────────────────────────────
+// 実際のワークスペース状態操作を使用し、スクリプトの動作を検証。
+// モックハンドラでは検出できないstale-stateバグ等を防止。
+
+describe("テンプレート統合テスト（ステートフルハンドラ）", () => {
+  const consoleLogs: string[] = [];
+  const consoleBridges: readonly NativeFunctionBridge[] = [
+    {
+      name: "console_log",
+      fn: (...args: readonly unknown[]) => {
+        consoleLogs.push(args.map(String).join(" "));
+      },
+    },
+    {
+      name: "console_error",
+      fn: (...args: readonly unknown[]) => {
+        consoleLogs.push(
+          `ERROR: ${args.map(String).join(" ") satisfies string}`,
+        );
+      },
+    },
+    {
+      name: "console_warn",
+      fn: (...args: readonly unknown[]) => {
+        consoleLogs.push(
+          `WARN: ${args.map(String).join(" ") satisfies string}`,
+        );
+      },
+    },
+  ];
+
+  const consoleShim = `
+    var console = {
+      log: function() {
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
+        console_log.apply(null, args);
+      },
+      error: function() {
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
+        console_error.apply(null, args);
+      },
+      warn: function() {
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) { args.push(arguments[i]); }
+        console_warn.apply(null, args);
+      }
+    };
+  `;
+
+  /**
+   * 実際のワークスペース状態を使用するステートフルハンドラ。
+   * ProofWorkspace.tsx の scriptCommandHandler と同じ動作を再現。
+   */
+  const createStatefulHandler = (): {
+    readonly handler: WorkspaceCommandHandler;
+    readonly getWorkspace: () => WorkspaceState;
+  } => {
+    const ds = hilbertDeduction(lukasiewiczSystem);
+    let ws = createEmptyWorkspace(ds);
+    let nextY = 50;
+
+    const handler: WorkspaceCommandHandler = {
+      addNode: (formulaText: string) => {
+        const y = nextY;
+        nextY += 80;
+        ws = addNode(ws, "axiom", "Node", { x: 200, y }, formulaText);
+        return `node-${String(ws.nextNodeId - 1) satisfies string}`;
+      },
+      setNodeFormula: (nodeId: string, formulaText: string) => {
+        ws = updateNodeFormulaText(ws, nodeId, formulaText);
+      },
+      getNodes: () =>
+        ws.nodes.map((n) => ({
+          id: n.id,
+          formulaText: n.formulaText,
+          label: n.label,
+          x: n.position.x,
+          y: n.position.y,
+        })),
+      connectMP: (antecedentId: string, conditionalId: string) => {
+        const y = nextY;
+        nextY += 80;
+        const result = applyMPAndConnect(ws, antecedentId, conditionalId, {
+          x: 200,
+          y,
+        });
+        if (Either.isLeft(result.validation)) {
+          const tag = result.validation.left._tag satisfies string;
+          throw new Error(`Modus Ponens failed: ${tag satisfies string}`);
+        }
+        ws = result.workspace;
+        return result.mpNodeId;
+      },
+      addGoal: (formulaText: string) => {
+        ws = addGoal(ws, formulaText);
+      },
+      removeNode: (nodeId: string) => {
+        ws = removeNode(ws, nodeId);
+      },
+      setNodeRoleAxiom: (nodeId: string) => {
+        ws = updateNodeRole(ws, nodeId, "axiom");
+      },
+      applyLayout: () => {
+        ws = applyTreeLayout(ws, "bottom-to-top");
+      },
+      clearWorkspace: () => {
+        ws = createEmptyWorkspace(ds);
+        nextY = 50;
+      },
+      getSelectedNodeIds: () => [],
+      getDeductionSystemInfo: () => ({
+        style: ds.style as string,
+        systemName: ds.system.name,
+        isHilbertStyle: ds.style === "hilbert",
+        rules: [],
+      }),
+      getLogicSystem: () => {
+        if (ds.style !== "hilbert") {
+          throw new Error("getLogicSystem: Hilbert体系でのみ使用可能");
+        }
+        const sys = ds.system;
+        return {
+          name: sys.name,
+          propositionalAxioms: Array.from(sys.propositionalAxioms),
+          predicateLogic: sys.predicateLogic,
+          equalityLogic: sys.equalityLogic,
+          generalization: sys.generalization,
+        };
+      },
+      extractScProof: () => {
+        throw new Error("Not implemented in stateful test handler");
+      },
+      extractHilbertProof: () => {
+        throw new Error("Not implemented in stateful test handler");
+      },
+    };
+
+    return { handler, getWorkspace: () => ws };
+  };
+
+  it("build-identity-proof-tree: ステートフルハンドラで正常に実行される", () => {
+    consoleLogs.length = 0;
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "build-identity-proof-tree",
+    )!;
+    const { handler, getWorkspace } = createStatefulHandler();
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+
+    // ワークスペースに5ノードが存在すること（公理3 + MP結論2）
+    const ws = getWorkspace();
+    expect(ws.nodes.length).toBe(5);
+
+    // ゴールが設定されていること
+    expect(ws.goals.length).toBe(1);
+
+    // コンソール出力確認
+    expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);
+  });
+
+  it("build-identity-proof: ステートフルハンドラで正常に実行される", () => {
+    consoleLogs.length = 0;
+    const tmpl = BUILTIN_TEMPLATES.find(
+      (t) => t.id === "build-identity-proof",
+    )!;
+    const { handler } = createStatefulHandler();
+    const bridges = [
+      ...createProofBridges(),
+      ...createCutEliminationBridges(),
+      ...createWorkspaceBridges(handler),
+      ...createHilbertProofBridges(handler),
+      ...consoleBridges,
+    ];
+    const code = consoleShim + tmpl.code;
+    const runner = createScriptRunner(code, {
+      bridges,
+      maxSteps: 50000,
+    });
+    const result = "run" in runner ? runner.run() : runner;
+    if (result._tag === "Error") {
+      throw new Error(
+        `Template failed: ${JSON.stringify(result.error) satisfies string}`,
+      );
+    }
+    expect(result._tag).toBe("Ok");
+    expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);
   });
 });
