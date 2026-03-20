@@ -29,6 +29,7 @@ export type {
   ScRulePaletteItem,
 } from "./axiomPaletteLogic";
 export { getInferenceRuleReferenceEntryId } from "./inferenceRuleReferenceLogic";
+export { getTabRuleReferenceEntryId } from "./tabRuleReferenceLogic";
 export { getDeductionSystemReferenceEntryId } from "./deductionSystemReferenceLogic";
 export { ProofWorkspace } from "./ProofWorkspace";
 export type {

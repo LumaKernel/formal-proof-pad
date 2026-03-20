@@ -6308,6 +6308,9 @@ export const ProofWorkspace = forwardRef<
               ? tabSelection.ruleId
               : undefined
           }
+          referenceEntries={referenceEntries}
+          locale={locale}
+          onOpenReferenceDetail={onOpenReferenceDetail}
           testId={
             /* v8 ignore start -- V8集約アーティファクト */
             testId ? `${testId satisfies string}-tab-rule-palette` : undefined

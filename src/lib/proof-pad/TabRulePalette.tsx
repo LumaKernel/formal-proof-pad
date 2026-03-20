@@ -16,6 +16,10 @@
 import { type CSSProperties, useCallback, useMemo } from "react";
 import type { TabRulePaletteItem } from "./axiomPaletteLogic";
 import type { TabRuleId } from "../logic-core/tableauCalculus";
+import type { ReferenceEntry, Locale } from "../reference/referenceEntry";
+import { findEntryById } from "../reference/referenceEntry";
+import { ReferencePopover } from "../reference/ReferencePopover";
+import { getTabRuleReferenceEntryId } from "./tabRuleReferenceLogic";
 import { useProofMessages } from "./ProofMessagesContext";
 
 // --- Props ---
@@ -29,6 +33,12 @@ export interface TabRulePaletteProps {
   readonly onRuleClick?: (ruleId: TabRuleId) => void;
   /** 現在選択中の規則ID */
   readonly selectedRuleId?: TabRuleId;
+  /** リファレンスエントリ一覧（省略時はリファレンスポップオーバー非表示） */
+  readonly referenceEntries?: readonly ReferenceEntry[];
+  /** ロケール（リファレンス表示用） */
+  readonly locale?: Locale;
+  /** リファレンス詳細モーダルを開くコールバック */
+  readonly onOpenReferenceDetail?: (entryId: string) => void;
   /** data-testid */
   readonly testId?: string;
 }
@@ -125,17 +135,34 @@ const branchingBadgeStyle: Readonly<CSSProperties> = {
 
 // --- コンポーネント ---
 
+const ruleItemLabelRowStyle: Readonly<CSSProperties> = {
+  display: "flex",
+  alignItems: "center",
+  gap: 4,
+  flex: 1,
+};
+
 function TabRuleItemView({
   rule,
   testId,
   isSelected,
   onClick,
+  referenceEntry,
+  locale,
+  onOpenReferenceDetail,
 }: {
   readonly rule: TabRulePaletteItem;
   readonly testId?: string;
   readonly isSelected: boolean;
   readonly onClick?: () => void;
+  readonly referenceEntry?: ReferenceEntry;
+  readonly locale?: Locale;
+  readonly onOpenReferenceDetail?: (entryId: string) => void;
 }) {
+  const handlePopoverClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
+
   return (
     <div
       data-testid={testId}
@@ -164,8 +191,24 @@ function TabRuleItemView({
         /* v8 ignore stop */
       }}
     >
-      <span>{rule.displayName}</span>
-      {rule.isBranching && <span style={branchingBadgeStyle}>分岐</span>}
+      <span style={ruleItemLabelRowStyle}>
+        <span>{rule.displayName}</span>
+        {rule.isBranching && <span style={branchingBadgeStyle}>分岐</span>}
+        {referenceEntry !== undefined && locale !== undefined && (
+          <span role="presentation" onClick={handlePopoverClick}>
+            <ReferencePopover
+              entry={referenceEntry}
+              locale={locale}
+              onOpenDetail={onOpenReferenceDetail}
+              testId={
+                testId !== undefined
+                  ? `${testId satisfies string}-ref`
+                  : undefined
+              }
+            />
+          </span>
+        )}
+      </span>
     </div>
   );
 }
@@ -175,6 +218,9 @@ export function TabRulePalette({
   onAddSequent,
   onRuleClick,
   selectedRuleId,
+  referenceEntries,
+  locale,
+  onOpenReferenceDetail,
   testId,
 }: TabRulePaletteProps) {
   const msg = useProofMessages();
@@ -184,20 +230,38 @@ export function TabRulePalette({
 
   const ruleItems = useMemo(
     () =>
-      rules.map((rule) => (
-        <TabRuleItemView
-          key={rule.id}
-          rule={rule}
-          isSelected={selectedRuleId === rule.id}
-          onClick={onRuleClick ? () => onRuleClick(rule.id) : undefined}
-          testId={
-            testId
-              ? `${testId satisfies string}-rule-${rule.id satisfies string}`
-              : undefined
-          }
-        />
-      )),
-    [rules, testId, onRuleClick, selectedRuleId],
+      rules.map((rule) => {
+        const refEntryId = getTabRuleReferenceEntryId(rule.id);
+        const refEntry =
+          refEntryId !== undefined && referenceEntries !== undefined
+            ? findEntryById(referenceEntries, refEntryId)
+            : undefined;
+        return (
+          <TabRuleItemView
+            key={rule.id}
+            rule={rule}
+            isSelected={selectedRuleId === rule.id}
+            onClick={onRuleClick ? () => onRuleClick(rule.id) : undefined}
+            referenceEntry={refEntry}
+            locale={locale}
+            onOpenReferenceDetail={onOpenReferenceDetail}
+            testId={
+              testId
+                ? `${testId satisfies string}-rule-${rule.id satisfies string}`
+                : undefined
+            }
+          />
+        );
+      }),
+    [
+      rules,
+      testId,
+      onRuleClick,
+      selectedRuleId,
+      referenceEntries,
+      locale,
+      onOpenReferenceDetail,
+    ],
   );
 
   if (rules.length === 0) {

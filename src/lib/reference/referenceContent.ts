@@ -7858,6 +7858,570 @@ const notationInputMethods: ReferenceEntry = {
 };
 
 // ============================================================
+// TAB推論規則 (TAB Inference Rules)
+// ============================================================
+
+const ruleTabBs: ReferenceEntry = {
+  id: "rule-tab-bs",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Basic Sequent (BS)",
+    ja: "TAB: 基本シーケント (BS)",
+  },
+  summary: {
+    en: "Axiom rule: $\\lnot\\varphi, \\varphi, \\Gamma \\Rightarrow$ closes the branch.",
+    ja: "公理規則: $\\lnot\\varphi, \\varphi, \\Gamma \\Rightarrow$ で枝を閉じる。",
+  },
+  body: {
+    en: [
+      "The <b>Basic Sequent (BS)</b> is the axiom rule of TAB. A sequent $\\lnot\\varphi, \\varphi, \\Gamma \\Rightarrow$ is immediately provable because the antecedent contains both $\\varphi$ and $\\lnot\\varphi$, representing a contradiction.",
+      "In tableau terms, this corresponds to a closed branch containing both T($\\varphi$) and F($\\varphi$). No further decomposition is needed.",
+    ],
+    ja: [
+      "<b>基本シーケント (BS)</b> はTABの公理規則です。シーケント $\\lnot\\varphi, \\varphi, \\Gamma \\Rightarrow$ は前件に$\\varphi$と$\\lnot\\varphi$の両方を含み矛盾を表すため、直ちに証明可能です。",
+      "タブロー的にはT($\\varphi$)とF($\\varphi$)の両方を含む閉じた枝に対応します。これ以上の分解は不要です。",
+    ],
+  },
+  formalNotation: "\\text{BS}: \\quad \\lnot\\varphi, \\varphi, \\Gamma \\Rightarrow",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "concept-tableau-closure",
+    "rule-tab-bottom",
+  ],
+  externalLinks: [],
+  keywords: [
+    "BS",
+    "basic sequent",
+    "axiom",
+    "closed branch",
+    "基本シーケント",
+    "公理",
+    "閉枝",
+  ],
+  order: 10,
+};
+
+const ruleTabBottom: ReferenceEntry = {
+  id: "rule-tab-bottom",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Bottom (⊥)",
+    ja: "TAB: ボトム (⊥)",
+  },
+  summary: {
+    en: "The sequent $\\bot, \\Gamma \\Rightarrow$ is immediately provable.",
+    ja: "$\\bot, \\Gamma \\Rightarrow$ は直ちに証明可能。",
+  },
+  body: {
+    en: [
+      "The <b>bottom rule</b> states that any sequent containing $\\bot$ in the antecedent is immediately provable. The formula $\\bot$ represents falsehood, so assuming it leads to any conclusion.",
+      "This rule has no premises — like BS, it closes a branch immediately.",
+    ],
+    ja: [
+      "<b>ボトム規則</b>は前件に$\\bot$を含む任意のシーケントが直ちに証明可能であることを述べます。$\\bot$は偽を表すため、それを仮定すればあらゆる結論が導かれます。",
+      "この規則は前提を持ちません。BSと同様に枝を直ちに閉じます。",
+    ],
+  },
+  formalNotation: "\\bot: \\quad \\bot, \\Gamma \\Rightarrow",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-bs",
+    "axiom-efq",
+  ],
+  externalLinks: [],
+  keywords: [
+    "bottom",
+    "⊥",
+    "falsum",
+    "ボトム",
+    "偽",
+  ],
+  order: 11,
+};
+
+const ruleTabExchange: ReferenceEntry = {
+  id: "rule-tab-exchange",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Exchange (e)",
+    ja: "TAB: 交換 (e)",
+  },
+  summary: {
+    en: "Reorder antecedent formulas: from $\\Gamma_1, \\psi, \\varphi, \\Gamma_2 \\Rightarrow$ conclude $\\Gamma_1, \\varphi, \\psi, \\Gamma_2 \\Rightarrow$.",
+    ja: "前件の論理式を並べ替え: $\\Gamma_1, \\psi, \\varphi, \\Gamma_2 \\Rightarrow$ から $\\Gamma_1, \\varphi, \\psi, \\Gamma_2 \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>exchange rule (e)</b> allows swapping two adjacent formulas in the antecedent. From $\\Gamma_1, \\psi, \\varphi, \\Gamma_2 \\Rightarrow$ we conclude $\\Gamma_1, \\varphi, \\psi, \\Gamma_2 \\Rightarrow$.",
+      "This is a structural rule that does not change the logical content of the sequent, only the ordering of formulas.",
+    ],
+    ja: [
+      "<b>交換規則 (e)</b> は前件内の隣接する2つの論理式を入れ替えることを許します。$\\Gamma_1, \\psi, \\varphi, \\Gamma_2 \\Rightarrow$ から $\\Gamma_1, \\varphi, \\psi, \\Gamma_2 \\Rightarrow$ を結論します。",
+      "これはシーケントの論理的内容を変えず、論理式の順序のみを変更する構造規則です。",
+    ],
+  },
+  formalNotation:
+    "\\text{e}: \\dfrac{\\Gamma_1, \\psi, \\varphi, \\Gamma_2 \\Rightarrow}{\\Gamma_1, \\varphi, \\psi, \\Gamma_2 \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-sc-structural",
+  ],
+  externalLinks: [],
+  keywords: [
+    "exchange",
+    "swap",
+    "structural rule",
+    "交換",
+    "構造規則",
+  ],
+  order: 12,
+};
+
+const ruleTabDoubleNegation: ReferenceEntry = {
+  id: "rule-tab-double-negation",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Double Negation (¬¬)",
+    ja: "TAB: 二重否定 (¬¬)",
+  },
+  summary: {
+    en: "From $\\varphi, \\Gamma \\Rightarrow$ conclude $\\lnot\\lnot\\varphi, \\Gamma \\Rightarrow$.",
+    ja: "$\\varphi, \\Gamma \\Rightarrow$ から $\\lnot\\lnot\\varphi, \\Gamma \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>double negation rule (¬¬)</b> eliminates a double negation in the antecedent. From $\\varphi, \\Gamma \\Rightarrow$ we conclude $\\lnot\\lnot\\varphi, \\Gamma \\Rightarrow$.",
+      "This is a non-branching ($\\alpha$-type) rule. In classical logic, $\\lnot\\lnot\\varphi$ and $\\varphi$ are equivalent.",
+    ],
+    ja: [
+      "<b>二重否定規則 (¬¬)</b> は前件の二重否定を除去します。$\\varphi, \\Gamma \\Rightarrow$ から $\\lnot\\lnot\\varphi, \\Gamma \\Rightarrow$ を結論します。",
+      "これは非分岐（$\\alpha$型）規則です。古典論理では$\\lnot\\lnot\\varphi$と$\\varphi$は同値です。",
+    ],
+  },
+  formalNotation:
+    "\\lnot\\lnot: \\dfrac{\\varphi, \\Gamma \\Rightarrow}{\\lnot\\lnot\\varphi, \\Gamma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "axiom-dne",
+  ],
+  externalLinks: [],
+  keywords: [
+    "double negation",
+    "¬¬",
+    "二重否定",
+    "alpha rule",
+    "α規則",
+  ],
+  order: 13,
+};
+
+const ruleTabConjunction: ReferenceEntry = {
+  id: "rule-tab-conjunction",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Conjunction (∧)",
+    ja: "TAB: 連言 (∧)",
+  },
+  summary: {
+    en: "From $\\varphi, \\psi, \\Gamma \\Rightarrow$ conclude $\\varphi \\land \\psi, \\Gamma \\Rightarrow$ (non-branching).",
+    ja: "$\\varphi, \\psi, \\Gamma \\Rightarrow$ から $\\varphi \\land \\psi, \\Gamma \\Rightarrow$ を導く（非分岐）。",
+  },
+  body: {
+    en: [
+      "The <b>conjunction rule (∧)</b> decomposes a conjunction in the antecedent. From $\\varphi, \\psi, \\Gamma \\Rightarrow$ we conclude $\\varphi \\land \\psi, \\Gamma \\Rightarrow$. Both conjuncts are placed in the antecedent.",
+      "This is a non-branching ($\\alpha$-type) rule. In tableau terms, T($\\varphi \\land \\psi$) decomposes to T($\\varphi$) and T($\\psi$) on the same branch.",
+    ],
+    ja: [
+      "<b>連言規則 (∧)</b> は前件の連言を分解します。$\\varphi, \\psi, \\Gamma \\Rightarrow$ から $\\varphi \\land \\psi, \\Gamma \\Rightarrow$ を結論します。両方の連言肢が前件に配置されます。",
+      "これは非分岐（$\\alpha$型）規則です。タブロー的にはT($\\varphi \\land \\psi$)が同じ枝上でT($\\varphi$)とT($\\psi$)に分解されます。",
+    ],
+  },
+  formalNotation:
+    "\\land: \\dfrac{\\varphi, \\psi, \\Gamma \\Rightarrow}{\\varphi \\land \\psi, \\Gamma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-neg-conjunction",
+    "rule-nd-conjunction",
+  ],
+  externalLinks: [],
+  keywords: [
+    "conjunction",
+    "∧",
+    "and",
+    "連言",
+    "alpha rule",
+    "α規則",
+  ],
+  order: 14,
+};
+
+const ruleTabNegConjunction: ReferenceEntry = {
+  id: "rule-tab-neg-conjunction",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Negated Conjunction (¬∧)",
+    ja: "TAB: 否定連言 (¬∧)",
+  },
+  summary: {
+    en: "BRANCHING: From $\\lnot\\varphi, \\Gamma \\Rightarrow$ and $\\lnot\\psi, \\Sigma \\Rightarrow$ conclude $\\lnot(\\varphi \\land \\psi), \\Gamma, \\Sigma \\Rightarrow$.",
+    ja: "分岐: $\\lnot\\varphi, \\Gamma \\Rightarrow$ と $\\lnot\\psi, \\Sigma \\Rightarrow$ から $\\lnot(\\varphi \\land \\psi), \\Gamma, \\Sigma \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>negated conjunction rule (¬∧)</b> is a branching ($\\beta$-type) rule. From premises $\\lnot\\varphi, \\Gamma \\Rightarrow$ and $\\lnot\\psi, \\Sigma \\Rightarrow$, we conclude $\\lnot(\\varphi \\land \\psi), \\Gamma, \\Sigma \\Rightarrow$.",
+      "In tableau terms, F($\\varphi \\land \\psi$) splits the branch: one sub-branch assumes F($\\varphi$) and the other assumes F($\\psi$). Both branches must close for the proof to succeed.",
+    ],
+    ja: [
+      "<b>否定連言規則 (¬∧)</b> は分岐（$\\beta$型）規則です。前提 $\\lnot\\varphi, \\Gamma \\Rightarrow$ と $\\lnot\\psi, \\Sigma \\Rightarrow$ から $\\lnot(\\varphi \\land \\psi), \\Gamma, \\Sigma \\Rightarrow$ を結論します。",
+      "タブロー的にはF($\\varphi \\land \\psi$)が枝を分割します：一方はF($\\varphi$)を、他方はF($\\psi$)を仮定します。証明が成功するには両方の枝が閉じる必要があります。",
+    ],
+  },
+  formalNotation:
+    "\\lnot\\land: \\dfrac{\\lnot\\varphi, \\Gamma \\Rightarrow \\qquad \\lnot\\psi, \\Sigma \\Rightarrow}{\\lnot(\\varphi \\land \\psi), \\Gamma, \\Sigma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-conjunction",
+    "rule-nd-conjunction",
+  ],
+  externalLinks: [],
+  keywords: [
+    "negated conjunction",
+    "¬∧",
+    "branching",
+    "否定連言",
+    "分岐",
+    "beta rule",
+    "β規則",
+  ],
+  order: 15,
+};
+
+const ruleTabDisjunction: ReferenceEntry = {
+  id: "rule-tab-disjunction",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Disjunction (∨)",
+    ja: "TAB: 選言 (∨)",
+  },
+  summary: {
+    en: "BRANCHING: From $\\varphi, \\Gamma \\Rightarrow$ and $\\psi, \\Sigma \\Rightarrow$ conclude $\\varphi \\lor \\psi, \\Gamma, \\Sigma \\Rightarrow$.",
+    ja: "分岐: $\\varphi, \\Gamma \\Rightarrow$ と $\\psi, \\Sigma \\Rightarrow$ から $\\varphi \\lor \\psi, \\Gamma, \\Sigma \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>disjunction rule (∨)</b> is a branching ($\\beta$-type) rule. From premises $\\varphi, \\Gamma \\Rightarrow$ and $\\psi, \\Sigma \\Rightarrow$, we conclude $\\varphi \\lor \\psi, \\Gamma, \\Sigma \\Rightarrow$.",
+      "In tableau terms, T($\\varphi \\lor \\psi$) splits the branch: one sub-branch assumes T($\\varphi$) and the other assumes T($\\psi$). Both branches must close.",
+    ],
+    ja: [
+      "<b>選言規則 (∨)</b> は分岐（$\\beta$型）規則です。前提 $\\varphi, \\Gamma \\Rightarrow$ と $\\psi, \\Sigma \\Rightarrow$ から $\\varphi \\lor \\psi, \\Gamma, \\Sigma \\Rightarrow$ を結論します。",
+      "タブロー的にはT($\\varphi \\lor \\psi$)が枝を分割します：一方はT($\\varphi$)を、他方はT($\\psi$)を仮定します。両方の枝が閉じる必要があります。",
+    ],
+  },
+  formalNotation:
+    "\\lor: \\dfrac{\\varphi, \\Gamma \\Rightarrow \\qquad \\psi, \\Sigma \\Rightarrow}{\\varphi \\lor \\psi, \\Gamma, \\Sigma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-neg-disjunction",
+    "rule-nd-disjunction",
+  ],
+  externalLinks: [],
+  keywords: [
+    "disjunction",
+    "∨",
+    "or",
+    "選言",
+    "分岐",
+    "beta rule",
+    "β規則",
+  ],
+  order: 16,
+};
+
+const ruleTabNegDisjunction: ReferenceEntry = {
+  id: "rule-tab-neg-disjunction",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Negated Disjunction (¬∨)",
+    ja: "TAB: 否定選言 (¬∨)",
+  },
+  summary: {
+    en: "From $\\lnot\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow$ conclude $\\lnot(\\varphi \\lor \\psi), \\Gamma \\Rightarrow$ (non-branching).",
+    ja: "$\\lnot\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow$ から $\\lnot(\\varphi \\lor \\psi), \\Gamma \\Rightarrow$ を導く（非分岐）。",
+  },
+  body: {
+    en: [
+      "The <b>negated disjunction rule (¬∨)</b> decomposes a negated disjunction in the antecedent. From $\\lnot\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow$ we conclude $\\lnot(\\varphi \\lor \\psi), \\Gamma \\Rightarrow$.",
+      "This is a non-branching ($\\alpha$-type) rule. In tableau terms, F($\\varphi \\lor \\psi$) decomposes to F($\\varphi$) and F($\\psi$) on the same branch.",
+    ],
+    ja: [
+      "<b>否定選言規則 (¬∨)</b> は前件の否定選言を分解します。$\\lnot\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow$ から $\\lnot(\\varphi \\lor \\psi), \\Gamma \\Rightarrow$ を結論します。",
+      "これは非分岐（$\\alpha$型）規則です。タブロー的にはF($\\varphi \\lor \\psi$)が同じ枝上でF($\\varphi$)とF($\\psi$)に分解されます。",
+    ],
+  },
+  formalNotation:
+    "\\lnot\\lor: \\dfrac{\\lnot\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow}{\\lnot(\\varphi \\lor \\psi), \\Gamma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-disjunction",
+    "rule-nd-disjunction",
+  ],
+  externalLinks: [],
+  keywords: [
+    "negated disjunction",
+    "¬∨",
+    "否定選言",
+    "alpha rule",
+    "α規則",
+  ],
+  order: 17,
+};
+
+const ruleTabImplication: ReferenceEntry = {
+  id: "rule-tab-implication",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Implication (→)",
+    ja: "TAB: 含意 (→)",
+  },
+  summary: {
+    en: "BRANCHING: From $\\lnot\\varphi, \\Gamma \\Rightarrow$ and $\\psi, \\Sigma \\Rightarrow$ conclude $\\varphi \\to \\psi, \\Gamma, \\Sigma \\Rightarrow$.",
+    ja: "分岐: $\\lnot\\varphi, \\Gamma \\Rightarrow$ と $\\psi, \\Sigma \\Rightarrow$ から $\\varphi \\to \\psi, \\Gamma, \\Sigma \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>implication rule (→)</b> is a branching ($\\beta$-type) rule. From premises $\\lnot\\varphi, \\Gamma \\Rightarrow$ and $\\psi, \\Sigma \\Rightarrow$, we conclude $\\varphi \\to \\psi, \\Gamma, \\Sigma \\Rightarrow$.",
+      "In tableau terms, T($\\varphi \\to \\psi$) splits the branch: one sub-branch assumes F($\\varphi$) and the other assumes T($\\psi$). Both branches must close.",
+    ],
+    ja: [
+      "<b>含意規則 (→)</b> は分岐（$\\beta$型）規則です。前提 $\\lnot\\varphi, \\Gamma \\Rightarrow$ と $\\psi, \\Sigma \\Rightarrow$ から $\\varphi \\to \\psi, \\Gamma, \\Sigma \\Rightarrow$ を結論します。",
+      "タブロー的にはT($\\varphi \\to \\psi$)が枝を分割します：一方はF($\\varphi$)を、他方はT($\\psi$)を仮定します。両方の枝が閉じる必要があります。",
+    ],
+  },
+  formalNotation:
+    "\\to: \\dfrac{\\lnot\\varphi, \\Gamma \\Rightarrow \\qquad \\psi, \\Sigma \\Rightarrow}{\\varphi \\to \\psi, \\Gamma, \\Sigma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-neg-implication",
+    "rule-nd-implication",
+  ],
+  externalLinks: [],
+  keywords: [
+    "implication",
+    "→",
+    "含意",
+    "分岐",
+    "beta rule",
+    "β規則",
+  ],
+  order: 18,
+};
+
+const ruleTabNegImplication: ReferenceEntry = {
+  id: "rule-tab-neg-implication",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Negated Implication (¬→)",
+    ja: "TAB: 否定含意 (¬→)",
+  },
+  summary: {
+    en: "From $\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow$ conclude $\\lnot(\\varphi \\to \\psi), \\Gamma \\Rightarrow$ (non-branching).",
+    ja: "$\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow$ から $\\lnot(\\varphi \\to \\psi), \\Gamma \\Rightarrow$ を導く（非分岐）。",
+  },
+  body: {
+    en: [
+      "The <b>negated implication rule (¬→)</b> decomposes a negated implication. From $\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow$ we conclude $\\lnot(\\varphi \\to \\psi), \\Gamma \\Rightarrow$.",
+      "This is a non-branching ($\\alpha$-type) rule. In tableau terms, F($\\varphi \\to \\psi$) decomposes to T($\\varphi$) and F($\\psi$) on the same branch.",
+    ],
+    ja: [
+      "<b>否定含意規則 (¬→)</b> は否定含意を分解します。$\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow$ から $\\lnot(\\varphi \\to \\psi), \\Gamma \\Rightarrow$ を結論します。",
+      "これは非分岐（$\\alpha$型）規則です。タブロー的にはF($\\varphi \\to \\psi$)が同じ枝上でT($\\varphi$)とF($\\psi$)に分解されます。",
+    ],
+  },
+  formalNotation:
+    "\\lnot\\to: \\dfrac{\\varphi, \\lnot\\psi, \\Gamma \\Rightarrow}{\\lnot(\\varphi \\to \\psi), \\Gamma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-implication",
+    "rule-nd-implication",
+  ],
+  externalLinks: [],
+  keywords: [
+    "negated implication",
+    "¬→",
+    "否定含意",
+    "alpha rule",
+    "α規則",
+  ],
+  order: 19,
+};
+
+const ruleTabUniversal: ReferenceEntry = {
+  id: "rule-tab-universal",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Universal Quantifier (∀)",
+    ja: "TAB: 全称量化子 (∀)",
+  },
+  summary: {
+    en: "From $\\varphi[t/x], \\Gamma \\Rightarrow$ conclude $\\forall x.\\,\\varphi, \\Gamma \\Rightarrow$ for any term $t$.",
+    ja: "任意の項$t$について $\\varphi[t/x], \\Gamma \\Rightarrow$ から $\\forall x.\\,\\varphi, \\Gamma \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>universal rule (∀)</b> decomposes a universal quantifier in the antecedent. From $\\varphi[t/x], \\Gamma \\Rightarrow$ we conclude $\\forall x.\\,\\varphi, \\Gamma \\Rightarrow$, where $t$ can be any term.",
+      "This is a $\\gamma$-type rule (non-branching, reusable). It may be applied multiple times with different terms $t$ to obtain different instances of $\\varphi$.",
+    ],
+    ja: [
+      "<b>全称規則 (∀)</b> は前件の全称量化子を分解します。$\\varphi[t/x], \\Gamma \\Rightarrow$ から $\\forall x.\\,\\varphi, \\Gamma \\Rightarrow$ を結論します。$t$は任意の項です。",
+      "これは$\\gamma$型規則（非分岐、再利用可能）です。$\\varphi$の異なるインスタンスを得るために、異なる項$t$で複数回適用できます。",
+    ],
+  },
+  formalNotation:
+    "\\forall: \\dfrac{\\varphi[t/x], \\Gamma \\Rightarrow}{\\forall x.\\,\\varphi, \\Gamma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-neg-universal",
+    "rule-tab-existential",
+    "concept-substitution",
+  ],
+  externalLinks: [],
+  keywords: [
+    "universal",
+    "∀",
+    "forall",
+    "全称",
+    "gamma rule",
+    "γ規則",
+  ],
+  order: 20,
+};
+
+const ruleTabNegUniversal: ReferenceEntry = {
+  id: "rule-tab-neg-universal",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Negated Universal (¬∀)",
+    ja: "TAB: 否定全称 (¬∀)",
+  },
+  summary: {
+    en: "From $\\lnot\\varphi[a/x], \\Gamma \\Rightarrow$ conclude $\\lnot\\forall x.\\,\\varphi, \\Gamma \\Rightarrow$ (eigenvariable $a$ must be fresh).",
+    ja: "固有変数$a$が新しいとき $\\lnot\\varphi[a/x], \\Gamma \\Rightarrow$ から $\\lnot\\forall x.\\,\\varphi, \\Gamma \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>negated universal rule (¬∀)</b> decomposes a negated universal quantifier. From $\\lnot\\varphi[a/x], \\Gamma \\Rightarrow$ we conclude $\\lnot\\forall x.\\,\\varphi, \\Gamma \\Rightarrow$.",
+      "This is a $\\delta$-type rule. The eigenvariable $a$ must be fresh — it must not occur in $\\varphi$, $\\Gamma$, or the conclusion. This side condition is essential for soundness.",
+    ],
+    ja: [
+      "<b>否定全称規則 (¬∀)</b> は否定全称量化子を分解します。$\\lnot\\varphi[a/x], \\Gamma \\Rightarrow$ から $\\lnot\\forall x.\\,\\varphi, \\Gamma \\Rightarrow$ を結論します。",
+      "これは$\\delta$型規則です。固有変数$a$は新しくなければなりません — $\\varphi$、$\\Gamma$、結論のいずれにも出現してはなりません。この副条件は健全性に不可欠です。",
+    ],
+  },
+  formalNotation:
+    "\\lnot\\forall: \\dfrac{\\lnot\\varphi[a/x], \\Gamma \\Rightarrow}{\\lnot\\forall x.\\,\\varphi, \\Gamma \\Rightarrow} \\quad (a \\text{ fresh})",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-universal",
+    "rule-tab-neg-existential",
+    "concept-free-variable",
+  ],
+  externalLinks: [],
+  keywords: [
+    "negated universal",
+    "¬∀",
+    "eigenvariable",
+    "否定全称",
+    "固有変数",
+    "delta rule",
+    "δ規則",
+  ],
+  order: 21,
+};
+
+const ruleTabExistential: ReferenceEntry = {
+  id: "rule-tab-existential",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Existential Quantifier (∃)",
+    ja: "TAB: 存在量化子 (∃)",
+  },
+  summary: {
+    en: "From $\\varphi[a/x], \\Gamma \\Rightarrow$ conclude $\\exists x.\\,\\varphi, \\Gamma \\Rightarrow$ (eigenvariable $a$ must be fresh).",
+    ja: "固有変数$a$が新しいとき $\\varphi[a/x], \\Gamma \\Rightarrow$ から $\\exists x.\\,\\varphi, \\Gamma \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>existential rule (∃)</b> decomposes an existential quantifier. From $\\varphi[a/x], \\Gamma \\Rightarrow$ we conclude $\\exists x.\\,\\varphi, \\Gamma \\Rightarrow$.",
+      "This is a $\\delta$-type rule. The eigenvariable $a$ must be fresh — it must not appear anywhere else in the proof at this point. Each application introduces a new variable.",
+    ],
+    ja: [
+      "<b>存在規則 (∃)</b> は存在量化子を分解します。$\\varphi[a/x], \\Gamma \\Rightarrow$ から $\\exists x.\\,\\varphi, \\Gamma \\Rightarrow$ を結論します。",
+      "これは$\\delta$型規則です。固有変数$a$は新しくなければなりません — この時点で証明の他のどこにも出現してはなりません。各適用で新しい変数が導入されます。",
+    ],
+  },
+  formalNotation:
+    "\\exists: \\dfrac{\\varphi[a/x], \\Gamma \\Rightarrow}{\\exists x.\\,\\varphi, \\Gamma \\Rightarrow} \\quad (a \\text{ fresh})",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-neg-existential",
+    "rule-tab-universal",
+    "concept-free-variable",
+  ],
+  externalLinks: [],
+  keywords: [
+    "existential",
+    "∃",
+    "exists",
+    "存在",
+    "eigenvariable",
+    "固有変数",
+    "delta rule",
+    "δ規則",
+  ],
+  order: 22,
+};
+
+const ruleTabNegExistential: ReferenceEntry = {
+  id: "rule-tab-neg-existential",
+  category: "inference-rule",
+  title: {
+    en: "TAB: Negated Existential (¬∃)",
+    ja: "TAB: 否定存在 (¬∃)",
+  },
+  summary: {
+    en: "From $\\lnot\\varphi[t/x], \\Gamma \\Rightarrow$ conclude $\\lnot\\exists x.\\,\\varphi, \\Gamma \\Rightarrow$ for any term $t$.",
+    ja: "任意の項$t$について $\\lnot\\varphi[t/x], \\Gamma \\Rightarrow$ から $\\lnot\\exists x.\\,\\varphi, \\Gamma \\Rightarrow$ を導く。",
+  },
+  body: {
+    en: [
+      "The <b>negated existential rule (¬∃)</b> decomposes a negated existential quantifier. From $\\lnot\\varphi[t/x], \\Gamma \\Rightarrow$ we conclude $\\lnot\\exists x.\\,\\varphi, \\Gamma \\Rightarrow$, where $t$ can be any term.",
+      "This is a $\\gamma$-type rule (non-branching, reusable). Like the universal rule, it may be applied multiple times with different terms.",
+    ],
+    ja: [
+      "<b>否定存在規則 (¬∃)</b> は否定存在量化子を分解します。$\\lnot\\varphi[t/x], \\Gamma \\Rightarrow$ から $\\lnot\\exists x.\\,\\varphi, \\Gamma \\Rightarrow$ を結論します。$t$は任意の項です。",
+      "これは$\\gamma$型規則（非分岐、再利用可能）です。全称規則と同様に、異なる項で複数回適用できます。",
+    ],
+  },
+  formalNotation:
+    "\\lnot\\exists: \\dfrac{\\lnot\\varphi[t/x], \\Gamma \\Rightarrow}{\\lnot\\exists x.\\,\\varphi, \\Gamma \\Rightarrow}",
+  relatedEntryIds: [
+    "concept-tab-sequent-rules",
+    "rule-tab-existential",
+    "rule-tab-neg-universal",
+    "concept-substitution",
+  ],
+  externalLinks: [],
+  keywords: [
+    "negated existential",
+    "¬∃",
+    "否定存在",
+    "gamma rule",
+    "γ規則",
+  ],
+  order: 23,
+};
+
+// ============================================================
 // エクスポート
 // ============================================================
 
@@ -7917,6 +8481,21 @@ export const allReferenceEntries: readonly ReferenceEntry[] = [
   ruleScOverview,
   ruleScStructural,
   ruleScLogical,
+  // TAB Inference Rules
+  ruleTabBs,
+  ruleTabBottom,
+  ruleTabExchange,
+  ruleTabDoubleNegation,
+  ruleTabConjunction,
+  ruleTabNegConjunction,
+  ruleTabDisjunction,
+  ruleTabNegDisjunction,
+  ruleTabImplication,
+  ruleTabNegImplication,
+  ruleTabUniversal,
+  ruleTabNegUniversal,
+  ruleTabExistential,
+  ruleTabNegExistential,
   // Logic Systems
   systemLukasiewicz,
   systemMendelson,
