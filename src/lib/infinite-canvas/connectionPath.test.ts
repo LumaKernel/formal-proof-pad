@@ -5,6 +5,7 @@ import {
   computeEdgePoint,
   computePortConnectionPath,
   computeSmartConnectionPath,
+  computeStraightPortConnectionPath,
   determineConnectionDirections,
   edgeMidpoint,
   endpointCenter,
@@ -789,6 +790,71 @@ describe("computePortConnectionPath", () => {
     expect(result.start).toEqual({ x: 100, y: 20 });
     // left edge at position 0.75: (300, 60)
     expect(result.end).toEqual({ x: 300, y: 60 });
+  });
+});
+
+describe("computeStraightPortConnectionPath", () => {
+  const viewport: ViewportState = { offsetX: 0, offsetY: 0, scale: 1 };
+
+  const fromPort: ConnectorPortOnItem = {
+    port: { id: "right", edge: "right", position: 0.5 },
+    itemPosition: { x: 0, y: 0 },
+    itemWidth: 100,
+    itemHeight: 50,
+  };
+
+  const toPort: ConnectorPortOnItem = {
+    port: { id: "left", edge: "left", position: 0.5 },
+    itemPosition: { x: 300, y: 0 },
+    itemWidth: 100,
+    itemHeight: 50,
+  };
+
+  it("returns a straight line SVG path (M ... L ...)", () => {
+    const result = computeStraightPortConnectionPath(
+      fromPort,
+      toPort,
+      viewport,
+    );
+    expect(result.d).toMatch(/^M\s/);
+    expect(result.d).toContain(" L ");
+    expect(result.d).not.toContain("C ");
+  });
+
+  it("start/end points match port endpoints", () => {
+    const result = computeStraightPortConnectionPath(
+      fromPort,
+      toPort,
+      viewport,
+    );
+    expect(result.start).toEqual({ x: 100, y: 25 });
+    expect(result.end).toEqual({ x: 300, y: 25 });
+  });
+
+  it("midpoint is the average of start and end", () => {
+    const result = computeStraightPortConnectionPath(
+      fromPort,
+      toPort,
+      viewport,
+    );
+    expect(result.midpoint).toEqual({ x: 200, y: 25 });
+  });
+
+  it("applies viewport offset", () => {
+    const vpOffset: ViewportState = { offsetX: 100, offsetY: 50, scale: 1 };
+    const result = computeStraightPortConnectionPath(
+      fromPort,
+      toPort,
+      vpOffset,
+    );
+    expect(result.start).toEqual({ x: 200, y: 75 });
+  });
+
+  it("applies viewport scale", () => {
+    const vpScale: ViewportState = { offsetX: 0, offsetY: 0, scale: 2 };
+    const result = computeStraightPortConnectionPath(fromPort, toPort, vpScale);
+    expect(result.start).toEqual({ x: 200, y: 50 });
+    expect(result.end).toEqual({ x: 600, y: 50 });
   });
 });
 

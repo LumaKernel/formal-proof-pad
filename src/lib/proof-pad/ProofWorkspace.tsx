@@ -1030,6 +1030,10 @@ export const ProofWorkspace = forwardRef<
     () => new Set(),
   );
 
+  // ドラッグ中ノードID追跡（エッジ簡略化用）
+  // refで管理: workspaceの変更でconnectionElements useMemoが再計算される際にref値を参照
+  const draggingNodeIdsRef = useRef<ReadonlySet<string>>(new Set());
+
   // ノードコンテキストメニュー
   const [nodeMenuState, setNodeMenuState] =
     useState<NodeMenuState>(NODE_MENU_CLOSED);
@@ -1262,6 +1266,12 @@ export const ProofWorkspace = forwardRef<
     containerSize,
     setViewport,
   );
+
+  // ドラッグ終了: draggingNodeIdsRefをクリアしてからエッジスクロール終了を通知
+  const handleNodeDragEnd = useCallback(() => {
+    draggingNodeIdsRef.current = new Set();
+    notifyDragEnd();
+  }, [notifyDragEnd]);
 
   // ミニマップ用アイテム一覧
   const minimapItems: readonly MinimapItem[] = useMemo(
@@ -4315,6 +4325,16 @@ export const ProofWorkspace = forwardRef<
   /* v8 ignore start -- ドラッグ操作: PointerEvent シミュレーションが必要なためブラウザテストで検証 */
   const handlePositionChange = useCallback(
     (nodeId: string) => (position: Point) => {
+      // ドラッグ中ノードを追跡（エッジ簡略化用）
+      if (!draggingNodeIdsRef.current.has(nodeId)) {
+        // マルチセレクションドラッグ: 選択中のノードをすべてドラッグ中として記録
+        if (selectedNodeIds.size >= 2 && selectedNodeIds.has(nodeId)) {
+          draggingNodeIdsRef.current = selectedNodeIds;
+        } else {
+          draggingNodeIdsRef.current = new Set([nodeId]);
+        }
+      }
+
       // マルチセレクションドラッグ: 選択ノードが2つ以上かつドラッグ対象が選択に含まれる場合
       if (selectedNodeIds.size >= 2 && selectedNodeIds.has(nodeId)) {
         const draggedNode = workspace.nodes.find((n) => n.id === nodeId);
@@ -4563,6 +4583,11 @@ export const ProofWorkspace = forwardRef<
             />
           ) : undefined;
 
+        // ドラッグ中ノードに接続するエッジは直線表示（パフォーマンス最適化）
+        const isDragSimplified =
+          draggingNodeIdsRef.current.has(conn.fromNodeId) ||
+          draggingNodeIdsRef.current.has(conn.toNodeId);
+
         return (
           <PortConnection
             key={conn.id}
@@ -4581,7 +4606,8 @@ export const ProofWorkspace = forwardRef<
             viewport={viewport}
             color={color}
             strokeWidth={2}
-            handDrawn={handDrawnConnections}
+            handDrawn={isDragSimplified ? false : handDrawnConnections}
+            simplified={isDragSimplified}
             label={edgeLabel}
             labelOffsetY={-12}
             onContextMenu={(screenX, screenY) => {
@@ -4754,7 +4780,7 @@ export const ProofWorkspace = forwardRef<
           onPositionChange={handlePositionChange(node.id)}
           dragEnabled={isDragEnabled}
           onDragMove={notifyDragMove}
-          onDragEnd={notifyDragEnd}
+          onDragEnd={handleNodeDragEnd}
         >
           <div
             ref={getNodeSizeRef(node.id)}
@@ -4868,7 +4894,7 @@ export const ProofWorkspace = forwardRef<
       onOpenReferenceDetail,
       handleAxiomBadgeClick,
       notifyDragMove,
-      notifyDragEnd,
+      handleNodeDragEnd,
       editRequestNodeId,
       handleEditNote,
       isSequentCalculusStyle,

@@ -477,6 +477,32 @@ export function computePortConnectionPath(
 }
 
 /**
+ * Compute a simplified straight-line connection path between two connector ports.
+ * Skips bezier computation and obstacle avoidance for maximum performance.
+ * Intended for use during drag operations where per-frame speed matters.
+ */
+export function computeStraightPortConnectionPath(
+  fromPort: ConnectorPortOnItem,
+  toPort: ConnectorPortOnItem,
+  viewport: ViewportState,
+): ConnectionPathData {
+  const fromEndpoint = computePortEndpoint(fromPort);
+  const toEndpoint = computePortEndpoint(toPort);
+
+  const start = worldToScreen(viewport, fromEndpoint.position);
+  const end = worldToScreen(viewport, toEndpoint.position);
+
+  const midpoint: Point = {
+    x: (start.x + end.x) / 2,
+    y: (start.y + end.y) / 2,
+  };
+
+  const d = `M ${String(start.x) satisfies string} ${String(start.y) satisfies string} L ${String(end.x) satisfies string} ${String(end.y) satisfies string}`;
+
+  return { d, start, end, midpoint };
+}
+
+/**
  * Compute a cubic bezier SVG path connecting two rectangular endpoints.
  * The curve exits/enters at the edge points and uses horizontal control points
  * for a smooth, aesthetically pleasing connection.

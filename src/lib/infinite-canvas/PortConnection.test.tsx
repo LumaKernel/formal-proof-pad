@@ -332,6 +332,29 @@ describe("PortConnection", () => {
     expect(label.style.pointerEvents).toBe("auto");
   });
 
+  it("uses straight-line path when simplified is true", () => {
+    render(
+      <PortConnection
+        from={fromPort}
+        to={toPort}
+        viewport={viewport}
+        simplified
+      />,
+    );
+    const path = screen.getByTestId("port-connection-path");
+    const d = path.getAttribute("d") ?? "";
+    expect(d).toContain(" L ");
+    expect(d).not.toContain("C ");
+  });
+
+  it("uses bezier path when simplified is false (default)", () => {
+    render(<PortConnection from={fromPort} to={toPort} viewport={viewport} />);
+    const path = screen.getByTestId("port-connection-path");
+    const d = path.getAttribute("d") ?? "";
+    expect(d).toContain("C ");
+    expect(d).not.toContain(" L ");
+  });
+
   it("renders complex label content (parameter panel)", () => {
     render(
       <PortConnection

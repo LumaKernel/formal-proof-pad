@@ -1,6 +1,10 @@
 import { type ReactNode, useId } from "react";
 import type { ConnectorPortOnItem } from "./connector";
-import { computePortConnectionPath, type Obstacle } from "./connectionPath";
+import {
+  computePortConnectionPath,
+  computeStraightPortConnectionPath,
+  type Obstacle,
+} from "./connectionPath";
 import {
   computeConnectionLabelPlacement,
   computeLabelScreenPosition,
@@ -32,6 +36,8 @@ export interface PortConnectionProps {
   readonly labelOffsetY?: number;
   /** Enable hand-drawn style with SVG turbulence filter (optional, default false) */
   readonly handDrawn?: boolean;
+  /** Use simplified straight-line path (skips bezier + obstacle avoidance). For drag performance. */
+  readonly simplified?: boolean;
   /** data-testid for the connection SVG element */
   readonly testId?: string;
 }
@@ -56,10 +62,13 @@ export function PortConnection({
   label,
   labelOffsetY = -20,
   handDrawn = false,
+  simplified = false,
   testId,
 }: PortConnectionProps) {
   const filterId = useId();
-  const path = computePortConnectionPath(from, to, viewport, obstacles);
+  const path = simplified
+    ? computeStraightPortConnectionPath(from, to, viewport)
+    : computePortConnectionPath(from, to, viewport, obstacles);
   const hasHitArea = onClick !== undefined || onContextMenu !== undefined;
   const hasLabel = label !== undefined;
 
