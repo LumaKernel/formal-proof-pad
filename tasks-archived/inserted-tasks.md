@@ -131,3 +131,7 @@
   - TermSubstitutionクラス/ファクトリ追加、15ファイルのexhaustive switch更新
   - standalone term parserで[τ/x]postfix対応、Unicode/LaTeX/Highlightフォーマット
   - resolveTermSubstitution追加、8テストファイルに27テスト追加
+
+- [x] スクリプトエディタのタブは右クリックで、よくあるコーディングエディタにあるようなコンテキストメニューを整備してほしい
+  - [x] まずはなにをメニューアクションとして作るかを整理してタスクに分割 — 6アクション（コピー、複製、閉じる、他閉じる、右閉じる、全閉じる）に整理
+  - [x] スクリプト名をコピー、は必ず入れておいて — navigator.clipboard.writeText実装済み

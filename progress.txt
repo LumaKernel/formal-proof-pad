@@ -16296,3 +16296,27 @@
   - Term union に新しいバリアントを追加する際、既存の as + fall-through パターン（例: unification.ts の BinaryOperation）が型縮小を壊す。明示的な if ガードが必要
   - Schema.TaggedClass で新しい Term バリアントを追加すれば Schema.Union が自動対応するため、serialization の変更は不要
 ---
+
+## 2026-03-20 22:45 - script-editor: タブ右クリックコンテキストメニュー追加
+- 実装した内容:
+  - タブ右クリックで6アクションのコンテキストメニュー表示（スクリプト名コピー、複製して編集、閉じる、他をすべて閉じる、右をすべて閉じる、すべて閉じる）
+  - 純粋ロジック: closeOtherTabs, closeTabsToRight, closeAllTabs を scriptWorkspaceState.ts に追加（テスト15件）
+  - tabContextMenuLogic.ts: メニュー項目生成・無効化条件の純粋ロジック新規作成（テスト6件）
+  - ScriptWorkspaceTabBar.tsx に ContextMenuComponent / useContextMenu 統合
+  - ScriptEditorComponent.tsx にハンドラ接続（copy, duplicate, close, closeOthers, closeToRight, closeAll）
+  - Storybookストーリー3件追加（ContextMenu, ContextMenuLastTab, ContextMenuSingleTab）
+- 変更したファイル:
+  - `src/components/ScriptEditor/scriptWorkspaceState.ts`: closeOtherTabs, closeTabsToRight, closeAllTabs追加
+  - `src/components/ScriptEditor/scriptWorkspaceState.test.ts`: テスト15件追加
+  - `src/components/ScriptEditor/tabContextMenuLogic.ts`: 新規作成
+  - `src/components/ScriptEditor/tabContextMenuLogic.test.ts`: 新規作成（テスト6件）
+  - `src/components/ScriptEditor/ScriptWorkspaceTabBar.tsx`: コンテキストメニューUI統合
+  - `src/components/ScriptEditor/ScriptWorkspaceTabBar.stories.tsx`: ストーリー3件追加
+  - `src/components/ScriptEditor/ScriptEditorComponent.tsx`: ハンドラ接続
+- カバレッジ: 99.37% Stmts / 97.63% Branch / 90.09% Funcs / 99.48% Lines（低下なし）
+- **今後のイテレーションへの学び:**
+  - 既存の `useContextMenu` フック（infinite-canvas由来）と `ContextMenuComponent` は汎用的に再利用可能。新しいコンテキストメニューを追加する際はこれらを使う
+  - タブバーへの新しいイベント（contextmenu等）は TabItem の props に追加し、TabBar から index 情報と共に渡すパターン
+  - コンテキストメニューの項目生成は純粋ロジック（tabContextMenuLogic.ts）に分離し、テスタブルに保つ
+  - `handleTabContextMenuAction` はswitch文でアクションを分岐。新アクション追加時はTabContextMenuAction union型に追加すればexhaustive checkが効く
+---
