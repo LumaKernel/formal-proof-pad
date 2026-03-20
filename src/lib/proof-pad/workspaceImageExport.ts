@@ -22,6 +22,8 @@ import {
 import type { WorkspaceConnection } from "./workspaceState";
 import { classifyNode } from "./nodeRoleLogic";
 import type { DateComponents } from "./workspaceExport";
+import type { InferenceEdge } from "./inferenceEdge";
+import { computeNodeLabelFromEdges } from "./inferenceEdgeLabelLogic";
 
 // --- 定数 ---
 
@@ -120,6 +122,7 @@ function renderNodeSVG(
   node: WorkspaceNode,
   nodeSizes: NodeSizeMap,
   connections: readonly WorkspaceConnection[],
+  inferenceEdges: readonly InferenceEdge[],
 ): string {
   const classification = classifyNode(node, connections);
   const style = getNodeClassificationStyle(classification);
@@ -145,7 +148,7 @@ function renderNodeSVG(
   // ラベルテキスト
   const labelY = y + 16;
   lines.push(
-    `    <text x="${(x + w / 2) satisfies number}" y="${labelY satisfies number}" text-anchor="middle" fill="${EXPORT_CARD_TEXT satisfies string}" font-size="11" font-family="sans-serif" font-weight="bold">${escapeXml(node.label) satisfies string}</text>`,
+    `    <text x="${(x + w / 2) satisfies number}" y="${labelY satisfies number}" text-anchor="middle" fill="${EXPORT_CARD_TEXT satisfies string}" font-size="11" font-family="sans-serif" font-weight="bold">${escapeXml(computeNodeLabelFromEdges(node.id, inferenceEdges) ?? node.label) satisfies string}</text>`,
   );
 
   // 式テキスト
@@ -321,7 +324,9 @@ export function generateExportSVG(
 
   // ノード（接続線の上に描画）
   for (const node of state.nodes) {
-    parts.push(renderNodeSVG(node, nodeSizes, state.connections));
+    parts.push(
+      renderNodeSVG(node, nodeSizes, state.connections, state.inferenceEdges),
+    );
   }
 
   parts.push(`</svg>`);

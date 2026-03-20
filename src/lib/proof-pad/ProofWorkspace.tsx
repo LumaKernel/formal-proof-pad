@@ -226,7 +226,10 @@ import type { ProofEntry } from "../proof-collection/proofCollectionState";
 import { prepareProofSaveParams } from "../proof-collection/proofCollectionState";
 import { ProofCollectionPanel } from "../proof-collection/ProofCollectionPanel";
 import { checkProofCompatibility } from "../proof-collection/proofCollectionCompatibility";
-import { computeInferenceEdgeLabelDataForConnection } from "./inferenceEdgeLabelLogic";
+import {
+  computeInferenceEdgeLabelDataForConnection,
+  computeNodeLabelFromEdges,
+} from "./inferenceEdgeLabelLogic";
 import { InferenceEdgeBadge } from "./InferenceEdgeBadge";
 import { EdgeParameterPopover } from "./EdgeParameterPopover";
 import type { EdgeBadgeEditState } from "./edgeBadgeEditLogic";
@@ -4936,7 +4939,10 @@ export const ProofWorkspace = forwardRef<
             <EditableProofNode
               id={node.id}
               kind={node.kind}
-              label={node.label}
+              label={
+                computeNodeLabelFromEdges(node.id, workspace.inferenceEdges) ??
+                node.label
+              }
               formulaText={node.formulaText}
               onFormulaTextChange={handleFormulaTextChange}
               onFormulaParsed={handleFormulaParsed}

@@ -757,8 +757,8 @@ export function applyMPAndConnect(
   rightNodeId: string,
   position: Point,
 ): ApplyMPResult {
-  // 結論ノードを追加（derivedかどうかはInferenceEdgeで計算される）
-  let ws = addNode(state, "axiom", "MP", position);
+  // 結論ノードを追加（ラベルはInferenceEdgeから動的に計算される）
+  let ws = addNode(state, "axiom", "Node", position);
   const mpNodeId = `node-${String(state.nextNodeId) satisfies string}`;
 
   // MPEdge を追加（InferenceEdge として直接管理）
@@ -813,8 +813,8 @@ export function applyGenAndConnect(
   position: Point,
 ): ApplyGenResult {
   /* v8 ignore stop */
-  // 結論ノードを追加（derivedかどうかはInferenceEdgeで計算される）
-  let ws = addNode(state, "axiom", "Gen", position);
+  // 結論ノードを追加（ラベルはInferenceEdgeから動的に計算される）
+  let ws = addNode(state, "axiom", "Node", position);
   const genNodeId = `node-${String(state.nextNodeId) satisfies string}`;
 
   // GenEdge を追加（InferenceEdge として直接管理）
@@ -866,8 +866,8 @@ export function applySubstitutionAndConnect(
   entries: SubstitutionEntries,
   position: Point,
 ): ApplySubstitutionResult {
-  // 結論ノードを追加（derivedかどうかはInferenceEdgeで計算される）
-  let ws = addNode(state, "axiom", "Subst", position);
+  // 結論ノードを追加（ラベルはInferenceEdgeから動的に計算される）
+  let ws = addNode(state, "axiom", "Node", position);
   const substitutionNodeId = `node-${String(state.nextNodeId) satisfies string}`;
 
   // SubstitutionEdge を追加（InferenceEdge として直接管理）
@@ -1082,8 +1082,8 @@ export function applyNdImplicationIntroAndConnect(
   dischargedFormulaText: string,
   position: Point,
 ): ApplyNdImplicationIntroResult {
-  // 結論ノードを追加
-  let ws = addNode(state, "axiom", "→I", position);
+  // 結論ノードを追加（ラベルはInferenceEdgeから動的に計算される）
+  let ws = addNode(state, "axiom", "Node", position);
   const conclusionNodeId = `node-${String(state.nextNodeId) satisfies string}`;
 
   // 仮定IDを計算

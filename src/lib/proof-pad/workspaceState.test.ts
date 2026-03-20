@@ -516,7 +516,7 @@ describe("proofWorkspace", () => {
       const mpNode = findNode(result.workspace, "node-3");
       expect(mpNode).toBeDefined();
       expect(mpNode!.kind).toBe("axiom");
-      expect(mpNode!.label).toBe("MP");
+      expect(mpNode!.label).toBe("Node");
       expect(mpNode!.formulaText).toBe("ψ");
     });
 
@@ -625,7 +625,7 @@ describe("proofWorkspace", () => {
       const genNode = findNode(result.workspace, "node-2");
       expect(genNode).toBeDefined();
       expect(genNode!.kind).toBe("axiom");
-      expect(genNode!.label).toBe("Gen");
+      expect(genNode!.label).toBe("Node");
       expect(genNode!.formulaText).toBe("∀x.φ");
     });
 
@@ -2792,9 +2792,9 @@ describe("proofWorkspace", () => {
         y: 100,
       });
       ws = mpResult.workspace;
-      // Before: node-3 has label "MP"
-      expect(ws.nodes.find((n) => n.id === "node-3")?.label).toBe("MP");
-      // After removing connection: label resets to "Axiom" (default for kind "axiom")
+      // Before: node-3 has label "Node" (label is computed from edges, stored label is "Node")
+      expect(ws.nodes.find((n) => n.id === "node-3")?.label).toBe("Node");
+      // After removing connection: stored label remains "Node" (display label computed from edges changes)
       ws = removeConnection(ws, "conn-node-1-out-node-3-premise-left");
       expect(ws.nodes.find((n) => n.id === "node-3")?.label).toBe("Axiom");
     });
@@ -2814,8 +2814,8 @@ describe("proofWorkspace", () => {
         y: 100,
       });
       ws = substResult.workspace;
-      // Before: conclusion node has label "Subst"
-      expect(ws.nodes.find((n) => n.id === "node-2")?.label).toBe("Subst");
+      // Before: conclusion node has label "Node" (display label computed from edges)
+      expect(ws.nodes.find((n) => n.id === "node-2")?.label).toBe("Node");
       // After removing connection: label resets
       ws = removeConnection(ws, ws.connections[0]!.id);
       expect(ws.nodes.find((n) => n.id === "node-2")?.label).toBe("Axiom");

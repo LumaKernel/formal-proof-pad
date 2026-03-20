@@ -16,6 +16,24 @@ import {
   isScInferenceEdge,
 } from "./inferenceEdge";
 
+// --- ノードラベルの動的計算 ---
+
+/**
+ * ノードIDに対応する推論エッジ（結論ノードとしてのエッジ）を検索し、
+ * そのエッジからノードラベルを計算する。
+ *
+ * エッジが見つからない場合（公理ノード等）は undefined を返す。
+ * UI側では undefined の場合に元の node.label をフォールバックとして使用する。
+ */
+export function computeNodeLabelFromEdges(
+  nodeId: string,
+  inferenceEdges: readonly InferenceEdge[],
+): string | undefined {
+  const edge = inferenceEdges.find((e) => e.conclusionNodeId === nodeId);
+  if (edge === undefined) return undefined;
+  return getInferenceEdgeLabel(edge);
+}
+
 // --- ラベルバッジ色 ---
 
 /** ND推論規則のデフォルトバッジ色 */

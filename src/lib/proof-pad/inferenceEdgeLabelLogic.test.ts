@@ -5,6 +5,7 @@ import {
   getPremiseRole,
   getInferenceEdgeLabelForConnection,
   computeInferenceEdgeLabelDataForConnection,
+  computeNodeLabelFromEdges,
 } from "./inferenceEdgeLabelLogic";
 import type {
   MPEdge,
@@ -773,6 +774,132 @@ describe("inferenceEdgeLabelLogic", () => {
         const data = computeInferenceEdgeLabelData(scAxiom);
         expect(data.label).toBe("公理 (ID)");
       });
+    });
+  });
+
+  describe("computeNodeLabelFromEdges", () => {
+    it("returns undefined for a node with no edges", () => {
+      const result = computeNodeLabelFromEdges("node-1", []);
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined for a node not referenced as conclusion", () => {
+      const mpEdge: MPEdge = {
+        _tag: "mp",
+        conclusionNodeId: "node-2",
+        leftPremiseNodeId: "node-1",
+        rightPremiseNodeId: "node-3",
+        conclusionText: "",
+      };
+      const result = computeNodeLabelFromEdges("node-1", [mpEdge]);
+      expect(result).toBeUndefined();
+    });
+
+    it("returns 'MP' for a node that is the conclusion of an MP edge", () => {
+      const mpEdge: MPEdge = {
+        _tag: "mp",
+        conclusionNodeId: "node-2",
+        leftPremiseNodeId: "node-1",
+        rightPremiseNodeId: "node-3",
+        conclusionText: "",
+      };
+      const result = computeNodeLabelFromEdges("node-2", [mpEdge]);
+      expect(result).toBe("MP");
+    });
+
+    it("returns 'Gen(x)' for a node that is the conclusion of a Gen edge", () => {
+      const genEdge: GenEdge = {
+        _tag: "gen",
+        conclusionNodeId: "node-2",
+        premiseNodeId: "node-1",
+        conclusionText: "",
+        variableName: "x",
+      };
+      const result = computeNodeLabelFromEdges("node-2", [genEdge]);
+      expect(result).toBe("Gen(x)");
+    });
+
+    it("returns 'Gen' for a Gen edge with empty variable name", () => {
+      const genEdge: GenEdge = {
+        _tag: "gen",
+        conclusionNodeId: "node-2",
+        premiseNodeId: "node-1",
+        conclusionText: "",
+        variableName: "",
+      };
+      const result = computeNodeLabelFromEdges("node-2", [genEdge]);
+      expect(result).toBe("Gen");
+    });
+
+    it("returns 'Subst(2)' for a substitution edge with 2 entries", () => {
+      const substEdge: SubstitutionEdge = {
+        _tag: "substitution",
+        conclusionNodeId: "node-2",
+        premiseNodeId: "node-1",
+        conclusionText: "",
+        entries: [
+          {
+            _tag: "FormulaSubstitution",
+            metaVariableName: "φ",
+            formulaText: "P(x)",
+          },
+          {
+            _tag: "FormulaSubstitution",
+            metaVariableName: "ψ",
+            formulaText: "Q(x)",
+          },
+        ],
+      };
+      const result = computeNodeLabelFromEdges("node-2", [substEdge]);
+      expect(result).toBe("Subst(2)");
+    });
+
+    it("returns 'Simp' for a simplification edge", () => {
+      const simpEdge: SimplificationEdge = {
+        _tag: "simplification",
+        conclusionNodeId: "node-2",
+        premiseNodeId: "node-1",
+        conclusionText: "",
+      };
+      const result = computeNodeLabelFromEdges("node-2", [simpEdge]);
+      expect(result).toBe("Simp");
+    });
+
+    it("returns ND label for ND edge conclusion", () => {
+      const ndEdge: NdInferenceEdge = {
+        _tag: "nd-implication-intro",
+        conclusionNodeId: "node-3",
+        premiseNodeId: "node-2",
+        conclusionText: "",
+        dischargedAssumptionId: 1,
+        dischargedFormulaText: "P",
+      };
+      const result = computeNodeLabelFromEdges("node-3", [ndEdge]);
+      expect(result).toBe("→I [1]");
+    });
+
+    it("finds correct edge among multiple edges", () => {
+      const mpEdge: MPEdge = {
+        _tag: "mp",
+        conclusionNodeId: "node-3",
+        leftPremiseNodeId: "node-1",
+        rightPremiseNodeId: "node-2",
+        conclusionText: "",
+      };
+      const genEdge: GenEdge = {
+        _tag: "gen",
+        conclusionNodeId: "node-4",
+        premiseNodeId: "node-3",
+        conclusionText: "",
+        variableName: "x",
+      };
+      expect(computeNodeLabelFromEdges("node-3", [mpEdge, genEdge])).toBe("MP");
+      expect(computeNodeLabelFromEdges("node-4", [mpEdge, genEdge])).toBe(
+        "Gen(x)",
+      );
+      expect(
+        computeNodeLabelFromEdges("node-1", [mpEdge, genEdge]),
+      ).toBeUndefined();
     });
   });
 });

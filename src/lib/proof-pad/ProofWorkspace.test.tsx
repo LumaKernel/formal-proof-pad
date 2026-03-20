@@ -936,13 +936,16 @@ describe("ProofWorkspace", () => {
         />,
       );
 
-      // Verify Gen badge is displayed
+      // Verify Gen label is displayed (both node label and edge badge show "Gen(x)")
       await waitFor(() => {
-        expect(screen.getByText("Gen(x)")).toBeInTheDocument();
+        expect(screen.getAllByText("Gen(x)").length).toBeGreaterThanOrEqual(1);
       });
 
-      // Click the Gen badge to open popover
-      await user.click(screen.getByText("Gen(x)"));
+      // Click the Gen edge badge (not the node label) to open popover
+      const badge = screen.getByTestId(
+        "workspace-edge-badge-conn-node-1-out-node-2-premise",
+      );
+      await user.click(badge);
 
       // Popover should be visible
       await waitFor(() => {
@@ -968,7 +971,7 @@ describe("ProofWorkspace", () => {
         expect(
           screen.queryByTestId("workspace-edge-popover"),
         ).not.toBeInTheDocument();
-        expect(screen.getByText("Gen(y)")).toBeInTheDocument();
+        expect(screen.getAllByText("Gen(y)").length).toBeGreaterThanOrEqual(1);
       });
     });
 
