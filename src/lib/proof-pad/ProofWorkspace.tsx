@@ -5037,6 +5037,7 @@ export const ProofWorkspace = forwardRef<
             ? `${testId satisfies string}-header`
             : undefined /* v8 ignore stop */
         }
+        onContextMenu={(e) => e.stopPropagation()}
       >
         <span>{msg.logicSystemLabel}</span>
         {systemReferenceEntry !== undefined && onOpenReferenceDetail ? (
@@ -5271,6 +5272,7 @@ export const ProofWorkspace = forwardRef<
             testId ? `${testId satisfies string}-mp-banner` : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>
             {mpSelection.phase === "selecting-left"
@@ -5298,6 +5300,7 @@ export const ProofWorkspace = forwardRef<
             testId ? `${testId satisfies string}-gen-banner` : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>{msg.genBannerSelectPremise}</span>
           <button
@@ -5319,6 +5322,7 @@ export const ProofWorkspace = forwardRef<
             testId ? `${testId satisfies string}-merge-banner` : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>{msg.mergeBannerSelectTarget}</span>
           <button
@@ -5342,6 +5346,7 @@ export const ProofWorkspace = forwardRef<
               : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>{msg.simplificationBannerSelectTarget}</span>
           <button
@@ -5363,6 +5368,7 @@ export const ProofWorkspace = forwardRef<
             testId ? `${testId satisfies string}-subconn-banner` : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>{msg.substitutionConnectionBannerSelectTarget}</span>
           <button
@@ -5384,6 +5390,7 @@ export const ProofWorkspace = forwardRef<
             testId ? `${testId satisfies string}-nd-banner` : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>
             {formatMessage(msg.ndBannerSelectNode, {
@@ -5409,6 +5416,7 @@ export const ProofWorkspace = forwardRef<
             testId ? `${testId satisfies string}-tab-banner` : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>
             {formatMessage(msg.tabBannerSelectNode, {
@@ -5434,6 +5442,7 @@ export const ProofWorkspace = forwardRef<
             testId ? `${testId satisfies string}-at-banner` : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>
             {atSelection.phase === "selecting-contradiction"
@@ -5461,6 +5470,7 @@ export const ProofWorkspace = forwardRef<
             testId ? `${testId satisfies string}-sc-banner` : undefined
             /* v8 ignore stop */
           }
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>
             {formatMessage(msg.scBannerSelectNode, {
@@ -5489,6 +5499,7 @@ export const ProofWorkspace = forwardRef<
             /* v8 ignore stop */
           }
           onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.stopPropagation()}
         >
           <span>{msg.genVariablePrompt}</span>
           {/* 自由変数サジェストチップ */}
@@ -5598,6 +5609,7 @@ export const ProofWorkspace = forwardRef<
             /* v8 ignore stop */
           }
           onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.stopPropagation()}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               handleSubstPromptCancel();
@@ -6069,6 +6081,7 @@ export const ProofWorkspace = forwardRef<
           }
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.stopPropagation()}
         >
           {/* リサイズハンドル（左端） */}
           <div
