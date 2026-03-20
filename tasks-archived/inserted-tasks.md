@@ -143,3 +143,5 @@
 - [x] term入力にも当然拡大編集モーダル機能は提供しよう。 → TermExpandedEditor新規作成、TermEditorに拡大ボタン・内蔵モーダル・複数行自動遷移を実装
 - [x] 選言除去 (∨L) などの模範解答を開いても Axiom ノードしかないのはおかしい。
   - [x] 29/34クエストをリッチな証明木に変換済み。残り5件は別問題（sc-23,24は→⇒簡略化、sc-27,34はクエスト式バグ、sc-30はカンマ分割問題）。
+- [x] 代入エントリをあとから編集する場合は、同じ論理式編集コンポーネントになっていない。
+  - substPromptBannerのFormulaEditor/TermEditorにeditTrigger="none", forceEditMode={true}, inputStyle={substInputStyle}を追加し、EdgeParameterPopoverと統一

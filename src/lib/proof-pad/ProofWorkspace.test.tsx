@@ -3764,13 +3764,9 @@ describe("ProofWorkspace", () => {
       expect(metaVarLabel1).toHaveTextContent("τ");
 
       // forceEditMode: 入力欄は最初から編集モード。placeholderはinput要素のattributeで確認
-      const input0 = screen.getByTestId(
-        "workspace-subst-value-0-input-input",
-      );
+      const input0 = screen.getByTestId("workspace-subst-value-0-input-input");
       expect(input0).toHaveAttribute("placeholder", "Enter formula");
-      const input1 = screen.getByTestId(
-        "workspace-subst-value-1-input-input",
-      );
+      const input1 = screen.getByTestId("workspace-subst-value-1-input-input");
       expect(input1).toHaveAttribute("placeholder", "Enter term");
     });
   });
