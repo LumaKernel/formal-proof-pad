@@ -16330,3 +16330,16 @@
   - Monaco editorの `fixedOverflowWidgets: true` は、エディタが `overflow: hidden` なコンテナ内にある場合に必須
   - ProofWorkspace → ScriptEditorComponent のネスト構造で3段の `overflow: hidden` がある
 ---
+
+## 2026-03-21 - 代入モーダル入力欄の視認性改善
+- FormulaInput/TermInputに`inputStyle`プロップを追加（入力要素スタイルのオーバーライド）
+- FormulaEditor/TermEditorでスルーパス
+- EdgeParameterPopoverで白背景(`#ffffff`) + 黒点線ボーダー(`dotted #333`)を適用
+- オーバーレイモード時は親divに背景色を伝搬して透過input下の背景を確保
+- 変更ファイル: FormulaInput.tsx, TermInput.tsx, FormulaEditor.tsx, TermEditor.tsx, EdgeParameterPopover.tsx
+- カバレッジ: 変化なし
+- **今後のイテレーションへの学び:**
+  - FormulaInput/TermInputのシンタックスハイライトはオーバーレイ方式: input要素はtransparentになり、背後のdivにトークン色を描画
+  - 背景色オーバーライド時はオーバーレイ親divにも背景色を設定しないと透過して見えない
+  - EdgeParameterPopoverにはストーリーがない。今後UIテストが必要な場合は専用ストーリーの作成を検討
+---
