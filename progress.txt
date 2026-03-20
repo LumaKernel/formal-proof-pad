@@ -16170,3 +16170,14 @@
 - **今後のイテレーションへの学び:**
   - i18n メッセージにプレースホルダーがある場合、`t.raw()` ではなく `t("key", { var: value })` で補間する必要がある。使わないプレースホルダーは除去すべき
 ---
+
+## 2026-03-20 17:30 - theme エラーテキスト視認性改善
+- 実装した内容: --color-error-text, --color-success-text, --color-info-text, --color-info-bg CSS変数をlight/darkモードに追加
+  - スクリプトエディタのランタイムエラー表示・ステータスバッジで--color-error-textが未定義→fallback #721c24（暗い赤）→ダークモードで見えにくかった
+  - light: #991b1b (暗い赤), dark: #fca5a5 (明るいピンク)で高コントラスト確保
+- 変更したファイル:
+  - `src/app/globals.css`: light/darkモードにCSS変数6個追加
+- **今後のイテレーションへの学び:**
+  - CSS変数のfallback値はテーマ定義と乖離しやすい。新しいセマンティックカラーを使うときはglobals.cssに変数が定義されているか確認する
+  - ScriptEditorComponentのステータスバッジ/エラーバーは inline style + CSS変数パターン
+---

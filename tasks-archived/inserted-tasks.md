@@ -110,3 +110,5 @@
 - [x] マージなどの対象ノードを選択する操作や、モーダル入力は、エスケープキーでキャンセルできてほしい。(ただし、モーダル内などの編集しているテキストエリアから抜けるときなどは別) — 全9選択モード(MP/Gen/Merge/Simplification/SubConn/ND/TAB/AT/SC)でEscapeキャンセル対応
 - [x] MP/GENは相手方が始まったら、終了すべきだ。 — 既に実装済み（handleStartMPSelection/handleStartGenSelectionで互いにidle化）
 - [x] 前提 (φ) をクリックして {variableName} で汎化します ← Genのこの{variableName}はなに？ — Gen選択バナー表示時点では変数名は不明なためプレースホルダーを除去
+- [x] スクリプトエディタのランタイムエラー、背景赤に赤字で見えにくい。 — --color-error-text CSS変数をlight/darkモードに追加
+  - [x] ReadyのとこがErrorになるときも同様 — 同じCSS変数で修正
