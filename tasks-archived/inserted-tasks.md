@@ -140,3 +140,4 @@
   - fixedOverflowWidgets: true で解決
 - [x] 代入エントリのモーダルは記号によってはハイライトが見づらい。論理式入力の背景は常に白にしよう。黒点線でクリック可能なことを常にアピール
   - FormulaInput/TermInputにinputStyleプロップ追加、EdgeParameterPopoverで白背景+黒点線ボーダー適用
+- [x] term入力にも当然拡大編集モーダル機能は提供しよう。 → TermExpandedEditor新規作成、TermEditorに拡大ボタン・内蔵モーダル・複数行自動遷移を実装

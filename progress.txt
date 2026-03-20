@@ -16343,3 +16343,16 @@
   - 背景色オーバーライド時はオーバーレイ親divにも背景色を設定しないと透過して見えない
   - EdgeParameterPopoverにはストーリーがない。今後UIテストが必要な場合は専用ストーリーの作成を検討
 ---
+
+## 2026-03-21 - Term入力の拡大編集モーダル機能
+- TermExpandedEditor.tsx 新規作成（FormulaExpandedEditorのTerm版、~480行）
+- TermExpandedEditor.test.tsx 新規作成（24テスト）
+- TermExpandedEditor.stories.tsx 新規作成（6ストーリー、全play関数付き）
+- TermEditor.tsx に拡大ボタン（⤢）、内蔵モーダル、複数行テキスト自動遷移を実装
+- TermEditor.test.tsx に拡大関連テスト7件追加（計45テスト）
+- index.ts に TermExpandedEditor/TermExpandedEditorProps エクスポート追加
+- カバレッジ: TermEditor.tsx 100%, TermExpandedEditor.tsx 100%（表示されず＝全カバー）
+- **今後のイテレーションへの学び:**
+  - FormulaEditor/FormulaExpandedEditor のパターンをTerm版に横展開する際は、テストも同等レベルで移植すること
+  - handleExpandMouseDown の v8 ignore パターンは FormulaEditor と同様に適用
+---
