@@ -2837,7 +2837,7 @@ export const ProofWorkspace = forwardRef<
         const depNode = findNode(workspace, depId);
         return {
           nodeId: depId,
-          displayName: axInfo?.displayName ?? depNode?.label ?? depId,
+          displayName: axInfo?.displayName ?? depNode?.formulaText ?? depId,
         };
       });
       return deduplicateDependencyInfos(infos);
