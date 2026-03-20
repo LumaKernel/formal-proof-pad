@@ -147,3 +147,4 @@
   - substPromptBannerのFormulaEditor/TermEditorにeditTrigger="none", forceEditMode={true}, inputStyle={substInputStyle}を追加し、EdgeParameterPopoverと統一
 - [x] いくらかネイティブの prompt(confirm?) が使われていそうだが、それらはすべて、カスタムのモーダルにする — RulePromptModalコンポーネントで全13箇所置換完了（ND:1, TAB:4, AT:2, SC:6）
   - [x] たとえば、ヒルベルト以外の規則適用でも使われているが、代入適用と同じように、専用のモーダルが出るべきだ
+- [x] 体系Sequent Calculusがクリックできない。解説ページの用意とクリックの対応を。 — ND/SC/TAB/AT全10システム名をガイド/コンセプトエントリにマッピング

@@ -16410,3 +16410,25 @@
   - globalThis.alert はまだ残存（別タスクで対応検討）
 
 ---
+
+---
+
+## 2026-03-20 - [proof-pad] 全演繹体系のシステムバッジをクリック可能にしリファレンスにリンク
+- ベースライン: Stmts 99.37%, Branch 97.63%, Funcs 90.17%, Lines 99.48%
+- **結果: Stmts 99.37% (±0), Branch 97.63% (±0), Funcs 90.17% (±0), Lines 99.48% (±0)**
+- 実装内容:
+  - deductionSystemReferenceLogic.tsに10のシステム名マッピングを追加
+  - ND系(NM/NJ/NK) → guide-intro-natural-deduction
+  - SC系(LM/LJ/LK) → guide-intro-sequent-calculus
+  - TAB系(TAB/TAB Prop) → guide-intro-tableau
+  - AT系(AT/AT Prop) → concept-analytic-tableau
+  - テスト22件（既存12 + 新規10）すべてパス
+- 変更ファイル:
+  - src/lib/proof-pad/deductionSystemReferenceLogic.ts（マッピング追加）
+  - src/lib/proof-pad/deductionSystemReferenceLogic.test.ts（テスト追加）
+- スクリーンショット: .screenshots/sc-system-badge-mapping.png
+- **今後のイテレーションへの学び:**
+  - 体系バッジのクリック可否はdeductionSystemReferenceLogicのマッピング有無で自動判定される（UIコード変更不要）
+  - 既存のガイド/コンセプトエントリを活用できる場合、新規リファレンスエントリ作成は不要
+
+---
