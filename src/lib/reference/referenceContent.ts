@@ -7882,7 +7882,8 @@ const ruleTabBs: ReferenceEntry = {
       "タブロー的にはT($\\varphi$)とF($\\varphi$)の両方を含む閉じた枝に対応します。これ以上の分解は不要です。",
     ],
   },
-  formalNotation: "\\text{BS}: \\quad \\lnot\\varphi, \\varphi, \\Gamma \\Rightarrow",
+  formalNotation:
+    "\\text{BS}: \\quad \\lnot\\varphi, \\varphi, \\Gamma \\Rightarrow",
   relatedEntryIds: [
     "concept-tab-sequent-rules",
     "concept-tableau-closure",
@@ -7923,19 +7924,9 @@ const ruleTabBottom: ReferenceEntry = {
     ],
   },
   formalNotation: "\\bot: \\quad \\bot, \\Gamma \\Rightarrow",
-  relatedEntryIds: [
-    "concept-tab-sequent-rules",
-    "rule-tab-bs",
-    "axiom-efq",
-  ],
+  relatedEntryIds: ["concept-tab-sequent-rules", "rule-tab-bs", "axiom-efq"],
   externalLinks: [],
-  keywords: [
-    "bottom",
-    "⊥",
-    "falsum",
-    "ボトム",
-    "偽",
-  ],
+  keywords: ["bottom", "⊥", "falsum", "ボトム", "偽"],
   order: 11,
 };
 
@@ -7962,18 +7953,9 @@ const ruleTabExchange: ReferenceEntry = {
   },
   formalNotation:
     "\\text{e}: \\dfrac{\\Gamma_1, \\psi, \\varphi, \\Gamma_2 \\Rightarrow}{\\Gamma_1, \\varphi, \\psi, \\Gamma_2 \\Rightarrow}",
-  relatedEntryIds: [
-    "concept-tab-sequent-rules",
-    "rule-sc-structural",
-  ],
+  relatedEntryIds: ["concept-tab-sequent-rules", "rule-sc-structural"],
   externalLinks: [],
-  keywords: [
-    "exchange",
-    "swap",
-    "structural rule",
-    "交換",
-    "構造規則",
-  ],
+  keywords: ["exchange", "swap", "structural rule", "交換", "構造規則"],
   order: 12,
 };
 
@@ -8000,18 +7982,9 @@ const ruleTabDoubleNegation: ReferenceEntry = {
   },
   formalNotation:
     "\\lnot\\lnot: \\dfrac{\\varphi, \\Gamma \\Rightarrow}{\\lnot\\lnot\\varphi, \\Gamma \\Rightarrow}",
-  relatedEntryIds: [
-    "concept-tab-sequent-rules",
-    "axiom-dne",
-  ],
+  relatedEntryIds: ["concept-tab-sequent-rules", "axiom-dne"],
   externalLinks: [],
-  keywords: [
-    "double negation",
-    "¬¬",
-    "二重否定",
-    "alpha rule",
-    "α規則",
-  ],
+  keywords: ["double negation", "¬¬", "二重否定", "alpha rule", "α規則"],
   order: 13,
 };
 
@@ -8044,14 +8017,7 @@ const ruleTabConjunction: ReferenceEntry = {
     "rule-nd-conjunction",
   ],
   externalLinks: [],
-  keywords: [
-    "conjunction",
-    "∧",
-    "and",
-    "連言",
-    "alpha rule",
-    "α規則",
-  ],
+  keywords: ["conjunction", "∧", "and", "連言", "alpha rule", "α規則"],
   order: 14,
 };
 
@@ -8125,15 +8091,7 @@ const ruleTabDisjunction: ReferenceEntry = {
     "rule-nd-disjunction",
   ],
   externalLinks: [],
-  keywords: [
-    "disjunction",
-    "∨",
-    "or",
-    "選言",
-    "分岐",
-    "beta rule",
-    "β規則",
-  ],
+  keywords: ["disjunction", "∨", "or", "選言", "分岐", "beta rule", "β規則"],
   order: 16,
 };
 
@@ -8166,13 +8124,7 @@ const ruleTabNegDisjunction: ReferenceEntry = {
     "rule-nd-disjunction",
   ],
   externalLinks: [],
-  keywords: [
-    "negated disjunction",
-    "¬∨",
-    "否定選言",
-    "alpha rule",
-    "α規則",
-  ],
+  keywords: ["negated disjunction", "¬∨", "否定選言", "alpha rule", "α規則"],
   order: 17,
 };
 
@@ -8205,14 +8157,7 @@ const ruleTabImplication: ReferenceEntry = {
     "rule-nd-implication",
   ],
   externalLinks: [],
-  keywords: [
-    "implication",
-    "→",
-    "含意",
-    "分岐",
-    "beta rule",
-    "β規則",
-  ],
+  keywords: ["implication", "→", "含意", "分岐", "beta rule", "β規則"],
   order: 18,
 };
 
@@ -8245,13 +8190,7 @@ const ruleTabNegImplication: ReferenceEntry = {
     "rule-nd-implication",
   ],
   externalLinks: [],
-  keywords: [
-    "negated implication",
-    "¬→",
-    "否定含意",
-    "alpha rule",
-    "α規則",
-  ],
+  keywords: ["negated implication", "¬→", "否定含意", "alpha rule", "α規則"],
   order: 19,
 };
 
@@ -8285,14 +8224,7 @@ const ruleTabUniversal: ReferenceEntry = {
     "concept-substitution",
   ],
   externalLinks: [],
-  keywords: [
-    "universal",
-    "∀",
-    "forall",
-    "全称",
-    "gamma rule",
-    "γ規則",
-  ],
+  keywords: ["universal", "∀", "forall", "全称", "gamma rule", "γ規則"],
   order: 20,
 };
 
@@ -8411,13 +8343,7 @@ const ruleTabNegExistential: ReferenceEntry = {
     "concept-substitution",
   ],
   externalLinks: [],
-  keywords: [
-    "negated existential",
-    "¬∃",
-    "否定存在",
-    "gamma rule",
-    "γ規則",
-  ],
+  keywords: ["negated existential", "¬∃", "否定存在", "gamma rule", "γ規則"],
   order: 23,
 };
 

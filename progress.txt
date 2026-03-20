@@ -16495,3 +16495,20 @@
   - バッジ検索: findInferenceEdgeForConclusionNode(edges, conn.toNodeId) ?? findInferenceEdgeForConclusionNode(edges, conn.fromNodeId) でTAB/Hilbert両方対応
 
 ---
+
+## 2026-03-21 - TABパレット(?)ヘルプボタン追加
+- 実装した内容: TABルールパレットの各規則に(?)ヘルプボタンを追加（ReferencePopoverパターン）
+- 変更したファイル:
+  - src/lib/proof-pad/tabRuleReferenceLogic.ts (新規: TabRuleId→ReferenceEntryIdマッピング)
+  - src/lib/proof-pad/tabRuleReferenceLogic.test.ts (新規: 5テスト)
+  - src/lib/proof-pad/TabRulePalette.tsx (ReferencePopover統合)
+  - src/lib/proof-pad/ProofWorkspace.tsx (props伝搬追加)
+  - src/lib/proof-pad/index.ts (export追加)
+  - src/lib/reference/referenceContent.ts (14規則分のリファレンスエントリ追加)
+  - src/lib/reference/referenceContent.test.ts (エントリ数104→118に更新)
+- スクリーンショット: .screenshots/tab-rule-palette-storybook.png
+- **今後のイテレーションへの学び:**
+  - (?)ボタンはreferenceEntries+locale+onOpenReferenceDetailの3propsが揃ったときのみ表示される。ProofWorkspace単体ストーリーでは表示されない（WorkspacePageViewレベルで渡される）
+  - ReferencePopover追加パターン: 純粋マッピングロジック(*ReferenceLogic.ts) + findEntryById + ReferencePopoverコンポーネント + e.stopPropagation()でボタンクリックの伝搬防止
+
+---

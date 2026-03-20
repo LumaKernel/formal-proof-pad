@@ -152,3 +152,5 @@
 - [x] メニューの「クエスト」の文言のチップ? をクリックするとクエストの詳細が出てきてほしい — クエストバッジをクリック可能にし、説明・ヒント数・学習ポイントをポップオーバーで表示。InlineMarkdown対応
 - [x] タブローにおける接続のチップはクリックしたら、置換適用のように詳細が表示されるべきだろう
   - tabEdgeDetailLogic.ts(純粋ロジック) + ProofWorkspace.tsx(UI統合)。TABエッジのconclusionNodeIdが親ノード側であるバッジ検索の修正も含む
+- [x] タブローにおける各規則にも(?)ボタンでアクセスできるヘルプがそれぞれ欲しい
+  - TabRulePaletteにReferencePopoverパターンで実装。14規則分のリファレンスエントリ追加。tabRuleReferenceLogic.ts(純粋マッピング)+テスト
