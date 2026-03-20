@@ -16530,7 +16530,7 @@
   - src/app/workspace/[id]/WorkspaceContent.tsx (showCollectionPanel伝搬)
   - messages/en.json, messages/ja.json (showCollectionPanel翻訳)
 - スクリーンショット: .screenshots/collection-panel-minimize-button.png
-- カバレッジ: CI結果待ち
+- カバレッジ: Stmts 99.35%, Branch 97.51%, Funcs 90.1%, Lines 99.46% (安定)
 - **今後のイテレーションへの学び:**
   - パネルの表示/非表示状態をローカルstate→親コンポーネントに持ち上げる際、テストのデフォルト挙動が変わる。initialXxxVisible propパターンでテストの後方互換を維持
   - onHideはオプショナルpropにし、未指定時は×ボタン自体を非表示にすることで、ストーリー等の単体表示では従来通り動作
