@@ -4,7 +4,7 @@
  * 変更時は TrashManagementPanel.tsx, trashPanelLogic.ts も同期すること。
  */
 
-import type { Meta, StoryObj } from "storybook/internal/types";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn, expect, within, userEvent } from "storybook/test";
 import type { TrashItem } from "./trashState";
 import {

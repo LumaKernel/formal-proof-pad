@@ -67,9 +67,14 @@ export type UseTrashResult = {
   readonly getItemsByKind: (kind: TrashItemKind) => readonly TrashItem[];
 };
 
+/** パージ間隔: 1時間（ミリ秒） */
+export const PURGE_INTERVAL_MS = 60 * 60 * 1000;
+
 export type UseTrashOptions = {
   /** 現在時刻取得関数（テスト用DI） */
   readonly getNow?: GetNow;
+  /** 定期パージの間隔（テスト用DI。デフォルト: PURGE_INTERVAL_MS） */
+  readonly purgeIntervalMs?: number;
 };
 
 /* v8 ignore start */
@@ -81,6 +86,7 @@ function defaultGetNow(): number {
 
 export function useTrash(options?: UseTrashOptions): UseTrashResult {
   const getNow = options?.getNow ?? defaultGetNow;
+  const purgeIntervalMs = options?.purgeIntervalMs ?? PURGE_INTERVAL_MS;
 
   const [state, setState] = useState<TrashState>(() => {
     /* v8 ignore start */
@@ -99,6 +105,42 @@ export function useTrash(options?: UseTrashOptions): UseTrashResult {
     saveTrashState(window.localStorage, state);
   }, [state]);
 
+  // 定期的に期限切れアイテムをパージ (setInterval + visibilitychange)
+  useEffect(() => {
+    const doPurge = () => {
+      setState((prev) => purgeExpiredItems(prev, getNow()));
+    };
+
+    const intervalId = setInterval(doPurge, purgeIntervalMs);
+
+    const handleVisibilityChange = () => {
+      /* v8 ignore start */
+      if (typeof document === "undefined") return;
+      /* v8 ignore stop */
+      if (document.visibilityState === "visible") {
+        doPurge();
+      }
+    };
+
+    /* v8 ignore start */
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+    /* v8 ignore stop */
+
+    return () => {
+      clearInterval(intervalId);
+      /* v8 ignore start */
+      if (typeof document !== "undefined") {
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
+      }
+      /* v8 ignore stop */
+    };
+  }, [getNow, purgeIntervalMs]);
+
   const moveToTrash = useCallback(
     (
       kind: TrashItemKind,
@@ -106,16 +148,19 @@ export function useTrash(options?: UseTrashOptions): UseTrashResult {
       displayName: string,
       serializedData: string,
     ) => {
-      setState((prev) =>
-        addToTrash(
-          prev,
+      const now = getNow();
+      setState((prev) => {
+        // 追加時に期限切れアイテムもパージ
+        const purged = purgeExpiredItems(prev, now);
+        return addToTrash(
+          purged,
           kind,
           originalId,
           displayName,
           serializedData,
-          getNow(),
-        ),
-      );
+          now,
+        );
+      });
     },
     [getNow],
   );

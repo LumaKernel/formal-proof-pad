@@ -32,6 +32,7 @@ export {
   loadTrashState,
   saveTrashState,
   TRASH_STORAGE_KEY,
+  PURGE_INTERVAL_MS,
   type UseTrashResult,
   type UseTrashOptions,
   type GetNow,

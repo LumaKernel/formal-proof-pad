@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import {
   useTrash,
@@ -235,5 +235,102 @@ describe("useTrash hook", () => {
     expect(stored).not.toBeNull();
     const parsed: unknown = JSON.parse(stored!);
     expect(parsed).toHaveProperty("items");
+  });
+});
+
+describe("useTrash 定期パージ", () => {
+  beforeEach(() => {
+    globalThis.localStorage.clear();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("setIntervalで期限切れアイテムが自動パージされる", () => {
+    // 初期状態: 有効アイテム1つ + 期限ギリギリのアイテム1つ
+    const initialNow = 1_000_000;
+    const almostExpiredAt = initialNow - TRASH_EXPIRY_MS + 100; // あと100msで期限切れ
+    let state = addToTrash(
+      createEmptyTrash(),
+      "notebook",
+      "nb-old",
+      "もうすぐ期限切れ",
+      "{}",
+      almostExpiredAt,
+    );
+    state = addToTrash(
+      state,
+      "script",
+      "s-new",
+      "新しいスクリプト",
+      "{}",
+      initialNow,
+    );
+    globalThis.localStorage.setItem(
+      TRASH_STORAGE_KEY,
+      serializeTrashState(state),
+    );
+
+    // 時刻を進行させるgetNow
+    let currentTime = initialNow;
+    const getNow = () => currentTime;
+    const purgeIntervalMs = 500; // テスト用に短い間隔
+
+    const { result } = renderHook(() => useTrash({ getNow, purgeIntervalMs }));
+
+    // 初期状態では両方残っている
+    expect(result.current.items.length).toBe(2);
+
+    // 時刻を進めて期限切れにする
+    currentTime = initialNow + 200; // almostExpiredAt から TRASH_EXPIRY_MS + 100 経過
+
+    // setInterval発火
+    act(() => {
+      vi.advanceTimersByTime(purgeIntervalMs);
+    });
+
+    // 期限切れアイテムがパージされ、有効なものだけ残る
+    expect(result.current.items.length).toBe(1);
+    expect(result.current.items[0]?.displayName).toBe("新しいスクリプト");
+  });
+
+  it("moveToTrash時に期限切れアイテムもパージされる", () => {
+    const initialNow = 1_000_000;
+    const expiredAt = initialNow - TRASH_EXPIRY_MS - 1;
+    const state = addToTrash(
+      createEmptyTrash(),
+      "notebook",
+      "nb-old",
+      "期限切れノート",
+      "{}",
+      expiredAt,
+    );
+    globalThis.localStorage.setItem(
+      TRASH_STORAGE_KEY,
+      serializeTrashState(state),
+    );
+
+    // getNowが初期化時には初期時刻を返し、その後の呼び出しでは進めた時刻を返す
+    let currentTime = expiredAt + 1; // 初期化時は期限切れではない
+    const getNow = () => currentTime;
+
+    const { result } = renderHook(() => useTrash({ getNow }));
+
+    // 初期化時はまだ期限切れではない
+    expect(result.current.items.length).toBe(1);
+
+    // 時刻を進めて期限切れにする
+    currentTime = initialNow;
+
+    // moveToTrashで新しいアイテムを追加
+    act(() => {
+      result.current.moveToTrash("script", "s-1", "新しいスクリプト", "{}");
+    });
+
+    // 期限切れアイテムはパージされ、新しいアイテムのみ残る
+    expect(result.current.items.length).toBe(1);
+    expect(result.current.items[0]?.displayName).toBe("新しいスクリプト");
   });
 });
