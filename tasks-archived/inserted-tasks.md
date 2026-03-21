@@ -162,3 +162,6 @@
 
 - [x] スクリプトエディタの組み込みAPIは、readonlyなビルトイン.d.tsを持つ、みたいな形では実現できないのか？そのほうがgo to definitionもできてよいだろう。
   - builtin-api.d.ts に統合、?raw importでMonacoに登録。generateXxxBridgeTypeDefs関数群を廃止
+
+- [x] 結局Effect.tsが組込まれているようにスクリプトエディタは構成できないのか
+  - Effect.ts そのものの組込みは困難（js-interpreter制限、巨大バンドル）。代わりにEitherJson型+ヘルパー関数（createRight/Left, isRight/Left, getOrThrow, getLeftOrThrow, getOrElse）をサンドボックスAPIとして提供

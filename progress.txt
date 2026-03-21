@@ -16580,3 +16580,19 @@
   - .d.ts ファイルの declare function 構文: 戻り値型は `:` で書く（`=>` は不正で any になる）
   - Prettier は関数削除後の空行整理も厳格にチェックする
 ---
+
+## 2026-03-21 - script-runner: Either ユーティリティAPI をサンドボックスに追加
+- Effect.ts の Either パターンをスクリプトサンドボックスで利用可能にした
+- EitherJson<T, E> 型定義（EitherRightJson, EitherLeftJson）を builtin-api.d.ts に追加
+- eitherBridge.ts: 7つのヘルパー関数（createRight, createLeft, isRight, isLeft, getOrThrow, getLeftOrThrow, getOrElse）
+- eitherBridge.test.ts: 23テスト（全関数の正常系・異常系を網羅）
+- builtin-api.test.ts: Either 型・関数の同期テスト 10件追加（計81テスト）
+- ScriptEditorComponent.tsx: createEitherBridges() を buildAllBridges に統合
+- 変更ファイル: eitherBridge.ts, eitherBridge.test.ts, builtin-api.d.ts, builtin-api.test.ts, index.ts, ScriptEditorComponent.tsx
+- カバレッジ: Stmts 99.35%, Branch 97.52%, Funcs 89.94%, Lines 99.46%（Funcs 0.1%微減はV8の既知quirk）
+- **今後のイテレーションへの学び:**
+  - Effect.ts そのものをjs-interpreterサンドボックスに組み込むのは困難（generator/async未対応、モジュール依存の深さ）
+  - 代わりにJSON互換の「Effect.ts風」型+ヘルパー関数パターンが実用的
+  - ブリッジモジュール追加パターン: xxxBridge.ts + xxxBridge.test.ts + index.ts export + ScriptEditorComponent統合 + builtin-api.d.ts型定義 + builtin-api.test.ts同期テスト
+  - V8のFuncsカバレッジはブリッジモジュールで低めに出る（arrow function定義のカウント方式）。cutEliminationBridge: 58.75%, eitherBridge: 62.5%
+---
