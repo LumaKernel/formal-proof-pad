@@ -108,6 +108,33 @@
 
 ---
 
+## 2026-03-21 - [script-runner] declare function型定義の戻り値構文修正
+- ベースライン: Stmts 99.35%, Branch 97.51%, Funcs 90.1%, Lines 99.46%
+- **結果: Stmts 99.35% (±0), Branch 97.48% (-0.03%), Funcs 90.05% (-0.05%), Lines 99.46% (±0)**
+  - Branch/Funcsの微減はv8カバレッジマージの揺らぎ（変更ファイル自体は全て100%）
+- 実装内容:
+  - 全ブリッジの `generateXxxTypeDefs` が `declare function name() => ReturnType;` という不正なTS構文を生成していたのを修正
+  - `declare function` では `=>` ではなく `:` を使う必要がある
+  - 結果として Monaco Editor 上で全APIの戻り値が `any` に解決されていた
+  - proofBridge.ts, workspaceBridge.ts, cutEliminationBridge.ts, hilbertProofBridge.ts の4ファイルを修正
+  - 各テストに構文正しさを検証するテストを追加
+- 変更ファイル:
+  - src/lib/script-runner/proofBridge.ts
+  - src/lib/script-runner/workspaceBridge.ts
+  - src/lib/script-runner/cutEliminationBridge.ts
+  - src/lib/script-runner/hilbertProofBridge.ts
+  - src/lib/script-runner/proofBridge.test.ts
+  - src/lib/script-runner/workspaceBridge.test.ts
+  - src/lib/script-runner/cutEliminationBridge.test.ts
+  - src/lib/script-runner/hilbertProofBridge.test.ts
+- スクリーンショット: .screenshots/script-editor-typedefs-fix.png
+- **今後のイテレーションへの学び:**
+  - `declare function` のシグネチャで `=>` を使うと TypeScript が構文エラーとして扱い、戻り値が `any` になる。`addExtraLib` で渡す型定義テキストは必ず `:` 構文を使うこと
+  - `def.signature.replace(/^\(/, "(")` は実質no-op（同じ文字の置換）。レビュー時に気づくべきパターン
+  - Signature 文字列のフォーマットが `(params) => ReturnType`（arrow type）であることは API_DEFS では自然だが、`declare function` テンプレートに埋め込む際は変換が必要
+
+---
+
 ## 2026-03-19 - [minimap] ビューポート追従による拡大を廃止しノード固定視点に変更
 - ベースライン: Stmts 99.61%, Branch 98.14%, Funcs 90.26%, Lines 99.71%
 - **結果: Stmts 99.61% (±0), Branch 98.14% (±0), Funcs 90.26% (±0), Lines 99.71% (±0)**
