@@ -16642,3 +16642,22 @@
   - React 18のsetState内での値返しは不確定（バッチング）。setState callback内で外部変数に代入する同期パターンは避け、items配列からfindItemで取得するパターンに変更
   - 次のイテレーション: ゴミ箱管理タブUI（HubTab追加、ゴミ箱アイテム一覧・復元・完全削除・一括削除）
 ---
+
+## 2026-03-21 - ゴミ箱管理タブUI
+- ゴミ箱管理タブをHubPageに追加
+  - trashPanelLogic.ts: 表示用アイテム変換、フィルタ、残り日数フォーマットの純粋ロジック
+  - TrashManagementPanel.tsx: フィルタバー・アイテム一覧・復元/削除ボタン・空にする確認ダイアログ
+  - TrashManagementPanel.stories.tsx: 7ストーリー(Empty, WithItems, FilterByKind, RestoreItem, DeleteItem, EmptyTrashConfirm, EmptyTrashExecute)
+  - HubTab に "trash" 追加、tabToPath, tabItems, HubPageViewProps 更新
+  - /trash ルート (src/app/trash/page.tsx)
+  - i18n: 16キー追加 (en.json, ja.json)
+  - hubMessages.ts: HubMessages型 + defaultHubMessages + hubMessageKeys 更新
+  - HubContent.tsx: trashPanelMessages構築 + trashProps をHubPageViewに渡す
+- 変更ファイル: trashPanelLogic.ts, trashPanelLogic.test.ts, TrashManagementPanel.tsx, TrashManagementPanel.stories.tsx, index.ts, HubPageView.tsx, HubContent.tsx, hubMessages.ts, trash/page.tsx, en.json, ja.json
+- カバレッジベースライン: Stmts 99.36%, Branch 97.50%, Funcs 90.00%, Lines 99.46%
+- スクリーンショット: .screenshots/trash-panel-with-items.png, .screenshots/trash-panel-items-iframe.png, .screenshots/trash-panel-empty.png
+- **今後のイテレーションへの学び:**
+  - ゴミ箱タブ追加チェックリスト: HubTab union → tabToPath → tabItems → HubPageViewProps → JSXレンダリング → HubMessages型 → defaultHubMessages → hubMessageKeys → useHubMessagesFromIntl → en.json → ja.json → page.tsx
+  - TrashManagementPanel は純粋プレゼンテーション。messages prop で i18n、callbacks で操作。HubContent が統合層
+  - `opt.kind ?? "all"` のような式をテンプレートリテラル内で使う場合、`satisfies string` は式全体を `()` で囲む必要がある
+---
