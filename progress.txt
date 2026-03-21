@@ -16783,3 +16783,18 @@
   - 既存のbuildCategoryNavigation/buildGlobalNavigationは十分汎用的で新規ロジック不要
 
 ---
+
+## 2026-03-21 - ドキュメントトップページ（ブラウズモード）
+- ReferenceFloatingWindow にブラウズモード（entry=undefined）を追加
+- ReferenceBrowserComponent に onSelectEntry コールバックを追加（内部モーダル抑制）
+- WorkspaceContent に referenceWindowOpen state を追加（ブラウズ/詳細の独立管理）
+- ホームボタン（←）でエントリ詳細からブラウズモードに戻れる
+- テスト: FloatingWindow +6件, BrowserComponent +1件 = 計56テスト全通過
+- ストーリー: BrowseMode, BrowseModeJapanese, DetailWithHomeButton 追加
+- 変更ファイル: ReferenceFloatingWindow.tsx, ReferenceBrowserComponent.tsx, WorkspaceContent.tsx, 各テスト・ストーリーファイル
+- スクリーンショット: .screenshots/floating-window-browse-mode.png, .screenshots/floating-window-detail-with-home.png
+- **今後のイテレーションへの学び:**
+  - ReferenceBrowserComponent を外部コンテナに埋め込む場合、onSelectEntry を渡して内部モーダルを抑制する
+  - CSS変数名前空間: ReferenceBrowserComponent は var(--ui-*)、ReferenceFloatingWindow は var(--color-*)
+  - useMemo依存配列で data?.formalNotation のようなオプショナルチェーンは eslint react-hooks/exhaustive-deps エラーになる。data 全体を依存にする
+---
