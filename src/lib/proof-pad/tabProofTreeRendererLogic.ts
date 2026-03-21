@@ -26,8 +26,10 @@ export type TabBranchStatus = "closed" | "open";
 export type TabTreeDisplayNode = {
   /** ユニークID */
   readonly id: string;
-  /** シーケントのテキスト（例: "¬P, P"） */
+  /** シーケントのテキスト（例: "¬P, P"）— formulaTexts.join(", ") から導出 */
   readonly sequentText: string;
+  /** 論理式テキストの配列（ソースオブトゥルース）。例: ["¬P", "P"] */
+  readonly formulaTexts: readonly string[];
   /** 適用された規則のラベル（例: "∧", "¬∨"）。ルートノードはundefined */
   readonly ruleLabel: string | undefined;
   /** 子ノードのID配列（0=葉, 1=単項規則, 2=分岐規則） */
@@ -70,8 +72,10 @@ export type TabTreeStats = {
 type TabGraphAnalysis = {
   /** nodeId → そのノードを結論として持つTABエッジ（ノードから下向きに適用された規則） */
   readonly outgoingEdge: ReadonlyMap<string, TabInferenceEdge>;
-  /** nodeId → そのノードのformulaText */
+  /** nodeId → そのノードのformulaText（表示用） */
   readonly nodeTexts: ReadonlyMap<string, string>;
+  /** nodeId → そのノードのformulaTexts（ソースオブトゥルース） */
+  readonly nodeFormulaTexts: ReadonlyMap<string, readonly string[]>;
   /** ルートノードのID（他のエッジの前提になっていないノード） */
   readonly rootNodeIds: readonly string[];
 };
@@ -121,10 +125,16 @@ function analyzeTabWorkspaceGraph(
     outgoingEdge.set(edge.conclusionNodeId, edge);
   }
 
-  // nodeId → formulaText
+  // nodeId → formulaText（表示用）
   const nodeTexts = new Map<string, string>();
+  // nodeId → formulaTexts（ソースオブトゥルース）
+  const nodeFormulaTexts = new Map<string, readonly string[]>();
   for (const node of nodes) {
     nodeTexts.set(node.id, node.formulaText);
+    nodeFormulaTexts.set(
+      node.id,
+      node.formulaTexts ?? (node.formulaText === "" ? [] : [node.formulaText]),
+    );
   }
 
   // 前提として使われているノードIDの集合
@@ -152,7 +162,7 @@ function analyzeTabWorkspaceGraph(
     }
   }
 
-  return { outgoingEdge, nodeTexts, rootNodeIds };
+  return { outgoingEdge, nodeTexts, nodeFormulaTexts, rootNodeIds };
 }
 
 /**
@@ -169,12 +179,15 @@ function buildTabTreeFromNode(
   ruleLabel: string | undefined,
 ): string {
   const id = `tabtree-${String(nextIdRef.value++) satisfies string}`;
+  const formulaTexts = analysis.nodeFormulaTexts.get(nodeId) ?? [];
+  const sequentText = analysis.nodeTexts.get(nodeId) ?? nodeId;
 
   // 循環参照ガード
   if (visited.has(nodeId)) {
     nodes.set(id, {
       id,
-      sequentText: analysis.nodeTexts.get(nodeId) ?? nodeId,
+      sequentText,
+      formulaTexts,
       ruleLabel,
       childIds: [],
       branchStatus: undefined,
@@ -191,7 +204,8 @@ function buildTabTreeFromNode(
     // 葉ノード（規則未適用 = 開いた枝）
     nodes.set(id, {
       id,
-      sequentText: analysis.nodeTexts.get(nodeId) ?? nodeId,
+      sequentText,
+      formulaTexts,
       ruleLabel,
       childIds: [],
       branchStatus: "open",
@@ -205,7 +219,8 @@ function buildTabTreeFromNode(
   if (edge._tag === "tab-axiom") {
     nodes.set(id, {
       id,
-      sequentText: analysis.nodeTexts.get(nodeId) ?? nodeId,
+      sequentText,
+      formulaTexts,
       ruleLabel,
       childIds: [],
       branchStatus: "closed",
@@ -232,7 +247,8 @@ function buildTabTreeFromNode(
 
   nodes.set(id, {
     id,
-    sequentText: analysis.nodeTexts.get(nodeId) ?? nodeId,
+    sequentText,
+    formulaTexts,
     ruleLabel,
     childIds: childDisplayIds,
     branchStatus: undefined,

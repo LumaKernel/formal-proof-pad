@@ -469,13 +469,22 @@ export function addNode(
   formulaTexts?: readonly string[],
 ): WorkspaceState {
   const id = `node-${String(state.nextNodeId) satisfies string}`;
+  // TABシステムでは formulaTexts を必ず初期化（ソースオブトゥルース）
+  const effectiveFormulaTexts =
+    formulaTexts !== undefined
+      ? formulaTexts
+      : isTabSystem(state)
+        ? splitByTopLevelComma(formulaText ?? "")
+        : undefined;
   const newNode: WorkspaceNode = {
     id,
     kind,
     label,
     formulaText: formulaText ?? "",
     position,
-    ...(formulaTexts !== undefined ? { formulaTexts } : {}),
+    ...(effectiveFormulaTexts !== undefined
+      ? { formulaTexts: effectiveFormulaTexts }
+      : {}),
   };
   return syncInferenceEdges({
     ...state,

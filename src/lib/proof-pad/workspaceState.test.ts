@@ -321,6 +321,24 @@ describe("proofWorkspace", () => {
       const result = updateNodeFormulaText(ws, "node-1", "P(x,y), Q(z)");
       expect(result.nodes[0]!.formulaTexts).toEqual(["P(x,y)", "Q(z)"]);
     });
+
+    it("TAB系では addNode 時に formulaTexts が自動初期化される（空ノード）", () => {
+      let ws = createEmptyWorkspace(tabDeduction);
+      ws = addNode(ws, "axiom", "", { x: 0, y: 0 });
+      expect(ws.nodes[0]!.formulaTexts).toEqual([]);
+    });
+
+    it("TAB系では addNode 時に formulaText から formulaTexts が導出される", () => {
+      let ws = createEmptyWorkspace(tabDeduction);
+      ws = addNode(ws, "axiom", "", { x: 0, y: 0 }, "¬φ, φ");
+      expect(ws.nodes[0]!.formulaTexts).toEqual(["¬φ", "φ"]);
+    });
+
+    it("Hilbert系では addNode 時に formulaTexts が設定されない", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "phi");
+      expect(ws.nodes[0]!.formulaTexts).toBeUndefined();
+    });
   });
 
   describe("findNode", () => {

@@ -26,6 +26,20 @@ function mkNode(id: string, formulaText: string): WorkspaceNode {
   };
 }
 
+function mkNodeWithTexts(
+  id: string,
+  formulaTexts: readonly string[],
+): WorkspaceNode {
+  return {
+    id,
+    kind: "axiom",
+    label: "",
+    formulaText: formulaTexts.join(", "),
+    formulaTexts,
+    position: { x: 0, y: 0 },
+  };
+}
+
 // ── convertTabWorkspaceToTreeDisplay ────────────────────────────
 
 describe("convertTabWorkspaceToTreeDisplay", () => {
@@ -272,6 +286,61 @@ describe("convertTabWorkspaceToTreeDisplay", () => {
     expect(result.nodes.size).toBe(1);
     const root = result.nodes.get(result.rootId);
     expect(root?.sequentText).toBe("unknown");
+  });
+
+  // --- formulaTexts 伝搬テスト ---
+
+  it("formulaTexts を持つノードはそのまま TabTreeDisplayNode に伝搬される", () => {
+    const nodes = [mkNodeWithTexts("n1", ["¬P", "P"])];
+    const edges: readonly InferenceEdge[] = [];
+    const result = convertTabWorkspaceToTreeDisplay(nodes, edges, "n1");
+
+    const root = result.nodes.get(result.rootId);
+    expect(root?.formulaTexts).toEqual(["¬P", "P"]);
+    expect(root?.sequentText).toBe("¬P, P");
+  });
+
+  it("formulaTexts がないノードは formulaText からフォールバックする", () => {
+    const nodes = [mkNode("n1", "¬P, P")];
+    const edges: readonly InferenceEdge[] = [];
+    const result = convertTabWorkspaceToTreeDisplay(nodes, edges, "n1");
+
+    const root = result.nodes.get(result.rootId);
+    // formulaTexts がないので formulaText を単一要素配列として使う
+    expect(root?.formulaTexts).toEqual(["¬P, P"]);
+  });
+
+  it("空の formulaText を持つノードは空配列にフォールバックする", () => {
+    const nodes = [mkNode("n1", "")];
+    const edges: readonly InferenceEdge[] = [];
+    const result = convertTabWorkspaceToTreeDisplay(nodes, edges, "n1");
+
+    const root = result.nodes.get(result.rootId);
+    expect(root?.formulaTexts).toEqual([]);
+  });
+
+  it("formulaTexts がツリー全体に伝搬される（単項規則チェーン）", () => {
+    const nodes = [
+      mkNodeWithTexts("n1", ["P ∧ Q"]),
+      mkNodeWithTexts("n2", ["P", "Q", "P ∧ Q"]),
+    ];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "tab-single",
+        ruleId: "conjunction",
+        conclusionNodeId: "n1",
+        premiseNodeId: "n2",
+        conclusionText: "P, Q, P ∧ Q",
+      },
+    ];
+    const result = convertTabWorkspaceToTreeDisplay(nodes, edges, "n1");
+
+    const root = result.nodes.get(result.rootId);
+    expect(root?.formulaTexts).toEqual(["P ∧ Q"]);
+
+    const childId = root!.childIds[0]!;
+    const child = result.nodes.get(childId);
+    expect(child?.formulaTexts).toEqual(["P", "Q", "P ∧ Q"]);
   });
 });
 
