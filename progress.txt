@@ -16596,3 +16596,16 @@
   - ブリッジモジュール追加パターン: xxxBridge.ts + xxxBridge.test.ts + index.ts export + ScriptEditorComponent統合 + builtin-api.d.ts型定義 + builtin-api.test.ts同期テスト
   - V8のFuncsカバレッジはブリッジモジュールで低めに出る（arrow function定義のカウント方式）。cutEliminationBridge: 58.75%, eitherBridge: 62.5%
 ---
+
+## 2026-03-21 - proof-pad: splitSequentText を括弧考慮スプリッターに置換
+- splitByTopLevelComma 関数を導入（括弧の深さを追跡してトップレベルのカンマのみで分割）
+- TAB の splitSequentText と SC の splitSequentTextParts の両方で使用
+- P(x,y) のような多引数述語がシーケントで使用可能に
+- 変更ファイル: tabApplicationLogic.ts, scApplicationLogic.ts, tabApplicationLogic.test.ts, scApplicationLogic.test.ts, index.ts
+- テスト: 11件追加（splitByTopLevelComma 6件、splitSequentText 3件、splitSequentTextParts 2件）
+- カバレッジ: Stmts 99.35%, Branch 97.51%, Funcs 89.95%, Lines 99.46%（安定）
+- **今後のイテレーションへの学び:**
+  - splitByTopLevelComma は tabApplicationLogic.ts に配置し、scApplicationLogic.ts から import。共通ユーティリティ化も検討できるが現時点では依存方向が適切
+  - TABノードの内部モデル完全移行（formulaText:string → formulaTexts:string[]）は別イテレーションの大きなリファクタリング
+  - SC の splitSequentTextParts も同じ問題を持っていたので同時修正した
+---
