@@ -16624,3 +16624,21 @@
   - serializedDataフィールドに元データのJSONを保持するため、復元時にデシリアライズが必要
   - Effect.ts Schema でイミュータブルな配列は `Schema.Array(ItemSchema)` + readonly型で定義
 ---
+
+## 2026-03-21 - ゴミ箱UI統合（useTrashフック + 削除ハンドラ統合）
+- 実装した内容: useTrashフックとHubContent削除ハンドラのゴミ箱統合
+  - `src/lib/trash/useTrash.ts` — React hook: localStorage永続化、期限切れ自動パージ（初期化時）、CRUD操作（moveToTrash, findItem, removeFromTrash, deletePermanently, empty, getItemsByKind）
+  - `src/lib/trash/useTrash.test.ts` — 14件のテスト（localStorage永続化、CRUD、期限切れパージ、種別フィルタ）
+  - `src/app/HubContent.tsx` — 4種の削除ハンドラをゴミ箱移動に変更:
+    - notebook: findNotebook → exportNotebookAsJson → moveToTrash → remove
+    - custom-quest: findCustomQuestById → exportCustomQuestAsJson → moveToTrash → removeCustomQuest
+    - script: findScript → JSON.stringify → moveToTrash → removeScript
+    - proof-entry: findProofEntry → JSON.stringify → moveToTrash → removeEntry
+- 変更したファイル: src/lib/trash/useTrash.ts (新規), src/lib/trash/useTrash.test.ts (新規), src/lib/trash/index.ts, src/app/HubContent.tsx
+- カバレッジ: Stmts 99.36%, Branch 97.50%, Funcs 90.00%, Lines 99.46%（低下なし）
+- **今後のイテレーションへの学び:**
+  - HubContent.tsxは不純層（Next.js, localStorage, router）のため除外対象。変更時はコンポーネントテスト・ストーリーで間接確認
+  - notebook用シリアライズはexportNotebookAsJson（Set→Array変換含む）。他の型はJSON.stringifyで十分（plain objects）
+  - React 18のsetState内での値返しは不確定（バッチング）。setState callback内で外部変数に代入する同期パターンは避け、items配列からfindItemで取得するパターンに変更
+  - 次のイテレーション: ゴミ箱管理タブUI（HubTab追加、ゴミ箱アイテム一覧・復元・完全削除・一括削除）
+---
