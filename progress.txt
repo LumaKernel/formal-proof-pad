@@ -16798,3 +16798,15 @@
   - CSS変数名前空間: ReferenceBrowserComponent は var(--ui-*)、ReferenceFloatingWindow は var(--color-*)
   - useMemo依存配列で data?.formalNotation のようなオプショナルチェーンは eslint react-hooks/exhaustive-deps エラーになる。data 全体を依存にする
 ---
+
+## 2026-03-21T18:53 - リファレンスウィンドウ コンテキストメニュー追加
+- コンテキストメニューに「リファレンスを開く」項目を追加
+- ProofWorkspace → WorkspacePageView → WorkspaceContent のプロップチェーンで onOpenReferenceWindow コールバックを伝搬
+- proofMessages.ts に openReferenceWindow メッセージキー追加、en.json/ja.json に翻訳追加
+- 前回表示していたエントリがあればそのまま、なければブラウズモードで表示
+- 変更ファイル: ProofWorkspace.tsx, proofMessages.ts, WorkspacePageView.tsx, WorkspaceContent.tsx, en.json, ja.json
+- 全12484テスト通過
+- **今後のイテレーションへの学び:**
+  - dev server (Next.js Turbopack) に pre-existing の "Unexpected identifier 'type'" ランタイムエラーあり。ワークスペースページが描画されない。Storybook での確認が必要
+  - コンテキストメニュー項目の追加パターン: showCollectionPanel と同じパターン (optional callback + conditional rendering)
+---
