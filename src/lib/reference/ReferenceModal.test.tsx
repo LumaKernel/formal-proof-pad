@@ -530,6 +530,140 @@ describe("ReferenceModal", () => {
     expect(screen.getByTestId("ref-modal-formula-1")).toBeDefined();
   });
 
+  it("ナビゲーションデータがあるとprev/nextが表示される", () => {
+    renderWithAntd(
+      <ReferenceModal
+        entry={makeEntry()}
+        allEntries={[makeEntry()]}
+        locale="en"
+        onClose={vi.fn()}
+        onNavigate={vi.fn()}
+        navigationData={{
+          previous: {
+            id: "prev-entry",
+            title: "Previous Entry",
+            href: "/reference/prev-entry",
+          },
+          next: {
+            id: "next-entry",
+            title: "Next Entry",
+            href: "/reference/next-entry",
+          },
+        }}
+        testId="ref-modal"
+      />,
+    );
+    const nav = screen.getByTestId("ref-modal-nav");
+    expect(nav).toBeDefined();
+    const prev = screen.getByTestId("ref-modal-nav-prev");
+    expect(prev.textContent).toContain("Previous Entry");
+    const next = screen.getByTestId("ref-modal-nav-next");
+    expect(next.textContent).toContain("Next Entry");
+  });
+
+  it("ナビゲーションのprevクリックでonNavigateが呼ばれる", () => {
+    const handleNavigate = vi.fn();
+    renderWithAntd(
+      <ReferenceModal
+        entry={makeEntry()}
+        allEntries={[makeEntry()]}
+        locale="en"
+        onClose={vi.fn()}
+        onNavigate={handleNavigate}
+        navigationData={{
+          previous: {
+            id: "prev-entry",
+            title: "Previous Entry",
+            href: "/reference/prev-entry",
+          },
+          next: undefined,
+        }}
+        testId="ref-modal"
+      />,
+    );
+    fireEvent.click(screen.getByTestId("ref-modal-nav-prev"));
+    expect(handleNavigate).toHaveBeenCalledWith("prev-entry");
+  });
+
+  it("ナビゲーションのnextクリックでonNavigateが呼ばれる", () => {
+    const handleNavigate = vi.fn();
+    renderWithAntd(
+      <ReferenceModal
+        entry={makeEntry()}
+        allEntries={[makeEntry()]}
+        locale="en"
+        onClose={vi.fn()}
+        onNavigate={handleNavigate}
+        navigationData={{
+          previous: undefined,
+          next: {
+            id: "next-entry",
+            title: "Next Entry",
+            href: "/reference/next-entry",
+          },
+        }}
+        testId="ref-modal"
+      />,
+    );
+    fireEvent.click(screen.getByTestId("ref-modal-nav-next"));
+    expect(handleNavigate).toHaveBeenCalledWith("next-entry");
+  });
+
+  it("ナビゲーションデータがundefinedならナビが非表示", () => {
+    renderWithAntd(
+      <ReferenceModal
+        entry={makeEntry()}
+        allEntries={[makeEntry()]}
+        locale="en"
+        onClose={vi.fn()}
+        testId="ref-modal"
+      />,
+    );
+    expect(screen.queryByTestId("ref-modal-nav")).toBeNull();
+  });
+
+  it("prev/next両方undefinedならナビが非表示", () => {
+    renderWithAntd(
+      <ReferenceModal
+        entry={makeEntry()}
+        allEntries={[makeEntry()]}
+        locale="en"
+        onClose={vi.fn()}
+        navigationData={{ previous: undefined, next: undefined }}
+        testId="ref-modal"
+      />,
+    );
+    expect(screen.queryByTestId("ref-modal-nav")).toBeNull();
+  });
+
+  it("日本語ナビゲーションラベルが表示される", () => {
+    renderWithAntd(
+      <ReferenceModal
+        entry={makeEntry()}
+        allEntries={[makeEntry()]}
+        locale="ja"
+        onClose={vi.fn()}
+        navigationData={{
+          previous: {
+            id: "prev",
+            title: "前のガイド",
+            href: "/reference/prev",
+          },
+          next: {
+            id: "next",
+            title: "次のガイド",
+            href: "/reference/next",
+          },
+        }}
+        testId="ref-modal"
+      />,
+    );
+    const prev = screen.getByTestId("ref-modal-nav-prev");
+    expect(prev.textContent).toContain("← 前");
+    const next = screen.getByTestId("ref-modal-nav-next");
+    expect(next.textContent).toContain("次 →");
+  });
+
   it("日本語で全セクションのラベルが表示される", () => {
     const allEntries = [makeEntry(), makeRelatedEntry()];
     renderWithAntd(

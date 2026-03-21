@@ -182,3 +182,58 @@ export const WithRelatedQuests: Story = {
     await expect(args.onStartQuest).toHaveBeenCalledWith("prop-02");
   },
 };
+
+export const WithNavigation: Story = {
+  args: {
+    onNavigate: fn(),
+    navigationData: {
+      previous: {
+        id: "guide-what-is-formal-proof",
+        title: "What is Formal Proof?",
+        href: "/reference/guide-what-is-formal-proof",
+      },
+      next: {
+        id: "guide-intro-hilbert-system",
+        title: "Introduction to Hilbert System",
+        href: "/reference/guide-intro-hilbert-system",
+      },
+    },
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement.ownerDocument.body);
+    const nav = canvas.getByTestId("ref-win-nav");
+    await expect(nav).toBeInTheDocument();
+    const prev = canvas.getByTestId("ref-win-nav-prev");
+    await expect(prev).toHaveTextContent("What is Formal Proof?");
+    const next = canvas.getByTestId("ref-win-nav-next");
+    await expect(next).toHaveTextContent("Introduction to Hilbert System");
+    await userEvent.click(next);
+    await expect(args.onNavigate).toHaveBeenCalledWith(
+      "guide-intro-hilbert-system",
+    );
+  },
+};
+
+export const WithNavigationNextOnly: Story = {
+  args: {
+    onNavigate: fn(),
+    navigationData: {
+      previous: undefined,
+      next: {
+        id: "guide-basic-operations",
+        title: "Basic Operations",
+        href: "/reference/guide-basic-operations",
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement.ownerDocument.body);
+    const nav = canvas.getByTestId("ref-win-nav");
+    await expect(nav).toBeInTheDocument();
+    await expect(
+      canvas.queryByTestId("ref-win-nav-prev"),
+    ).not.toBeInTheDocument();
+    const next = canvas.getByTestId("ref-win-nav-next");
+    await expect(next).toHaveTextContent("Basic Operations");
+  },
+};

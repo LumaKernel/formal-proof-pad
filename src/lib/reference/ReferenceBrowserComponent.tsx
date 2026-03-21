@@ -24,6 +24,7 @@ import {
   type ReferenceBrowserState,
 } from "./referenceBrowserLogic";
 import { InlineMarkdown } from "./InlineMarkdown";
+import { buildCategoryNavigation } from "./referenceViewerLogic";
 
 // --- Styles ---
 
@@ -322,6 +323,14 @@ export function ReferenceBrowserComponent({
     [entries, detailEntryId],
   );
 
+  const modalNavigationData = useMemo(
+    () =>
+      detailEntry !== undefined
+        ? buildCategoryNavigation(detailEntry, entries, locale)
+        : undefined,
+    [detailEntry, entries, locale],
+  );
+
   const relatedQuests: readonly RelatedQuestInfo[] | undefined = useMemo(() => {
     if (
       detailEntry === undefined ||
@@ -505,6 +514,7 @@ export function ReferenceBrowserComponent({
           onNavigate={handleNavigate}
           relatedQuests={relatedQuests}
           onStartQuest={onStartQuest}
+          navigationData={modalNavigationData}
           /* v8 ignore start -- optional testId prop */
           testId={
             testId !== undefined

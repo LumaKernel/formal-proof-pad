@@ -25,6 +25,7 @@ import {
 } from "../../../lib/quest/questVersionLogic";
 import { allReferenceEntries } from "../../../lib/reference/referenceContent";
 import { findEntryById } from "../../../lib/reference/referenceEntry";
+import { buildCategoryNavigation } from "../../../lib/reference/referenceViewerLogic";
 import { ReferenceFloatingWindow } from "../../../lib/reference/ReferenceFloatingWindow";
 import type { Locale as ReferenceLocale } from "../../../lib/reference/referenceEntry";
 import { ThemeProvider } from "../../../lib/theme/ThemeProvider";
@@ -465,6 +466,18 @@ function WorkspaceInner() {
     [referenceDetailId],
   );
 
+  const referenceNavigation = useMemo(
+    () =>
+      referenceDetailEntry !== undefined
+        ? buildCategoryNavigation(
+            referenceDetailEntry,
+            allReferenceEntries,
+            referenceLocale,
+          )
+        : undefined,
+    [referenceDetailEntry, referenceLocale],
+  );
+
   const questInfo = useMemo((): GoalQuestInfo | undefined => {
     if (questId === undefined) return undefined;
     const quest = builtinQuests.find((q) => q.id === questId);
@@ -544,6 +557,7 @@ function WorkspaceInner() {
           locale={referenceLocale}
           onClose={handleCloseReferenceDetail}
           onNavigate={handleOpenReferenceDetail}
+          navigationData={referenceNavigation}
         />
       ) : null}
     </>

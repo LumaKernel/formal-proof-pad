@@ -217,3 +217,34 @@ export const WithRelatedQuestsJapanese: Story = {
     ).toBeInTheDocument();
   },
 };
+
+export const WithNavigation: Story = {
+  args: {
+    onNavigate: fn(),
+    navigationData: {
+      previous: {
+        id: "guide-what-is-formal-proof",
+        title: "What is Formal Proof?",
+        href: "/reference/guide-what-is-formal-proof",
+      },
+      next: {
+        id: "guide-intro-hilbert-system",
+        title: "Introduction to Hilbert System",
+        href: "/reference/guide-intro-hilbert-system",
+      },
+    },
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const nav = canvas.getByTestId("ref-modal-nav");
+    await expect(nav).toBeInTheDocument();
+    const prev = canvas.getByTestId("ref-modal-nav-prev");
+    await expect(prev).toHaveTextContent("What is Formal Proof?");
+    const next = canvas.getByTestId("ref-modal-nav-next");
+    await expect(next).toHaveTextContent("Introduction to Hilbert System");
+    await userEvent.click(next);
+    await expect(args.onNavigate).toHaveBeenCalledWith(
+      "guide-intro-hilbert-system",
+    );
+  },
+};

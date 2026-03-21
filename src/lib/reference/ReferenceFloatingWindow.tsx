@@ -15,7 +15,10 @@ import katex from "katex";
 import type { Locale, ReferenceEntry } from "./referenceEntry";
 import { buildModalData } from "./referenceUILogic";
 import { InlineMarkdown } from "./InlineMarkdown";
-import { buildReferenceViewerUrl } from "./referenceViewerLogic";
+import {
+  buildReferenceViewerUrl,
+  type NavigationData,
+} from "./referenceViewerLogic";
 import type {
   DragStartInfo,
   ResizeStartInfo,
@@ -46,6 +49,8 @@ export interface ReferenceFloatingWindowProps {
   readonly relatedQuests?: readonly RelatedQuestInfo[];
   /** クエスト開始コールバック */
   readonly onStartQuest?: (questId: string) => void;
+  /** カテゴリ内ナビゲーション（prev/next） */
+  readonly navigationData?: NavigationData;
   /** data-testid */
   readonly testId?: string;
 }
@@ -176,6 +181,45 @@ const questItemWrapperStyle: CSSProperties = {
   display: "inline-block",
 };
 
+const navFooterStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "6px 12px",
+  borderTop: "1px solid var(--color-border, #e2e8f0)",
+  background: "var(--color-bg-secondary, #fafafa)",
+  flexShrink: 0,
+  gap: "8px",
+};
+
+const navButtonStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "1px",
+  padding: "4px 8px",
+  borderRadius: "4px",
+  border: "1px solid var(--color-border, #e2e8f0)",
+  textDecoration: "none",
+  cursor: "pointer",
+  background: "var(--color-surface, #fff)",
+  maxWidth: "45%",
+  overflow: "hidden",
+  fontSize: "var(--font-size-xs, 11px)",
+};
+
+const navButtonLabelStyle: CSSProperties = {
+  color: "var(--color-text-secondary, #999)",
+  fontSize: "10px",
+};
+
+const navButtonTitleStyle: CSSProperties = {
+  color: "var(--color-node-axiom, #5b8bd9)",
+  fontSize: "var(--font-size-xs, 11px)",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+};
+
 const resizeHandleStyle: CSSProperties = {
   position: "absolute",
   right: 0,
@@ -205,6 +249,7 @@ export function ReferenceFloatingWindow({
   onNavigate,
   relatedQuests,
   onStartQuest,
+  navigationData,
   testId,
 }: ReferenceFloatingWindowProps) {
   const [rect, setRect] = useState<WindowRect>(() =>
@@ -521,6 +566,78 @@ export function ReferenceFloatingWindow({
           </div>
         )}
       </div>
+
+      {/* ナビゲーションフッター */}
+      {navigationData !== undefined &&
+        (navigationData.previous !== undefined ||
+          navigationData.next !== undefined) && (
+          <nav
+            style={navFooterStyle}
+            aria-label="entry navigation"
+            data-testid={
+              testId !== undefined
+                ? `${testId satisfies string}-nav`
+                : undefined
+            }
+          >
+            {navigationData.previous !== undefined ? (
+              <a
+                href={navigationData.previous.href}
+                style={{ ...navButtonStyle, alignItems: "flex-start" }}
+                onClick={(e) => {
+                  if (onNavigate !== undefined) {
+                    e.preventDefault();
+                    onNavigate(navigationData.previous!.id);
+                  }
+                }}
+                data-testid={
+                  testId !== undefined
+                    ? `${testId satisfies string}-nav-prev`
+                    : undefined
+                }
+              >
+                <span style={navButtonLabelStyle}>
+                  {locale === "ja" ? "← 前" : "← Prev"}
+                </span>
+                <span style={navButtonTitleStyle}>
+                  {navigationData.previous.title}
+                </span>
+              </a>
+            ) : (
+              <div />
+            )}
+            {navigationData.next !== undefined ? (
+              <a
+                href={navigationData.next.href}
+                style={{
+                  ...navButtonStyle,
+                  alignItems: "flex-end",
+                  marginLeft: "auto",
+                }}
+                onClick={(e) => {
+                  if (onNavigate !== undefined) {
+                    e.preventDefault();
+                    onNavigate(navigationData.next!.id);
+                  }
+                }}
+                data-testid={
+                  testId !== undefined
+                    ? `${testId satisfies string}-nav-next`
+                    : undefined
+                }
+              >
+                <span style={navButtonLabelStyle}>
+                  {locale === "ja" ? "次 →" : "Next →"}
+                </span>
+                <span style={navButtonTitleStyle}>
+                  {navigationData.next.title}
+                </span>
+              </a>
+            ) : (
+              <div />
+            )}
+          </nav>
+        )}
 
       {/* リサイズハンドル */}
       <div

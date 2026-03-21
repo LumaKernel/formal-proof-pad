@@ -14,7 +14,10 @@ import katex from "katex";
 import type { Locale, ReferenceEntry } from "./referenceEntry";
 import { buildModalData } from "./referenceUILogic";
 import { InlineMarkdown } from "./InlineMarkdown";
-import { buildReferenceViewerUrl } from "./referenceViewerLogic";
+import {
+  buildReferenceViewerUrl,
+  type NavigationData,
+} from "./referenceViewerLogic";
 
 // --- Props ---
 
@@ -39,6 +42,8 @@ export interface ReferenceModalProps {
   readonly relatedQuests?: readonly RelatedQuestInfo[];
   /** クエスト開始コールバック */
   readonly onStartQuest?: (questId: string) => void;
+  /** カテゴリ内ナビゲーション（prev/next） */
+  readonly navigationData?: NavigationData;
   /** data-testid */
   readonly testId?: string;
 }
@@ -168,6 +173,42 @@ const questItemWrapperStyle: CSSProperties = {
   display: "inline-block",
 };
 
+const modalNavContainerStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "stretch",
+  marginTop: "24px",
+  paddingTop: "16px",
+  borderTop: "1px solid var(--color-border, #e2e8f0)",
+  gap: "12px",
+};
+
+const modalNavLinkStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "2px",
+  padding: "8px 12px",
+  borderRadius: "6px",
+  border: "1px solid var(--color-border, #e2e8f0)",
+  textDecoration: "none",
+  cursor: "pointer",
+  background: "var(--color-surface, #fff)",
+  maxWidth: "45%",
+};
+
+const modalNavLabelStyle: CSSProperties = {
+  fontSize: "var(--font-size-xs, 11px)",
+  color: "var(--color-text-secondary, #999)",
+};
+
+const modalNavTitleStyle: CSSProperties = {
+  fontSize: "var(--font-size-sm, 13px)",
+  color: "var(--color-node-axiom, #5b8bd9)",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+};
+
 // --- コンポーネント ---
 
 export function ReferenceModal({
@@ -178,6 +219,7 @@ export function ReferenceModal({
   onNavigate,
   relatedQuests,
   onStartQuest,
+  navigationData,
   testId,
 }: ReferenceModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -408,6 +450,81 @@ export function ReferenceModal({
               </div>
             </div>
           )}
+
+          {/* ナビゲーション */}
+          {navigationData !== undefined &&
+            (navigationData.previous !== undefined ||
+              navigationData.next !== undefined) && (
+              <nav
+                style={modalNavContainerStyle}
+                aria-label="entry navigation"
+                data-testid={
+                  testId !== undefined
+                    ? `${testId satisfies string}-nav`
+                    : undefined
+                }
+              >
+                {navigationData.previous !== undefined ? (
+                  <a
+                    href={navigationData.previous.href}
+                    style={{
+                      ...modalNavLinkStyle,
+                      alignItems: "flex-start",
+                    }}
+                    onClick={(e) => {
+                      if (onNavigate !== undefined) {
+                        e.preventDefault();
+                        onNavigate(navigationData.previous!.id);
+                      }
+                    }}
+                    data-testid={
+                      testId !== undefined
+                        ? `${testId satisfies string}-nav-prev`
+                        : undefined
+                    }
+                  >
+                    <span style={modalNavLabelStyle}>
+                      {locale === "ja" ? "← 前" : "← Previous"}
+                    </span>
+                    <span style={modalNavTitleStyle}>
+                      {navigationData.previous.title}
+                    </span>
+                  </a>
+                ) : (
+                  <div />
+                )}
+                {navigationData.next !== undefined ? (
+                  <a
+                    href={navigationData.next.href}
+                    style={{
+                      ...modalNavLinkStyle,
+                      alignItems: "flex-end",
+                      marginLeft: "auto",
+                    }}
+                    onClick={(e) => {
+                      if (onNavigate !== undefined) {
+                        e.preventDefault();
+                        onNavigate(navigationData.next!.id);
+                      }
+                    }}
+                    data-testid={
+                      testId !== undefined
+                        ? `${testId satisfies string}-nav-next`
+                        : undefined
+                    }
+                  >
+                    <span style={modalNavLabelStyle}>
+                      {locale === "ja" ? "次 →" : "Next →"}
+                    </span>
+                    <span style={modalNavTitleStyle}>
+                      {navigationData.next.title}
+                    </span>
+                  </a>
+                ) : (
+                  <div />
+                )}
+              </nav>
+            )}
         </div>
       </div>
     </div>
