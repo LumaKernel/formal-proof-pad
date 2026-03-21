@@ -36,3 +36,18 @@ export {
   type UseTrashOptions,
   type GetNow,
 } from "./useTrash";
+export {
+  type TrashKindLabels,
+  type TrashDisplayItem,
+  type TrashFilterOption,
+  toTrashDisplayItem,
+  toTrashDisplayItems,
+  filterTrashDisplayItems,
+  buildTrashFilterOptions,
+  formatRemainingDays,
+} from "./trashPanelLogic";
+export {
+  TrashManagementPanel,
+  type TrashManagementPanelProps,
+  type TrashPanelMessages,
+} from "./TrashManagementPanel";

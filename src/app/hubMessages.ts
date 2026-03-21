@@ -52,6 +52,23 @@ export type HubMessages = {
   readonly scriptsDelete: string;
   readonly scriptsRename: string;
   readonly scriptsExport: string;
+  // --- Trash ---
+  readonly tabTrash: string;
+  readonly trashEmpty: string;
+  readonly trashEmptyDescription: string;
+  readonly trashRestore: string;
+  readonly trashDelete: string;
+  readonly trashEmptyTrash: string;
+  readonly trashRemainingDays: string;
+  readonly trashFilterAll: string;
+  readonly trashKindNotebook: string;
+  readonly trashKindCustomQuest: string;
+  readonly trashKindScript: string;
+  readonly trashKindProofEntry: string;
+  readonly trashConfirmEmptyTitle: string;
+  readonly trashConfirmEmptyDescription: string;
+  readonly trashConfirmEmptyOk: string;
+  readonly trashConfirmEmptyCancel: string;
   // --- Collection ---
   readonly collectionEmpty: string;
   readonly collectionEntryCount: string;
@@ -112,6 +129,25 @@ export const defaultHubMessages: HubMessages = {
   scriptsDelete: "Delete",
   scriptsRename: "Rename",
   scriptsExport: "Export",
+  // Trash
+  tabTrash: "Trash",
+  trashEmpty: "Trash is empty",
+  trashEmptyDescription:
+    "Deleted items will appear here for 30 days before being permanently removed.",
+  trashRestore: "Restore",
+  trashDelete: "Delete",
+  trashEmptyTrash: "Empty Trash",
+  trashRemainingDays: "{days} days left",
+  trashFilterAll: "All",
+  trashKindNotebook: "Notebook",
+  trashKindCustomQuest: "Custom Quest",
+  trashKindScript: "Script",
+  trashKindProofEntry: "Proof Entry",
+  trashConfirmEmptyTitle: "Empty Trash?",
+  trashConfirmEmptyDescription:
+    "All items in the trash will be permanently deleted. This action cannot be undone.",
+  trashConfirmEmptyOk: "Empty Trash",
+  trashConfirmEmptyCancel: "Cancel",
   // Collection
   collectionEmpty:
     "No saved proofs yet. Save proofs from your workspace to manage them here.",
@@ -163,6 +199,22 @@ export const hubMessageKeys: readonly (keyof HubMessages)[] = [
   "scriptsDelete",
   "scriptsRename",
   "scriptsExport",
+  "tabTrash",
+  "trashEmpty",
+  "trashEmptyDescription",
+  "trashRestore",
+  "trashDelete",
+  "trashEmptyTrash",
+  "trashRemainingDays",
+  "trashFilterAll",
+  "trashKindNotebook",
+  "trashKindCustomQuest",
+  "trashKindScript",
+  "trashKindProofEntry",
+  "trashConfirmEmptyTitle",
+  "trashConfirmEmptyDescription",
+  "trashConfirmEmptyOk",
+  "trashConfirmEmptyCancel",
   "collectionEmpty",
   "collectionEntryCount",
   "collectionDelete",

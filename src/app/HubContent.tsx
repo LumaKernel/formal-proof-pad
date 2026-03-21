@@ -64,7 +64,7 @@ import {
   recommendedQuestIds,
 } from "./landingPageLogic";
 import { useProofCollection, findProofEntry } from "../lib/proof-collection";
-import { useTrash } from "../lib/trash";
+import { useTrash, type TrashPanelMessages } from "../lib/trash";
 import {
   deserializeSavedScripts,
   serializeSavedScripts,
@@ -85,6 +85,7 @@ const tabToPath: Record<HubTab, string> = {
   collection: "/collection",
   reference: "/reference",
   scripts: "/scripts",
+  trash: "/trash",
 };
 
 export type HubContentProps = {
@@ -149,6 +150,25 @@ function useHubMessagesFromIntl(): HubMessages {
       scriptsDelete: String(t.raw("scriptsDelete")),
       scriptsRename: String(t.raw("scriptsRename")),
       scriptsExport: String(t.raw("scriptsExport")),
+      // Trash
+      tabTrash: String(t.raw("tabTrash")),
+      trashEmpty: String(t.raw("trashEmpty")),
+      trashEmptyDescription: String(t.raw("trashEmptyDescription")),
+      trashRestore: String(t.raw("trashRestore")),
+      trashDelete: String(t.raw("trashDelete")),
+      trashEmptyTrash: String(t.raw("trashEmptyTrash")),
+      trashRemainingDays: String(t.raw("trashRemainingDays")),
+      trashFilterAll: String(t.raw("trashFilterAll")),
+      trashKindNotebook: String(t.raw("trashKindNotebook")),
+      trashKindCustomQuest: String(t.raw("trashKindCustomQuest")),
+      trashKindScript: String(t.raw("trashKindScript")),
+      trashKindProofEntry: String(t.raw("trashKindProofEntry")),
+      trashConfirmEmptyTitle: String(t.raw("trashConfirmEmptyTitle")),
+      trashConfirmEmptyDescription: String(
+        t.raw("trashConfirmEmptyDescription"),
+      ),
+      trashConfirmEmptyOk: String(t.raw("trashConfirmEmptyOk")),
+      trashConfirmEmptyCancel: String(t.raw("trashConfirmEmptyCancel")),
       // Collection
       collectionEmpty: String(t.raw("collectionEmpty")),
       collectionEntryCount: String(t.raw("collectionEntryCount")),
@@ -697,6 +717,41 @@ function HubInner({ initialTab }: HubContentProps) {
     [proofCollection, trash],
   );
 
+  // --- ゴミ箱パネル用 props ---
+
+  const trashPanelMessages = useMemo(
+    (): TrashPanelMessages => ({
+      emptyTitle: hubMessages.trashEmpty,
+      emptyDescription: hubMessages.trashEmptyDescription,
+      restoreButton: hubMessages.trashRestore,
+      deleteButton: hubMessages.trashDelete,
+      emptyTrashButton: hubMessages.trashEmptyTrash,
+      remainingDaysTemplate: hubMessages.trashRemainingDays,
+      filterAll: hubMessages.trashFilterAll,
+      kindLabels: {
+        notebook: hubMessages.trashKindNotebook,
+        "custom-quest": hubMessages.trashKindCustomQuest,
+        script: hubMessages.trashKindScript,
+        "proof-entry": hubMessages.trashKindProofEntry,
+      },
+      confirmEmptyTitle: hubMessages.trashConfirmEmptyTitle,
+      confirmEmptyDescription: hubMessages.trashConfirmEmptyDescription,
+      confirmEmptyOk: hubMessages.trashConfirmEmptyOk,
+      confirmEmptyCancel: hubMessages.trashConfirmEmptyCancel,
+    }),
+    [hubMessages],
+  );
+
+  const handleTrashRestore = useCallback(
+    (trashId: string) => {
+      // 復元: ゴミ箱からアイテムデータを取得し、ゴミ箱から除去
+      // NOTE: 実際のコレクションへの復元は将来的に実装
+      // 現時点ではゴミ箱からの除去のみ
+      trash.removeFromTrash(trashId);
+    },
+    [trash],
+  );
+
   return (
     <HubMessagesProvider messages={hubMessages}>
       <HubPageView
@@ -740,6 +795,14 @@ function HubInner({ initialTab }: HubContentProps) {
         onDeleteScript={handleDeleteScript}
         onRenameScript={handleRenameScript}
         onExportScript={handleExportScript}
+        trashProps={{
+          items: trash.items,
+          now: getNow(),
+          messages: trashPanelMessages,
+          onRestore: handleTrashRestore,
+          onDeletePermanently: trash.deletePermanently,
+          onEmptyTrash: trash.empty,
+        }}
         collectionProps={{
           entries: proofCollection.entries,
           folders: proofCollection.folders,

@@ -50,6 +50,10 @@ import { ReferenceBrowserComponent } from "../lib/reference/ReferenceBrowserComp
 import type { QuestReferenceMap } from "../lib/quest/questReferenceMappingLogic";
 import { ScriptListPanel } from "../components/ScriptEditor/ScriptListPanel";
 import type { ScriptListItem } from "../components/ScriptEditor/scriptListPanelLogic";
+import {
+  TrashManagementPanel,
+  type TrashManagementPanelProps,
+} from "../lib/trash/TrashManagementPanel";
 import { useHubMessages } from "./HubMessagesContext";
 
 // --- Types ---
@@ -60,7 +64,8 @@ export type HubTab =
   | "custom-quests"
   | "collection"
   | "reference"
-  | "scripts";
+  | "scripts"
+  | "trash";
 type HubViewState = "list" | "create";
 
 /** ランディングページに表示するおすすめクエスト */
@@ -158,6 +163,8 @@ export type HubPageViewProps = {
   readonly onRenameScript?: (id: string, newTitle: string) => void;
   /** スクリプトエクスポート */
   readonly onExportScript?: (id: string) => void;
+  /** ゴミ箱パネルのprops（trashタブ用） */
+  readonly trashProps?: Omit<TrashManagementPanelProps, "testId">;
 };
 
 // --- Inline styles ---
@@ -537,6 +544,7 @@ export function HubPageView({
   onDeleteScript,
   onRenameScript,
   onExportScript,
+  trashProps,
 }: HubPageViewProps) {
   const m = useHubMessages();
   const [view, setView] = useState<HubViewState>("list");
@@ -586,6 +594,7 @@ export function HubPageView({
       { key: "collection" as const, label: m.tabCollection },
       { key: "reference" as const, label: m.tabReference },
       { key: "scripts" as const, label: m.tabScripts },
+      { key: "trash" as const, label: m.tabTrash },
     ],
     [m],
   );
@@ -905,6 +914,18 @@ export function HubPageView({
                 onRename={onRenameScript}
                 onExport={onExportScript}
                 testId="script-list-panel"
+              />
+            )}
+
+            {tab === "trash" && trashProps !== undefined && (
+              <TrashManagementPanel
+                items={trashProps.items}
+                now={trashProps.now}
+                messages={trashProps.messages}
+                onRestore={trashProps.onRestore}
+                onDeletePermanently={trashProps.onDeletePermanently}
+                onEmptyTrash={trashProps.onEmptyTrash}
+                testId="trash-panel"
               />
             )}
           </div>
