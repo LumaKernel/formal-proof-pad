@@ -136,6 +136,14 @@ function useHubMessagesFromIntl(): HubMessages {
       landingStartFreeProof: String(t.raw("landingStartFreeProof")),
       landingExploreQuests: String(t.raw("landingExploreQuests")),
       landingRecommendedQuests: String(t.raw("landingRecommendedQuests")),
+      landingQuickQuestDescription: String(
+        t.raw("landingQuickQuestDescription"),
+      ),
+      landingGettingStartedTitle: String(t.raw("landingGettingStartedTitle")),
+      landingGettingStartedDescription: String(
+        t.raw("landingGettingStartedDescription"),
+      ),
+      landingGettingStartedLink: String(t.raw("landingGettingStartedLink")),
       // Reference
       tabReference: String(t.raw("tabReference")),
       referenceSearchPlaceholder: String(t.raw("referenceSearchPlaceholder")),

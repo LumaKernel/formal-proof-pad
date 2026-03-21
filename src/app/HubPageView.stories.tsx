@@ -688,12 +688,11 @@ export const Landing: Story = {
     // タイトルが表示される（ヘッダーとランディングの両方に存在）
     const titles = canvas.getAllByText("Formal Logic Pad");
     await expect(titles.length).toBeGreaterThanOrEqual(2);
-    // アクションボタンが表示される
-    await expect(canvas.getByTestId("landing-start-free")).toBeInTheDocument();
+    // クイッククエストセクションが目立つ位置に表示される
     await expect(
-      canvas.getByTestId("landing-explore-quests"),
+      canvas.getByTestId("landing-quick-quest-section"),
     ).toBeInTheDocument();
-    // おすすめクエストが表示される
+    // おすすめクエストボタンが表示される
     await expect(
       canvas.getByTestId("landing-quest-prop-01"),
     ).toBeInTheDocument();
@@ -702,6 +701,18 @@ export const Landing: Story = {
     ).toBeInTheDocument();
     await expect(
       canvas.getByTestId("landing-quest-prop-05"),
+    ).toBeInTheDocument();
+    // 初学者向けガイドセクションが表示される
+    await expect(
+      canvas.getByTestId("landing-getting-started"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("landing-getting-started-link"),
+    ).toBeInTheDocument();
+    // 上級者向けリンクは控えめに表示される
+    await expect(canvas.getByTestId("landing-start-free")).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("landing-explore-quests"),
     ).toBeInTheDocument();
     // タブバーは表示されない（ランディング表示中）
     await expect(canvas.queryByText("Notebooks")).not.toBeInTheDocument();
@@ -758,6 +769,23 @@ export const LandingRecommendedQuest: Story = {
     // おすすめクエストボタンをクリック
     await userEvent.click(canvas.getByTestId("landing-quest-prop-01"));
     await expect(args.onStartQuest).toHaveBeenCalledWith("prop-01");
+  },
+};
+
+/** ランディングページから「学習ガイドを見る」をクリック → onTabChange("reference")呼び出し */
+export const LandingGettingStarted: Story = {
+  args: {
+    listItems: [],
+    groups: sampleGroups,
+    showLanding: true,
+    recommendedQuests: sampleRecommendedQuests,
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    // 「学習ガイドを見る」リンクをクリック
+    await userEvent.click(canvas.getByTestId("landing-getting-started-link"));
+    // onTabChange("reference") が呼ばれる
+    await expect(args.onTabChange).toHaveBeenCalledWith("reference");
   },
 };
 

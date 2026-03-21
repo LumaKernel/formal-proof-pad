@@ -38,6 +38,10 @@ export type HubMessages = {
   readonly landingStartFreeProof: string;
   readonly landingExploreQuests: string;
   readonly landingRecommendedQuests: string;
+  readonly landingQuickQuestDescription: string;
+  readonly landingGettingStartedTitle: string;
+  readonly landingGettingStartedDescription: string;
+  readonly landingGettingStartedLink: string;
   // --- Reference ---
   readonly tabReference: string;
   readonly referenceSearchPlaceholder: string;
@@ -112,7 +116,13 @@ export const defaultHubMessages: HubMessages = {
     "Explore formal proof systems interactively. Build proofs in Hilbert-style, natural deduction, sequent calculus, and more.",
   landingStartFreeProof: "Start Free Proof",
   landingExploreQuests: "Explore Quests",
-  landingRecommendedQuests: "Try a Quick Quest",
+  landingRecommendedQuests: "Quick Quests",
+  landingQuickQuestDescription:
+    "Start with a guided quest to learn the basics of formal proof. Each quest walks you through step by step.",
+  landingGettingStartedTitle: "New to Formal Logic?",
+  landingGettingStartedDescription:
+    "Check out the learning guides to understand the fundamentals before diving in.",
+  landingGettingStartedLink: "Browse Learning Guides",
   // Reference
   tabReference: "Reference",
   referenceSearchPlaceholder: "Search reference…",
@@ -187,6 +197,10 @@ export const hubMessageKeys: readonly (keyof HubMessages)[] = [
   "landingStartFreeProof",
   "landingExploreQuests",
   "landingRecommendedQuests",
+  "landingQuickQuestDescription",
+  "landingGettingStartedTitle",
+  "landingGettingStartedDescription",
+  "landingGettingStartedLink",
   "tabReference",
   "referenceSearchPlaceholder",
   "referenceEmpty",

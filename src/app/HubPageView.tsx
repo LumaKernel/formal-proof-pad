@@ -259,7 +259,7 @@ const landingContainerStyle: Readonly<CSSProperties> = {
   maxWidth: "640px",
   marginLeft: "auto",
   marginRight: "auto",
-  paddingTop: "80px",
+  paddingTop: "60px",
   paddingBottom: "60px",
   paddingLeft: "24px",
   paddingRight: "24px",
@@ -288,52 +288,30 @@ const landingDescriptionStyle: Readonly<CSSProperties> = {
   marginBottom: "36px",
 };
 
-const landingButtonsStyle: Readonly<CSSProperties> = {
-  display: "flex",
-  gap: "12px",
-  justifyContent: "center",
+/** クイッククエストセクション: primary & prominent */
+const landingQuickQuestSectionStyle: Readonly<CSSProperties> = {
   marginBottom: "40px",
+  paddingTop: "24px",
+  paddingBottom: "24px",
+  paddingLeft: "20px",
+  paddingRight: "20px",
+  borderRadius: "12px",
+  backgroundColor: "var(--ui-card)",
+  border: "1px solid var(--ui-border)",
 };
 
-const landingStartFreeStyle: Readonly<CSSProperties> = {
-  paddingTop: "12px",
-  paddingBottom: "12px",
-  paddingLeft: "28px",
-  paddingRight: "28px",
-  fontSize: "15px",
+const landingQuickQuestTitleStyle: Readonly<CSSProperties> = {
+  fontSize: "18px",
   fontWeight: 700,
-  border: "none",
-  borderRadius: "10px",
-  cursor: "pointer",
-  backgroundColor: "var(--ui-primary)",
-  color: "var(--ui-primary-foreground)",
-  transitionProperty: "opacity",
-  transitionDuration: "150ms",
+  color: "var(--ui-foreground)",
+  marginBottom: "8px",
 };
 
-const landingExploreQuestsStyle: Readonly<CSSProperties> = {
-  paddingTop: "12px",
-  paddingBottom: "12px",
-  paddingLeft: "28px",
-  paddingRight: "28px",
-  fontSize: "15px",
-  fontWeight: 700,
-  borderRadius: "10px",
-  cursor: "pointer",
-  border: "2px solid var(--ui-primary)",
-  backgroundColor: "transparent",
-  color: "var(--ui-primary)",
-  transitionProperty: "opacity",
-  transitionDuration: "150ms",
-};
-
-const landingRecommendedLabelStyle: Readonly<CSSProperties> = {
-  fontSize: "13px",
-  fontWeight: 600,
+const landingQuickQuestDescriptionStyle: Readonly<CSSProperties> = {
+  fontSize: "14px",
+  lineHeight: 1.625,
   color: "var(--ui-muted-foreground)",
-  textTransform: "uppercase",
-  letterSpacing: "0.1em",
-  marginBottom: "12px",
+  marginBottom: "16px",
 };
 
 const landingRecommendedListStyle: Readonly<CSSProperties> = {
@@ -344,18 +322,83 @@ const landingRecommendedListStyle: Readonly<CSSProperties> = {
 };
 
 const landingQuestButtonStyle: Readonly<CSSProperties> = {
+  paddingTop: "10px",
+  paddingBottom: "10px",
+  paddingLeft: "22px",
+  paddingRight: "22px",
+  fontSize: "14px",
+  fontWeight: 600,
+  borderRadius: "8px",
+  cursor: "pointer",
+  border: "none",
+  backgroundColor: "var(--ui-primary)",
+  color: "var(--ui-primary-foreground)",
+  transitionProperty: "opacity",
+  transitionDuration: "150ms",
+};
+
+/** 初学者向けガイドセクション */
+const landingGettingStartedSectionStyle: Readonly<CSSProperties> = {
+  marginBottom: "32px",
+  paddingTop: "20px",
+  paddingBottom: "20px",
+  paddingLeft: "20px",
+  paddingRight: "20px",
+  borderRadius: "12px",
+  backgroundColor: "var(--ui-muted)",
+  textAlign: "center",
+};
+
+const landingGettingStartedTitleStyle: Readonly<CSSProperties> = {
+  fontSize: "15px",
+  fontWeight: 700,
+  color: "var(--ui-foreground)",
+  marginBottom: "6px",
+};
+
+const landingGettingStartedDescriptionStyle: Readonly<CSSProperties> = {
+  fontSize: "13px",
+  lineHeight: 1.5,
+  color: "var(--ui-muted-foreground)",
+  marginBottom: "12px",
+};
+
+const landingGettingStartedLinkStyle: Readonly<CSSProperties> = {
+  display: "inline-block",
   paddingTop: "8px",
   paddingBottom: "8px",
-  paddingLeft: "18px",
-  paddingRight: "18px",
+  paddingLeft: "20px",
+  paddingRight: "20px",
   fontSize: "13px",
   fontWeight: 600,
   borderRadius: "8px",
   cursor: "pointer",
-  border: "1px solid var(--ui-border)",
-  backgroundColor: "var(--ui-card)",
-  color: "var(--ui-foreground)",
-  transitionProperty: "color, background-color, border-color",
+  border: "1px solid var(--ui-primary)",
+  backgroundColor: "transparent",
+  color: "var(--ui-primary)",
+  transitionProperty: "opacity",
+  transitionDuration: "150ms",
+};
+
+/** 上級者向けリンク行: "自由に証明" & "クエストを探索" */
+const landingAdvancedLinksStyle: Readonly<CSSProperties> = {
+  display: "flex",
+  gap: "20px",
+  justifyContent: "center",
+  marginBottom: "24px",
+};
+
+const landingAdvancedLinkStyle: Readonly<CSSProperties> = {
+  fontSize: "13px",
+  fontWeight: 500,
+  color: "var(--ui-muted-foreground)",
+  cursor: "pointer",
+  background: "none",
+  border: "none",
+  padding: 0,
+  textDecoration: "underline",
+  textUnderlineOffset: "3px",
+  transitionProperty: "color",
   transitionDuration: "150ms",
 };
 
@@ -688,37 +731,25 @@ export function HubPageView({
           <h1 style={landingTitleStyle}>{m.landingTitle}</h1>
           <p style={landingSubtitleStyle}>{m.landingSubtitle}</p>
           <p style={landingDescriptionStyle}>{m.landingDescription}</p>
-          <div style={landingButtonsStyle}>
-            <button
-              type="button"
-              className="hub-hover-opacity-90"
-              style={landingStartFreeStyle}
-              data-testid="landing-start-free"
-              onClick={() => setView("create")}
-            >
-              {m.landingStartFreeProof}
-            </button>
-            <button
-              type="button"
-              className="hub-hover-opacity-90"
-              style={landingExploreQuestsStyle}
-              data-testid="landing-explore-quests"
-              onClick={() => onTabChange("quests")}
-            >
-              {m.landingExploreQuests}
-            </button>
-          </div>
+
+          {/* Quick Quests: primary & prominent section */}
           {recommendedQuests !== undefined && recommendedQuests.length > 0 && (
-            <div style={{ textAlign: "center" }}>
-              <div style={landingRecommendedLabelStyle}>
+            <div
+              style={landingQuickQuestSectionStyle}
+              data-testid="landing-quick-quest-section"
+            >
+              <div style={landingQuickQuestTitleStyle}>
                 {m.landingRecommendedQuests}
+              </div>
+              <div style={landingQuickQuestDescriptionStyle}>
+                {m.landingQuickQuestDescription}
               </div>
               <div style={landingRecommendedListStyle}>
                 {recommendedQuests.map((q) => (
                   <button
                     key={q.id}
                     type="button"
-                    className="hub-hover-bg-muted"
+                    className="hub-hover-opacity-90"
                     style={landingQuestButtonStyle}
                     data-testid={`landing-quest-${q.id satisfies string}`}
                     onClick={() => onStartQuest(q.id)}
@@ -729,6 +760,48 @@ export function HubPageView({
               </div>
             </div>
           )}
+
+          {/* Getting Started: beginner docs section */}
+          <div
+            style={landingGettingStartedSectionStyle}
+            data-testid="landing-getting-started"
+          >
+            <div style={landingGettingStartedTitleStyle}>
+              {m.landingGettingStartedTitle}
+            </div>
+            <div style={landingGettingStartedDescriptionStyle}>
+              {m.landingGettingStartedDescription}
+            </div>
+            <button
+              type="button"
+              className="hub-hover-opacity-90"
+              style={landingGettingStartedLinkStyle}
+              data-testid="landing-getting-started-link"
+              onClick={() => onTabChange("reference")}
+            >
+              {m.landingGettingStartedLink}
+            </button>
+          </div>
+
+          {/* Advanced links: subtle text links */}
+          <div style={landingAdvancedLinksStyle}>
+            <button
+              type="button"
+              style={landingAdvancedLinkStyle}
+              data-testid="landing-start-free"
+              onClick={() => setView("create")}
+            >
+              {m.landingStartFreeProof}
+            </button>
+            <button
+              type="button"
+              style={landingAdvancedLinkStyle}
+              data-testid="landing-explore-quests"
+              onClick={() => onTabChange("quests")}
+            >
+              {m.landingExploreQuests}
+            </button>
+          </div>
 
           {/* Landing view=create: show form instead of landing */}
           {view === "create" && (
