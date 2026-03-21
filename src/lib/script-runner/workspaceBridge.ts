@@ -497,4 +497,3 @@ export const WORKSPACE_BRIDGE_API_DEFS: readonly ProofBridgeApiDef[] = [
       "ワークスペースからHilbert証明木を抽出する。rootNodeIdを省略するとルートを自動検出する。Hilbert系でない場合や証明木構築に失敗した場合はエラーをthrowする。",
   },
 ];
-

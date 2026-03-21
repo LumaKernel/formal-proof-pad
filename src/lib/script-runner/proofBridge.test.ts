@@ -543,4 +543,3 @@ describe("PROOF_BRIDGE_API_DEFS", () => {
     }
   });
 });
-

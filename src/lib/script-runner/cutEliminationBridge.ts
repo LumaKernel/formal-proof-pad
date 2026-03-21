@@ -928,4 +928,3 @@ export const CUT_ELIMINATION_BRIDGE_API_DEFS: readonly ProofBridgeApiDef[] = [
     description: "存在右規則（⇒∃）ノードを構築する。",
   },
 ];
-

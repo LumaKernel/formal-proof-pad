@@ -864,4 +864,3 @@ describe("extractHilbertProof ブリッジ", () => {
     expect(msg).toContain("Hilbert系でのみ使用可能です");
   });
 });
-

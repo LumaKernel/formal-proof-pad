@@ -458,4 +458,3 @@ export const PROOF_BRIDGE_API_DEFS: readonly ProofBridgeApiDef[] = [
       "命題論理シーケント計算（LK）の自動証明探索。シーケントが妥当なら証明木を返す。証明不可能またはステップ数超過時は例外をスロー。",
   },
 ];
-
