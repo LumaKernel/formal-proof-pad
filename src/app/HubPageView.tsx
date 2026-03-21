@@ -163,6 +163,8 @@ export type HubPageViewProps = {
   readonly onRenameScript?: (id: string, newTitle: string) => void;
   /** スクリプトエクスポート */
   readonly onExportScript?: (id: string) => void;
+  /** スクリプトドキュメントを表示するコールバック */
+  readonly onShowScriptDocs?: () => void;
   /** ゴミ箱パネルのprops（trashタブ用） */
   readonly trashProps?: Omit<TrashManagementPanelProps, "testId">;
 };
@@ -587,6 +589,7 @@ export function HubPageView({
   onDeleteScript,
   onRenameScript,
   onExportScript,
+  onShowScriptDocs,
   trashProps,
 }: HubPageViewProps) {
   const m = useHubMessages();
@@ -982,10 +985,12 @@ export function HubPageView({
                   deleteButton: m.scriptsDelete,
                   renameButton: m.scriptsRename,
                   exportButton: m.scriptsExport,
+                  docsLinkText: m.scriptsDocsLink,
                 }}
                 onDelete={onDeleteScript}
                 onRename={onRenameScript}
                 onExport={onExportScript}
+                onShowDocs={onShowScriptDocs}
                 testId="script-list-panel"
               />
             )}

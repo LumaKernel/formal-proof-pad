@@ -20,6 +20,7 @@ const defaultMessages: ScriptListPanelMessages = {
   deleteButton: "Delete",
   renameButton: "Rename",
   exportButton: "Export",
+  docsLinkText: "Script Guide",
 };
 
 const sampleItems: readonly ScriptListItem[] = [
@@ -35,6 +36,27 @@ describe("ScriptListPanel", () => {
       expect(
         screen.getByText("Save scripts from the workspace."),
       ).toBeInTheDocument();
+    });
+
+    it("onShowDocs が渡されるとドキュメントリンクが表示される", () => {
+      const onShowDocs = vi.fn();
+      renderWithAntd(
+        <ScriptListPanel
+          items={[]}
+          messages={defaultMessages}
+          onShowDocs={onShowDocs}
+        />,
+      );
+      const link = screen.getByTestId("script-list-panel-docs-link");
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveTextContent("Script Guide");
+    });
+
+    it("onShowDocs 未指定でドキュメントリンクが非表示", () => {
+      renderWithAntd(<ScriptListPanel items={[]} messages={defaultMessages} />);
+      expect(
+        screen.queryByTestId("script-list-panel-docs-link"),
+      ).not.toBeInTheDocument();
     });
 
     it("empty testId が付く", () => {
@@ -58,6 +80,32 @@ describe("ScriptListPanel", () => {
       expect(screen.getByText("Script Beta")).toBeInTheDocument();
       expect(screen.getByText("2h ago")).toBeInTheDocument();
       expect(screen.getByText("1d ago")).toBeInTheDocument();
+    });
+
+    it("onShowDocs が渡されるとドキュメントバナーが表示される", async () => {
+      const onShowDocs = vi.fn();
+      renderWithAntd(
+        <ScriptListPanel
+          items={sampleItems}
+          messages={defaultMessages}
+          onShowDocs={onShowDocs}
+        />,
+      );
+      const banner = screen.getByTestId("script-list-panel-docs-banner");
+      expect(banner).toBeInTheDocument();
+      const link = screen.getByTestId("script-list-panel-docs-link");
+      expect(link).toHaveTextContent("Script Guide");
+      await userEvent.click(link);
+      expect(onShowDocs).toHaveBeenCalledOnce();
+    });
+
+    it("onShowDocs 未指定でドキュメントバナーが非表示", () => {
+      renderWithAntd(
+        <ScriptListPanel items={sampleItems} messages={defaultMessages} />,
+      );
+      expect(
+        screen.queryByTestId("script-list-panel-docs-banner"),
+      ).not.toBeInTheDocument();
     });
 
     it("デフォルト testId が付く", () => {

@@ -170,6 +170,7 @@ const meta: Meta<typeof HubPageView> = {
     onDeleteScript: fn(),
     onRenameScript: fn(),
     onExportScript: fn(),
+    onShowScriptDocs: fn(),
     languageToggle: { locale: "en", onLocaleChange: fn() },
   },
 };
@@ -869,6 +870,13 @@ export const ScriptsTab: Story = {
     await expect(canvas.getByText("Substitution Checker")).toBeInTheDocument();
     // 時間ラベルが表示される
     await expect(canvas.getByText("2h ago")).toBeInTheDocument();
+    // ドキュメントバナーが表示される
+    await expect(
+      canvas.getByTestId("script-list-panel-docs-banner"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("script-list-panel-docs-link"),
+    ).toBeInTheDocument();
   },
 };
 
@@ -886,6 +894,10 @@ export const ScriptsTabEmpty: Story = {
       canvas.getByTestId("script-list-panel-empty"),
     ).toBeInTheDocument();
     await expect(canvas.getByText("No saved scripts yet")).toBeInTheDocument();
+    // ドキュメントリンクが表示される
+    await expect(
+      canvas.getByTestId("script-list-panel-docs-link"),
+    ).toBeInTheDocument();
   },
 };
 

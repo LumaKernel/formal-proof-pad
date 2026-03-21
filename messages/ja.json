@@ -57,6 +57,7 @@
     "scriptsDelete": "削除",
     "scriptsRename": "名前変更",
     "scriptsExport": "エクスポート",
+    "scriptsDocsLink": "スクリプトガイド",
     "tabTrash": "ゴミ箱",
     "trashEmpty": "ゴミ箱は空です",
     "trashEmptyDescription": "削除されたアイテムは30日間ここに保存され、その後完全に削除されます。",

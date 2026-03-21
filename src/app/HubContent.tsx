@@ -158,6 +158,7 @@ function useHubMessagesFromIntl(): HubMessages {
       scriptsDelete: String(t.raw("scriptsDelete")),
       scriptsRename: String(t.raw("scriptsRename")),
       scriptsExport: String(t.raw("scriptsExport")),
+      scriptsDocsLink: String(t.raw("scriptsDocsLink")),
       // Trash
       tabTrash: String(t.raw("tabTrash")),
       trashEmpty: String(t.raw("trashEmpty")),
@@ -803,6 +804,7 @@ function HubInner({ initialTab }: HubContentProps) {
         onDeleteScript={handleDeleteScript}
         onRenameScript={handleRenameScript}
         onExportScript={handleExportScript}
+        onShowScriptDocs={handleShowReference}
         trashProps={{
           items: trash.items,
           now: getNow(),

@@ -57,6 +57,7 @@
     "scriptsDelete": "Delete",
     "scriptsRename": "Rename",
     "scriptsExport": "Export",
+    "scriptsDocsLink": "Script Guide",
     "tabTrash": "Trash",
     "trashEmpty": "Trash is empty",
     "trashEmptyDescription": "Deleted items will appear here for 30 days before being permanently removed.",

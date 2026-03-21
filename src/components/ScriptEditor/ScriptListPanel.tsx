@@ -19,6 +19,7 @@ export type ScriptListPanelMessages = {
   readonly deleteButton: string;
   readonly renameButton: string;
   readonly exportButton: string;
+  readonly docsLinkText: string;
 };
 
 export type ScriptListPanelProps = {
@@ -27,6 +28,8 @@ export type ScriptListPanelProps = {
   readonly onDelete?: (id: string) => void;
   readonly onRename?: (id: string, newTitle: string) => void;
   readonly onExport?: (id: string) => void;
+  /** スクリプト関連ドキュメントを表示するコールバック */
+  readonly onShowDocs?: () => void;
   readonly testId?: string;
 };
 
@@ -98,6 +101,53 @@ const emptyDescriptionStyle: Readonly<CSSProperties> = {
   lineHeight: 1.625,
 };
 
+const docsLinkButtonStyle: Readonly<CSSProperties> = {
+  display: "inline-block",
+  marginTop: "16px",
+  paddingTop: "8px",
+  paddingBottom: "8px",
+  paddingLeft: "20px",
+  paddingRight: "20px",
+  fontSize: "13px",
+  fontWeight: 600,
+  borderRadius: "8px",
+  cursor: "pointer",
+  border: "1px solid var(--ui-primary)",
+  backgroundColor: "transparent",
+  color: "var(--ui-primary)",
+  transitionProperty: "opacity",
+  transitionDuration: "150ms",
+};
+
+const docsBannerStyle: Readonly<CSSProperties> = {
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  paddingTop: "10px",
+  paddingBottom: "10px",
+  paddingLeft: "14px",
+  paddingRight: "14px",
+  marginBottom: "12px",
+  borderRadius: "8px",
+  backgroundColor: "var(--ui-muted)",
+  fontSize: "13px",
+  color: "var(--ui-muted-foreground)",
+};
+
+const docsBannerLinkStyle: Readonly<CSSProperties> = {
+  marginLeft: "auto",
+  fontSize: "13px",
+  fontWeight: 600,
+  color: "var(--ui-primary)",
+  cursor: "pointer",
+  background: "none",
+  border: "none",
+  padding: 0,
+  textDecoration: "underline",
+  textUnderlineOffset: "3px",
+  whiteSpace: "nowrap",
+};
+
 const renameInputStyle: Readonly<CSSProperties> = {
   fontWeight: 600,
   fontSize: "0.875rem",
@@ -117,6 +167,7 @@ export function ScriptListPanel({
   onDelete,
   onRename,
   onExport,
+  onShowDocs,
   testId = "script-list-panel",
 }: ScriptListPanelProps) {
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -145,12 +196,39 @@ export function ScriptListPanel({
       <div style={emptyStyle} data-testid={`${testId satisfies string}-empty`}>
         <div style={emptyTitleStyle}>{messages.emptyTitle}</div>
         <p style={emptyDescriptionStyle}>{messages.emptyDescription}</p>
+        {onShowDocs !== undefined && (
+          <button
+            type="button"
+            className="hub-hover-opacity-90"
+            style={docsLinkButtonStyle}
+            data-testid={`${testId satisfies string}-docs-link`}
+            onClick={onShowDocs}
+          >
+            {messages.docsLinkText}
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div style={listStyle} data-testid={testId}>
+      {onShowDocs !== undefined && (
+        <div
+          style={docsBannerStyle}
+          data-testid={`${testId satisfies string}-docs-banner`}
+        >
+          <span>{messages.emptyDescription}</span>
+          <button
+            type="button"
+            style={docsBannerLinkStyle}
+            data-testid={`${testId satisfies string}-docs-link`}
+            onClick={onShowDocs}
+          >
+            {messages.docsLinkText}
+          </button>
+        </div>
+      )}
       {items.map((item) => (
         <div
           key={item.id}

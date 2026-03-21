@@ -56,6 +56,7 @@ export type HubMessages = {
   readonly scriptsDelete: string;
   readonly scriptsRename: string;
   readonly scriptsExport: string;
+  readonly scriptsDocsLink: string;
   // --- Trash ---
   readonly tabTrash: string;
   readonly trashEmpty: string;
@@ -139,6 +140,7 @@ export const defaultHubMessages: HubMessages = {
   scriptsDelete: "Delete",
   scriptsRename: "Rename",
   scriptsExport: "Export",
+  scriptsDocsLink: "Script Guide",
   // Trash
   tabTrash: "Trash",
   trashEmpty: "Trash is empty",
@@ -213,6 +215,7 @@ export const hubMessageKeys: readonly (keyof HubMessages)[] = [
   "scriptsDelete",
   "scriptsRename",
   "scriptsExport",
+  "scriptsDocsLink",
   "tabTrash",
   "trashEmpty",
   "trashEmptyDescription",
