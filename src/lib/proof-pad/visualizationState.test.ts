@@ -228,7 +228,7 @@ describe("visualizationState", () => {
         level: "info",
         timestamp: 0,
       };
-      const s = addLog(
+      addLog(
         addAnnotation(addHighlight(emptyVisualizationState, h), ann),
         log,
       );
