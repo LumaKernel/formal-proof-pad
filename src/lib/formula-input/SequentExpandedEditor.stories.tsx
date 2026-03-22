@@ -175,9 +175,7 @@ export const WithSyntaxHelp: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     // 構文ヘルプボタンが表示される
-    const syntaxHelpButton = canvas.getByTestId(
-      "sequent-editor-syntax-help",
-    );
+    const syntaxHelpButton = canvas.getByTestId("sequent-editor-syntax-help");
     await expect(syntaxHelpButton).toBeInTheDocument();
     // クリックしてもエラーにならない
     await userEvent.click(syntaxHelpButton);
