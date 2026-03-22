@@ -20,9 +20,11 @@ import {
 import type { Term } from "./term";
 import {
   termVariable,
+  termMetaVariable,
   constant,
   functionApplication,
   binaryOperation,
+  termSubstitution,
 } from "./term";
 
 const x = termVariable("x");
@@ -146,6 +148,38 @@ describe("findTermVariableSubstitution", () => {
       expect(result).toBeUndefined();
     });
 
+    it("変数捕獲の防止: BinaryOperationに束縛変数を含むターゲット", () => {
+      // ∀y. P(x) vs ∀y. P(y + y) — x → y+y だが y は束縛変数
+      const source = universal(y, P(x));
+      const target = universal(y, P(binaryOperation("+", y, y)));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
+    it("変数捕獲の防止: TermSubstitutionに束縛変数を含むターゲット", () => {
+      // ∀y. P(x) vs ∀y. P(t[y/z]) — x → t[y/z] だが y は束縛変数
+      const source = universal(y, P(x));
+      const target = universal(y, P(termSubstitution(a, y, z)));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
+    it("変数捕獲の防止: FunctionApplicationに束縛変数を含むターゲット", () => {
+      // ∀y. P(x) vs ∀y. P(f(y)) — x → f(y) だが y は束縛変数
+      const source = universal(y, P(x));
+      const target = universal(y, P(functionApplication("f", [y])));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
+    it("ソース束縛変数 vs ターゲット非変数項は失敗", () => {
+      // ∀x. P(x) vs ∀x. P(f(a)) — x は束縛変数、ターゲットは FunctionApplication
+      const source = universal(x, P(x));
+      const target = universal(x, P(functionApplication("f", [a])));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
     it("束縛変数同士の不一致（de Bruijnレベル不一致）", () => {
       // ∀x.∀y.P(x,y) vs ∀x.∀y.P(y,x)（束縛変数の入れ替え）
       const source = universal(x, universal(y, predicate("P", [x, y])));
@@ -215,6 +249,42 @@ describe("findTermVariableSubstitution", () => {
       const result = findTermVariableSubstitution(source, target);
       expect(result).toBeUndefined();
     });
+
+    it("FunctionApplication同士の構造的マッチ", () => {
+      // f(x, y) = f(a, b) → 項レベルで直接マッチ
+      const source = equality(functionApplication("f", [x, y]), z);
+      const target = equality(functionApplication("f", [a, b]), constant("c"));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeDefined();
+      expect(result!.size).toBe(3);
+      expect(result!.get("x")).toEqual(a);
+      expect(result!.get("y")).toEqual(b);
+      expect(result!.get("z")).toEqual(constant("c"));
+    });
+
+    it("異なる関数名のFunctionApplicationは失敗", () => {
+      const source = equality(functionApplication("f", [x]), z);
+      const target = equality(functionApplication("g", [a]), constant("c"));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
+    it("異なるアリティのFunctionApplicationは失敗", () => {
+      const source = equality(functionApplication("f", [x]), z);
+      const target = equality(functionApplication("f", [a, b]), constant("c"));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
+    it("TermSubstitution同士の構造的マッチ", () => {
+      // t[a/x] vs t[b/x] — termSubstitution の term と replacement をマッチ
+      const source = equality(termSubstitution(x, y, z), a);
+      const target = equality(termSubstitution(a, b, z), a);
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeDefined();
+      expect(result!.get("x")).toEqual(a);
+      expect(result!.get("y")).toEqual(b);
+    });
   });
 
   describe("正規化を伴うマッチング", () => {
@@ -238,6 +308,28 @@ describe("findTermVariableSubstitution", () => {
   });
 
   describe("MetaVariable / TermMetaVariable", () => {
+    it("TermMetaVariableは名前とsubscriptで構造的マッチ", () => {
+      const source = equality(termMetaVariable("α", "1"), a);
+      const target = equality(termMetaVariable("α", "1"), a);
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeDefined();
+      expect(result!.size).toBe(0);
+    });
+
+    it("異なるTermMetaVariable名は失敗", () => {
+      const source = equality(termMetaVariable("α"), a);
+      const target = equality(termMetaVariable("β"), a);
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
+    it("異なるTermMetaVariable subscriptは失敗", () => {
+      const source = equality(termMetaVariable("α", "1"), a);
+      const target = equality(termMetaVariable("α", "2"), a);
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
     it("MetaVariableは構造的にマッチ", () => {
       const source = implication(metaVariable("φ"), metaVariable("ψ"));
       const target = implication(metaVariable("φ"), metaVariable("ψ"));
@@ -297,6 +389,11 @@ describe("isNonTrivialSubstitutionResult", () => {
 
   it("同一論理式はfalse", () => {
     expect(isNonTrivialSubstitutionResult(P(a), P(a))).toBe(false);
+  });
+
+  it("恒等代入のみ（x → x）はfalse", () => {
+    // P(x) vs P(x) — x → x で恒等代入、非自明ではない
+    expect(isNonTrivialSubstitutionResult(P(x), P(x))).toBe(false);
   });
 
   it("マッチ不可はfalse", () => {
