@@ -293,6 +293,11 @@ import {
 import type { HighlightColor } from "./visualizationState";
 import { getHighlightStyle } from "./visualizationHighlightLogic";
 import {
+  getAnnotationBubbleStyle,
+  getAnnotationContainerStyle,
+  groupAnnotationsByNodeId,
+} from "./visualizationAnnotationLogic";
+import {
   findHilbertRootNodeIds,
   buildHilbertProofTree,
 } from "./hilbertTreeBuildLogic";
@@ -5098,6 +5103,13 @@ export const ProofWorkspace = forwardRef<
     [showDependencies],
   );
 
+  // --- アノテーショングルーピング ---
+
+  const annotationsByNodeId = useMemo(
+    () => groupAnnotationsByNodeId(vizState.annotations),
+    [vizState.annotations],
+  );
+
   // --- ノードのレンダリング ---
 
   const renderNode = useCallback(
@@ -5248,6 +5260,7 @@ export const ProofWorkspace = forwardRef<
               handleNodeContextMenu(node.id, e);
             }}
             style={{
+              position: "relative",
               cursor: isSelectionActive ? "pointer" : undefined,
               outline: outlineStyle,
               outlineOffset: 2,
@@ -5312,6 +5325,23 @@ export const ProofWorkspace = forwardRef<
               onEditNote={handleEditNote}
               testId={`proof-node-${node.id satisfies string}`}
             />
+            {/* 可視化アノテーション吹き出し */}
+            {annotationsByNodeId.has(node.id) ? (
+              <div
+                style={getAnnotationContainerStyle() as React.CSSProperties}
+                data-testid={`viz-annotations-${node.id satisfies string}`}
+              >
+                {annotationsByNodeId.get(node.id)!.map((ann) => (
+                  <div
+                    key={ann.id}
+                    style={getAnnotationBubbleStyle() as React.CSSProperties}
+                    data-testid={`viz-annotation-${ann.id satisfies string}`}
+                  >
+                    {ann.text}
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         </CanvasItem>
       );
@@ -5357,6 +5387,7 @@ export const ProofWorkspace = forwardRef<
       handleEditNote,
       isSequentCalculusStyle,
       vizState,
+      annotationsByNodeId,
     ],
   );
 
