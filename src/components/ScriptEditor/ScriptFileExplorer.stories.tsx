@@ -129,6 +129,80 @@ export const DeleteFlow: Story = {
   },
 };
 
+export const RenameCancelEscape: Story = {
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Hover to show action buttons
+    const item = canvas.getByTestId("file-explorer-item-s1");
+    await userEvent.hover(item);
+
+    // Click rename button
+    const renameBtn = canvas.getByTestId("file-explorer-rename-btn-s1");
+    await userEvent.click(renameBtn);
+
+    // Type something then press Escape
+    const input = canvas.getByTestId("file-explorer-rename-input-s1");
+    await userEvent.clear(input);
+    await userEvent.type(input, "Should Not Save{Escape}");
+
+    // onRename should NOT be called
+    await expect(args.onRename).not.toHaveBeenCalled();
+
+    // Input should disappear (back to normal display)
+    const inputAfter = canvasElement.querySelector(
+      "[data-testid='file-explorer-rename-input-s1']",
+    );
+    await expect(inputAfter).toBeNull();
+  },
+};
+
+export const RenameBlurConfirm: Story = {
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Hover to show action buttons
+    const item = canvas.getByTestId("file-explorer-item-s2");
+    await userEvent.hover(item);
+
+    // Click rename button
+    const renameBtn = canvas.getByTestId("file-explorer-rename-btn-s2");
+    await userEvent.click(renameBtn);
+
+    // Type new name then blur (tab away)
+    const input = canvas.getByTestId("file-explorer-rename-input-s2");
+    await userEvent.clear(input);
+    await userEvent.type(input, "Blur Renamed");
+    await userEvent.tab();
+
+    // onRename should be called via blur handler
+    await expect(args.onRename).toHaveBeenCalledWith("s2", "Blur Renamed");
+  },
+};
+
+export const HoverAndLeave: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Hover to show action buttons
+    const item = canvas.getByTestId("file-explorer-item-s1");
+    await userEvent.hover(item);
+
+    // Action buttons should be visible
+    const renameBtn = canvas.getByTestId("file-explorer-rename-btn-s1");
+    await expect(renameBtn).toBeDefined();
+
+    // Mouse leave
+    await userEvent.unhover(item);
+
+    // Action buttons should disappear
+    const renameBtnAfter = canvasElement.querySelector(
+      "[data-testid='file-explorer-rename-btn-s1']",
+    );
+    await expect(renameBtnAfter).toBeNull();
+  },
+};
+
 export const DeleteCancel: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
