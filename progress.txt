@@ -17009,3 +17009,22 @@
   - `document.visibilityState`のモックは`Object.defineProperty`で設定し、テスト後に復元する
   - jsdom環境ではデフォルトで`visibilityState`は`"visible"`
 ---
+
+## 2026-03-22 - proof-pad RendererLogicカバレッジ改善
+- tabProofTreeRendererLogic.ts: Branch 91.66% → 100%
+  - 循環参照ガードテスト追加
+  - tab-single premiseNodeId undefined テスト
+  - tab-branching 両方 premiseNodeId undefined テスト
+- atProofTreeRendererLogic.ts: Branch 81.25% → 100%
+  - at-alpha resultNodeId undefined テスト
+  - at-beta leftResultNodeId/rightResultNodeId undefined テスト
+  - at-gamma resultNodeId undefined テスト
+  - 循環参照 + missing node text fallback テスト
+  - 存在しないノードID fallback テスト（開放枝・閉鎖・分岐・非分岐）
+- 変更ファイル:
+  - src/lib/proof-pad/tabProofTreeRendererLogic.test.ts
+  - src/lib/proof-pad/atProofTreeRendererLogic.test.ts
+- **今後のイテレーションへの学び:**
+  - RendererLogicの未カバー分岐はほぼ「undefined NodeID」パターン。空のworkspace nodes配列でテスト可能
+  - v8カバレッジの`?? fallback`分岐はnodeTexts.get()がundefinedを返すケースで発火
+---
