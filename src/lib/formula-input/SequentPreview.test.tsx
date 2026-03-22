@@ -5,9 +5,7 @@ import { SequentPreview } from "./SequentPreview";
 describe("SequentPreview", () => {
   describe("基本レンダリング", () => {
     it("前件・後件が空のとき ∅ を表示する", () => {
-      render(
-        <SequentPreview antecedents={[]} succedents={[]} testId="sp" />,
-      );
+      render(<SequentPreview antecedents={[]} succedents={[]} testId="sp" />);
       const el = screen.getByTestId("sp");
       expect(el).toHaveTextContent("∅⇒∅");
     });
@@ -58,11 +56,7 @@ describe("SequentPreview", () => {
   describe("複数論理式のカンマ区切り", () => {
     it("前件が複数あるとカンマで区切られる", () => {
       render(
-        <SequentPreview
-          antecedents={["φ", "ψ"]}
-          succedents={[]}
-          testId="sp"
-        />,
+        <SequentPreview antecedents={["φ", "ψ"]} succedents={[]} testId="sp" />,
       );
       const el = screen.getByTestId("sp");
       expect(el).toHaveTextContent(/φ.*,.*ψ/);
@@ -70,11 +64,7 @@ describe("SequentPreview", () => {
 
     it("後件が複数あるとカンマで区切られる", () => {
       render(
-        <SequentPreview
-          antecedents={[]}
-          succedents={["φ", "ψ"]}
-          testId="sp"
-        />,
+        <SequentPreview antecedents={[]} succedents={["φ", "ψ"]} testId="sp" />,
       );
       const el = screen.getByTestId("sp");
       expect(el).toHaveTextContent(/φ.*,.*ψ/);
@@ -84,11 +74,7 @@ describe("SequentPreview", () => {
   describe("空文字列のフィルタリング", () => {
     it("空文字列の前件はフィルタされて ∅ 表示になる", () => {
       render(
-        <SequentPreview
-          antecedents={["", "  "]}
-          succedents={[]}
-          testId="sp"
-        />,
+        <SequentPreview antecedents={["", "  "]} succedents={[]} testId="sp" />,
       );
       const el = screen.getByTestId("sp");
       // 空文字列はフィルタされるので ∅ 表示
