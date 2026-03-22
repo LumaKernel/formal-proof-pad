@@ -224,6 +224,195 @@ describe("convertAtWorkspaceToTreeDisplay", () => {
     expect(closedCount).toBe(2);
   });
 
+  it("should use nodeId as fallback text when node is not in workspace", () => {
+    // 存在しないノードIDを直接ルートとして指定
+    const nodes: readonly WorkspaceNode[] = [];
+    const edges: readonly InferenceEdge[] = [];
+    const result = convertAtWorkspaceToTreeDisplay(
+      nodes,
+      edges,
+      "missing-node",
+    );
+
+    const root = result.nodes.get(result.rootId);
+    expect(root).toBeDefined();
+    // nodeTextsにないのでnodeIdがフォールバックとして使われる
+    expect(root!.formulaText).toBe("missing-node");
+    expect(root!.branchStatus).toBe("open");
+  });
+
+  it("should use nodeId fallback for closure with missing node text", () => {
+    // ノードがworkspaceにないがエッジがある
+    const nodes: readonly WorkspaceNode[] = [];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "at-closed",
+        ruleId: "closure",
+        conclusionNodeId: "ghost",
+        contradictionNodeId: "other",
+        conclusionText: "T:phi",
+      },
+    ];
+    const result = convertAtWorkspaceToTreeDisplay(nodes, edges, "ghost");
+
+    const root = result.nodes.get(result.rootId);
+    expect(root).toBeDefined();
+    expect(root!.formulaText).toBe("ghost");
+    expect(root!.branchStatus).toBe("closed");
+  });
+
+  it("should use nodeId fallback for branching edge with missing node text", () => {
+    const nodes: readonly WorkspaceNode[] = [];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "at-beta",
+        ruleId: "beta-disj",
+        conclusionNodeId: "root",
+        leftResultNodeId: "left",
+        rightResultNodeId: "right",
+        conclusionText: "T:phi ∨ psi",
+        leftResultText: "T:phi",
+        rightResultText: "T:psi",
+      },
+    ];
+    const result = convertAtWorkspaceToTreeDisplay(nodes, edges, "root");
+
+    const root = result.nodes.get(result.rootId);
+    expect(root).toBeDefined();
+    expect(root!.formulaText).toBe("root");
+    expect(root!.childIds.length).toBe(2);
+  });
+
+  it("should use nodeId fallback for non-branching edge with missing node text", () => {
+    const nodes: readonly WorkspaceNode[] = [];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "at-alpha",
+        ruleId: "alpha-double-neg-t",
+        conclusionNodeId: "root",
+        resultNodeId: "child",
+        secondResultNodeId: undefined,
+        conclusionText: "T:¬¬phi",
+        resultText: "T:phi",
+        secondResultText: undefined,
+      },
+    ];
+    const result = convertAtWorkspaceToTreeDisplay(nodes, edges, "root");
+
+    const root = result.nodes.get(result.rootId);
+    expect(root).toBeDefined();
+    expect(root!.formulaText).toBe("root");
+    expect(root!.childIds.length).toBe(1);
+  });
+
+  it("should handle at-alpha with resultNodeId undefined", () => {
+    const nodes = [mkNode("n1", "T:¬¬phi")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "at-alpha",
+        ruleId: "alpha-double-neg-t",
+        conclusionNodeId: "n1",
+        resultNodeId: undefined,
+        secondResultNodeId: undefined,
+        conclusionText: "T:¬¬phi",
+        resultText: "T:phi",
+        secondResultText: undefined,
+      },
+    ];
+    const result = convertAtWorkspaceToTreeDisplay(nodes, edges, "n1");
+    const root = result.nodes.get(result.rootId);
+    expect(root).toBeDefined();
+    expect(root!.childIds).toEqual([]);
+  });
+
+  it("should handle at-beta with rightResultNodeId undefined", () => {
+    const nodes = [mkNode("n1", "T:phi ∨ psi"), mkNode("n2", "T:phi")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "at-beta",
+        ruleId: "beta-disj",
+        conclusionNodeId: "n1",
+        leftResultNodeId: "n2",
+        rightResultNodeId: undefined,
+        conclusionText: "T:phi ∨ psi",
+        leftResultText: "T:phi",
+        rightResultText: "T:psi",
+      },
+    ];
+    const result = convertAtWorkspaceToTreeDisplay(nodes, edges, "n1");
+    const root = result.nodes.get(result.rootId);
+    expect(root).toBeDefined();
+    expect(root!.childIds.length).toBe(1);
+  });
+
+  it("should handle at-beta with leftResultNodeId undefined", () => {
+    const nodes = [mkNode("n1", "T:phi ∨ psi"), mkNode("n3", "T:psi")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "at-beta",
+        ruleId: "beta-disj",
+        conclusionNodeId: "n1",
+        leftResultNodeId: undefined,
+        rightResultNodeId: "n3",
+        conclusionText: "T:phi ∨ psi",
+        leftResultText: "T:phi",
+        rightResultText: "T:psi",
+      },
+    ];
+    const result = convertAtWorkspaceToTreeDisplay(nodes, edges, "n1");
+    const root = result.nodes.get(result.rootId);
+    expect(root).toBeDefined();
+    expect(root!.childIds.length).toBe(1);
+  });
+
+  it("should handle at-gamma with resultNodeId undefined", () => {
+    const nodes = [mkNode("n1", "T:(all x. P(x))")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "at-gamma",
+        ruleId: "gamma-univ",
+        conclusionNodeId: "n1",
+        resultNodeId: undefined,
+        conclusionText: "T:(all x. P(x))",
+        resultText: "T:P(a)",
+        termText: "a",
+      },
+    ];
+    const result = convertAtWorkspaceToTreeDisplay(nodes, edges, "n1");
+    const root = result.nodes.get(result.rootId);
+    expect(root).toBeDefined();
+    expect(root!.childIds).toEqual([]);
+  });
+
+  it("should handle circular references with missing node text fallback", () => {
+    // 循環参照 + nodeTextsにないノードID
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "at-alpha",
+        ruleId: "alpha-neg-t",
+        conclusionNodeId: "ghost1",
+        resultNodeId: "ghost2",
+        secondResultNodeId: undefined,
+        conclusionText: "T:phi",
+        resultText: "T:psi",
+        secondResultText: undefined,
+      },
+      {
+        _tag: "at-alpha",
+        ruleId: "alpha-neg-t",
+        conclusionNodeId: "ghost2",
+        resultNodeId: "ghost1",
+        secondResultNodeId: undefined,
+        conclusionText: "T:psi",
+        resultText: "T:phi",
+        secondResultText: undefined,
+      },
+    ];
+    const result = convertAtWorkspaceToTreeDisplay([], edges, "ghost1");
+    // 循環停止ノードのformulaTextもフォールバック
+    expect(result.nodes.size).toBe(3);
+  });
+
   it("should ignore non-AT edges", () => {
     const nodes = [mkNode("n1", "T:phi")];
     const edges: readonly InferenceEdge[] = [

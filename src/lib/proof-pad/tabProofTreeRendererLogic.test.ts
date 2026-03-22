@@ -288,6 +288,73 @@ describe("convertTabWorkspaceToTreeDisplay", () => {
     expect(root?.sequentText).toBe("unknown");
   });
 
+  it("循環参照がある場合は停止する", () => {
+    // n1 → n2 → n1 の循環
+    const nodes = [mkNode("n1", "P"), mkNode("n2", "Q")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "tab-single",
+        ruleId: "double-negation",
+        conclusionNodeId: "n1",
+        premiseNodeId: "n2",
+        conclusionText: "Q",
+      },
+      {
+        _tag: "tab-single",
+        ruleId: "double-negation",
+        conclusionNodeId: "n2",
+        premiseNodeId: "n1",
+        conclusionText: "P",
+      },
+    ];
+    const result = convertTabWorkspaceToTreeDisplay(nodes, edges, "n1");
+
+    // 循環で停止し、無限ループにならないこと
+    expect(result.nodes.size).toBe(3); // n1, n2, n1(循環停止)
+    const root = result.nodes.get(result.rootId);
+    expect(root?.childIds).toHaveLength(1);
+  });
+
+  it("tab-singleでpremiseNodeIdがundefinedの場合は子なし", () => {
+    const nodes = [mkNode("n1", "P")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "tab-single",
+        ruleId: "double-negation",
+        conclusionNodeId: "n1",
+        premiseNodeId: undefined,
+        conclusionText: "P",
+      },
+    ];
+    const result = convertTabWorkspaceToTreeDisplay(nodes, edges, "n1");
+
+    const root = result.nodes.get(result.rootId);
+    expect(root?.childIds).toEqual([]);
+    // premiseNodeIdがないので中間ノード扱い（branchStatusはundefined）
+    expect(root?.branchStatus).toBeUndefined();
+  });
+
+  it("tab-branchingで両方のpremiseNodeIdがundefinedの場合は子なし", () => {
+    const nodes = [mkNode("n1", "P ∨ Q")];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "tab-branching",
+        ruleId: "disjunction",
+        conclusionNodeId: "n1",
+        leftPremiseNodeId: undefined,
+        rightPremiseNodeId: undefined,
+        leftConclusionText: "P",
+        rightConclusionText: "Q",
+        conclusionText: "P ∨ Q",
+      },
+    ];
+    const result = convertTabWorkspaceToTreeDisplay(nodes, edges, "n1");
+
+    const root = result.nodes.get(result.rootId);
+    expect(root?.childIds).toEqual([]);
+    expect(root?.branchStatus).toBeUndefined();
+  });
+
   // --- formulaTexts 伝搬テスト ---
 
   it("formulaTexts を持つノードはそのまま TabTreeDisplayNode に伝搬される", () => {
