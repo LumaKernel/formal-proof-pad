@@ -17028,3 +17028,10 @@
   - RendererLogicの未カバー分岐はほぼ「undefined NodeID」パターン。空のworkspace nodes配列でテスト可能
   - v8カバレッジの`?? fallback`分岐はnodeTexts.get()がundefinedを返すケースで発火
 ---
+
+## 2026-03-22 - ndProofTreeRendererLogicカバレッジ改善
+- ndProofTreeRendererLogic.ts: Branch 85.71% → 100%
+  - ワークスペースにないノードIDのフォールバックテスト
+  - 循環参照 + missing node text のフォールバックテスト
+- 変更ファイル: src/lib/proof-pad/ndProofTreeRendererLogic.test.ts
+---
