@@ -156,6 +156,14 @@ describe("findTermVariableSubstitution", () => {
       expect(result).toBeUndefined();
     });
 
+    it("変数捕獲の防止: BinaryOperationの右辺のみ束縛変数を含む", () => {
+      // ∀y. P(x) vs ∀y. P(a + y) — 左辺aは定数、右辺yは束縛変数
+      const source = universal(y, P(x));
+      const target = universal(y, P(binaryOperation("+", a, y)));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeUndefined();
+    });
+
     it("変数捕獲の防止: TermSubstitutionに束縛変数を含むターゲット", () => {
       // ∀y. P(x) vs ∀y. P(t[y/z]) — x → t[y/z] だが y は束縛変数
       const source = universal(y, P(x));

@@ -17035,3 +17035,50 @@
   - 循環参照 + missing node text のフォールバックテスト
 - 変更ファイル: src/lib/proof-pad/ndProofTreeRendererLogic.test.ts
 ---
+
+## 2026-03-23 - SequentDisplay/SignedFormulaDisplay カバレッジ改善
+- SequentDisplay.test.tsx 新規作成（13テスト）
+  - データソース分岐（sequent prop優先 / text / 両方未指定）
+  - FormulaSlotView parsed/text 分岐
+  - fontSize/color/testId の各ternary分岐
+  - 複数論理式のカンマ区切り
+  - SequentDisplay.tsx: Branch 53.84% → 100%
+- SignedFormulaDisplay.test.tsx 新規作成（13テスト）
+  - T/F 符号分岐
+  - パース失敗フォールバック
+  - formulaSlot parsed/text 分岐
+  - fontSize/color/testId の各ternary分岐
+  - SignedFormulaDisplay.tsx: Branch 33.33% → 100%
+- CLAUDE.md 更新: テストセクションに新ファイル追加
+- 変更ファイル: src/lib/proof-pad/SequentDisplay.test.tsx, src/lib/proof-pad/SignedFormulaDisplay.test.tsx, src/lib/proof-pad/CLAUDE.md
+- **今後のイテレーションへの学び:**
+  - SequentDisplay/SignedFormulaDisplayの未カバーブランチは主にoptional props (fontSize/color/testId) のternary分岐と FormulaSlot parsed/text 分岐
+  - FormulaSlotのtext fallbackテストは「???」のようなパース不能な文字列で生成できる
+---
+
+## 2026-03-23 - SequentPreview カバレッジ改善
+- SequentPreview.test.tsx 新規作成（9テスト）
+  - 空前件/後件の∅表示
+  - パース成功: FormulaDisplay表示
+  - パース失敗: エラーテキスト表示
+  - 複数論理式のカンマ区切り
+  - 空文字列のフィルタリング
+  - SequentPreview.tsx: Branch 58.33% → 100%
+- SequentPreview.tsx: parseFormulaSlotの空文字列チェックがコンポーネント経由では到達不能（フィルタ済み）→ v8 ignore追加
+- 変更ファイル: src/lib/formula-input/SequentPreview.test.tsx, src/lib/formula-input/SequentPreview.tsx
+- **今後のイテレーションへの学び:**
+  - parseFormulaSlotの空文字列チェック(line 74)は呼び出し元で.filter()済みのため到達不能。防御的コードにv8 ignoreが適切
+---
+
+## 2026-03-23 - alphaEquivalence/signedFormulaDisplayLogic/trashPanelLogic カバレッジ改善
+- alphaEquivalence.test.ts: TermSubstitution α等価性テスト4件追加（同一/異なる変数名/置換対象/置換値）
+  - alphaEquivalence.ts: Branch 93.42% → 100%
+- signedFormulaDisplayLogic.ts: 到達不能ブランチ（line 50）にv8 ignore追加
+  - signedFormulaDisplayLogic.ts: Branch 91.66% → 100%
+- trashPanelLogic.ts: 到達不能ブランチ（line 99, filter後のMap.get ?? 0）にv8 ignore追加
+  - trashPanelLogic.ts: Branch 87.5% → 100%
+- 変更ファイル: src/lib/logic-core/alphaEquivalence.test.ts, src/lib/proof-pad/signedFormulaDisplayLogic.ts, src/lib/trash/trashPanelLogic.ts
+- **今後のイテレーションへの学び:**
+  - `Map.get(key) ?? default` で直前にhas(key)でフィルタ済みの場合、??は到達不能 → v8 ignore適切
+  - `text.trim()` で先行trimした後の空チェックは、isXxx()で長さチェック済みだと到達不能
+---

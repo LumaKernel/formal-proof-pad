@@ -17,6 +17,7 @@ import {
   type GenEdge,
   type SubstitutionEdge,
   type SimplificationEdge,
+  type SubstitutionConnectionEdge,
   type NdImplicationIntroEdge,
   type NdImplicationElimEdge,
   type NdConjunctionIntroEdge,
@@ -321,6 +322,26 @@ describe("inferenceEdge", () => {
       };
       expect(getInferenceEdgePremiseNodeIds(edge)).toEqual([]);
     });
+
+    it("returns premise for SubstitutionConnectionEdge", () => {
+      const edge: SubstitutionConnectionEdge = {
+        _tag: "substitution-connection",
+        conclusionNodeId: "sc-1",
+        premiseNodeId: "a",
+        conclusionText: "",
+      };
+      expect(getInferenceEdgePremiseNodeIds(edge)).toEqual(["a"]);
+    });
+
+    it("returns empty for SubstitutionConnectionEdge without premise", () => {
+      const edge: SubstitutionConnectionEdge = {
+        _tag: "substitution-connection",
+        conclusionNodeId: "sc-1",
+        premiseNodeId: undefined,
+        conclusionText: "",
+      };
+      expect(getInferenceEdgePremiseNodeIds(edge)).toEqual([]);
+    });
   });
 
   describe("getInferenceEdgeLabel", () => {
@@ -398,6 +419,16 @@ describe("inferenceEdge", () => {
         conclusionText: "",
       };
       expect(getInferenceEdgeLabel(edge)).toBe("Simp");
+    });
+
+    it("returns 'SubConn' for SubstitutionConnection edge", () => {
+      const edge: SubstitutionConnectionEdge = {
+        _tag: "substitution-connection",
+        conclusionNodeId: "sc-1",
+        premiseNodeId: "a",
+        conclusionText: "",
+      };
+      expect(getInferenceEdgeLabel(edge)).toBe("SubConn");
     });
   });
 
@@ -940,6 +971,20 @@ describe("inferenceEdge", () => {
       });
     });
 
+    it("remaps SubstitutionConnection edge node IDs", () => {
+      const edge: SubstitutionConnectionEdge = {
+        _tag: "substitution-connection",
+        conclusionNodeId: "c1",
+        premiseNodeId: "p1",
+        conclusionText: "φ",
+      };
+      const result = remapEdgeNodeIds(edge, mapFn);
+      expect(result).toEqual({
+        ...edge,
+        conclusionNodeId: "new-c1",
+        premiseNodeId: "new-p1",
+      });
+    });
     it("remaps 1-premise ND edge (→I)", () => {
       const result = remapEdgeNodeIds(ndImplicationIntro, mapFn);
       expect(result).toEqual({
