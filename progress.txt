@@ -17106,3 +17106,15 @@
   - v8 ignore配置修正は効果があるが、`else if`文の分岐点自体は依然カウントされる
   - modelAnswer.ts の残りの未カバーは理論公理の TheoryAxiom パス（実行時到達不能）
 ---
+
+## 2026-03-23 - カバレッジ改善（workspaceState proof-pad）
+- workspaceState.ts (proof-pad): Branch 95.67% → 98.76%
+  - computeNextAssumptionId: nd-disjunction-elim, nd-existential-elim テスト追加
+  - revalidateInferenceConclusions: substitution-connection テスト追加
+- 変更ファイル:
+  - src/lib/proof-pad/workspaceState.test.ts（3テスト追加）
+- CI: Stmts 99.74%, Branch 98.69%, Funcs 90.05%, Lines 99.81%
+- **今後のイテレーションへの学び:**
+  - ND未実装エッジ型（disjunction-elim, existential-elim）は手動でinferenceEdges配列にオブジェクトを注入してテスト可能
+  - WorkspaceStateは plain object なので spread でフィールドを上書きしてテスト状態を構築できる
+---
