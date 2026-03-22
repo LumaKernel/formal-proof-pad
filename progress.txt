@@ -17118,3 +17118,24 @@
   - ND未実装エッジ型（disjunction-elim, existential-elim）は手動でinferenceEdges配列にオブジェクトを注入してテスト可能
   - WorkspaceStateは plain object なので spread でフィールドを上書きしてテスト状態を構築できる
 ---
+
+## 2026-03-23 - カバレッジ改善（copyPasteLogic, metaVariable, parser）
+- copyPasteLogic.ts: formulaTexts分岐テスト追加（Branch 96.72% → 100%）
+  - コピー/ペースト時のformulaTextsプロパティの有無で分岐する条件スプレッド
+- metaVariable.ts: TermSubstitution collectTermMetaVariables テスト追加（Branch 97.72% → 100%）
+  - termSubstitution(term, replacement, variable) の引数順序に注意
+- parser.ts: 項置換関連テスト4件追加（Branch 97.27% → 99.61%）
+  - META_VARIABLE変数、不正トークンエラー、DIVIDE欠落エラー、RBRACKET欠落エラー
+  - 残り: line 842 は防御的分岐（stopBeforeにLBRACKETが含まれるケースは現在到達不能）
+- 変更ファイル:
+  - src/lib/proof-pad/copyPasteLogic.test.ts（4テスト追加）
+  - src/lib/logic-core/metaVariable.test.ts（1テスト追加）
+  - src/lib/logic-lang/parser.test.ts（4テスト追加）
+  - src/lib/logic-lang/parser.ts（防御的分岐コメント追加）
+- ベースライン: Stmts 99.74%, Branch 98.69%, Funcs 90.05%, Lines 99.81%
+- **今後のイテレーションへの学び:**
+  - termSubstitution の引数順序は (term, replacement, variable) — variable は最後
+  - 多くの純粋ロジックファイルは単体テストでは100%だがフルスイートで低くなる（v8集約クォーク）
+  - 真に未カバーの分岐を見つけるには単体テスト実行での coverage を確認する必要がある
+  - parser.ts の stopBefore パラメータは現在 undefined/STOP_AT_DIVIDE のみ。LBRACKET分岐は防御的
+---
