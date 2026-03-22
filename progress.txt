@@ -17191,3 +17191,19 @@
   - カテゴリ別セクション表示のブランチカバレッジは、カテゴリの部分集合を持つ規則リストで false ブランチをカバーできる
   - AtRulePaletteItem は { id: AtRuleId, displayName: string, isBranching: boolean } の3プロパティ
 ---
+
+## 2026-03-23 - カバレッジ改善（NdRulePalette/AxiomPalette ブランチカバレッジ）
+- NdRulePalette.test.tsx: 規則アイテムhover/unhoverテスト2件追加
+  - 非選択時: onMouseEnter/onMouseLeave の `!isSelected` true分岐カバー
+  - 選択時: onMouseEnter/onMouseLeave の `!isSelected` false分岐カバー（スタイルが変わらないことを確認）
+- AxiomPalette.test.tsx: referenceEntries指定+locale未指定テスト1件追加
+  - `referenceEntry !== undefined && locale !== undefined` の locale undefined 分岐カバー
+- ベースライン: Stmts 99.87%, Branch 98.98%, Funcs 90.17%, Lines 99.92%
+- 結果: Stmts 99.88%, Branch 99.01%, Funcs 90.19%, Lines 99.93%
+- 変更ファイル:
+  - src/lib/proof-pad/NdRulePalette.test.tsx（2テスト追加）
+  - src/lib/proof-pad/AxiomPalette.test.tsx（1テスト追加）
+- **今後のイテレーションへの学び:**
+  - NdRulePaletteの規則アイテムhoverは add-assumption ボタンとは独立。テストでは onSelectRule を渡してクリック可能にする
+  - AxiomPaletteItemView の referenceEntry/locale 条件は&&で結合されているため、片方だけ提供するケースが必要だが、v8フルスイート集約では効果が薄い場合がある
+---
