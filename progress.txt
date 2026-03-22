@@ -108,6 +108,26 @@
 
 ---
 
+## 2026-03-22 - [SequentExpandedEditor] カバレッジ改善ストーリー追加
+- ベースライン: Stmts 99.50%, Branch 97.57%, Funcs 89.98%, Lines 99.61%
+- **結果: Stmts 99.52% (+0.02%), Branch 97.74% (+0.17%), Funcs 90.02% (+0.04%), Lines 99.63% (+0.02%)**
+- 実装内容:
+  - SequentExpandedEditor.stories.tsx に5つのストーリーを追加
+  - EscapeToClose: Escapeキーでモーダル閉じる（handleKeyDown Escape分岐）
+  - OverlayClickToClose: オーバーレイクリックでモーダル閉じる（handleOverlayClick）
+  - WithSyntaxHelp: onOpenSyntaxHelp渡して構文ヘルプボタン表示+クリック
+  - WithoutTestId: testIdなしで描画（ternary else分岐カバレッジ）
+  - MultipleFormulasPreview: 複数式の前件・後件でプレビュー確認
+- 変更ファイル:
+  - src/lib/formula-input/SequentExpandedEditor.stories.tsx
+- スクリーンショット: .screenshots/sequent-expanded-editor-syntax-help.png, .screenshots/sequent-expanded-editor-multiple-formulas.png
+- **今後のイテレーションへの学び:**
+  - SequentExpandedEditorのBranch低カバレッジは主にtestId ternary分岐が原因。testIdなしストーリーで大幅改善
+  - SequentPreview.tsxのカバレッジもSequentExpandedEditorのストーリーを通じて間接的に改善される
+  - 新ファイル作成後は必ず `npx prettier --write` を実行する（CI失敗防止）
+
+---
+
 ## 2026-03-22 - [ScriptFileExplorer] カバレッジ改善ストーリー追加
 - ベースライン: Stmts 99.46%, Branch 97.55%, Funcs 89.91%, Lines 99.56%
 - **結果: Stmts 99.50% (+0.04%), Branch 97.57% (+0.02%), Funcs 89.98% (+0.07%), Lines 99.61% (+0.05%)**
