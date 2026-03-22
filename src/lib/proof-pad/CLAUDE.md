@@ -59,6 +59,8 @@ logic-core, logic-lang, formula-input, infinite-canvas を統合する層。
 - `workspaceState.test.ts`: 統合テスト（マージ含む）
 - `ProofWorkspace.stories.tsx`: Storybook ストーリー
 - `formulaCopyLogic.test.ts`: 論理式コピー変換テスト（Unicode/ASCII/LaTeX）
+- `SequentDisplay.test.tsx`: シーケント表示UIテスト（データソース分岐、スタイルprops、FormulaSlot parsed/text）
+- `SignedFormulaDisplay.test.tsx`: 署名付き論理式表示UIテスト（T/F符号、パース失敗フォールバック、スタイルprops）
 
 ## コンテキストメニュー
 
