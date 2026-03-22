@@ -108,6 +108,25 @@
 
 ---
 
+## 2026-03-22 - [termVariableMatching] カバレッジ改善ユニットテスト追加
+- ベースライン: Stmts 99.52%, Branch 97.74%, Funcs 90.02%, Lines 99.63%
+- **結果: Stmts 99.58% (+0.06%), Branch 97.94% (+0.20%), Funcs 90.03% (+0.01%), Lines 99.68% (+0.05%)**
+- 実装内容:
+  - termVariableMatching.test.ts に10件のテストケースを追加
+  - FunctionApplication/TermSubstitution構造マッチ、異なる関数名/アリティの失敗テスト
+  - TermMetaVariable の名前/subscript 構造マッチと不一致テスト
+  - 変数捕獲防止: BinaryOperation/TermSubstitution/FunctionApplication に束縛変数を含むターゲット
+  - ソース束縛変数 vs ターゲット非変数項の失敗テスト
+  - 恒等代入のみ（x→x）がfalseを返すテスト
+- 変更ファイル:
+  - src/lib/logic-core/termVariableMatching.test.ts
+- **今後のイテレーションへの学び:**
+  - TermMetaVariable の name は Greek letters のみ (α, β, γ...) — "t", "s" 等は ParseError
+  - termContainsBoundVariable の Constant/TermMetaVariable → false 分岐は単独テストではカバーしにくい（v8のswitch分岐カウント問題）
+  - 純粋ロジックファイルのカバレッジ改善はユニットテスト直接追加が最も効率的
+
+---
+
 ## 2026-03-22 - [SequentExpandedEditor] カバレッジ改善ストーリー追加
 - ベースライン: Stmts 99.50%, Branch 97.57%, Funcs 89.98%, Lines 99.61%
 - **結果: Stmts 99.52% (+0.02%), Branch 97.74% (+0.17%), Funcs 90.02% (+0.04%), Lines 99.63% (+0.02%)**
