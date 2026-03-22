@@ -16880,3 +16880,25 @@
   - renderNodeの既存outlineスタイルチェーンに可視化ハイライトを追加する際、選択・MP・マージ等の優先度より低く設定
   - CIのprettier checkは`npm run lint`に含まれる。ローカルでeslintだけ通しても不十分
 ---
+
+## 2026-03-22 - アルゴリズム可視化API サブタスク3: 吹き出しアノテーション描画UI統合
+- **カバレッジ: Stmts 99.44% (±0), Branch 97.49% (±0), Funcs 89.87% (-0.03%), Lines 99.55% (±0)**
+- Funcs微減はProofWorkspace.tsx内のアノテーション描画コード追加による（UI層、V8集約クイーク）
+- 実装内容:
+  - `visualizationAnnotationLogic.ts`: アノテーション吹き出しの純粋ロジック（スタイル定義、ノード別グルーピング）
+  - `visualizationAnnotationLogic.test.ts`: 9テスト（スタイル取得、コンテナスタイル、グルーピング）
+  - `ProofWorkspace.tsx`: annotationsByNodeId useMemo + renderNode内でアノテーション吹き出し描画
+    - ノード下部に`position: absolute; top: 100%`でcalloutバブルを配置
+    - pointerEvents: noneでキャンバス操作を阻害しない
+    - CSS変数によるテーマ対応（--color-annotation-bg/text/border）
+- 変更ファイル:
+  - src/lib/proof-pad/visualizationAnnotationLogic.ts (新規)
+  - src/lib/proof-pad/visualizationAnnotationLogic.test.ts (新規)
+  - src/lib/proof-pad/ProofWorkspace.tsx (更新)
+  - possible-next-tasks.md (更新)
+- スクリーンショット: .screenshots/annotation-proofworkspace-empty.png, .screenshots/annotation-proofworkspace-with-nodes.png
+- **今後のイテレーションへの学び:**
+  - アノテーション描画パターン: CanvasItem内のdivにposition:relativeを付け、子要素にposition:absolute+top:100%で下部に配置
+  - groupAnnotationsByNodeId で ReadonlyMap<annotationId, NodeAnnotation> → ReadonlyMap<nodeId, NodeAnnotation[]> に変換
+  - visualizationAnnotationLogic は visualizationHighlightLogic と同じパターン（純粋ロジック→CSSスタイルMap）
+---
