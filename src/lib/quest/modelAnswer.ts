@@ -595,8 +595,8 @@ function expandAxiomStepIfNeeded(
   let schemaDslText: string | undefined;
   if (identification._tag === "Ok") {
     schemaDslText = propositionalAxiomDslTexts[identification.axiomId];
-  } else if (identification._tag === "TheoryAxiom") {
     /* v8 ignore start — 理論公理は matchMode:"exact" のため非自明代入にならず到達しない */
+  } else if (identification._tag === "TheoryAxiom") {
     const theoryAxiom = system.theoryAxioms?.find(
       (a) => a.id === identification.theoryAxiomId,
     );
