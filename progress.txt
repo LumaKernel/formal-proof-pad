@@ -16997,3 +16997,15 @@
   - ScriptApiReferencePanelは55 API（Proof 12, Workspace 16, Cut Elimination 27）を表示
   - WorkspacePageView QuestCompleteProp01FromHub ストーリーはCI上で15sタイムアウトのflaky test
 ---
+
+## 2026-03-22 - useTrashカバレッジ改善
+- useTrash.ts: Branch 70% → 100% (全メトリクス100%)
+- 追加テスト:
+  - visibilitychangeイベント(visible状態)で期限切れアイテムがパージされるテスト
+  - visibilitychangeイベント(hidden状態)ではパージされないテスト
+  - optionsなしでデフォルト値が使われるテスト
+- 変更ファイル: src/lib/trash/useTrash.test.ts
+- **今後のイテレーションへの学び:**
+  - `document.visibilityState`のモックは`Object.defineProperty`で設定し、テスト後に復元する
+  - jsdom環境ではデフォルトで`visibilityState`は`"visible"`
+---
