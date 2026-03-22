@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AtRulePalette } from "./AtRulePalette";
-import { getAvailableAtRules } from "./axiomPaletteLogic";
+import { getAvailableAtRules, type AtRulePaletteItem } from "./axiomPaletteLogic";
 import { atSystem, atPropSystem } from "../logic-core/deductionSystem";
 
 const atRules = getAvailableAtRules(atSystem);
@@ -300,5 +300,39 @@ describe("AtRulePalette", () => {
     expect(screen.getByText("β (branching)")).toBeInTheDocument();
     expect(screen.queryByText("γ/δ (quantifiers)")).not.toBeInTheDocument();
     expect(screen.getByText("Closure")).toBeInTheDocument();
+  });
+
+  it("closure のみの規則リストではα/β/γδセクションが表示されない", () => {
+    const closureOnly: readonly AtRulePaletteItem[] = [
+      { id: "closure", displayName: "×", isBranching: false },
+    ];
+    render(
+      <AtRulePalette
+        rules={closureOnly}
+        onAddFormula={() => {}}
+        testId="palette"
+      />,
+    );
+    expect(screen.queryByText("α (non-branching)")).not.toBeInTheDocument();
+    expect(screen.queryByText("β (branching)")).not.toBeInTheDocument();
+    expect(screen.queryByText("γ/δ (quantifiers)")).not.toBeInTheDocument();
+    expect(screen.getByText("Closure")).toBeInTheDocument();
+  });
+
+  it("alpha のみの規則リストではβ/γδ/closureセクションが表示されない", () => {
+    const alphaOnly: readonly AtRulePaletteItem[] = [
+      { id: "alpha-conj", displayName: "T(∧)", isBranching: false },
+    ];
+    render(
+      <AtRulePalette
+        rules={alphaOnly}
+        onAddFormula={() => {}}
+        testId="palette"
+      />,
+    );
+    expect(screen.getByText("α (non-branching)")).toBeInTheDocument();
+    expect(screen.queryByText("β (branching)")).not.toBeInTheDocument();
+    expect(screen.queryByText("γ/δ (quantifiers)")).not.toBeInTheDocument();
+    expect(screen.queryByText("Closure")).not.toBeInTheDocument();
   });
 });
