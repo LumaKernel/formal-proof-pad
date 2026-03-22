@@ -17159,3 +17159,23 @@
   - 真に未カバーの分岐を見つけるには単体テスト実行での coverage を確認する必要がある
   - parser.ts の stopBefore パラメータは現在 undefined/STOP_AT_DIVIDE のみ。LBRACKET分岐は防御的
 ---
+
+## 2026-03-23 - カバレッジ改善（TreePanel/RulePalette/ScriptFileExplorer ブランチカバレッジ）
+- TabProofTreePanel.stories.tsx: MultipleRoots ストーリー追加（roots.length > 1 分岐 + cycle-root ボタンカバー）
+- AtProofTreePanel.stories.tsx: MultipleRoots + NonSignedFormula ストーリー追加
+  - MultipleRoots: roots.length > 1 分岐 + cycle-root ボタンカバー
+  - NonSignedFormula: isSignedFormulaText false分岐（プレーンテキスト表示）
+- TabRulePalette.test.tsx: referenceEntries/locale 付きテスト2件追加（ReferencePopover 表示/非表示分岐）
+- ScriptFileExplorer.stories.tsx: RenameDoubleClick ストーリー追加（onDoubleClick stopPropagation カバー）
+- ベースライン: Stmts 99.83%, Branch 98.84%, Funcs 90.05%, Lines 99.89%
+- 結果: Stmts 99.87%, Branch 98.98%, Funcs 90.17%, Lines 99.92%
+- 変更ファイル:
+  - src/lib/proof-pad/TabProofTreePanel.stories.tsx（MultipleRoots ストーリー追加）
+  - src/lib/proof-pad/AtProofTreePanel.stories.tsx（MultipleRoots + NonSignedFormula ストーリー追加）
+  - src/lib/proof-pad/TabRulePalette.test.tsx（referenceEntries テスト2件追加）
+  - src/components/ScriptEditor/ScriptFileExplorer.stories.tsx（RenameDoubleClick ストーリー追加）
+- **今後のイテレーションへの学び:**
+  - TreeRendererLogic は独自ID（tabtree-N, attree-N）を生成する。ストーリーのplay関数では元のノードIDではなく生成IDを使う
+  - TabRulePalette の referenceEntries テストには ReferenceEntry の全必須フィールドが必要（category, title, summary, body, relatedEntryIds, externalLinks, keywords, order）
+  - roots.length > 1 分岐は2つの独立した証明木（エッジで接続されていないルートノード）で発火する
+---
