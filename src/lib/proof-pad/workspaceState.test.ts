@@ -988,6 +988,77 @@ describe("proofWorkspace", () => {
       }
     });
 
+    it("increments assumptionId past existing nd-disjunction-elim edge", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "phi");
+      // 手動で nd-disjunction-elim エッジを注入（assumptionId 3, 5）
+      ws = {
+        ...ws,
+        inferenceEdges: [
+          ...ws.inferenceEdges,
+          {
+            _tag: "nd-disjunction-elim" as const,
+            conclusionNodeId: "dummy-conclusion",
+            disjunctionPremiseNodeId: undefined,
+            leftCasePremiseNodeId: undefined,
+            leftDischargedAssumptionId: 3,
+            rightCasePremiseNodeId: undefined,
+            rightDischargedAssumptionId: 5,
+            conclusionText: "",
+          },
+        ],
+      };
+      const result = applyNdImplicationIntroAndConnect(ws, "node-1", "phi", {
+        x: 0,
+        y: 150,
+      });
+      const edge = result.workspace.inferenceEdges.find(
+        (e) =>
+          e._tag === "nd-implication-intro" &&
+          e.conclusionNodeId === result.conclusionNodeId,
+      );
+      expect(edge).toBeDefined();
+      if (edge && edge._tag === "nd-implication-intro") {
+        // max(0, 3, 5) + 1 = 6
+        expect(edge.dischargedAssumptionId).toBe(6);
+      }
+    });
+
+    it("increments assumptionId past existing nd-existential-elim edge", () => {
+      let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
+      ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "phi");
+      // 手動で nd-existential-elim エッジを注入（assumptionId 4）
+      ws = {
+        ...ws,
+        inferenceEdges: [
+          ...ws.inferenceEdges,
+          {
+            _tag: "nd-existential-elim" as const,
+            conclusionNodeId: "dummy-conclusion",
+            existentialPremiseNodeId: undefined,
+            casePremiseNodeId: undefined,
+            dischargedAssumptionId: 4,
+            dischargedFormulaText: "P(x)",
+            conclusionText: "",
+          },
+        ],
+      };
+      const result = applyNdImplicationIntroAndConnect(ws, "node-1", "phi", {
+        x: 0,
+        y: 150,
+      });
+      const edge = result.workspace.inferenceEdges.find(
+        (e) =>
+          e._tag === "nd-implication-intro" &&
+          e.conclusionNodeId === result.conclusionNodeId,
+      );
+      expect(edge).toBeDefined();
+      if (edge && edge._tag === "nd-implication-intro") {
+        // max(0, 4) + 1 = 5
+        expect(edge.dischargedAssumptionId).toBe(5);
+      }
+    });
+
     it("adds connection from premise to conclusion", () => {
       let ws = createEmptyWorkspace(naturalDeduction(nmSystem));
       ws = addNode(ws, "axiom", "Assumption", { x: 0, y: 0 }, "phi");
@@ -2159,6 +2230,28 @@ describe("proofWorkspace", () => {
       // Revalidation should not change the conclusion text
       const result = revalidateInferenceConclusions(ws);
       expect(findNode(result, "node-2")?.formulaText).toBe("all y. P(y)");
+    });
+
+    it("handles SubstitutionConnection edge revalidation (does not change conclusion)", () => {
+      let ws = createEmptyWorkspace(lukasiewiczSystem);
+      ws = addNode(ws, "axiom", "Axiom", { x: 0, y: 0 }, "phi -> phi");
+      ws = addNode(ws, "axiom", "Axiom", { x: 100, y: 0 }, "P(a)");
+      // 手動で substitution-connection エッジを注入
+      ws = {
+        ...ws,
+        inferenceEdges: [
+          ...ws.inferenceEdges,
+          {
+            _tag: "substitution-connection" as const,
+            conclusionNodeId: "node-2",
+            premiseNodeId: "node-1",
+            conclusionText: "P(a)",
+          },
+        ],
+      };
+      // Revalidation should not change the conclusion text
+      const result = revalidateInferenceConclusions(ws);
+      expect(findNode(result, "node-2")?.formulaText).toBe("P(a)");
     });
 
     it("connectSimplification connects two α-equivalent nodes", () => {
