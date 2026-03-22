@@ -17179,3 +17179,15 @@
   - TabRulePalette の referenceEntries テストには ReferenceEntry の全必須フィールドが必要（category, title, summary, body, relatedEntryIds, externalLinks, keywords, order）
   - roots.length > 1 分岐は2つの独立した証明木（エッジで接続されていないルートノード）で発火する
 ---
+
+## 2026-03-23 - カバレッジ改善（AtRulePalette ブランチカバレッジ）
+- AtRulePalette.test.tsx: カテゴリ部分集合テスト2件追加
+  - closure のみの規則リスト → alpha/beta/gammaDelta セクション非表示の false ブランチカバー
+  - alpha のみの規則リスト → beta/gammaDelta/closure セクション非表示の false ブランチカバー
+- AtRulePalette.tsx 単体: Branch 78.57% → 100%（フルスイートではv8集約で下がる可能性あり）
+- 変更ファイル:
+  - src/lib/proof-pad/AtRulePalette.test.tsx（2テスト追加）
+- **今後のイテレーションへの学び:**
+  - カテゴリ別セクション表示のブランチカバレッジは、カテゴリの部分集合を持つ規則リストで false ブランチをカバーできる
+  - AtRulePaletteItem は { id: AtRuleId, displayName: string, isBranching: boolean } の3プロパティ
+---
