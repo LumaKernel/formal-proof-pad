@@ -51,3 +51,8 @@ export {
   decodeProofNode,
 } from "./hilbertProofBridge";
 export { createEitherBridges, EITHER_BRIDGE_API_DEFS } from "./eitherBridge";
+export {
+  createVisualizationBridges,
+  VISUALIZATION_BRIDGE_API_DEFS,
+  type VisualizationCommandHandler,
+} from "./visualizationBridge";

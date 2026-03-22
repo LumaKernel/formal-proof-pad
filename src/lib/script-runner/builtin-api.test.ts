@@ -13,6 +13,7 @@ import { WORKSPACE_BRIDGE_API_DEFS } from "./workspaceBridge";
 import { CUT_ELIMINATION_BRIDGE_API_DEFS } from "./cutEliminationBridge";
 import { HILBERT_PROOF_BRIDGE_API_DEFS } from "./hilbertProofBridge";
 import { EITHER_BRIDGE_API_DEFS } from "./eitherBridge";
+import { VISUALIZATION_BRIDGE_API_DEFS } from "./visualizationBridge";
 
 const builtinApiPath = resolve(__dirname, "builtin-api.d.ts");
 const builtinApiContent = readFileSync(builtinApiPath, "utf-8");
@@ -145,6 +146,16 @@ describe("builtin-api.d.ts", () => {
 
   describe("EITHER_BRIDGE_API_DEFS の全関数が宣言されている", () => {
     for (const def of EITHER_BRIDGE_API_DEFS) {
+      it(`declare function ${def.name satisfies string}`, () => {
+        expect(builtinApiContent).toContain(
+          `declare function ${def.name satisfies string}`,
+        );
+      });
+    }
+  });
+
+  describe("VISUALIZATION_BRIDGE_API_DEFS の全関数が宣言されている", () => {
+    for (const def of VISUALIZATION_BRIDGE_API_DEFS) {
       it(`declare function ${def.name satisfies string}`, () => {
         expect(builtinApiContent).toContain(
           `declare function ${def.name satisfies string}`,

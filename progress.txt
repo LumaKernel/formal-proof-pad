@@ -16824,3 +16824,14 @@
   - Funcs改善よりも Stmts/Branch/Lines の改善に注力した方が効果的
   - TermSubstitution はテスト漏れになりやすいAST型。新機能追加時に TermSubstitution ケースのテストを忘れないこと
 ---
+
+## 2026-03-22 - possible-next-tasks.md 作成
+- `possible-next-tasks.md` を新規作成。タスク候補を整理
+  - 高: アルゴリズム可視化API
+  - 中: script-runner TODO実装、V8 Funcsカバレッジ対策
+  - 低: UIカバレッジ改善、ドキュメント改善
+- カバレッジ: Stmts 99.44, Branch 97.48, Funcs 89.84, Lines 99.55（前回から変化なし）
+- **今後のイテレーションへの学び:**
+  - プロジェクトの主要な未完了タスクはアルゴリズム可視化APIのみ
+  - script-runner/templates.ts に4箇所のTODOがある（カット除去証明テンプレート）
+---

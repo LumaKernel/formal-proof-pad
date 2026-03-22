@@ -414,6 +414,39 @@ declare function applyReverseDeductionTheorem(
 /** Hilbert証明木をワークスペースに表示する。既存ノードはクリアせず、横に配置される。 */
 declare function displayHilbertProof(proof: ProofNodeJson): void;
 
+// ── 可視化 API (visualizationBridge) ──────────────────────
+
+/** ノードにハイライトを追加する。色を省略するとyellow。既存があれば上書き。 */
+declare function highlightNode(
+  nodeId: string,
+  color?: "red" | "blue" | "green" | "yellow" | "purple" | "orange",
+  label?: string,
+): void;
+
+/** ノードのハイライトを除去する。 */
+declare function unhighlightNode(nodeId: string): void;
+
+/** 全ノードのハイライトをクリアする。 */
+declare function clearHighlights(): void;
+
+/** ノードに吹き出しアノテーションを追加する。アノテーションIDを返す。 */
+declare function addAnnotation(nodeId: string, text: string): string;
+
+/** アノテーションを除去する。 */
+declare function removeAnnotation(annotationId: string): void;
+
+/** 全アノテーションをクリアする。 */
+declare function clearAnnotations(): void;
+
+/** 可視化ログにメッセージを追加する。levelを省略するとinfo。 */
+declare function vizLog(
+  message: string,
+  level?: "info" | "warn" | "error",
+): void;
+
+/** 全可視化状態（ハイライト・アノテーション・ログ）をクリアする。 */
+declare function clearVisualization(): void;
+
 // ── コンソール API ────────────────────────────────────────
 
 declare const console: {
