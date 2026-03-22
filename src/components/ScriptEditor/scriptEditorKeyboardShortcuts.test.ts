@@ -70,6 +70,22 @@ describe("classifyScriptEditorKeyDown", () => {
     });
   });
 
+  describe("Ctrl/Cmd+S on library tab (non-readonly)", () => {
+    const tab: ActiveTabContext = { source: "library", readonly: false };
+
+    it("Ctrl+S → none", () => {
+      expect(classifyScriptEditorKeyDown(ctrlS, tab)).toEqual({
+        type: "none",
+      });
+    });
+
+    it("Cmd+S → none", () => {
+      expect(classifyScriptEditorKeyDown(metaS, tab)).toEqual({
+        type: "none",
+      });
+    });
+  });
+
   describe("no active tab", () => {
     it("returns none when activeTab is undefined", () => {
       expect(classifyScriptEditorKeyDown(ctrlS, undefined)).toEqual({

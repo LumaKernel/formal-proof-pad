@@ -186,6 +186,17 @@ export const Empty: Story = {
   },
 };
 
+export const OverlayClickToClose: Story = {
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // オーバーレイ（背景）をクリック → onClose が呼ばれる
+    const overlay = canvas.getByTestId("script-library-overlay");
+    await userEvent.click(overlay);
+    await expect(args.onClose).toHaveBeenCalled();
+  },
+};
+
 export const DeleteSavedScript: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);

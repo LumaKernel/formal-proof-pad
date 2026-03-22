@@ -18,6 +18,7 @@ import {
   constant,
   functionApplication,
   termMetaVariable,
+  termSubstitution,
   termVariable,
 } from "../logic-core/term";
 import { formatFormula, formatTerm } from "./formatUnicode";
@@ -438,6 +439,40 @@ describe("formulaHighlight", () => {
           ),
         ),
       );
+    });
+
+    it("TermSubstitution: t[s/x] は term + [replacement/variable]", () => {
+      const tokens = tokenizeTerm(
+        termSubstitution(
+          termVariable("t"),
+          termVariable("s"),
+          termVariable("x"),
+        ),
+      );
+      expect(tokensToText(tokens)).toBe("t[s/x]");
+      expect(tokens).toEqual([
+        { text: "t", kind: "variable" },
+        { text: "[", kind: "punctuation" },
+        { text: "s", kind: "variable" },
+        { text: "/", kind: "punctuation" },
+        { text: "x", kind: "variable" },
+        { text: "]", kind: "punctuation" },
+      ]);
+    });
+
+    it("TermSubstitution: 二項演算のtermは括弧で囲む", () => {
+      // (x + y)[s/z]
+      const tokens = tokenizeTerm(
+        termSubstitution(
+          binaryOperation("+", termVariable("x"), termVariable("y")),
+          termVariable("s"),
+          termVariable("z"),
+        ),
+      );
+      const text = tokensToText(tokens);
+      expect(text).toContain("(");
+      expect(text).toContain(")");
+      expect(text).toContain("[s/z]");
     });
   });
 
