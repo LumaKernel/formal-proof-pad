@@ -14,9 +14,11 @@ import { SequentExpandedEditor } from "./SequentExpandedEditor";
 function SequentEditorWrapper({
   initialValue = " ⇒ ",
   testId = "sequent-editor",
+  onOpenSyntaxHelp,
 }: {
   readonly initialValue?: string;
   readonly testId?: string;
+  readonly onOpenSyntaxHelp?: () => void;
 }) {
   const [value, setValue] = useState(initialValue);
   const [closed, setClosed] = useState(false);
@@ -36,6 +38,7 @@ function SequentEditorWrapper({
       onClose={() => {
         setClosed(true);
       }}
+      onOpenSyntaxHelp={onOpenSyntaxHelp}
       testId={testId}
     />
   );
@@ -126,5 +129,106 @@ export const AddAndEditFormula: Story = {
       "sequent-editor-antecedents-add",
     );
     await expect(antecedentAddButton).toBeInTheDocument();
+  },
+};
+
+/** Escapeキーでモーダルを閉じる */
+export const EscapeToClose: Story = {
+  render: () => <SequentEditorWrapper />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // モーダルが表示されていることを確認
+    await expect(
+      canvas.getByTestId("sequent-editor-turnstile"),
+    ).toBeInTheDocument();
+    // Escape キーでモーダルを閉じる
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(canvas.getByTestId("closed-state")).toBeInTheDocument();
+    });
+  },
+};
+
+/** オーバーレイ（モーダル外）クリックで閉じる */
+export const OverlayClickToClose: Story = {
+  render: () => <SequentEditorWrapper />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // オーバーレイ要素をクリック（モーダル外）
+    const overlay = canvas.getByTestId("sequent-editor");
+    await userEvent.click(overlay);
+    await waitFor(() => {
+      expect(canvas.getByTestId("closed-state")).toBeInTheDocument();
+    });
+  },
+};
+
+/** 構文ヘルプボタン付き */
+export const WithSyntaxHelp: Story = {
+  render: () => (
+    <SequentEditorWrapper
+      onOpenSyntaxHelp={() => {
+        /* noop for story */
+      }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // 構文ヘルプボタンが表示される
+    const syntaxHelpButton = canvas.getByTestId(
+      "sequent-editor-syntax-help",
+    );
+    await expect(syntaxHelpButton).toBeInTheDocument();
+    // クリックしてもエラーにならない
+    await userEvent.click(syntaxHelpButton);
+  },
+};
+
+/** testIdなしで描画（ternary の else 分岐カバレッジ） */
+export const WithoutTestId: Story = {
+  render: () => {
+    const [value, setValue] = useState(" ⇒ ");
+    return (
+      <SequentExpandedEditor
+        value={value}
+        onChange={setValue}
+        onClose={() => {}}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // role="dialog" でモーダルを検出（testIdなし）
+    const dialog = canvas.getByRole("dialog");
+    await expect(dialog).toBeInTheDocument();
+    await expect(dialog).toHaveAttribute("aria-label", "シーケントエディタ");
+  },
+};
+
+/** 複数の前件・後件で、プレビューにカンマ区切りとパース結果が表示される */
+export const MultipleFormulasPreview: Story = {
+  render: () => (
+    <SequentEditorWrapper initialValue="phi, psi -> chi ⇒ phi -> psi, chi" />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // 前件に2つの論理式がある
+    await expect(
+      canvas.getByTestId("sequent-editor-antecedents-item-0"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("sequent-editor-antecedents-item-1"),
+    ).toBeInTheDocument();
+    // 後件に2つの論理式がある
+    await expect(
+      canvas.getByTestId("sequent-editor-succedents-item-0"),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("sequent-editor-succedents-item-1"),
+    ).toBeInTheDocument();
+    // プレビューが表示されている
+    await expect(
+      canvas.getByTestId("sequent-editor-preview"),
+    ).toBeInTheDocument();
   },
 };
