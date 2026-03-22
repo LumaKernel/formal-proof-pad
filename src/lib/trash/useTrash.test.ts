@@ -62,6 +62,12 @@ describe("useTrash hook", () => {
     expect(result.current.count).toBe(0);
   });
 
+  it("optionsなしでデフォルト値が使われる", () => {
+    const { result } = renderHook(() => useTrash());
+    expect(result.current.items).toEqual([]);
+    expect(result.current.count).toBe(0);
+  });
+
   it("localStorageに保存済みデータがあれば復元される", () => {
     const state = addToTrash(
       createEmptyTrash(),
@@ -294,6 +300,111 @@ describe("useTrash 定期パージ", () => {
     // 期限切れアイテムがパージされ、有効なものだけ残る
     expect(result.current.items.length).toBe(1);
     expect(result.current.items[0]?.displayName).toBe("新しいスクリプト");
+  });
+
+  it("visibilitychangeイベント(visible)で期限切れアイテムがパージされる", () => {
+    const initialNow = 1_000_000;
+    const almostExpiredAt = initialNow - TRASH_EXPIRY_MS + 100;
+    let state = addToTrash(
+      createEmptyTrash(),
+      "notebook",
+      "nb-old",
+      "もうすぐ期限切れ",
+      "{}",
+      almostExpiredAt,
+    );
+    state = addToTrash(
+      state,
+      "script",
+      "s-new",
+      "新しいスクリプト",
+      "{}",
+      initialNow,
+    );
+    globalThis.localStorage.setItem(
+      TRASH_STORAGE_KEY,
+      serializeTrashState(state),
+    );
+
+    let currentTime = initialNow;
+    const getNow = () => currentTime;
+
+    const { result } = renderHook(() =>
+      useTrash({ getNow, purgeIntervalMs: 60_000 }),
+    );
+
+    expect(result.current.items.length).toBe(2);
+
+    // 時刻を進めて期限切れにする
+    currentTime = initialNow + 200;
+
+    // visibilitychange イベントを発火（visible状態）
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    // 期限切れアイテムがパージされる
+    expect(result.current.items.length).toBe(1);
+    expect(result.current.items[0]?.displayName).toBe("新しいスクリプト");
+  });
+
+  it("visibilitychangeイベント(hidden)ではパージされない", () => {
+    const initialNow = 1_000_000;
+    const almostExpiredAt = initialNow - TRASH_EXPIRY_MS + 100;
+    let state = addToTrash(
+      createEmptyTrash(),
+      "notebook",
+      "nb-old",
+      "もうすぐ期限切れ",
+      "{}",
+      almostExpiredAt,
+    );
+    state = addToTrash(
+      state,
+      "script",
+      "s-new",
+      "新しいスクリプト",
+      "{}",
+      initialNow,
+    );
+    globalThis.localStorage.setItem(
+      TRASH_STORAGE_KEY,
+      serializeTrashState(state),
+    );
+
+    let currentTime = initialNow;
+    const getNow = () => currentTime;
+
+    const { result } = renderHook(() =>
+      useTrash({ getNow, purgeIntervalMs: 60_000 }),
+    );
+
+    expect(result.current.items.length).toBe(2);
+
+    // 時刻を進めて期限切れにする
+    currentTime = initialNow + 200;
+
+    // visibilityState を hidden にモック
+    const original = document.visibilityState;
+    Object.defineProperty(document, "visibilityState", {
+      value: "hidden",
+      writable: true,
+      configurable: true,
+    });
+
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    // hidden状態ではパージされない
+    expect(result.current.items.length).toBe(2);
+
+    // 復元
+    Object.defineProperty(document, "visibilityState", {
+      value: original,
+      writable: true,
+      configurable: true,
+    });
   });
 
   it("moveToTrash時に期限切れアイテムもパージされる", () => {
