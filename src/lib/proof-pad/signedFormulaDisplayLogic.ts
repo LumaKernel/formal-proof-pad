@@ -47,7 +47,9 @@ export function parseSignedFormulaDisplayData(
   if (!isSignedFormulaText(trimmed)) return undefined;
   const sign: Sign = trimmed[0] === "T" ? "T" : "F";
   const formulaText = trimmed.slice(2).trim();
+  /* v8 ignore start */ // trimmed は trim() 済みかつ isSignedFormulaText で length>=3 を保証するため到達不能
   if (formulaText === "") return undefined;
+  /* v8 ignore stop */
   return {
     sign,
     formulaSlot: textToFormulaSlot(formulaText),

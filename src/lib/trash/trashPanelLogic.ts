@@ -96,7 +96,9 @@ export function buildTrashFilterOptions(
     .map((kind) => ({
       kind,
       label: kindLabels[kind],
+      /* v8 ignore start */ // .filter(has) で存在保証済みだが型上 undefined の可能性あり
       count: kindCounts.get(kind) ?? 0,
+      /* v8 ignore stop */
     }));
 
   return [allOption, ...kindOptions];

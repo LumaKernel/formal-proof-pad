@@ -22,6 +22,7 @@ import {
   formulaSubstitution,
   freeVariableAbsence,
 } from "./index";
+import { termSubstitution } from "./term";
 
 // --- ヘルパー ---
 
@@ -375,6 +376,40 @@ describe("areSimplificationEquivalent", () => {
           universal(x, existential(y, pxy)),
           existential(x, universal(y, pxy)),
         ),
+      ).toBe(false);
+    });
+  });
+
+  describe("TermSubstitution を含む項のα等価性", () => {
+    it("同一のTermSubstitutionを含む等式はα等価", () => {
+      const sub1 = termSubstitution(x, y, z);
+      const sub2 = termSubstitution(x, y, z);
+      expect(alphaEqualFormula(equality(sub1, x), equality(sub2, x))).toBe(
+        true,
+      );
+    });
+
+    it("異なる変数名のTermSubstitutionはα等価でない", () => {
+      const sub1 = termSubstitution(x, y, z);
+      const sub2 = termSubstitution(x, y, w);
+      expect(alphaEqualFormula(equality(sub1, x), equality(sub2, x))).toBe(
+        false,
+      );
+    });
+
+    it("異なる置換対象のTermSubstitutionはα等価でない", () => {
+      const sub1 = termSubstitution(x, y, z);
+      const sub2 = termSubstitution(y, y, z);
+      expect(
+        alphaEqualFormula(predicate("P", [sub1]), predicate("P", [sub2])),
+      ).toBe(false);
+    });
+
+    it("異なる置換値のTermSubstitutionはα等価でない", () => {
+      const sub1 = termSubstitution(x, y, z);
+      const sub2 = termSubstitution(x, a, z);
+      expect(
+        alphaEqualFormula(predicate("P", [sub1]), predicate("P", [sub2])),
       ).toBe(false);
     });
   });
