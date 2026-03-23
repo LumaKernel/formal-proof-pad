@@ -109,6 +109,23 @@
 
 ---
 
+## 2026-03-23 - [カバレッジ改善] SequentExpandedEditor テスト追加＋TermExpandedEditor ブランチカバレッジ
+- ベースライン: Stmts 99.92%, Branch 99.29%, Funcs 90.24%, Lines 99.97%
+- **結果: Stmts 99.97% (+0.05%), Branch 99.33% (+0.04%), Funcs 90.31% (+0.07%), Lines 99.99% (+0.02%)**
+- 実装内容:
+  - SequentExpandedEditor.test.tsx 新規作成（18テスト）: 基本表示、閉じる操作、構文ヘルプ、前件・後件操作、testId未指定
+  - TermExpandedEditor.test.tsx: エラーハイライトのposition 0開始ケース追加（renderHighlightedText の pos < h.start false分岐）
+- 変更ファイル:
+  - src/lib/formula-input/SequentExpandedEditor.test.tsx（新規）
+  - src/lib/formula-input/TermExpandedEditor.test.tsx
+- **今後のイテレーションへの学び:**
+  - v8 Funcsカバレッジの低さ（90%台）はv8カバレッジ集約のアーティファクト。個別テスト実行では100%だがCI全体では低く出る。テスト追加では改善困難
+  - SequentExpandedEditor の handleAntecedentChange/handleSuccedentChange は FormulaListEditor の add ボタンクリックで間接的にテスト可能
+  - renderHighlightedText の `pos < h.start` false 分岐: エラーがposition 0から始まる入力（例: `)`）でカバー。`f(`のようなエラーは途中からなので true 分岐のみ
+  - FormulaExpandedEditor.test.tsx のパターンを踏襲すれば効率的にテスト作成できる
+
+---
+
 ## 2026-03-23 - [カバレッジ改善] referenceディレクトリのブランチカバレッジ向上
 - ベースライン: Stmts 99.92%, Branch 99.19%, Funcs 90.26%, Lines 99.97%
 - **結果: Stmts 99.92% (±0.00%), Branch 99.29% (+0.10%), Funcs 90.26% (±0.00%), Lines 99.97% (±0.00%)**
