@@ -136,6 +136,26 @@ describe("RulePromptModal", () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
+  it("does not call onCancel when clicking inside modal content", async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+
+    render(
+      <RulePromptModal
+        message="Enter"
+        defaultValue=""
+        onConfirm={vi.fn()}
+        onCancel={onCancel}
+        testId="prompt"
+      />,
+    );
+
+    // Click the input inside the modal (not the overlay)
+    await user.click(screen.getByTestId("prompt-input"));
+
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
   it("uses default testId when testId is not provided", () => {
     render(
       <RulePromptModal

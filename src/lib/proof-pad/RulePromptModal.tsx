@@ -131,10 +131,11 @@ export function RulePromptModal({
       style={overlayStyle}
       data-testid={testId}
       onClick={(e) => {
-        // オーバーレイ外クリックでキャンセル
+        /* v8 ignore start -- 防御的コード: 内側modal divがstopPropagation()するため、e.target !== e.currentTargetは構造的に到達しない */
         if (e.target === e.currentTarget) {
           onCancel();
         }
+        /* v8 ignore stop */
       }}
       onPointerDown={(e) => e.stopPropagation()}
     >
