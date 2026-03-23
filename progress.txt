@@ -29,6 +29,7 @@
 - FormulaInput: 制御コンポーネント、`useDeferredValue`でデバウンス、純粋関数（computeParseState等）を分離してテスタブルに
 - macOSのcase-insensitiveファイルシステムでは `FormulaEditor.tsx` と `formulaEditor.ts` が衝突する。異なるケースのファイル名は使わず、`editorLogic.ts` のように明確に異なる名前にする
 
+- UIコンポーネント（Button/Tabs/Menu/Icons）は `src/components/ui/` に配置。スタイルロジックは `uiStyleLogic.ts` に純粋関数として分離。テーマ対応は `useResolvedThemeSafe()` を使用（ThemeProvider外でもデフォルト "light" で動作）
 - ドラッグはオフセットベース方式: ドラッグ開始時にカーソル→アイテムのワールド座標オフセットを記録し、毎フレームカーソルのワールド座標からオフセットを引いて位置を算出。デルタ方式はsnap誤差の蓄積やviewport変化(エッジスクロール)に弱い
 - CanvasItem + FormulaEditor 統合: `onModeChange` コールバック + `dragEnabled` プロパティで編集中ドラッグ無効化を実現
 - FormulaEditor内 `onPointerDown` の `stopPropagation` は**編集モード時のみ**に限定。表示モードではCanvasItemへpointerイベントを伝播させ、ノード選択・ドラッグを可能にする
@@ -17385,4 +17386,20 @@
   - `.next/static/chunks/` の ls -lhS でローカルビルドのチャンクサイズ確認可能
   - Effect.tsはtree-shaking困難（ランタイム全体が必要）— 代替策としてimport分割やdynamic importを検討
   - antdはButton/Tabs/Menuのみ使用なのに1MB — headless UIへの移行が最も効果的
+---
+
+## 2026-03-23 - antd依存除去＋軽量UIコンポーネント実装
+- antd (1.0MB×2チャンク) と @ant-design/icons を削除
+- 自前の軽量UIコンポーネントに置換: UiButton, UiTabs, UiMenu, UiIcons
+- スタイルロジックを uiStyleLogic.ts に純粋関数として分離
+- バンドルサイズ: 9.4MB → 8.7MB (raw)
+- カバレッジ: Stmts 99.91→99.92%, Branch 99.18→99.19%, Funcs 90.2→90.26%, Lines 99.97→99.97%
+- 変更ファイル: 38ファイル（新規6 + 修正25ソース + 修正9テスト + .storybook/preview.ts + package.json）
+- テスト追加: 64テスト（UiButton 17, UiTabs 7, UiMenu 8, UiIcons 8, uiStyleLogic 24）
+- **今後のイテレーションへの学び:**
+  - useResolvedThemeSafe() パターン: ThemeProvider外でも動作する（デフォルト "light"）。テストでThemeProvider不要
+  - 純粋スタイル関数の分離: dark/light分岐テストにはReact不要。uiStyleLogic.tsのような純粋モジュールでカバレッジ100%達成
+  - jsdomはCSSカラーをrgb()形式で返す。テストではhex値直接比較は使えない
+  - AntDesignThemeProvider.tsx は .trashed にリネーム済み
+  - Storybook: node_modules変更後はStorybook再起動必要（stale cache問題）
 ---
