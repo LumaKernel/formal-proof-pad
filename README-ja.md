@@ -1,5 +1,7 @@
 # Formal Logic Pad
 
+[![codecov](https://codecov.io/gh/LumaKernel/formal-logic-pad/graph/badge.svg)](https://codecov.io/gh/LumaKernel/formal-logic-pad)
+
 [English README](./README.md)
 
 命題論理と述語論理の形式的証明を対話的に構築するWebアプリケーション。ヒルベルト流、自然演繹、シーケント計算の証明体系に対応している。

@@ -1,5 +1,7 @@
 # Formal Logic Pad
 
+[![codecov](https://codecov.io/gh/LumaKernel/formal-logic-pad/graph/badge.svg)](https://codecov.io/gh/LumaKernel/formal-logic-pad)
+
 [日本語版 README はこちら](./README-ja.md)
 
 An interactive web application for constructing formal proofs in propositional and predicate logic. Supports Hilbert-style, natural deduction, and sequent calculus proof systems.

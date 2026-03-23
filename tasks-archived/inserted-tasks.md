@@ -211,3 +211,5 @@
     - reverse-deduction-theorem-explicit テンプレート追加
 - [x] README.mdをまっさらにして整理。シンプルな記述、アカデミック向けに。強調などは使わない。
   - [x] README-ja.mdも用意。READMEからすぐアクセスできるように
+- [x] codecovのバッジをREADMEにつける
+  - README.mdとREADME-ja.mdの両方にcodecovバッジ追加
