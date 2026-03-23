@@ -572,6 +572,65 @@ describe("ReferenceFloatingWindow", () => {
     expect(screen.queryByTestId("ref-win-home")).toBeNull();
   });
 
+  it("ホームボタンが日本語aria-labelで表示される", () => {
+    render(
+      <ReferenceFloatingWindow
+        entry={makeEntry()}
+        allEntries={[makeEntry()]}
+        locale="ja"
+        onClose={vi.fn()}
+        onNavigateHome={vi.fn()}
+        testId="ref-win"
+      />,
+    );
+    const homeBtn = screen.getByTestId("ref-win-home");
+    expect(homeBtn.getAttribute("aria-label")).toBe("一覧に戻る");
+  });
+
+  it("testIdなしでナビゲーション・ホームボタン・ブラウズモードが動作する", () => {
+    // testId=undefined時の各分岐をカバー
+    const allEntries = [makeEntry(), makeRelatedEntry()];
+    const { unmount } = render(
+      <ReferenceFloatingWindow
+        entry={allEntries[0]!}
+        allEntries={allEntries}
+        locale="en"
+        onClose={vi.fn()}
+        onNavigateHome={vi.fn()}
+        onNavigate={vi.fn()}
+        navigationData={{
+          previous: {
+            id: "prev",
+            title: "Prev",
+            href: "/reference/prev",
+          },
+          next: {
+            id: "next",
+            title: "Next",
+            href: "/reference/next",
+          },
+        }}
+      />,
+    );
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toBeDefined();
+    // ホームボタン・ナビゲーション・新規タブリンクがtestIdなしで存在
+    expect(dialog.textContent).toContain("Prev");
+    expect(dialog.textContent).toContain("Next");
+    unmount();
+
+    // ブラウズモードもtestIdなしで動作
+    render(
+      <ReferenceFloatingWindow
+        allEntries={allEntries}
+        locale="en"
+        onClose={vi.fn()}
+      />,
+    );
+    const browseDialog = screen.getByRole("dialog");
+    expect(browseDialog.textContent).toContain("Reference");
+  });
+
   it("onNavigate未指定時にprevクリックしてもエラーにならない", () => {
     render(
       <ReferenceFloatingWindow

@@ -699,6 +699,33 @@ describe("ReferenceModal", () => {
     expect(prev).toBeInTheDocument();
   });
 
+  it("testIdなしでナビゲーションが動作する", () => {
+    render(
+      <ReferenceModal
+        entry={makeEntry()}
+        allEntries={[makeEntry()]}
+        locale="en"
+        onClose={vi.fn()}
+        onNavigate={vi.fn()}
+        navigationData={{
+          previous: {
+            id: "prev",
+            title: "Prev Entry",
+            href: "/reference/prev",
+          },
+          next: {
+            id: "next",
+            title: "Next Entry",
+            href: "/reference/next",
+          },
+        }}
+      />,
+    );
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.textContent).toContain("Prev Entry");
+    expect(dialog.textContent).toContain("Next Entry");
+  });
+
   it("onNavigate未指定時にnextクリックしてもエラーにならない", () => {
     render(
       <ReferenceModal

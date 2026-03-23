@@ -303,9 +303,11 @@ export function ReferenceBrowserComponent({
 
   const handleNavigate = useCallback(
     (entryId: string) => {
+      /* v8 ignore start -- defensive: modal only renders when onSelectEntry === undefined */
       if (onSelectEntry !== undefined) {
         onSelectEntry(entryId);
       } else {
+        /* v8 ignore stop */
         setDetailEntryId(entryId);
       }
     },
