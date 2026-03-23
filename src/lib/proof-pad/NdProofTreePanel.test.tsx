@@ -190,6 +190,39 @@ describe("NdProofTreePanel", () => {
     expect(cycleButton.textContent).toBe("2/2");
   });
 
+  it("複数ルート＋testId未指定でもレンダリングできる", () => {
+    const nodes = [
+      mkNode("n1", "φ"),
+      mkNode("n2", "φ → φ"),
+      mkNode("n3", "ψ"),
+      mkNode("n4", "ψ → ψ"),
+    ];
+    const edges: readonly InferenceEdge[] = [
+      {
+        _tag: "nd-implication-intro",
+        conclusionNodeId: "n2",
+        premiseNodeId: "n1",
+        dischargedFormulaText: "φ",
+        dischargedAssumptionId: 1,
+        conclusionText: "φ → φ",
+      },
+      {
+        _tag: "nd-implication-intro",
+        conclusionNodeId: "n4",
+        premiseNodeId: "n3",
+        dischargedFormulaText: "ψ",
+        dischargedAssumptionId: 2,
+        conclusionText: "ψ → ψ",
+      },
+    ];
+    const { container } = render(
+      <NdProofTreePanel nodes={nodes} inferenceEdges={edges} />,
+    );
+    expect(container.textContent).toContain("ND Proof Tree");
+    // サイクルボタンはtestIdなしでもレンダリングされる
+    expect(container.textContent).toContain("1/2");
+  });
+
   it("深いツリーを正しく表示する", () => {
     const nodes = [
       mkNode("n1", "φ"),

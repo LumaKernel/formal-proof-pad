@@ -179,11 +179,13 @@ function ProofTreeNode({
             : undefined
         }
       >
+        {/* v8 ignore start -- 防御的コード: SC変換は常にconclusionSequentを設定するため、undefinedは構造的に到達しない */}
         {node.conclusionSequent !== undefined ? (
           <SequentDisplay sequent={node.conclusionSequent} fontSize={11} />
         ) : (
           node.conclusionText
         )}
+        {/* v8 ignore stop */}
       </div>
     </div>
   );
