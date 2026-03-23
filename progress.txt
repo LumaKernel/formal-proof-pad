@@ -17403,3 +17403,16 @@
   - AntDesignThemeProvider.tsx は .trashed にリネーム済み
   - Storybook: node_modules変更後はStorybook再起動必要（stale cache問題）
 ---
+
+## 2026-03-23 - ScriptEditorComponent 遅延ロード＋最適化タスク完了
+- ScriptEditorComponent を React.lazy で遅延ロード化
+- Monaco Editor + js-interpreter が 236KB の独立チャンクに分離（ワークスペース初回ロードから除外）
+- ドキュメント遅延ロード調査: md-editor-rt は MdPreview が常時使用のため遅延不可と判断
+- カバレッジ: Stmts 99.92%, Branch 99.19%, Funcs 90.24%, Lines 99.97%（変化なし）
+- Next.js最適化タスク全完了: antd除去 + スクリプト遅延ロード + 各種調査
+- 変更ファイル: ProofWorkspace.tsx（lazy import + Suspense）, ProofWorkspace.test.tsx（waitFor追加）
+- **今後のイテレーションへの学び:**
+  - React.lazy + Suspense: 名前付きexportは `.then(m => ({ default: m.Component }))` でラップ
+  - テスト: React.lazy化した後は getByTestId → waitFor(getByTestId) に変更必要
+  - md-editor-rt の MdPreview が EditableProofNode で常時使用されるため、パッケージ全体が初回ロードに含まれる。分離には MdPreview を含むノードコンポーネントの構造的リファクタリングが必要
+---

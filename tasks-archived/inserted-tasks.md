@@ -223,3 +223,10 @@
 - [x] formal logic padからformal proof padに名前をもろもろ変更する
   - package.json, README, UIテキスト, ロケール, devcontainer, GitHub URL等を一括変更
   - git remote URLも更新
+- [x] Next.jsの機能を用いた最適化
+  - [x] ロード時間の調査（LCP 443-573ms, CLS 0.00 — Core Web Vitals良好）
+  - [x] Hubタブ遅延ロード調査 → 効果なし（全タブがantd Button共有、タブ自体は軽量）
+  - [x] Effect.ts tree-shaking 調査 → 改善不可（Effect.gen/runSync使用のためruntime全体が必要。Turbopackはルートごとにチャンク重複）
+  - [x] antd → 軽量UIコンポーネント自前実装に置換（バンドル9.4MB→8.7MB、antd+@ant-design/icons削除）
+  - [x] スクリプトに関連する要素の遅延ロード（ScriptEditorComponent を React.lazy 化、Monaco+js-interpreter 236KBチャンク分離）
+  - [x] ドキュメントの遅延ロード調査 → md-editor-rt は EditableProofNode が MdPreview を常時使用するため遅延不可
