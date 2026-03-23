@@ -506,6 +506,78 @@ describe("ProofCollectionPanel", () => {
       });
       expect(onHide).toHaveBeenCalledTimes(1);
     });
+
+    it("×ボタンでSpaceキーを押すとonHideが呼ばれる", () => {
+      const onHide = vi.fn();
+      render(
+        <ProofCollectionPanel
+          entries={[createTestEntry({ id: "e1" })]}
+          folders={[]}
+          messages={defaultProofMessages}
+          {...defaultCallbacks}
+          onHide={onHide}
+          testId="panel"
+        />,
+      );
+      fireEvent.keyDown(screen.getByTestId("panel-hide"), {
+        key: " ",
+      });
+      expect(onHide).toHaveBeenCalledTimes(1);
+    });
+
+    it("testId未指定でonHide指定時も×ボタンがレンダリングされる", () => {
+      const onHide = vi.fn();
+      render(
+        <ProofCollectionPanel
+          entries={[createTestEntry({ id: "e1" })]}
+          folders={[]}
+          messages={defaultProofMessages}
+          {...defaultCallbacks}
+          onHide={onHide}
+        />,
+      );
+      // testId未指定時はdata-testidがundefinedなのでroleで取得
+      const hideButtons = screen.getAllByRole("button");
+      const hideSpan = hideButtons.find(
+        (el) => el.tagName === "SPAN" && el.textContent === "×",
+      );
+      expect(hideSpan).toBeDefined();
+      fireEvent.click(hideSpan!);
+      expect(onHide).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("position prop", () => {
+    it("position指定時にleft/topスタイルが適用される", () => {
+      render(
+        <ProofCollectionPanel
+          entries={[createTestEntry({ id: "e1" })]}
+          folders={[]}
+          messages={defaultProofMessages}
+          {...defaultCallbacks}
+          position={{ x: 100, y: 200 }}
+          testId="panel"
+        />,
+      );
+      const panel = screen.getByTestId("panel");
+      expect(panel.style.left).toBe("100px");
+      expect(panel.style.top).toBe("200px");
+    });
+
+    it("position未指定時はデフォルトスタイルが適用される", () => {
+      render(
+        <ProofCollectionPanel
+          entries={[createTestEntry({ id: "e1" })]}
+          folders={[]}
+          messages={defaultProofMessages}
+          {...defaultCallbacks}
+          testId="panel"
+        />,
+      );
+      const panel = screen.getByTestId("panel");
+      // デフォルトではleftが設定されない
+      expect(panel.style.left).toBe("");
+    });
   });
 
   describe("ヘッダー", () => {

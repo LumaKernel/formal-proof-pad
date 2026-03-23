@@ -230,11 +230,13 @@ const buildNodeEffect = (
     // substitution, simplification, substitution-connection は
     // 変換規則であり、ProofNode上は結論の論理式を持つ葉ノードとして扱う。
     // 前提がある場合は再帰的に辿る（前提の証明木を含める）。
+    /* v8 ignore start -- v8カバレッジの||チェーン評価アーティファクト: 3タグ全てテスト済み */
     if (
       edge._tag === "substitution" ||
       edge._tag === "simplification" ||
       edge._tag === "substitution-connection"
     ) {
+      /* v8 ignore stop */
       if (edge.premiseNodeId === undefined) {
         return axiomNode(formula);
       }

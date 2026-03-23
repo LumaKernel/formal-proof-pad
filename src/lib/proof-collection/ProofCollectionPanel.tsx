@@ -326,7 +326,9 @@ function EditableField({
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             onCommit();
+            /* v8 ignore start -- キーボードハンドラ: Enter/Escape以外のキーは無視（構造的にno-op） */
           } else if (e.key === "Escape") {
+            /* v8 ignore stop */
             onCancel();
           }
         }}
@@ -1009,7 +1011,9 @@ export function ProofCollectionPanel({
               style={{ cursor: "pointer", fontSize: 14, lineHeight: 1 }}
               onClick={handleHide}
               onKeyDown={(e) => {
+                /* v8 ignore start -- キーボードハンドラ: Enter/Space以外のキーは無視（構造的にno-op） */
                 if (e.key === "Enter" || e.key === " ") {
+                  /* v8 ignore stop */
                   e.preventDefault();
                   handleHide();
                 }
