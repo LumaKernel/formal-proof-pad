@@ -108,6 +108,24 @@
 
 ---
 
+## 2026-03-23 - [カバレッジ改善] scriptWorkspaceState/termVariableMatching/substitution ブランチカバレッジ
+- ベースライン: Stmts 99.91%, Branch 99.12%, Funcs 90.2%, Lines 99.97%
+- **結果: Stmts 99.91% (±0.00%), Branch 99.16% (+0.04%), Funcs 90.2% (±0.00%), Lines 99.97% (±0.00%)**
+- 実装内容:
+  - scriptWorkspaceState.test.ts: `&&` 短絡分岐カバレッジ3件追加（openLibraryTab/openSavedTab/findTabBySourceId で同じsource種別・異なるsourceIdを通過するケース）
+  - termVariableMatching.test.ts: `termContainsBoundVariable` のConstant/TermMetaVariable直接分岐テスト2件追加
+  - substitution.test.ts: `containsMetaVariable` の `||` 右辺分岐テスト1件追加（右辺のみメタ変数がある二項結合子）
+- 変更ファイル:
+  - src/components/ScriptEditor/scriptWorkspaceState.test.ts
+  - src/lib/logic-core/termVariableMatching.test.ts
+  - src/lib/logic-core/substitution.test.ts
+- **今後のイテレーションへの学び:**
+  - `&&` の第二条件が未カバーになるのは、同じsource種別のタブが複数ある場合にsourceIdが異なるケースをテストしていないため
+  - `containsMetaVariable` の `||` 短絡: 既存テストは左辺にメタ変数がある場合のみ。右辺のみの場合を追加してカバー
+  - `termContainsBoundVariable` のConstant/TermMetaVariableケースは再帰呼び出しでは通過するが、直接的な引数として呼ぶテストで確実にカバーできる
+
+---
+
 ## 2026-03-23 - [カバレッジ改善] scriptEditorKeyboardShortcuts/formulaHighlight/ScriptLibraryPanel
 - ベースライン: Stmts 99.80%, Branch 98.79%, Funcs 90.05%, Lines 99.85%
 - **結果: Stmts 99.83% (+0.03%), Branch 98.84% (+0.05%), Funcs 90.05% (±0.00%), Lines 99.89% (+0.04%)**
