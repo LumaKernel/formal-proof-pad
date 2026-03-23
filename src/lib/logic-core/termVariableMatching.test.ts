@@ -180,6 +180,25 @@ describe("findTermVariableSubstitution", () => {
       expect(result).toBeUndefined();
     });
 
+    it("変数捕獲なし: ターゲットがConstantのみの場合はマッチ成功", () => {
+      // ∀y. P(x) vs ∀y. P(a) — x → a, aは定数なので束縛変数を含まない
+      const source = universal(y, P(x));
+      const target = universal(y, P(a));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeDefined();
+      expect(result!.get("x")).toEqual(a);
+    });
+
+    it("変数捕獲なし: ターゲットがTermMetaVariableのみの場合はマッチ成功", () => {
+      // ∀y. P(x) vs ∀y. P(α) — x → α, αはメタ変数なので束縛変数を含まない
+      const alpha = termMetaVariable("α");
+      const source = universal(y, P(x));
+      const target = universal(y, P(alpha));
+      const result = findTermVariableSubstitution(source, target);
+      expect(result).toBeDefined();
+      expect(result!.get("x")).toEqual(alpha);
+    });
+
     it("ソース束縛変数 vs ターゲット非変数項は失敗", () => {
       // ∀x. P(x) vs ∀x. P(f(a)) — x は束縛変数、ターゲットは FunctionApplication
       const source = universal(x, P(x));

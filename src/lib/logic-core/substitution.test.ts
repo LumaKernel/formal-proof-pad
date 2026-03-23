@@ -1856,6 +1856,21 @@ describe("normalizeFormula", () => {
     expect(result._tag).toBe("FreeVariableAbsence");
   });
 
+  test("containsMetaVariable経由: 右辺にのみメタ変数がある二項結合子", () => {
+    // (P(y) → φ)[b/y]
+    // 左辺P(y)にメタ変数なし → containsMetaVariable(f.left) = false
+    // 右辺φにメタ変数あり → containsMetaVariable(f.right) = true
+    // → 置換を保持（|| の第二分岐を通過）
+    const phi = metaVariable("φ");
+    const inner = implication(
+      predicate("P", [termVariable("y")]),
+      phi,
+    );
+    const f = formulaSubstitution(inner, constant("b"), termVariable("y"));
+    const result = normalizeFormula(f);
+    expect(result._tag).toBe("FormulaSubstitution");
+  });
+
   test("公理A5のインスタンス化: (∀x.φ)→φ[τ/x] で φ:=φ→φ", () => {
     const phi = metaVariable("φ");
     const tau = termVariable("τ");

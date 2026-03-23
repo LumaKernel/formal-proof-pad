@@ -138,6 +138,22 @@ describe("scriptWorkspaceState", () => {
       expect(s3.tabs).toHaveLength(2);
       expect(s3.activeTabId).toBe(s2.tabs[1]?.id);
     });
+
+    it("異なるsourceIdのlibraryタブを飛ばして正しいテンプレートを見つける", () => {
+      // library(tpl-1) → library(tpl-2) の順で配置し、tpl-2を再度開く
+      // .find() が tpl-1 を先に評価し source === "library" && sourceId !== "tpl-2" で短絡する
+      const s1 = openLibraryTab(
+        initialWorkspaceState,
+        "tpl-1",
+        "Template 1",
+        "code1",
+        1000,
+      );
+      const s2 = openLibraryTab(s1, "tpl-2", "Template 2", "code2", 2000);
+      const s3 = openLibraryTab(s2, "tpl-2", "Template 2", "code2", 3000);
+      expect(s3.tabs).toHaveLength(2);
+      expect(s3.activeTabId).toBe(s2.tabs[1]?.id);
+    });
   });
 
   describe("openSavedTab", () => {
@@ -189,6 +205,22 @@ describe("scriptWorkspaceState", () => {
       );
       const s2 = openSavedTab(s1, "script-1", "Script", "code", 2000);
       const s3 = openSavedTab(s2, "script-1", "Script", "code", 3000);
+      expect(s3.tabs).toHaveLength(2);
+      expect(s3.activeTabId).toBe(s2.tabs[1]?.id);
+    });
+
+    it("異なるsourceIdのsavedタブを飛ばして正しいスクリプトを見つける", () => {
+      // saved(script-1) → saved(script-2) の順で配置し、script-2を再度開く
+      // .find() が script-1 を先に評価し source === "saved" && sourceId !== "script-2" で短絡する
+      const s1 = openSavedTab(
+        initialWorkspaceState,
+        "script-1",
+        "Script 1",
+        "code1",
+        1000,
+      );
+      const s2 = openSavedTab(s1, "script-2", "Script 2", "code2", 2000);
+      const s3 = openSavedTab(s2, "script-2", "Script 2", "code2", 3000);
       expect(s3.tabs).toHaveLength(2);
       expect(s3.activeTabId).toBe(s2.tabs[1]?.id);
     });
@@ -516,6 +548,21 @@ describe("scriptWorkspaceState", () => {
       const s3 = openSavedTab(s2, "script-1", "Script", "saved-code", 3000);
       const found = findTabBySourceId(s3, "saved", "script-1");
       expect(found?.sourceId).toBe("script-1");
+    });
+
+    it("同じsource種別で異なるsourceIdのタブを飛ばして検索する", () => {
+      // library(tpl-1) → library(tpl-2) の順で配置し、tpl-2を検索
+      // .find() が tpl-1 を先に評価し source === "library" && sourceId !== "tpl-2" で短絡する
+      const s1 = openLibraryTab(
+        initialWorkspaceState,
+        "tpl-1",
+        "Template 1",
+        "code1",
+        1000,
+      );
+      const s2 = openLibraryTab(s1, "tpl-2", "Template 2", "code2", 2000);
+      const found = findTabBySourceId(s2, "library", "tpl-2");
+      expect(found?.sourceId).toBe("tpl-2");
     });
   });
 
