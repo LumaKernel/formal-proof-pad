@@ -108,6 +108,21 @@
 
 ---
 
+## 2026-03-23 - [カバレッジ改善] substitutionConnectionLogic BFS visited分岐
+- ベースライン: Stmts 99.91%, Branch 99.16%, Funcs 90.2%, Lines 99.97%
+- **結果: Stmts 99.91% (±0.00%), Branch 99.17% (+0.01%), Funcs 90.2% (±0.00%), Lines 99.97% (±0.00%)**
+- 実装内容:
+  - substitutionConnectionLogic.test.ts: ダイヤモンドDAGテスト追加（BFS visited分岐カバレッジ）
+  - 5ノード+4エッジのダイヤモンドDAGで `visited.has(current) → continue` パスを通過
+- 変更ファイル:
+  - src/lib/proof-pad/substitutionConnectionLogic.test.ts
+- **今後のイテレーションへの学び:**
+  - BFS重複訪問テストにはダイヤモンドDAG（2つのパスが同一ノードに合流）が必要
+  - `wouldCreateCycle` はプライベート関数なので `computeSubstitutionConnectionCompatibleNodeIds` 経由でのみテスト可能
+  - テスト追加時の describe ブロック nesting に注意 — 閉じ括弧の位置を確認
+
+---
+
 ## 2026-03-23 - [カバレッジ改善] scriptWorkspaceState/termVariableMatching/substitution ブランチカバレッジ
 - ベースライン: Stmts 99.91%, Branch 99.12%, Funcs 90.2%, Lines 99.97%
 - **結果: Stmts 99.91% (±0.00%), Branch 99.16% (+0.04%), Funcs 90.2% (±0.00%), Lines 99.97% (±0.00%)**

@@ -458,6 +458,194 @@ if (isCutFree(proof)) {
 };
 
 /**
+ * 演繹定理の明示的実装テンプレート。
+ *
+ * applyDeductionTheorem 組込み関数を使わず、
+ * A1/A2/MP を使って演繹定理の変換を手動で構築する。
+ * 教育目的: アルゴリズムの各ケースが可視化される。
+ *
+ * @see dev/logic-reference/08-deduction-theorem.md
+ */
+const deductionTheoremExplicit: ScriptTemplate = {
+  id: "deduction-theorem-explicit",
+  title: "演繹定理の明示的実装",
+  description:
+    "組込み関数を使わず、A1/A2/MPで演繹定理の変換を手動で構築する。各ケースのログ出力付き。",
+  compatibleStyles: ["hilbert"],
+  code: `// 演繹定理の明示的実装
+//
+// applyDeductionTheorem() 組込み関数を使わず、
+// 演繹定理のアルゴリズムを手動で実装します。
+//
+// Γ ∪ {A} ⊢ B の証明木を Γ ⊢ A → B の証明木に変換します。
+//
+// 3つのケース:
+//   ケース1: AxiomNode（仮定A と一致）→ A→A の恒等証明（5ステップ）
+//   ケース2: AxiomNode（公理C）→ A1(C,A) + MP で A→C
+//   ケース3: ModusPonensNode → A2 + MP×2 で再帰的に変換
+
+// 体系チェック
+var sysInfo = getDeductionSystemInfo();
+if (!sysInfo.isHilbertStyle) {
+  throw new Error("このスクリプトはヒルベルト流の体系でのみ実行できます。現在の体系: " + sysInfo.style);
+}
+
+console.log("=== 演繹定理の明示的実装 ===");
+console.log("体系: " + sysInfo.systemName);
+console.log("");
+
+// ── テンプレート定数（一度だけパース）──────────────────────
+var A1_SCHEMA = parseFormula("phi -> (psi -> phi)");
+var A2_SCHEMA = parseFormula("(phi -> (psi -> chi)) -> ((phi -> psi) -> (phi -> chi))");
+var IMPL_SCHEMA = parseFormula("phi -> psi");
+
+// ── ヘルパー関数 ─────────────────────────────────────────
+
+// 含意 a → b を構築
+function impl(a, b) {
+  return substituteFormula(IMPL_SCHEMA, { "\\u03c6": a, "\\u03c8": b });
+}
+
+// A1(p, q) = p → (q → p) の公理ノードを構築
+function makeA1(p, q) {
+  var formula = substituteFormula(A1_SCHEMA, { "\\u03c6": p, "\\u03c8": q });
+  return { _tag: "AxiomNode", formula: formula };
+}
+
+// A2(p, q, r) = (p→(q→r)) → ((p→q) → (p→r)) の公理ノードを構築
+function makeA2(p, q, r) {
+  var formula = substituteFormula(A2_SCHEMA, { "\\u03c6": p, "\\u03c8": q, "\\u03c7": r });
+  return { _tag: "AxiomNode", formula: formula };
+}
+
+// MP(antecedentProof, conditionalProof) の証明ノードを構築
+function makeMP(antecedentProof, conditionalProof, conclusion) {
+  return {
+    _tag: "ModusPonensNode",
+    formula: conclusion,
+    antecedent: antecedentProof,
+    conditional: conditionalProof
+  };
+}
+
+// ── ケース1: A → A の恒等証明（5ステップ）─────────────────
+
+function buildIdentityProofExplicit(a) {
+  var bImplA = impl(a, a);
+
+  // step1: A2(A, A→A, A)
+  var step1 = makeA2(a, bImplA, a);
+
+  // step2: A1(A, A→A)
+  var step2 = makeA1(a, bImplA);
+
+  // step3: MP(step2, step1) = (A→(A→A)) → (A→A)
+  var step3Conclusion = impl(impl(a, bImplA), impl(a, a));
+  var step3 = makeMP(step2, step1, step3Conclusion);
+
+  // step4: A1(A, A)
+  var step4 = makeA1(a, a);
+
+  // step5: MP(step4, step3) = A→A
+  var step5Conclusion = impl(a, a);
+  return makeMP(step4, step3, step5Conclusion);
+}
+
+// ── メイン変換関数 ───────────────────────────────────────
+var depth = 0;
+
+function deductionTransform(proof, hypothesis) {
+  var indent = "";
+  for (var i = 0; i < depth; i++) { indent += "  "; }
+  depth++;
+
+  var result;
+
+  if (proof._tag === "AxiomNode") {
+    if (equalFormula(proof.formula, hypothesis)) {
+      console.log(indent + "[ケース1] 仮定一致 → A→A 恒等証明");
+      result = buildIdentityProofExplicit(hypothesis);
+    } else {
+      console.log(indent + "[ケース2] 公理: " + formatFormula(proof.formula));
+      var c = proof.formula;
+      var a1Node = makeA1(c, hypothesis);
+      var cNode = { _tag: "AxiomNode", formula: c };
+      var aImplC = impl(hypothesis, c);
+      result = makeMP(cNode, a1Node, aImplC);
+    }
+  } else if (proof._tag === "ModusPonensNode") {
+    var d = proof.antecedent.formula;
+    var e = proof.formula;
+    console.log(indent + "[ケース3] MP: " + formatFormula(e));
+    console.log(indent + "  前提: " + formatFormula(d));
+    console.log(indent + "  条件: " + formatFormula(impl(d, e)));
+
+    var aImplDProof = deductionTransform(proof.antecedent, hypothesis);
+    var aImplDEProof = deductionTransform(proof.conditional, hypothesis);
+
+    var a2Node = makeA2(hypothesis, d, e);
+    var adToAE = impl(impl(hypothesis, d), impl(hypothesis, e));
+    var mp1 = makeMP(aImplDEProof, a2Node, adToAE);
+    var aImplE = impl(hypothesis, e);
+    result = makeMP(aImplDProof, mp1, aImplE);
+  } else {
+    throw new Error("未対応のノード型: " + proof._tag);
+  }
+
+  depth--;
+  console.log(indent + "→ " + formatFormula(result.formula));
+  return result;
+}
+
+// ── 実行 ─────────────────────────────────────────────────
+
+// 選択中ノードの論理式を仮定として使用
+var selectedIds = getSelectedNodeIds();
+if (selectedIds.length === 0) {
+  throw new Error("仮定とする論理式のノードを1つ選択してください。");
+}
+if (selectedIds.length > 1) {
+  throw new Error("仮定として使用するノードは1つだけ選択してください。");
+}
+
+var allNodes = getNodes();
+var selectedNode = null;
+for (var i = 0; i < allNodes.length; i++) {
+  if (allNodes[i].id === selectedIds[0]) {
+    selectedNode = allNodes[i];
+  }
+}
+if (!selectedNode) {
+  throw new Error("選択されたノードが見つかりません。");
+}
+
+var hypothesisText = selectedNode.formulaText;
+var hypothesis = parseFormula(hypothesisText);
+console.log("仮定: " + formatFormula(hypothesis));
+console.log("");
+
+// ワークスペースからHilbert証明木を抽出
+console.log("--- 証明木を抽出中 ---");
+var proof = extractHilbertProof();
+console.log("元の結論: " + formatFormula(proof.formula));
+console.log("");
+
+// 演繹定理を明示的に適用
+console.log("--- 変換中 ---");
+var transformed = deductionTransform(proof, hypothesis);
+console.log("");
+
+// 変換後の証明木をワークスペースに表示
+console.log("--- 変換後の証明木を配置中 ---");
+displayHilbertProof(transformed);
+
+console.log("");
+console.log("演繹定理の適用が完了しました。");
+console.log("変換後の結論: " + formatFormula(transformed.formula));
+`,
+};
+
+/**
  * ワークスペースの証明に対して演繹定理を適用するテンプレート。
  *
  * ワークスペースからHilbert証明木を自動抽出し、
@@ -1625,6 +1813,7 @@ export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
   predicateLogicProof,
   syllogismProof,
   hilbertTheoremGallery,
+  deductionTheoremExplicit,
   deductionTheoremWorkspace,
   reverseDeductionTheoremWorkspace,
 ];
