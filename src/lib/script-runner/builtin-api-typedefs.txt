@@ -6,7 +6,7 @@
  *
  * 変更時は以下も同期すること:
  * - 各ブリッジモジュールの API_DEFS 配列（ドキュメント用）
- * - builtin-api.test.ts（同期テスト）
+ * - builtin-api.test.ts（同期テスト。ファイル名は builtin-api-typedefs.txt）
  */
 
 // ── 基本型 (opaque branded types) ──────────────────────────

@@ -23,7 +23,7 @@ import {
   createEitherBridges,
   createVisualizationBridges,
 } from "@/lib/script-runner";
-import builtinApiTypeDefs from "@/lib/script-runner/builtin-api.d.ts?raw";
+import builtinApiTypeDefs from "@/lib/script-runner/builtin-api-typedefs.txt?raw";
 import { BUILTIN_TEMPLATES } from "@/lib/script-runner/templates";
 import type { DeductionStyle } from "@/lib/logic-core/deductionSystem";
 import { ScriptLibraryPanel } from "./ScriptLibraryPanel";
@@ -534,7 +534,7 @@ export const ScriptEditorComponent: React.FC<ScriptEditorComponentProps> = ({
       noSyntaxValidation: false,
     });
 
-    // builtin-api.d.ts を ?raw でインポートした文字列をそのまま渡す。
+    // builtin-api-typedefs.txt を ?raw でインポートした文字列をそのまま渡す。
     // 型定義は実ファイルとして存在するため TSC が検証し、
     // Go to Definition もこの仮想ファイル内で動作する。
     monaco.languages.typescript.javascriptDefaults.addExtraLib(

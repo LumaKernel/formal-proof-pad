@@ -55,6 +55,7 @@
     "jsdom": "^28.1.0",
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
+    "raw-loader": "^4.0.2",
     "storybook": "^10.2.8",
     "typescript": "^5",
     "vite": "^7.3.1",

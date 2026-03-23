@@ -4,7 +4,7 @@
  * Effect.ts の Either パターンをスクリプトサンドボックス内で利用できるように
  * JSON 互換の EitherJson 型とヘルパー関数を提供する。
  *
- * 変更時は eitherBridge.test.ts, index.ts, builtin-api.d.ts も同期すること。
+ * 変更時は eitherBridge.test.ts, index.ts, builtin-api-typedefs.txt も同期すること。
  */
 
 import type { NativeFunctionBridge } from "./scriptRunner";
@@ -118,7 +118,7 @@ export const createEitherBridges = (): readonly NativeFunctionBridge[] => [
 
 /**
  * ブリッジ関数の API 定義一覧。
- * builtin-api.d.ts との同期確認テストで使用する。
+ * builtin-api-typedefs.txt との同期確認テストで使用する。
  */
 export const EITHER_BRIDGE_API_DEFS: readonly ProofBridgeApiDef[] = [
   {

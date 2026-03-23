@@ -4,7 +4,7 @@
  * スクリプトからノードハイライト・アノテーション・ログ操作を行う。
  * コールバック方式で VisualizationState を間接的に操作する。
  *
- * 変更時は visualizationBridge.test.ts, index.ts, builtin-api.d.ts も同期すること。
+ * 変更時は visualizationBridge.test.ts, index.ts, builtin-api-typedefs.txt も同期すること。
  */
 
 import type { NativeFunctionBridge } from "./scriptRunner";
@@ -149,7 +149,7 @@ export const createVisualizationBridges = (
 
 /**
  * ブリッジ関数の API 定義一覧。
- * builtin-api.d.ts との同期確認テストで使用する。
+ * builtin-api-typedefs.txt との同期確認テストで使用する。
  */
 export const VISUALIZATION_BRIDGE_API_DEFS: readonly ProofBridgeApiDef[] = [
   {

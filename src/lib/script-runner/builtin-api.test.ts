@@ -1,8 +1,8 @@
 /**
- * builtin-api.d.ts の整合性テスト。
+ * builtin-api-typedefs.txt の整合性テスト。
  *
  * 各ブリッジモジュールの API_DEFS 配列に定義された関数名が
- * builtin-api.d.ts 内に `declare function <name>` として存在することを検証する。
+ * builtin-api-typedefs.txt 内に `declare function <name>` として存在することを検証する。
  * また、.d.ts ファイルの構文的な健全性も確認する。
  */
 import { describe, it, expect } from "vitest";
@@ -15,10 +15,10 @@ import { HILBERT_PROOF_BRIDGE_API_DEFS } from "./hilbertProofBridge";
 import { EITHER_BRIDGE_API_DEFS } from "./eitherBridge";
 import { VISUALIZATION_BRIDGE_API_DEFS } from "./visualizationBridge";
 
-const builtinApiPath = resolve(__dirname, "builtin-api.d.ts");
+const builtinApiPath = resolve(__dirname, "builtin-api-typedefs.txt");
 const builtinApiContent = readFileSync(builtinApiPath, "utf-8");
 
-describe("builtin-api.d.ts", () => {
+describe("builtin-api-typedefs.txt", () => {
   it("ファイルが存在し、内容がある", () => {
     expect(builtinApiContent.length).toBeGreaterThan(0);
   });

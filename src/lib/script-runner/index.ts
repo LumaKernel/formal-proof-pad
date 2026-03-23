@@ -6,7 +6,7 @@
  * 実行制限（ステップ数・時間）を提供する。
  * 証明操作 API ブリッジも提供する。
  *
- * 型定義は builtin-api.d.ts に統合済み（?raw インポートで使用）。
+ * 型定義は builtin-api-typedefs.txt に統合済み（?raw インポートで使用）。
  *
  * 変更時は scriptRunner.ts, proofBridge.ts, *.test.ts も同期すること。
  */
