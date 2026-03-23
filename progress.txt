@@ -109,6 +109,24 @@
 
 ---
 
+## 2026-03-23 - [カバレッジ改善] referenceディレクトリのブランチカバレッジ向上
+- ベースライン: Stmts 99.92%, Branch 99.19%, Funcs 90.26%, Lines 99.97%
+- **結果: Stmts 99.92% (±0.00%), Branch 99.29% (+0.10%), Funcs 90.26% (±0.00%), Lines 99.97% (±0.00%)**
+- 実装内容:
+  - ReferenceFloatingWindow.test.tsx: testIdなし+ナビ/ホーム/ブラウズモードテスト、ホームボタンja aria-labelテスト（+2テスト）
+  - ReferenceModal.test.tsx: testIdなし+ナビゲーション表示テスト（+1テスト）
+  - ReferenceBrowserComponent.tsx: handleNavigateの到達不能防御分岐にv8 ignore追加
+- 変更ファイル:
+  - src/lib/reference/ReferenceFloatingWindow.test.tsx
+  - src/lib/reference/ReferenceModal.test.tsx
+  - src/lib/reference/ReferenceBrowserComponent.tsx
+- **今後のイテレーションへの学び:**
+  - testId ternary (`testId !== undefined ? ... : undefined`) は v8 でブランチとしてカウントされる。要素が条件付きレンダリングの場合、testIdなしで全機能を動作させるテストが必要
+  - ReferenceBrowserComponent の handleNavigate は modal の onNavigate に渡されるが、modal は onSelectEntry===undefined 時のみレンダリングされるため、handleNavigate 内の onSelectEntry!==undefined 分岐は到達不能（防御コード）
+  - Reference ディレクトリの残り未カバーブランチ: ReferenceFloatingWindow 99.25% — v8 ignore 済みの pointer event handler 内の分岐
+
+---
+
 ## 2026-03-23 - [カバレッジ改善] substitutionConnectionLogic BFS visited分岐
 - ベースライン: Stmts 99.91%, Branch 99.16%, Funcs 90.2%, Lines 99.97%
 - **結果: Stmts 99.91% (±0.00%), Branch 99.17% (+0.01%), Funcs 90.2% (±0.00%), Lines 99.97% (±0.00%)**
