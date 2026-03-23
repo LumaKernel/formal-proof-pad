@@ -7,6 +7,7 @@
 
 import type { CSSProperties, ReactNode, MouseEvent } from "react";
 import { useResolvedThemeSafe } from "../../lib/theme/ThemeProvider";
+import { menuListStyle, getMenuItemStyle } from "./uiStyleLogic";
 
 export type UiMenuItem = {
   readonly key: string;
@@ -23,46 +24,18 @@ export type UiMenuProps = {
   readonly style?: CSSProperties;
 };
 
-const listStyle: Readonly<CSSProperties> = {
-  listStyle: "none",
-  margin: 0,
-  padding: "0.25rem 0",
-};
-
-function getItemStyle(danger: boolean, isDark: boolean): CSSProperties {
-  return {
-    display: "block",
-    width: "100%",
-    padding: "0.375rem 0.75rem",
-    fontSize: "0.8125rem",
-    textAlign: "left",
-    cursor: "pointer",
-    background: "none",
-    border: "none",
-    fontFamily: "inherit",
-    color: danger
-      ? isDark
-        ? "#ff6b6b"
-        : "#e06060"
-      : isDark
-        ? "#e0e0e0"
-        : "#171717",
-    transition: "background-color 0.1s",
-  };
-}
-
 export function UiMenu({ items, style }: UiMenuProps): ReactNode {
   const resolved = useResolvedThemeSafe();
   const isDark = resolved === "dark";
 
   return (
-    <ul style={{ ...listStyle, ...style }} role="menu">
+    <ul style={{ ...menuListStyle, ...style }} role="menu">
       {items?.map((item) => (
         <li key={item.key} role="none">
           <button
             type="button"
             role="menuitem"
-            style={getItemStyle(item.danger === true, isDark)}
+            style={getMenuItemStyle(item.danger === true, isDark)}
             onClick={(e) => item.onClick?.({ domEvent: e })}
           >
             {item.label}
