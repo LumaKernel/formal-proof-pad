@@ -213,3 +213,7 @@
   - [x] README-ja.mdも用意。READMEからすぐアクセスできるように
 - [x] codecovのバッジをREADMEにつける
   - README.mdとREADME-ja.mdの両方にcodecovバッジ追加
+- [x] 各種依存やフレームワーク、Node.jsなどのバージョンを最新にできないか確認
+  - Next.js 16.2.1, React 19.2.4, Storybook 10.3.1, Vitest 4.1.0, Effect 3.21.0
+  - @types/node ^20→^22 (Node 22に合わせて)
+  - vite 8, eslint 10等のメジャーバージョンは互換性リスクのため未対応

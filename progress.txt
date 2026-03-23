@@ -17331,3 +17331,15 @@
 - 変更ファイル: README.md, README-ja.md
 - カバレッジ変化なし（ドキュメントのみの変更）
 ---
+
+## 2026-03-23 - 依存パッケージ更新
+- semver互換の全パッケージを最新に更新
+- Next.js 16.1.6→16.2.1, React 19.2.3→19.2.4, Storybook 10.2.8→10.3.1
+- Vitest 4.0.18→4.1.0, Effect 3.19.19→3.21.0, antd 6.3.2→6.3.3
+- @types/node ^20→^22 (Node 22に合わせて)
+- カバレッジ: Stmts 99.91%, Branch 99.18%, Funcs 90.22%, Lines 99.97%（低下なし）
+- **今後のイテレーションへの学び:**
+  - vite 8, eslint 10, jsdom 29, @vitejs/plugin-react 6 はメジャーバージョンアップで互換性リスクあり。別タスクとして検討
+  - ローカルのStorybook browserテストは長時間実行でworker timeoutが起きやすい。CIで確認する方が確実
+  - GitHubリポジトリが formal-logic-pad → formal-proof-pad にリネームされた
+---
