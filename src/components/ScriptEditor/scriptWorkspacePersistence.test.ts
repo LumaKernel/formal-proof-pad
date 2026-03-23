@@ -246,6 +246,106 @@ describe("scriptWorkspacePersistence", () => {
       expect(restored.activeTabId).toBe(restored.tabs[0]?.id);
     });
 
+    it("タブのtitleが文字列でなければフィルタされる", () => {
+      const json = JSON.stringify({
+        tabs: [
+          {
+            id: "tab-1",
+            source: "unnamed",
+            title: 123,
+            code: "",
+            originalCode: "",
+            sourceId: null,
+            readonly: false,
+          },
+        ],
+        activeTabId: null,
+        nextUnnamedCounter: 1,
+      });
+      const restored = deserializeWorkspace(json, sampleTemplates);
+      expect(restored.tabs).toHaveLength(0);
+    });
+
+    it("タブのcodeが文字列でなければフィルタされる", () => {
+      const json = JSON.stringify({
+        tabs: [
+          {
+            id: "tab-1",
+            source: "unnamed",
+            title: "Valid",
+            code: null,
+            originalCode: "",
+            sourceId: null,
+            readonly: false,
+          },
+        ],
+        activeTabId: null,
+        nextUnnamedCounter: 1,
+      });
+      const restored = deserializeWorkspace(json, sampleTemplates);
+      expect(restored.tabs).toHaveLength(0);
+    });
+
+    it("タブのoriginalCodeが文字列でなければフィルタされる", () => {
+      const json = JSON.stringify({
+        tabs: [
+          {
+            id: "tab-1",
+            source: "unnamed",
+            title: "Valid",
+            code: "",
+            originalCode: 42,
+            sourceId: null,
+            readonly: false,
+          },
+        ],
+        activeTabId: null,
+        nextUnnamedCounter: 1,
+      });
+      const restored = deserializeWorkspace(json, sampleTemplates);
+      expect(restored.tabs).toHaveLength(0);
+    });
+
+    it("タブのsourceIdがnullでも文字列でもなければフィルタされる", () => {
+      const json = JSON.stringify({
+        tabs: [
+          {
+            id: "tab-1",
+            source: "unnamed",
+            title: "Valid",
+            code: "",
+            originalCode: "",
+            sourceId: 123,
+            readonly: false,
+          },
+        ],
+        activeTabId: null,
+        nextUnnamedCounter: 1,
+      });
+      const restored = deserializeWorkspace(json, sampleTemplates);
+      expect(restored.tabs).toHaveLength(0);
+    });
+
+    it("タブのreadonlyがbooleanでなければフィルタされる", () => {
+      const json = JSON.stringify({
+        tabs: [
+          {
+            id: "tab-1",
+            source: "unnamed",
+            title: "Valid",
+            code: "",
+            originalCode: "",
+            sourceId: null,
+            readonly: "yes",
+          },
+        ],
+        activeTabId: null,
+        nextUnnamedCounter: 1,
+      });
+      const restored = deserializeWorkspace(json, sampleTemplates);
+      expect(restored.tabs).toHaveLength(0);
+    });
+
     it("LibraryタブのsourceIdがnullなら除外される", () => {
       const json = JSON.stringify({
         tabs: [
