@@ -17343,3 +17343,16 @@
   - ローカルのStorybook browserテストは長時間実行でworker timeoutが起きやすい。CIで確認する方が確実
   - GitHubリポジトリが formal-logic-pad → formal-proof-pad にリネームされた
 ---
+
+## 2026-03-23 - Vercelデプロイ修正（Turbopack対応）
+- Next.js 16がデフォルトでTurbopackを使用するようになり、.d.tsの?rawインポートが解決不可に
+- builtin-api.d.ts → builtin-api-typedefs.txt にリネーム
+- next.config.ts に turbopack.rules で *.txt → raw-loader 設定を追加
+- raw-loader パッケージを devDependencies に追加
+- 変更ファイル: next.config.ts, package.json, ScriptEditorComponent.tsx, builtin-api-typedefs.txt, builtin-api.test.ts, 各bridgeモジュールのコメント
+- カバレッジ: Stmts 99.91%, Branch 99.18%, Funcs 90.2%, Lines 99.97%（低下なし）
+- **今後のイテレーションへの学び:**
+  - Next.js 16はデフォルトでTurbopackを使用。カスタムwebpack設定がある場合はturbopack設定も追加が必要
+  - Turbopackは.d.tsファイルのモジュール解決をサポートしない。rawテキストとして使う.d.tsファイルは.txt等に改名する
+  - turbopack.rulesで `*.txt` → `raw-loader` + `as: "*.js"` で対応可能
+---

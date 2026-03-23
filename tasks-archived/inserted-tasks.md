@@ -217,3 +217,6 @@
   - Next.js 16.2.1, React 19.2.4, Storybook 10.3.1, Vitest 4.1.0, Effect 3.21.0
   - @types/node ^20→^22 (Node 22に合わせて)
   - vite 8, eslint 10等のメジャーバージョンは互換性リスクのため未対応
+- [x] Vercelデプロイ失敗修正
+  - 原因: Next.js 16がデフォルトでTurbopackを使用、.d.tsの?rawインポートが解決不可
+  - 修正: builtin-api.d.ts→builtin-api-typedefs.txt + Turbopack rules設定 + raw-loader追加
