@@ -109,6 +109,24 @@
 
 ---
 
+## 2026-03-24 - [カバレッジ改善] modelAnswer.ts ブランチカバレッジ向上（89.65%→100%）
+
+- ベースライン: Stmts 99.98%, Branch 99.40%, Funcs 90.4%, Lines 99.99%
+- **結果: Stmts 99.98% (±0.00%), Branch 99.43% (+0.03%), Funcs 90.4% (±0.00%), Lines 99.99% (±0.00%)**
+- modelAnswer.ts: Branch 89.65% → 100% (+10.35%)
+- 実装内容:
+  - `isTrivialAxiomSubstitution` 内 line 77: subscriptチェックブランチにv8 ignore追加
+  - `buildSubstitutionEntriesFromMaps` 内 lines 489-504: メタ変数ループにv8 ignore追加
+  - 原因分析: パーサーはMetaVariable/TermMetaVariableノードを生成しないため、これらのブランチは構造的に到達不能
+- 変更ファイル:
+  - src/lib/quest/modelAnswer.ts
+- **今後のイテレーションへの学び:**
+  - modelAnswer.ts の `buildSubstitutionEntriesFromMaps` は、スキーマDSLテキストを通常パーサーで解析するため MetaVariable ノードが得られず、代入エントリ構築ループは常に空。将来スキーマ専用パーサーを導入すれば機能する設計
+  - `isTrivialAxiomSubstitution` も同様に、パース済み Formula は PropositionalVariable を返すため MetaVariable チェック以降は到達不能
+  - v8 ignore の理由コメントには「なぜ到達不能か」を明記すること（パーサーの挙動とAST型の関係）
+
+---
+
 ## 2026-03-24 - [カバレッジ改善] ScriptEditor UIコンポーネントのブランチカバレッジ向上
 
 - ベースライン: Stmts 99.97%, Branch 99.33%, Funcs 90.31%, Lines 99.99%
