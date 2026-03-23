@@ -17368,3 +17368,21 @@
   - progress.txtやtasks-archived内の歴史的参照は変更しない（歴史として残す）
   - codecovバッジURLはGitHubリポジトリ名に依存するため、リポジトリ名変更時は更新が必要
 ---
+
+## 2026-03-23 - ロード時間調査（Next.js最適化）
+- ロード時間の調査を実施（Vercel本番環境でChrome DevToolsパフォーマンストレース）
+- Hub page: LCP 573ms, TTFB 19ms, CLS 0.00
+- Workspace page: LCP 443ms, TTFB 11ms, CLS 0.00
+- Core Web Vitals は良好、明確なボトルネックなし
+- バンドルサイズ分析:
+  - Effect.ts: 1.6MB×2チャンク (gzip 345KB×2) — 最大の依存
+  - antd: 1.0MB×2チャンク (gzip 304KB×2) — Button/Tabs/Menuのみ使用
+  - Monaco: 985KB (gzip 285KB) — ワークスペースのみ（適切に分離済み）
+- 全ページで next/dynamic + ssr: false 済み
+- タスクリスト更新: タブコンテンツ遅延ロード、Effect tree-shaking、antd軽量化を候補追加
+- **今後のイテレーションへの学び:**
+  - Turbopackビルドはチャンクサイズ表示なし（webpackの`--analyze`相当がない）
+  - `.next/static/chunks/` の ls -lhS でローカルビルドのチャンクサイズ確認可能
+  - Effect.tsはtree-shaking困難（ランタイム全体が必要）— 代替策としてimport分割やdynamic importを検討
+  - antdはButton/Tabs/Menuのみ使用なのに1MB — headless UIへの移行が最も効果的
+---
