@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Formal Logic Pad
+
+[日本語版 README はこちら](./README-ja.md)
+
+An interactive web application for constructing formal proofs in propositional and predicate logic. Supports Hilbert-style, natural deduction, and sequent calculus proof systems.
+
+## Features
+
+- Visual proof construction on an infinite canvas with drag-and-drop
+- Hilbert-style axiomatic proofs (modus ponens, generalization)
+- Natural deduction (introduction and elimination rules)
+- Sequent calculus (LJ / LK) with cut elimination
+- Quest mode with guided exercises for propositional and predicate logic
+- Truth table generation and formula evaluation
+- Proof collection management (save, load, import/export)
+- Dark and light theme support
+- English and Japanese localization
+
+## Requirements
+
+- Node.js 22 or later
+- npm
 
 ## Getting Started
 
-First, run the development server:
-
-```bash
+```
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The development server starts at http://localhost:13000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+npm run test:run
+npm run coverage
+```
 
-## Learn More
+## Storybook
 
-To learn more about Next.js, take a look at the following resources:
+```
+npm run storybook
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Storybook starts at http://localhost:13006.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See the repository for license information.
