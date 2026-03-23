@@ -1862,10 +1862,7 @@ describe("normalizeFormula", () => {
     // 右辺φにメタ変数あり → containsMetaVariable(f.right) = true
     // → 置換を保持（|| の第二分岐を通過）
     const phi = metaVariable("φ");
-    const inner = implication(
-      predicate("P", [termVariable("y")]),
-      phi,
-    );
+    const inner = implication(predicate("P", [termVariable("y")]), phi);
     const f = formulaSubstitution(inner, constant("b"), termVariable("y"));
     const result = normalizeFormula(f);
     expect(result._tag).toBe("FormulaSubstitution");
