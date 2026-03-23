@@ -220,3 +220,6 @@
 - [x] Vercelデプロイ失敗修正
   - 原因: Next.js 16がデフォルトでTurbopackを使用、.d.tsの?rawインポートが解決不可
   - 修正: builtin-api.d.ts→builtin-api-typedefs.txt + Turbopack rules設定 + raw-loader追加
+- [x] formal logic padからformal proof padに名前をもろもろ変更する
+  - package.json, README, UIテキスト, ロケール, devcontainer, GitHub URL等を一括変更
+  - git remote URLも更新

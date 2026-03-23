@@ -17356,3 +17356,15 @@
   - Turbopackは.d.tsファイルのモジュール解決をサポートしない。rawテキストとして使う.d.tsファイルは.txt等に改名する
   - turbopack.rulesで `*.txt` → `raw-loader` + `as: "*.js"` で対応可能
 ---
+
+## 2026-03-23 - formal-logic-pad → formal-proof-pad 名前変更
+- package.json name, README.md/README-ja.md タイトル・codecovバッジURL
+- UIテキスト (HubPageView, WorkspacePageView, hubMessages)
+- ストーリーテスト期待値, messages/en.json, messages/ja.json
+- .devcontainer/devcontainer.json, dev/ドキュメント内参照
+- git remote URL更新
+- カバレッジ: Stmts 99.91%, Branch 99.18%, Funcs 90.22%, Lines 99.97%（低下なし）
+- **今後のイテレーションへの学び:**
+  - progress.txtやtasks-archived内の歴史的参照は変更しない（歴史として残す）
+  - codecovバッジURLはGitHubリポジトリ名に依存するため、リポジトリ名変更時は更新が必要
+---
