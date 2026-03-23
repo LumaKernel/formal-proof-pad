@@ -209,3 +209,5 @@
   - [x] 逆も同様
     - 08-deduction-theorem.md セクション 6 に詳細解説追加
     - reverse-deduction-theorem-explicit テンプレート追加
+- [x] README.mdをまっさらにして整理。シンプルな記述、アカデミック向けに。強調などは使わない。
+  - [x] README-ja.mdも用意。READMEからすぐアクセスできるように

@@ -17316,3 +17316,12 @@
   - ProofNodeJson の formula._tag で含意判定可能（Implication チェック）
   - inserted-tasks.md 全完了 → tasks-archived/ へのアーカイブ対象
 ---
+
+## 2026-03-23 - README整理
+- create-next-appデフォルトのREADMEを削除し、アカデミック向けのシンプルなREADMEに刷新
+- README-ja.md（日本語版）を新規作成、READMEから相互リンク
+- 変更ファイル: README.md, README-ja.md
+- カバレッジ変化なし: Stmts 99.91%, Branch 99.17%, Funcs 90.2%, Lines 99.97%
+- **今後のイテレーションへの学び:**
+  - tasks/inserted-tasks.mdのインデントはPrettier準拠（スペース2個）にする。4スペースだとCI失敗
+---
