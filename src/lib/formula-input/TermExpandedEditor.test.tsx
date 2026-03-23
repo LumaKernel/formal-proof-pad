@@ -144,6 +144,15 @@ describe("TermExpandedEditor - エラー表示", () => {
       expect(screen.getByTestId("expanded-highlights")).toBeInTheDocument();
     });
   });
+
+  it("テキスト先頭からエラーがある場合もハイライトが表示される", async () => {
+    // エラーが位置0から始まるケース（gap なし = pos < h.start の false ブランチ）
+    render(<ExpandedEditorWrapper initialValue=")" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("expanded-highlights")).toBeInTheDocument();
+    });
+  });
 });
 
 // --- 閉じる操作テスト ---
