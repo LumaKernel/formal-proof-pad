@@ -17325,3 +17325,9 @@
 - **今後のイテレーションへの学び:**
   - tasks/inserted-tasks.mdのインデントはPrettier準拠（スペース2個）にする。4スペースだとCI失敗
 ---
+
+## 2026-03-23 - codecovバッジ追加
+- README.mdとREADME-ja.mdにcodecovバッジを追加
+- 変更ファイル: README.md, README-ja.md
+- カバレッジ変化なし（ドキュメントのみの変更）
+---

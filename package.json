@@ -24,10 +24,10 @@
     "js-interpreter": "^6.0.1",
     "katex": "^0.16.33",
     "md-editor-rt": "^6.4.0",
-    "next": "16.1.6",
+    "next": "^16.2.1",
     "next-intl": "^4.8.2",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.1",
@@ -42,7 +42,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/katex": "^0.16.8",
-    "@types/node": "^20",
+    "@types/node": "^22.19.15",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.4",
@@ -50,7 +50,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "^16.2.1",
     "eslint-plugin-storybook": "^10.2.8",
     "jsdom": "^28.1.0",
     "playwright": "^1.58.2",
