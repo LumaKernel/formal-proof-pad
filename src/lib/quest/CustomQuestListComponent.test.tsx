@@ -543,9 +543,7 @@ describe("CustomQuestListComponent", () => {
 
   describe("ホバー状態", () => {
     it("mouseLeaveでホバー状態が解除される", () => {
-      render(
-        <CustomQuestList items={sampleItems} onStartQuest={vi.fn()} />,
-      );
+      render(<CustomQuestList items={sampleItems} onStartQuest={vi.fn()} />);
 
       const questItem = screen.getByTestId("custom-quest-item-custom-1001");
 
@@ -959,9 +957,7 @@ describe("CustomQuestListComponent", () => {
     });
 
     it("両方ない場合は共有ボタンが表示されない", () => {
-      render(
-        <CustomQuestList items={sampleItems} onStartQuest={vi.fn()} />,
-      );
+      render(<CustomQuestList items={sampleItems} onStartQuest={vi.fn()} />);
 
       expect(
         screen.queryByTestId("custom-quest-share-btn-custom-1001"),
