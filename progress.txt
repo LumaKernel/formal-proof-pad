@@ -109,6 +109,36 @@
 
 ---
 
+## 2026-03-24 - [カバレッジ改善] ScriptEditor UIコンポーネントのブランチカバレッジ向上
+
+- ベースライン: Stmts 99.97%, Branch 99.33%, Funcs 90.31%, Lines 99.99%
+- **結果: Stmts 99.97% (±0.00%), Branch 99.39% (+0.06%), Funcs 90.42% (+0.11%), Lines 99.99% (±0.00%)**
+- ScriptEditor ディレクトリ: Branch 96.19% → 97.85% (+1.66%)
+- 実装内容:
+  - ScriptFileExplorer.test.tsx 新規作成（3テスト）: リネーム同名Enter、リネーム同名blur、空状態
+  - ScriptApiReferencePanel.test.tsx 新規作成（2テスト）: Spaceキー操作、検索結果なし
+  - ScriptLibraryPanel.test.tsx 新規作成（2テスト）: 検索クエリあり結果なし、検索クエリなし結果なし
+  - ScriptWorkspaceTabBar.test.tsx 新規作成（1テスト）: コンテキストメニューハンドラ未指定
+  - scriptWorkspacePersistence.test.ts: バリデーション中間分岐テスト5件追加（title/code/originalCode/sourceId/readonly）
+- ブランチ100%になったファイル:
+  - ScriptFileExplorer.tsx: 90.47% → 100%
+  - ScriptApiReferencePanel.tsx: 94.11% → 100%
+  - ScriptWorkspaceTabBar.tsx: 92.85% → 100%
+  - ScriptLibraryPanel.tsx: 94.44% → 100%
+- 変更ファイル:
+  - src/components/ScriptEditor/ScriptFileExplorer.test.tsx（新規）
+  - src/components/ScriptEditor/ScriptApiReferencePanel.test.tsx（新規）
+  - src/components/ScriptEditor/ScriptLibraryPanel.test.tsx（新規）
+  - src/components/ScriptEditor/ScriptWorkspaceTabBar.test.tsx（新規）
+  - src/components/ScriptEditor/scriptWorkspacePersistence.test.ts
+- **今後のイテレーションへの学び:**
+  - ScriptEditor UIコンポーネントの未カバーブランチは主に: (1)リネームで同名→onRename呼ばれない、(2)検索結果なし、(3)キーボードShortcutのSpace、(4)オプショナルhandler未指定
+  - scriptWorkspacePersistence.ts: 個別テストでは100%だがCI全体では98.27%（v8集約アーティファクト）
+  - scriptWorkspaceState.ts: 同様にCI全体では88%（個別100%）
+  - ContextMenuComponentの項目は `data-testid="context-menu-item-{id}"` でアクセス可能
+
+---
+
 ## 2026-03-23 - [カバレッジ改善] SequentExpandedEditor テスト追加＋TermExpandedEditor ブランチカバレッジ
 - ベースライン: Stmts 99.92%, Branch 99.29%, Funcs 90.24%, Lines 99.97%
 - **結果: Stmts 99.97% (+0.05%), Branch 99.33% (+0.04%), Funcs 90.31% (+0.07%), Lines 99.99% (+0.02%)**
