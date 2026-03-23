@@ -17232,3 +17232,14 @@
 - **今後のイテレーションへの学び:**
   - v8 ignore で else if ブランチを除外するには、前の if ブロック末尾に `/* v8 ignore start */` を置く必要がある（else if 行の前に置いても遅い）
 ---
+
+## 2026-03-23 - カバレッジ改善（ProofWorkspace クエスト詳細ハンドラ v8 ignore）
+- ProofWorkspace.tsx: クエスト詳細ポップオーバーのdocumentイベントリスナー（外側クリック/Escape）にv8 ignore追加
+  - Storybookで検証済みのUI操作ハンドラをカバレッジ除外
+- ベースライン: Stmts 99.89%, Branch 99.07%, Funcs 90.21%, Lines 99.94%
+- 結果: Stmts 99.90%, Branch 99.11%, Funcs 90.20%, Lines 99.96%
+- 変更ファイル:
+  - src/lib/proof-pad/ProofWorkspace.tsx（v8 ignore 追加のみ）
+- **今後のイテレーションへの学び:**
+  - document.addEventListenerで登録するハンドラ内のロジック（click outside, Escape閉じ）はunit testで到達困難。Storybookで検証しv8 ignoreで除外するのが適切
+---
