@@ -30,7 +30,7 @@ import { encodeProofNode } from "./hilbertProofBridge";
 
 describe("BUILTIN_TEMPLATES", () => {
   it("20のテンプレートを含む", () => {
-    expect(BUILTIN_TEMPLATES).toHaveLength(21);
+    expect(BUILTIN_TEMPLATES).toHaveLength(22);
   });
 
   it("各テンプレートが必須フィールドを持つ", () => {
@@ -1075,8 +1075,9 @@ describe("filterTemplatesByStyle", () => {
     expect(ids).toContain("deduction-theorem-explicit");
     expect(ids).toContain("deduction-theorem-workspace");
     expect(ids).toContain("hilbert-theorem-gallery");
+    expect(ids).toContain("reverse-deduction-theorem-explicit");
     expect(ids).toContain("reverse-deduction-theorem-workspace");
-    expect(result).toHaveLength(11);
+    expect(result).toHaveLength(12);
   });
 
   it("BUILTIN_TEMPLATESでsequent-calculusフィルタ", () => {

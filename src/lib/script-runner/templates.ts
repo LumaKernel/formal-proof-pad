@@ -720,6 +720,88 @@ console.log("Γ ∪ {" + hypothesisText + "} ⊢ B → Γ ⊢ " + hypothesisText
 };
 
 /**
+ * 逆演繹定理の明示的実装テンプレート。
+ *
+ * applyReverseDeductionTheorem 組込み関数を使わず、
+ * 結論の含意構造を手動で分解して MP で B を導出する。
+ * 教育目的: 逆演繹定理がいかにシンプルかを実感できる。
+ *
+ * @see dev/logic-reference/08-deduction-theorem.md
+ */
+const reverseDeductionTheoremExplicit: ScriptTemplate = {
+  id: "reverse-deduction-theorem-explicit",
+  title: "逆演繹定理の明示的実装",
+  description:
+    "組込み関数を使わず、結論 A→B の構造を分解して A を仮定に追加し MP で B を導出する。",
+  compatibleStyles: ["hilbert"],
+  code: `// 逆演繹定理の明示的実装
+//
+// applyReverseDeductionTheorem() 組込み関数を使わず、
+// 逆演繹定理の変換を手動で実装します。
+//
+// Γ ⊢ A → B の証明木を Γ ∪ {A} ⊢ B の証明木に変換します。
+//
+// アルゴリズム:
+//   1. 証明木の結論が A→B の形であることを確認
+//   2. A を AxiomNode（仮定）として追加
+//   3. MP(A, A→B) = B
+
+// 体系チェック
+var sysInfo = getDeductionSystemInfo();
+if (!sysInfo.isHilbertStyle) {
+  throw new Error("このスクリプトはヒルベルト流の体系でのみ実行できます。現在の体系: " + sysInfo.style);
+}
+
+console.log("=== 逆演繹定理の明示的実装 ===");
+console.log("体系: " + sysInfo.systemName);
+console.log("");
+
+// ワークスペースからHilbert証明木を抽出
+console.log("--- 証明木を抽出中 ---");
+var proof = extractHilbertProof();
+var conclusion = proof.formula;
+console.log("元の結論: " + formatFormula(conclusion));
+console.log("");
+
+// 結論が含意 A→B の形であることを確認
+console.log("--- 結論の構造を確認 ---");
+if (conclusion._tag !== "Implication") {
+  throw new Error("結論が含意（→）の形ではありません: " + formatFormula(conclusion));
+}
+
+var a = conclusion.left;   // 仮定として追加する A
+var b = conclusion.right;  // 導出される結論 B
+
+console.log("  A = " + formatFormula(a));
+console.log("  B = " + formatFormula(b));
+console.log("");
+
+// 逆演繹定理を適用
+console.log("--- 変換中 ---");
+console.log("  [ステップ1] A を仮定（AxiomNode）として追加");
+var aNode = { _tag: "AxiomNode", formula: a };
+
+console.log("  [ステップ2] MP(A, A→B) = B");
+var transformed = {
+  _tag: "ModusPonensNode",
+  formula: b,
+  antecedent: aNode,       // 前提: A
+  conditional: proof        // 条件: A→B（元の証明木全体）
+};
+console.log("  → " + formatFormula(transformed.formula));
+console.log("");
+
+// 変換後の証明木をワークスペースに表示
+console.log("--- 変換後の証明木を配置中 ---");
+displayHilbertProof(transformed);
+
+console.log("");
+console.log("逆演繹定理の適用が完了しました。");
+console.log("Γ ⊢ " + formatFormula(conclusion) + " → Γ ∪ {" + formatFormula(a) + "} ⊢ " + formatFormula(b));
+`,
+};
+
+/**
  * 逆演繹定理の適用テンプレート。
  *
  * ワークスペース上のHilbert証明木の結論（A→B）から、
@@ -1815,6 +1897,7 @@ export const BUILTIN_TEMPLATES: readonly ScriptTemplate[] = [
   hilbertTheoremGallery,
   deductionTheoremExplicit,
   deductionTheoremWorkspace,
+  reverseDeductionTheoremExplicit,
   reverseDeductionTheoremWorkspace,
 ];
 

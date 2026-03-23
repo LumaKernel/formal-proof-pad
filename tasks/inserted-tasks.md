@@ -6,4 +6,4 @@
     - dev/logic-reference/08-deduction-theorem.md に作成
     - 明示的実装スクリプトテンプレート deduction-theorem-explicit も追加
     - クエストとの連携は逆演繹定理タスクと合わせて検討
-  - [ ] 逆も同様
+  - [-] 逆も同様
