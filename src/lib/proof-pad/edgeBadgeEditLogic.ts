@@ -15,7 +15,9 @@ import {
   isAtInferenceEdge,
   isScInferenceEdge,
 } from "./inferenceEdge";
+import { Either } from "effect";
 import { greekLetters } from "../logic-core/greekLetters";
+import { parseString, parseTermString } from "../logic-lang/parser";
 import type {
   SubstitutionEntries,
   SubstitutionEntry,
@@ -260,13 +262,32 @@ export function fromSubstEditEntries(
 }
 
 /**
+ * 代入エントリの値が構文的に正しいかを判定する。
+ * formula種別ならparseString、term種別ならparseTermStringで検証。
+ */
+function isSubstEntryValueParseable(entry: SubstEditEntry): boolean {
+  const trimmed = entry.value.trim();
+  if (trimmed === "") return false;
+  if (entry.kind === "formula") {
+    return Either.isRight(parseString(trimmed));
+  }
+  // entry.kind === "term"
+  return Either.isRight(parseTermString(trimmed));
+}
+
+/**
  * Substitution編集が確定可能かどうかを判定する。
  * 少なくとも1つの有効なエントリ（metaVarとvalueが非空）が必要。
+ * さらに、非空のすべてのエントリが構文的に正しい論理式/項でなければならない。
  */
 export function canConfirmSubstEdit(
   entries: readonly SubstEditEntry[],
 ): boolean {
-  return entries.some((e) => e.metaVar.trim() !== "" && e.value.trim() !== "");
+  const filledEntries = entries.filter(
+    (e) => e.metaVar.trim() !== "" && e.value.trim() !== "",
+  );
+  if (filledEntries.length === 0) return false;
+  return filledEntries.every(isSubstEntryValueParseable);
 }
 
 /**

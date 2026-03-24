@@ -596,6 +596,57 @@ describe("edgeBadgeEditLogic", () => {
           ]),
         ).toBe(false);
       });
+
+      it("returns false when formula value is syntactically invalid", () => {
+        expect(
+          canConfirmSubstEdit([
+            { kind: "formula", metaVar: "φ", value: "-> ->" },
+          ]),
+        ).toBe(false);
+      });
+
+      it("returns false when term value is syntactically invalid", () => {
+        expect(
+          canConfirmSubstEdit([
+            { kind: "term", metaVar: "τ", value: "(((" },
+          ]),
+        ).toBe(false);
+      });
+
+      it("returns true when formula value is syntactically valid", () => {
+        expect(
+          canConfirmSubstEdit([
+            { kind: "formula", metaVar: "φ", value: "alpha -> beta" },
+          ]),
+        ).toBe(true);
+      });
+
+      it("returns true when term value is syntactically valid", () => {
+        expect(
+          canConfirmSubstEdit([
+            { kind: "term", metaVar: "τ", value: "S(0)" },
+          ]),
+        ).toBe(true);
+      });
+
+      it("returns false when one of multiple entries has invalid formula", () => {
+        expect(
+          canConfirmSubstEdit([
+            { kind: "formula", metaVar: "φ", value: "alpha" },
+            { kind: "formula", metaVar: "ψ", value: "-> invalid" },
+          ]),
+        ).toBe(false);
+      });
+
+      it("returns true when all filled entries are syntactically valid", () => {
+        expect(
+          canConfirmSubstEdit([
+            { kind: "formula", metaVar: "φ", value: "alpha" },
+            { kind: "formula", metaVar: "", value: "" },
+            { kind: "term", metaVar: "τ", value: "S(0)" },
+          ]),
+        ).toBe(true);
+      });
     });
 
     describe("toSubstEditEntries (with subscripted meta-variables)", () => {
