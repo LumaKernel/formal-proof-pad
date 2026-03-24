@@ -17754,3 +17754,15 @@
   - CustomQuestListComponent.tsxの編集フォームラベル（難易度、体系、ゴール式等）と確認ダイアログのi18n化が未完了
   - HubPageView内のreferenceLocaleがアプリ全体のlocaleとして使われている
 ---
+
+## 2026-03-25 - CustomQuestListComponent i18n化
+- 実装した内容: CustomQuestListComponentの全UIテキスト（編集フォーム、作成フォーム、インポートフォーム、削除確認、共有パネル、ヘッダー、空状態）をi18n対応
+- 変更したファイル:
+  - src/lib/quest/customQuestListLabels.ts (新規: 30個のラベル関数)
+  - src/lib/quest/customQuestListLabels.test.ts (新規: 64テスト、100%カバレッジ)
+  - src/lib/quest/CustomQuestListComponent.tsx (locale引数をEditForm/CreateForm/ImportFormにスレッド、全ハードコード日本語を関数呼び出しに置換)
+- **今後のイテレーションへの学び:**
+  - ラベル関数は専用ファイル（*Labels.ts）に分離するパターンが保守しやすい
+  - locale引数はサブコンポーネントごとにpropsで受け渡す必要がある（React context未使用のため）
+  - CustomQuestListComponentは約50個の日本語文字列があり、一括でi18n化するのが効率的
+---

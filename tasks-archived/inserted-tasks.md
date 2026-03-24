@@ -247,3 +247,6 @@
   - identifyAxiomで公理インスタンス判定を使った孤立ノード検証を追加。非Hilbert系はスキップ
   - [x] このパターンは証明完了にならないことを保証するテストがあるべきだ (公理制約違反になる)
 - [x] JA設定でドキュメントページのbreadcrumbsの最初が home のまま — `buildBreadcrumbs`で"Home"→locale条件分岐"ホーム"に修正
+- [x] EN設定で日本語の箇所がいくらかある。pw mcpで確認していって。
+  - [x] QuestCatalogComponent: フィルタラベル、ボタン、ステップ数テキスト、空状態メッセージをi18n化
+  - [x] CustomQuestListComponent: 編集フォームラベル、確認ダイアログ、共有パネル等のi18n化 — customQuestListLabels.tsに全ラベル関数を分離、locale引数でEN/JA切替
