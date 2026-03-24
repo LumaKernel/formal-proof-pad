@@ -17667,3 +17667,18 @@
   - no-dateが最多（8箇所）で集約効果が高い。getCurrentTimestamp()関数で一括管理
   - eslint-disableはv8 ignoreほど大量ではない（19 vs 851）
 ---
+
+## 2026-03-24T11:35 - eslint-disable集約: unsafeDate.ts作成
+- unsafeDate.ts作成: getCurrentTimestamp, getCurrentUtcDateComponents, timestampToLocalDateComponents
+- 7ファイルからeslint-disable no-dateを削除（8箇所→1箇所に集約）
+  - useTrash.ts, useProofCollection.ts, useNotebookCollection.ts: defaultGetNow内
+  - WorkspaceContent.tsx, HubContent.tsx: Date.now()直接使用
+  - ProofWorkspace.tsx: new Date() + UTC field extraction 3箇所 + Date.now() 1箇所
+  - scriptFileExplorerLogic.ts: formatSavedAt内のnew Date(timestamp)
+- unsafeDate.test.ts: 3テスト追加
+- カバレッジ: CI確認待ち
+- **今後のイテレーションへの学び:**
+  - Date系のeslint-disable集約はパターンが単純で効果的（同一関数で全置換可能）
+  - unsafeDate.tsはvitest coverage除外対象（_unsafe/**）
+  - tasks/inserted-tasks.mdのprettier修正を忘れずに
+---
