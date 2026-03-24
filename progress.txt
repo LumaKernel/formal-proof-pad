@@ -17775,3 +17775,12 @@
   - ProofWorkspaceのキーボードハンドラはコンテナにaddEventListenerで付いており、INPUT/TEXTAREA/contentEditableのみスキップしている。パネル内テキスト選択はwindow.getSelection()で判定する必要がある
   - v8 ignore内のコードはJSDOMでテスト不可。ブラウザテスト（Playwright）で検証する
 ---
+
+## 2026-03-25 - ドラッグ後エッジ直線残留バグ修正
+- 実装した内容: ProofWorkspace.tsx でドラッグ終了後にエッジが直線（simplified）のまま戻らないバグを修正。isDraggingAny stateを追加し、ドラッグ終了時に再レンダーをトリガー
+- 変更したファイル: src/lib/proof-pad/ProofWorkspace.tsx
+- カバレッジ: ベースライン 99.97%/99.62%/90.53%/99.98%（変更はv8 ignore内のため影響なし）
+- **今後のイテレーションへの学び:**
+  - useRefの値変更は再レンダーをトリガーしない。refの値変更がUIに影響するべき場合は、対応するstateを用意して再レンダーを保証する必要がある
+  - useMemoの依存配列に「値は直接使わないがトリガー目的で入れたい」場合は、値をuseMemo内で実際に参照する形に書き換えると、ESLint react-hooks/exhaustive-deps警告を回避できる
+---
