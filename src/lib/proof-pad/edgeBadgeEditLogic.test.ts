@@ -9,6 +9,7 @@ import {
   fromSubstEditEntries,
   canConfirmSubstEdit,
   updateSubstEditEntryValue,
+  metaVarDefaultValue,
 } from "./edgeBadgeEditLogic";
 
 describe("edgeBadgeEditLogic", () => {
@@ -389,11 +390,11 @@ describe("edgeBadgeEditLogic", () => {
     });
 
     describe("toSubstEditEntries (with premiseFormulaText)", () => {
-      it("auto-extracts meta-variables from premise formula", () => {
+      it("auto-extracts meta-variables from premise formula with default values", () => {
         const result = toSubstEditEntries([], "phi -> (psi -> phi)");
         expect(result).toEqual([
-          { kind: "formula", metaVar: "φ", value: "" },
-          { kind: "formula", metaVar: "ψ", value: "" },
+          { kind: "formula", metaVar: "φ", value: "phi" },
+          { kind: "formula", metaVar: "ψ", value: "psi" },
         ]);
       });
 
@@ -408,21 +409,23 @@ describe("edgeBadgeEditLogic", () => {
         const result = toSubstEditEntries(entries, "phi -> (psi -> phi)");
         expect(result).toEqual([
           { kind: "formula", metaVar: "φ", value: "alpha" },
-          { kind: "formula", metaVar: "ψ", value: "" },
+          { kind: "formula", metaVar: "ψ", value: "psi" },
         ]);
       });
 
       it("extracts term meta-variables as well", () => {
         const result = toSubstEditEntries([], "(all x. phi) -> phi");
         // phi is formula metavar; no term metavar in this formula
-        expect(result).toEqual([{ kind: "formula", metaVar: "φ", value: "" }]);
+        expect(result).toEqual([
+          { kind: "formula", metaVar: "φ", value: "phi" },
+        ]);
       });
 
       it("extracts both formula and term meta-variables", () => {
         // Formula with both formula meta-variable and term meta-variable
         const result = toSubstEditEntries([], "all x. P(x) -> P(tau)");
         // τ is a term meta-variable
-        expect(result).toEqual([{ kind: "term", metaVar: "τ", value: "" }]);
+        expect(result).toEqual([{ kind: "term", metaVar: "τ", value: "tau" }]);
       });
 
       it("merges existing term entry values with extracted term meta-variables", () => {
@@ -451,12 +454,12 @@ describe("edgeBadgeEditLogic", () => {
         ]);
       });
 
-      it("extracts Greek letter names written in Latin as meta-variables", () => {
+      it("extracts Greek letter names written in Latin as meta-variables with defaults", () => {
         // In the parser, "alpha" is parsed as the Greek letter α (meta-variable)
         const result = toSubstEditEntries([], "alpha -> beta");
         expect(result).toEqual([
-          { kind: "formula", metaVar: "α", value: "" },
-          { kind: "formula", metaVar: "β", value: "" },
+          { kind: "formula", metaVar: "α", value: "alpha" },
+          { kind: "formula", metaVar: "β", value: "beta" },
         ]);
       });
 
@@ -646,17 +649,19 @@ describe("edgeBadgeEditLogic", () => {
     });
 
     describe("toSubstEditEntries (with subscripted meta-variables)", () => {
-      it("auto-extracts subscripted formula meta-variables from premise", () => {
+      it("auto-extracts subscripted formula meta-variables from premise with defaults", () => {
         const result = toSubstEditEntries([], "phi1 -> (psi -> phi1)");
         expect(result).toEqual([
-          { kind: "formula", metaVar: "φ_1", value: "" },
-          { kind: "formula", metaVar: "ψ", value: "" },
+          { kind: "formula", metaVar: "φ_1", value: "phi1" },
+          { kind: "formula", metaVar: "ψ", value: "psi" },
         ]);
       });
 
-      it("auto-extracts subscripted term meta-variables from premise", () => {
+      it("auto-extracts subscripted term meta-variables from premise with defaults", () => {
         const result = toSubstEditEntries([], "all x. P(x) -> P(tau1)");
-        expect(result).toEqual([{ kind: "term", metaVar: "τ_1", value: "" }]);
+        expect(result).toEqual([
+          { kind: "term", metaVar: "τ_1", value: "tau1" },
+        ]);
       });
 
       it("handles valid premise with no meta-variables and existing entries", () => {
@@ -673,6 +678,27 @@ describe("edgeBadgeEditLogic", () => {
         expect(result).toEqual([
           { kind: "formula", metaVar: "φ", value: "alpha" },
         ]);
+      });
+    });
+
+    describe("metaVarDefaultValue", () => {
+      it("returns Latin name for known Greek letter without subscript", () => {
+        expect(metaVarDefaultValue("φ", undefined)).toBe("phi");
+        expect(metaVarDefaultValue("ψ", undefined)).toBe("psi");
+        expect(metaVarDefaultValue("τ", undefined)).toBe("tau");
+        expect(metaVarDefaultValue("α", undefined)).toBe("alpha");
+        expect(metaVarDefaultValue("β", undefined)).toBe("beta");
+      });
+
+      it("appends subscript to Latin name", () => {
+        expect(metaVarDefaultValue("φ", "1")).toBe("phi1");
+        expect(metaVarDefaultValue("τ", "2")).toBe("tau2");
+      });
+
+      it("returns Latin name for all supported Greek letters", () => {
+        expect(metaVarDefaultValue("γ", undefined)).toBe("gamma");
+        expect(metaVarDefaultValue("δ", undefined)).toBe("delta");
+        expect(metaVarDefaultValue("ω", undefined)).toBe("omega");
       });
     });
 

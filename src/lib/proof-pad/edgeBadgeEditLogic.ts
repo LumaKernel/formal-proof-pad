@@ -16,7 +16,8 @@ import {
   isScInferenceEdge,
 } from "./inferenceEdge";
 import { Either } from "effect";
-import { greekLetters } from "../logic-core/greekLetters";
+import { greekLetters, greekLetterNames } from "../logic-core/greekLetters";
+import type { GreekLetter } from "../logic-core/greekLetters";
 import { parseString, parseTermString } from "../logic-lang/parser";
 import type {
   SubstitutionEntries,
@@ -120,6 +121,27 @@ export function canConfirmGenEdit(state: GenEditState): boolean {
   return state.variableName.trim() !== "";
 }
 
+// --- ギリシャ文字 → Latin名 逆引きマップ ---
+
+/** ギリシャ文字からパーサー互換のLatin名への逆引きマップ */
+const greekToLatinName: ReadonlyMap<GreekLetter, string> = new Map(
+  [...greekLetterNames].map(([latin, greek]) => [greek, latin]),
+);
+
+/**
+ * メタ変数のデフォルト値（恒等代入）を生成する。
+ * ギリシャ文字名のLatin表記 + 添字で構成（例: φ → "phi", φ_1 → "phi1"）。
+ */
+export function metaVarDefaultValue(
+  greekName: GreekLetter,
+  subscript: string | undefined,
+): string {
+  const latin = greekToLatinName.get(greekName) ?? greekName;
+  return subscript !== undefined
+    ? `${latin satisfies string}${subscript satisfies string}`
+    : latin;
+}
+
 // --- Substitution編集操作 ---
 
 /** Substitution編集のエントリ種別 */
@@ -166,7 +188,7 @@ export function toSubstEditEntries(
           value:
             existing !== undefined && existing._tag === "FormulaSubstitution"
               ? existing.formulaText
-              : "",
+              : metaVarDefaultValue(mv.name, mv.subscript),
         });
       }
 
@@ -187,7 +209,7 @@ export function toSubstEditEntries(
           value:
             existing !== undefined && existing._tag === "TermSubstitution"
               ? existing.termText
-              : "",
+              : metaVarDefaultValue(tmv.name, tmv.subscript),
         });
       }
 

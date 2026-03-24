@@ -217,8 +217,8 @@ describe("EdgeParameterPopover", () => {
       });
       // φ entry should have existing value merged
       expect(getValueInput("popover-value-0")).toHaveValue("alpha");
-      // ψ entry should be empty (no existing value)
-      expect(getValueInput("popover-value-1")).toHaveValue("");
+      // ψ entry should have default value (Latin name of Greek letter)
+      expect(getValueInput("popover-value-1")).toHaveValue("psi");
     });
 
     it("calls onCancel on Cancel button", async () => {
