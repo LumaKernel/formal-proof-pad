@@ -109,6 +109,26 @@
 
 ---
 
+## 2026-03-24 - [分析] v8 ignore 全箇所の分析・分類
+
+- ベースライン: Stmts 99.98%, Branch 99.64%, Funcs 90.41%, Lines 99.99%
+- **結果: カバレッジ変化なし（分析タスクのためコード変更なし）**
+- 実装内容:
+  - v8 ignore start の全851箇所（107ファイル）を検索・収集
+  - 12カテゴリに分類（task-processing.md に詳細記録）
+  - 主要カテゴリ: exhaustive switch tail (~80), V8集約アーティファクト (~115), 防御的ノード存在チェック (~65), StepLimitExceeded伝播 (~44), testId分岐 (~53)
+  - 集約方針を策定: makeConstMap活用、_unsafe/フォルダ集約、コンポーネントパターン統一
+- 変更ファイル:
+  - task-processing.md（分析結果記録）
+  - tasks/inserted-tasks.md（サブタスク完了）
+- **今後のイテレーションへの学び:**
+  - ProofWorkspace.tsx が最多（225箇所）。大部分はV8集約アーティファクトと防御的ノードチェック
+  - makeConstMapで解消可能なのはexhaustive Map lookupパターン（~3箇所）と一部のノード存在チェック
+  - exhaustive switch tailパターン（~80箇所）は`assertNever`ヘルパーで`_unsafe/`に集約可能
+  - V8集約アーティファクト（~115箇所）はV8のカバレッジマージバグで回避困難
+
+---
+
 ## 2026-03-24 - [カバレッジ改善] ProofTreePanel系4ファイルのブランチカバレッジ100%達成
 
 - ベースライン: Stmts 99.98%, Branch 99.43%, Funcs 90.42%, Lines 99.99%
