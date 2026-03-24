@@ -110,11 +110,11 @@ const substConfirmButtonStyle: Readonly<CSSProperties> = {
   borderColor: "transparent",
 };
 
-/** 代入入力欄の入力要素スタイル: 白背景+黒点線でクリック可能性を常にアピール */
+/** 代入入力欄の入力要素スタイル: テーマ対応背景+点線でクリック可能性を常にアピール */
 const substInputStyle: Readonly<CSSProperties> = {
-  backgroundColor: "#ffffff",
+  backgroundColor: "var(--color-surface, #ffffff)",
   borderStyle: "dotted",
-  borderColor: "#333333",
+  borderColor: "var(--color-border, #333333)",
 };
 
 // --- Gen Popover ---

@@ -39,10 +39,11 @@ const popupStyle: CSSProperties = {
   minWidth: 200,
   maxHeight: 200,
   overflowY: "auto",
-  backgroundColor: "#fff",
+  backgroundColor: "var(--color-surface, #ffffff)",
+  color: "var(--color-text-primary, #171717)",
   borderWidth: 1,
   borderStyle: "solid",
-  borderColor: "#e2e8f0",
+  borderColor: "var(--color-border, #e2e8f0)",
   borderRadius: 6,
   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
   padding: "4px 0",
@@ -60,15 +61,15 @@ const itemBaseStyle: CSSProperties = {
 
 const itemSelectedStyle: CSSProperties = {
   ...itemBaseStyle,
-  backgroundColor: "#ebf8ff",
+  backgroundColor: "var(--color-surface-selected, #ebf8ff)",
 };
 
 const categoryBadgeStyle: CSSProperties = {
   fontSize: "0.75em",
   padding: "1px 4px",
   borderRadius: 3,
-  backgroundColor: "#edf2f7",
-  color: "#718096",
+  backgroundColor: "var(--color-bg-secondary, #edf2f7)",
+  color: "var(--color-text-secondary, #718096)",
 };
 
 // --- コンポーネント ---

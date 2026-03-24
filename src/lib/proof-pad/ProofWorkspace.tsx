@@ -754,11 +754,11 @@ const substKindLabelStyle = {
   color: "rgba(255,255,255,0.7)",
 };
 
-/** 代入入力欄の入力要素スタイル: 白背景+黒点線でクリック可能性を常にアピール（EdgeParameterPopoverと統一） */
+/** 代入入力欄の入力要素スタイル: テーマ対応背景+点線でクリック可能性を常にアピール（EdgeParameterPopoverと統一） */
 const substInputStyle: Readonly<CSSProperties> = {
-  backgroundColor: "#ffffff",
+  backgroundColor: "var(--color-surface, #ffffff)",
   borderStyle: "dotted",
-  borderColor: "#333333",
+  borderColor: "var(--color-border, #333333)",
 };
 
 // --- ゴール関連スタイル ---
