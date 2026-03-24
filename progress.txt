@@ -17710,3 +17710,25 @@
   - onParsedパターン: 「パース成功時にコールバック」は4箇所で同一実装だった。共通化の典型例
   - formula-inputモジュール内のhookは外部exportせず内部利用のみで十分
 ---
+
+## 2026-03-25 - 循環証明バグ修正
+- 実装した内容: ゴール式をノードとして置くだけで証明完了になるバグを修正
+  - checkGoal (goalCheckLogic.ts) と findMatchingNode (questCompletionLogic.ts) に孤立ノード検証を追加
+  - 孤立ノード = 推論エッジに一切参加していないノード（結論でも前提でもない）
+  - identifyAxiom で公理インスタンス（代入込み）として認識されるノードは孤立でも正当と判定
+  - 非Hilbert系（AT/SC/TAB/ND）は emptyLogicSystem で公理がないため検証スキップ
+- 変更したファイル:
+  - src/lib/proof-pad/goalCheckLogic.ts (isRecognizedAxiom追加、checkGoalに孤立ノード検証)
+  - src/lib/quest/questCompletionLogic.ts (findMatchingNodeに孤立ノード検証)
+  - src/lib/proof-pad/ProofWorkspace.tsx (checkGoalにinferenceEdges/system渡し)
+  - src/lib/proof-pad/goalCheckLogic.test.ts (循環証明防止テスト5件追加)
+  - src/lib/proof-pad/ProofWorkspace.test.tsx (公理テンプレート/インスタンステスト更新)
+  - src/lib/quest/questCompletionLogic.test.ts (孤立ノードテスト更新)
+  - src/lib/quest/modelAnswer.test.ts (孤立ノードテスト更新)
+- カバレッジ: 99.97% stmts / 99.62% branch / 90.41% funcs / 99.98% lines（低下なし）
+- **今後のイテレーションへの学び:**
+  - matchAxiomTemplateByEquality は「テンプレートとの構造的完全一致」のみ。代入インスタンスの判定には identifyAxiom を使う
+  - 非Hilbert系は emptyLogicSystem を使うため propositionalAxioms が空。公理パターン検証はHilbert系のみで意味を持つ
+  - getNodeAxiomIds はエッジグラフを辿って公理を追跡する。エッジなし孤立ノードの公理は追跡できない
+  - 孤立ノード判定: 結論ノードだけでなく前提ノードとしての参加もチェックする（SC/TABルートノードは前提として参加）
+---

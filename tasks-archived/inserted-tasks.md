@@ -243,3 +243,6 @@
 - [x] useEffect すべきところは、ひとつの場所に集約されているべきだと考える。
   - [x] まずは現在の useEffect を分析、分類。 you may not need useEffect も分析。（84箇所/42ファイル/6カテゴリ。外部系同期35箇所は正当。onParsedコールバック8箇所は排除可能。focusリセット18箇所はkey/autoFocusで改善可能。ref同期12箇所はrAF最適化で現状維持。localStorage5箇所+初期化6箇所は現状妥当。task-processing.mdに詳細記録）
   - [x] `.../_unsafe` のようなフォルダに useEffect をすべき対象を集約する。（\_unsafeパターンは不適合。代わりにuseNotifyOnParsedフックでonParsedコールバック4箇所を集約。残り80箇所は正当なuseEffect）
+- [x] ノードとしてゴールを入れるだけで証明完了になってしまう。依存してる公理として、それ自身があるときが禁止になっていない？
+  - identifyAxiomで公理インスタンス判定を使った孤立ノード検証を追加。非Hilbert系はスキップ
+  - [x] このパターンは証明完了にならないことを保証するテストがあるべきだ (公理制約違反になる)
