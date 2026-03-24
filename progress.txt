@@ -109,6 +109,25 @@
 
 ---
 
+## 2026-03-25 - [formula-input] 補完ポップアップ・代入入力欄のダークモード対応
+
+- ベースライン: Stmts 99.97%, Branch 99.6%, Funcs 90.49%, Lines 99.98%
+- **結果: Stmts 99.97% (±0), Branch 99.6% (±0), Funcs 90.51% (+0.02%), Lines 99.98% (±0)**
+- 実装内容:
+  - CompletionPopup.tsx: ハードコード色(`#fff`, `#ebf8ff`, `#edf2f7`)をCSS変数(`--color-surface`, `--color-surface-selected`, `--color-bg-secondary`, `--color-text-secondary`, `--color-border`)に置換
+  - EdgeParameterPopover.tsx: `substInputStyle`の`#ffffff`/`#333333`をCSS変数に置換
+  - ProofWorkspace.tsx: 同様の`substInputStyle`をCSS変数に置換
+- 変更ファイル:
+  - src/lib/formula-input/CompletionPopup.tsx
+  - src/lib/proof-pad/EdgeParameterPopover.tsx
+  - src/lib/proof-pad/ProofWorkspace.tsx
+- **今後のイテレーションへの学び:**
+  - formula-input内のFormulaInput/TermInput等のベーススタイルは既にCSS変数化済み（`--color-surface`等）。問題はCompletionPopupとsubstInputStyleのハードコードだった
+  - Storybook iframe URLフォーマット: `title: "FormulaInput/InputCompletion"` → ID: `formulainput-inputcompletion--story-name`（スラッシュはハイフンに変換、大文字小文字区別なし）
+  - `globals=theme:dark` でStorybook iframeのダークモード切り替え可能
+
+---
+
 ## 2026-03-24 - [_unsafe] 防御的コード集約モジュール作成＋初期適用
 
 - ベースライン: Stmts 99.98%, Branch 99.64%, Funcs 90.44%, Lines 99.99%
