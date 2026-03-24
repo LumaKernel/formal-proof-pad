@@ -17627,3 +17627,14 @@
   - ||チェーンのv8ブランチカバレッジアーティファクトは個別テストで100%なら v8 ignore で対処
   - ProofCollectionPanel.tsx の position prop は既存テストでカバーされていなかった。新機能追加時にテストも必ず追加すべき
 ---
+
+## 2026-03-24T07:10 - v8 ignore集約: _unsafeサブタスク完了
+- commandPalette.ts: unsafeAssertDefined適用、v8 ignore 1箇所削除
+- _unsafe初期セットアップ完了（unsafeMapGet, unsafeAssertDefined）
+- 適用済み: referenceViewerLogic.ts, goalPanelLogic.ts, commandPalette.ts
+- modelAnswer.ts（57箇所）は別途サブタスクとして残す
+- カバレッジ: Stmts 99.98%, Branch 99.64%, Funcs 90.43%, Lines 99.99%（変化なし）
+- **今後のイテレーションへの学び:**
+  - _unsafeユーティリティは防御的throw用のみ。graceful degradation（findIndex===-1→空返却）には不適
+  - unsafeLookup.tsのテンプレートリテラルでは`satisfies string`が必要（ESLintルール）
+---
