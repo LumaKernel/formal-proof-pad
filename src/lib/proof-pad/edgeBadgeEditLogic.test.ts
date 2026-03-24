@@ -607,9 +607,7 @@ describe("edgeBadgeEditLogic", () => {
 
       it("returns false when term value is syntactically invalid", () => {
         expect(
-          canConfirmSubstEdit([
-            { kind: "term", metaVar: "τ", value: "(((" },
-          ]),
+          canConfirmSubstEdit([{ kind: "term", metaVar: "τ", value: "(((" }]),
         ).toBe(false);
       });
 
@@ -623,9 +621,7 @@ describe("edgeBadgeEditLogic", () => {
 
       it("returns true when term value is syntactically valid", () => {
         expect(
-          canConfirmSubstEdit([
-            { kind: "term", metaVar: "τ", value: "S(0)" },
-          ]),
+          canConfirmSubstEdit([{ kind: "term", metaVar: "τ", value: "S(0)" }]),
         ).toBe(true);
       });
 
