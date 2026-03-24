@@ -23,6 +23,7 @@ import { tokenizeDslInput } from "../logic-lang/formulaHighlight";
 import type { TermParseState } from "./TermInput";
 import { computeTermParseState } from "./TermInput";
 import { computeErrorHighlights, formatErrorMessage } from "./FormulaInput";
+import { useNotifyOnParsed } from "./useNotifyOnParsed";
 import { TermDisplay } from "./TermDisplay";
 
 // --- Props ---
@@ -250,11 +251,8 @@ export function TermExpandedEditor({
   );
 
   // パース成功時に onParsed を呼ぶ
-  useEffect(() => {
-    if (parseState.status === "success" && onParsed) {
-      onParsed(parseState.term);
-    }
-  }, [parseState, onParsed]);
+  const parsedTerm = parseState.status === "success" ? parseState.term : null;
+  useNotifyOnParsed(parsedTerm, onParsed);
 
   // 開いたらtextareaにフォーカス
   useEffect(() => {

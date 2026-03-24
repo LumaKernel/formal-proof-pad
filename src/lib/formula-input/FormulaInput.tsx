@@ -8,13 +8,7 @@
  */
 
 import type { CSSProperties } from "react";
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { useCallback, useDeferredValue, useMemo, useRef } from "react";
 import { Either } from "effect";
 import type { Formula } from "../logic-core/formula";
 import type { FormulaTokenKind } from "../logic-lang/formulaHighlight";
@@ -24,6 +18,7 @@ import { parseString } from "../logic-lang/parser";
 import { CompletionPopup } from "./CompletionPopup";
 import { FormulaDisplay } from "./FormulaDisplay";
 import { useCompletion } from "./useCompletion";
+import { useNotifyOnParsed } from "./useNotifyOnParsed";
 
 // --- パース結果の型 ---
 
@@ -253,11 +248,9 @@ export function FormulaInput({
   const comp = useCompletion(value);
 
   // パース成功時に onParsed を呼ぶ
-  useEffect(() => {
-    if (parseState.status === "success" && onParsed) {
-      onParsed(parseState.formula);
-    }
-  }, [parseState, onParsed]);
+  const parsedFormula =
+    parseState.status === "success" ? parseState.formula : null;
+  useNotifyOnParsed(parsedFormula, onParsed);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

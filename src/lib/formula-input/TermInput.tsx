@@ -8,13 +8,7 @@
  */
 
 import type { CSSProperties } from "react";
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { useCallback, useDeferredValue, useMemo, useRef } from "react";
 import { Either } from "effect";
 import type { Term } from "../logic-core/term";
 import type { FormulaTokenKind } from "../logic-lang/formulaHighlight";
@@ -26,6 +20,7 @@ import type { ErrorHighlight } from "./FormulaInput";
 import { computeErrorHighlights, formatErrorMessage } from "./FormulaInput";
 import { TermDisplay } from "./TermDisplay";
 import { useCompletion } from "./useCompletion";
+import { useNotifyOnParsed } from "./useNotifyOnParsed";
 
 // --- パース結果の型 ---
 
@@ -223,11 +218,8 @@ export function TermInput({
   const comp = useCompletion(value);
 
   // パース成功時に onParsed を呼ぶ
-  useEffect(() => {
-    if (parseState.status === "success" && onParsed) {
-      onParsed(parseState.term);
-    }
-  }, [parseState, onParsed]);
+  const parsedTerm = parseState.status === "success" ? parseState.term : null;
+  useNotifyOnParsed(parsedTerm, onParsed);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

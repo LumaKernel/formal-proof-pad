@@ -19,6 +19,7 @@ import type { Formula } from "../logic-core/formula";
 import type { FormulaTokenKind } from "../logic-lang/formulaHighlight";
 import { tokenizeDslInput } from "../logic-lang/formulaHighlight";
 import type { FormulaParseState } from "./FormulaInput";
+import { useNotifyOnParsed } from "./useNotifyOnParsed";
 import {
   computeErrorHighlights,
   computeParseState,
@@ -251,11 +252,9 @@ export function FormulaExpandedEditor({
   );
 
   // パース成功時に onParsed を呼ぶ
-  useEffect(() => {
-    if (parseState.status === "success" && onParsed) {
-      onParsed(parseState.formula);
-    }
-  }, [parseState, onParsed]);
+  const parsedFormula =
+    parseState.status === "success" ? parseState.formula : null;
+  useNotifyOnParsed(parsedFormula, onParsed);
 
   // 開いたらtextareaにフォーカス
   useEffect(() => {
