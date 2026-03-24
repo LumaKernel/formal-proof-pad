@@ -256,3 +256,6 @@
   - isDraggingAny stateを追加し、ドラッグ終了時に再レンダーをトリガーしてsimplified接続線をベジェ曲線に復帰させる
 - [x] 代入モーダル系は論理式が不正なのにそのまま進めるようにはしないで (disabledに)
   - canConfirmSubstEditにparseString/parseTermStringによる構文検証を追加。全non-emptyエントリが構文的に正しい場合のみApply可能
+- [x] 代入モーダル系は論理式が未入力のときはエラー扱いにして、デフォルトで代入元と同じ値が入ってる状態から始まる、というふうにして
+  - 空入力はcanConfirmSubstEditで構文検証によりfalse判定
+  - デフォルト値はメタ変数名のLatin表記（φ→"phi", τ→"tau", φ_1→"phi1"等）でプリフィル

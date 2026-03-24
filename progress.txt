@@ -17793,3 +17793,18 @@
   - canConfirmSubstEdit のような「確定可能か」判定には、単なる空チェックだけでなく構文検証も含めるべき。UIのdisabled状態が既に純粋関数に依存している場合、ロジック側の変更だけでUI反映される
   - edgeBadgeEditLogic.tsは logic-lang/parser.ts に依存する形になった。代入系の構文検証パイプライン: UI入力 → canConfirmSubstEdit(parse検証) → fromSubstEditEntries → validateSubstitutionApplication(二重検証)
 ---
+
+## 2026-03-25 - proof-pad: 代入ポップオーバーデフォルト値プリフィル
+- 実装した内容:
+  - `metaVarDefaultValue(greekName, subscript)` 関数を追加（ギリシャ文字→Latin名の逆引き）
+  - `toSubstEditEntries` でメタ変数の初期値を空文字列からLatin表記（φ→"phi", τ→"tau", φ_1→"phi1"等）に変更
+  - これにより代入ポップオーバーを開いた際、恒等代入がデフォルト入力される
+- 変更したファイル:
+  - `src/lib/proof-pad/edgeBadgeEditLogic.ts` (metaVarDefaultValue追加, toSubstEditEntriesデフォルト値変更)
+  - `src/lib/proof-pad/edgeBadgeEditLogic.test.ts` (52テスト: デフォルト値テスト追加・更新)
+  - `src/lib/proof-pad/EdgeParameterPopover.test.tsx` (デフォルト値の期待値更新)
+- カバレッジ: 99.97% / 99.60% / 90.49% / 99.98% (ベースライン: 99.97% / 99.61% / 90.50% / 99.98% — 誤差範囲)
+- **今後のイテレーションへの学び:**
+  - `greekLetterNames` のMap(Latin→Greek)は全23文字を網羅しており、逆引きで未定義になるケースは実際にはない
+  - UIテスト(EdgeParameterPopover.test.tsx)も純粋ロジック変更の影響を受けるので、ロジック変更時は必ずUIテストも確認
+---
