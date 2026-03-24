@@ -9,7 +9,7 @@
     - [x] modelAnswer.ts への\_unsafe適用（resolveNodeId→string直接返却、applyNdStep→throw型化、配列/find/premiseNodeIds等にunsafeAssertDefined適用。v8 ignore 30ブロック削除、残17ブロックはEither.isLeft/parser/exhaustive等）
 
 - [ ] eslint-disable すべきところは、ひとつの場所に集約されているべきだと考える。
-  - [ ] まずは現在の eslint-disable を分析、分類。
+  - [x] まずは現在の eslint-disable を分析、分類。（19箇所/12ファイル/6カテゴリ。no-date 8箇所が最大、集約可能。exhaustive-deps 3箇所は設計見直し。その他8箇所はコンテキスト固有で集約困難。task-processing.mdに詳細記録）
   - [ ] `.../_unsafe` のようなフォルダに eslint-disable をすべき対象を集約する。
 
 - [ ] useEffect すべきところは、ひとつの場所に集約されているべきだと考える。

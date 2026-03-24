@@ -17653,3 +17653,17 @@
   - throw型化すると既存のエラーパステストがtoThrowに変わる。テスト更新を忘れずに
   - Either.isLeft系のv8 ignoreは別のユーティリティが必要（unsafeAssertDefinedでは対応不可）
 ---
+
+## 2026-03-24T11:30 - eslint-disable分析
+- eslint-disable 分析完了: 19箇所/12ファイル/6カテゴリ
+  - no-date: 8箇所（タイムスタンプ生成。_unsafe/unsafeDate.tsに集約可能）
+  - react-hooks/exhaustive-deps: 3箇所（依存配列設計。カスタムフック見直しで一部解消可能）
+  - react-hooks/set-state-in-effect: 2箇所（イベント駆動遷移。コンテキスト固有）
+  - prefer-immutable: 1箇所（cutElimination.tsのmutableカウンター）
+  - no-require-imports: 1箇所（scriptRunner.tsの動的require）
+  - no-html-link-for-pages: 1箇所（pure libコンポーネント）
+- コード変更なし
+- **今後のイテレーションへの学び:**
+  - no-dateが最多（8箇所）で集約効果が高い。getCurrentTimestamp()関数で一括管理
+  - eslint-disableはv8 ignoreほど大量ではない（19 vs 851）
+---
