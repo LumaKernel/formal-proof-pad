@@ -259,3 +259,7 @@
 - [x] 代入モーダル系は論理式が未入力のときはエラー扱いにして、デフォルトで代入元と同じ値が入ってる状態から始まる、というふうにして
   - 空入力はcanConfirmSubstEditで構文検証によりfalse判定
   - デフォルト値はメタ変数名のLatin表記（φ→"phi", τ→"tau", φ_1→"phi1"等）でプリフィル
+- [x] 代入モーダル系の「論理式を入力」のプレースホルダーは白背景なのに白で見えない。別の色にせよ。
+  - CompletionPopup.tsx, EdgeParameterPopover.tsx, ProofWorkspace.tsx のハードコード色をCSS変数(`--color-surface`, `--color-border`等)に置換
+  - [x] 白背景にして、って言ったタスクのときを契機にだいぶ悪化してそう。ちょっとそのときの変更確認して、場合によっては適切に戻して
+    - 3e7192bで追加された`#ffffff`ハードコードをCSS変数に修正

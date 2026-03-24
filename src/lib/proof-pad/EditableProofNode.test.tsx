@@ -966,4 +966,24 @@ describe("EditableProofNode", () => {
       expect(container).toHaveTextContent(":=");
     });
   });
+
+  describe("highlighted", () => {
+    it("highlighted=trueのときpulseアニメーションが適用される", () => {
+      renderNode({ highlighted: true });
+      const node = screen.getByTestId("test-node");
+      expect(node.style.animation).toContain("node-highlight-pulse");
+    });
+
+    it("highlighted=falseのときアニメーションが適用されない", () => {
+      renderNode({ highlighted: false });
+      const node = screen.getByTestId("test-node");
+      expect(node.style.animation).toBe("");
+    });
+
+    it("highlightedが省略されたときアニメーションが適用されない", () => {
+      renderNode();
+      const node = screen.getByTestId("test-node");
+      expect(node.style.animation).toBe("");
+    });
+  });
 });

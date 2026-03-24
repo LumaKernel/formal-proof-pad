@@ -98,6 +98,8 @@ export interface EditableProofNodeProps {
   readonly useSequentEditor?: boolean;
   /** ノートノードの編集開始コールバック（kind="note"のダブルクリック時） */
   readonly onEditNote?: (id: string) => void;
+  /** ノードをハイライト表示するか（代入ポップオーバー等で対象ノードを示す） */
+  readonly highlighted?: boolean;
   /** data-testid */
   readonly testId?: string;
 }
@@ -423,6 +425,7 @@ export function EditableProofNode({
   forceEditMode,
   useSequentEditor,
   onEditNote,
+  highlighted = false,
   testId,
 }: EditableProofNodeProps) {
   const nodeStyle = useMemo(
@@ -454,8 +457,11 @@ export function EditableProofNode({
       borderLeft: `4px solid ${nodeStyle.stripeColor satisfies string}`,
       transition: "box-shadow 0.15s ease, transform 0.15s ease",
       transform: isHovered ? "translateY(-1px)" : "none",
+      ...(highlighted
+        ? { animation: "node-highlight-pulse 1.5s ease-in-out infinite" }
+        : {}),
     }),
-    [nodeStyle, isHovered],
+    [nodeStyle, isHovered, highlighted],
   );
 
   const handleFormulaChange = useCallback(

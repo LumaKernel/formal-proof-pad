@@ -731,3 +731,61 @@ export const ReadonlyParseError: Story = {
     await expect(emptyFormula.getAttribute("data-has-parse-error")).toBeNull();
   },
 };
+
+/**
+ * ハイライト状態: 代入ポップオーバー等で対象ノードを示すpulseアニメーション。
+ */
+export const Highlighted: Story = {
+  render: () => {
+    const [text, setText] = useState("φ → (ψ → φ)");
+    return (
+      <div style={{ display: "flex", gap: 32, padding: 32 }}>
+        <div>
+          <div
+            style={{ fontSize: 11, marginBottom: 8, color: "#888" }}
+          >
+            highlighted=true
+          </div>
+          <EditableProofNode
+            id="hl-node"
+            kind="axiom"
+            label="A1"
+            formulaText={text}
+            onFormulaTextChange={(_id, t) => setText(t)}
+            highlighted={true}
+            testId="highlighted-node"
+          />
+        </div>
+        <div>
+          <div
+            style={{ fontSize: 11, marginBottom: 8, color: "#888" }}
+          >
+            highlighted=false (通常)
+          </div>
+          <EditableProofNode
+            id="normal-node"
+            kind="axiom"
+            label="A1"
+            formulaText={text}
+            onFormulaTextChange={(_id, t) => setText(t)}
+            highlighted={false}
+            testId="normal-node"
+          />
+        </div>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const highlightedNode = canvas.getByTestId("highlighted-node");
+    const normalNode = canvas.getByTestId("normal-node");
+
+    // ハイライトノードにはpulseアニメーションが適用
+    await expect(highlightedNode.style.animation).toContain(
+      "node-highlight-pulse",
+    );
+
+    // 通常ノードにはアニメーションなし
+    await expect(normalNode.style.animation).toBe("");
+  },
+};
