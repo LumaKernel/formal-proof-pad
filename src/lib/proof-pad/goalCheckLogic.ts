@@ -176,8 +176,7 @@ export function checkGoal(
       (system.propositionalAxioms.size > 0 ||
         system.predicateLogic ||
         (system.theoryAxioms?.length ?? 0) > 0);
-    const doStandaloneCheck =
-      inferenceEdges !== undefined && hasAxiomSystem;
+    const doStandaloneCheck = inferenceEdges !== undefined && hasAxiomSystem;
     let matchingNodeId: string | undefined;
     for (const node of nodes) {
       if (node.formulaText.trim() === "") continue;

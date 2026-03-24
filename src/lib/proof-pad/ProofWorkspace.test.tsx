@@ -1270,13 +1270,7 @@ describe("ProofWorkspace", () => {
     it("shows proof complete banner when goal is achieved", () => {
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       // A1テンプレート: phi -> (psi -> phi) は正当な公理
-      ws = addNode(
-        ws,
-        "axiom",
-        "A1",
-        { x: 0, y: 0 },
-        "phi -> (psi -> phi)",
-      );
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi -> (psi -> phi)");
       ws = addGoal(ws, "phi -> (psi -> phi)");
 
       render(
@@ -1346,13 +1340,7 @@ describe("ProofWorkspace", () => {
       const onGoalAchieved = vi.fn();
       let ws = createEmptyWorkspace(lukasiewiczSystem);
       // A1テンプレート: 正当な公理
-      ws = addNode(
-        ws,
-        "axiom",
-        "A1",
-        { x: 0, y: 0 },
-        "phi -> (psi -> phi)",
-      );
+      ws = addNode(ws, "axiom", "A1", { x: 0, y: 0 }, "phi -> (psi -> phi)");
       ws = addGoal(ws, "phi -> (psi -> phi)");
 
       render(
