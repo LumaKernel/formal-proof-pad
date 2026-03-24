@@ -17766,3 +17766,12 @@
   - locale引数はサブコンポーネントごとにpropsで受け渡す必要がある（React context未使用のため）
   - CustomQuestListComponentは約50個の日本語文字列があり、一括でi18n化するのが効率的
 ---
+
+## 2026-03-25 - コピーバグ修正
+- 実装した内容: ProofWorkspace.tsx のキーボードハンドラで Cmd+C/X がテキスト選択時にもブラウザネイティブコピーを阻害していたバグを修正
+- 変更したファイル: src/lib/proof-pad/ProofWorkspace.tsx
+- カバレッジ: ベースライン 99.97%/99.62%/90.55%/99.98%（変更はv8 ignore内のため影響なし）
+- **今後のイテレーションへの学び:**
+  - ProofWorkspaceのキーボードハンドラはコンテナにaddEventListenerで付いており、INPUT/TEXTAREA/contentEditableのみスキップしている。パネル内テキスト選択はwindow.getSelection()で判定する必要がある
+  - v8 ignore内のコードはJSDOMでテスト不可。ブラウザテスト（Playwright）で検証する
+---

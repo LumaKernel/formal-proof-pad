@@ -250,3 +250,5 @@
 - [x] EN設定で日本語の箇所がいくらかある。pw mcpで確認していって。
   - [x] QuestCatalogComponent: フィルタラベル、ボタン、ステップ数テキスト、空状態メッセージをi18n化
   - [x] CustomQuestListComponent: 編集フォームラベル、確認ダイアログ、共有パネル等のi18n化 — customQuestListLabels.tsに全ラベル関数を分離、locale引数でEN/JA切替
+- [x] 各ウィンドウでセレクトしてcmd-cしてもテキストをコピーできない。コピーのフックの判定が広すぎる可能性がある。
+  - window.getSelection() でテキスト選択を検出し、選択時はネイティブコピーを許可。Cmd+Xも同様に修正。
