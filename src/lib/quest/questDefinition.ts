@@ -286,14 +286,28 @@ export function groupByCategory(
   return map;
 }
 
+/**
+ * カテゴリID → 表示順のルックアップMap。
+ * questCategoriesから構築。全QuestCategory値について定義済み。
+ */
+const categoryOrderMap: ReadonlyMap<QuestCategory, number> = new Map(
+  questCategories.map((c) => [c.id, c.order]),
+);
+
+/** カテゴリの表示順を取得する（未定義カテゴリは末尾に配置） */
+export function getCategoryOrder(category: QuestCategory): number {
+  /* v8 ignore start -- categoryOrderMapは全QuestCategory値で初期化済み */
+  return categoryOrderMap.get(category) ?? 999;
+  /* v8 ignore stop */
+}
+
 /** クエストをカテゴリ順 → カテゴリ内order順にソートする */
 export function sortQuests(
   quests: readonly QuestDefinition[],
 ): readonly QuestDefinition[] {
-  const categoryOrder = new Map(questCategories.map((c) => [c.id, c.order]));
   return [...quests].sort((a, b) => {
-    const catA = categoryOrder.get(a.category) ?? 999;
-    const catB = categoryOrder.get(b.category) ?? 999;
+    const catA = getCategoryOrder(a.category);
+    const catB = getCategoryOrder(b.category);
     if (catA !== catB) return catA - catB;
     return a.order - b.order;
   });

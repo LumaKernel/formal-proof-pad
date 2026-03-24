@@ -17,6 +17,7 @@ import {
   searchEntries,
   sortByOrder,
   getLocalizedText,
+  getCategoryMeta,
 } from "./referenceEntry";
 
 // --- State ---
@@ -170,16 +171,12 @@ export function buildEntryListItems(
   locale: Locale,
 ): readonly EntryListItemData[] {
   return entries.map((entry): EntryListItemData => {
-    const categoryMeta = categoryMetas.find((m) => m.id === entry.category);
+    const meta = getCategoryMeta(entry.category);
     return {
       id: entry.id,
       title: getLocalizedText(entry.title, locale),
       summary: getLocalizedText(entry.summary, locale),
-      /* v8 ignore start -- categoryMetaは全エントリで必ず見つかる */
-      categoryLabel: categoryMeta
-        ? getLocalizedText(categoryMeta.label, locale)
-        : entry.category,
-      /* v8 ignore stop */
+      categoryLabel: getLocalizedText(meta.label, locale),
       category: entry.category,
       hasFormalNotation: entry.formalNotation !== undefined,
     };

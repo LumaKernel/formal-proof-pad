@@ -7,6 +7,7 @@
  * 変更時は workspaceBridge.test.ts, index.ts, proofBridge.ts も同期すること。
  */
 
+import { makeConstMap } from "@luma/const-map";
 import type { NativeFunctionBridge } from "./scriptRunner";
 import type { ProofBridgeApiDef } from "./proofBridge";
 import { decodeScProofNode } from "./cutEliminationBridge";
@@ -274,59 +275,32 @@ const createGetNodeStateFn =
 
 /**
  * SC証明ノードの推論規則名を取得する。
+ * makeConstMapにより、既知のSCタグ以外が渡された場合はエラーとなる。
+ * 新しいSCルール追加時はこのマップも更新すること。
  */
-const scTagToRuleName = (tag: string): string => {
-  /* v8 ignore start -- switch行のv8ブランチアーティファクト。defaultは防御的コードでignore済み */
-  switch (tag) {
-    /* v8 ignore stop */
-    case "ScIdentity":
-      return "ID";
-    case "ScBottomLeft":
-      return "⊥L";
-    case "ScCut":
-      return "Cut";
-    case "ScWeakeningLeft":
-      return "WL";
-    case "ScWeakeningRight":
-      return "WR";
-    case "ScContractionLeft":
-      return "CL";
-    case "ScContractionRight":
-      return "CR";
-    case "ScExchangeLeft":
-      return "XL";
-    case "ScExchangeRight":
-      return "XR";
-    case "ScImplicationLeft":
-      return "→L";
-    case "ScImplicationRight":
-      return "→R";
-    case "ScConjunctionLeft":
-      return "∧L";
-    case "ScConjunctionRight":
-      return "∧R";
-    case "ScDisjunctionLeft":
-      return "∨L";
-    case "ScDisjunctionRight":
-      return "∨R";
-    case "ScUniversalLeft":
-      return "∀L";
-    case "ScUniversalRight":
-      return "∀R";
-    case "ScExistentialLeft":
-      return "∃L";
-    case "ScExistentialRight":
-      return "∃R";
-    case "ScNegationLeft":
-      return "¬L";
-    case "ScNegationRight":
-      return "¬R";
-    /* v8 ignore start — 防御的コード: 既知のSCルールタグで網羅済み。将来のタグ追加時のフォールバック */
-    default:
-      return tag;
-    /* v8 ignore stop */
-  }
-};
+const scTagToRuleName = makeConstMap([
+  ["ScIdentity", "ID"],
+  ["ScBottomLeft", "⊥L"],
+  ["ScCut", "Cut"],
+  ["ScWeakeningLeft", "WL"],
+  ["ScWeakeningRight", "WR"],
+  ["ScContractionLeft", "CL"],
+  ["ScContractionRight", "CR"],
+  ["ScExchangeLeft", "XL"],
+  ["ScExchangeRight", "XR"],
+  ["ScImplicationLeft", "→L"],
+  ["ScImplicationRight", "→R"],
+  ["ScConjunctionLeft", "∧L"],
+  ["ScConjunctionRight", "∧R"],
+  ["ScDisjunctionLeft", "∨L"],
+  ["ScDisjunctionRight", "∨R"],
+  ["ScUniversalLeft", "∀L"],
+  ["ScUniversalRight", "∀R"],
+  ["ScExistentialLeft", "∃L"],
+  ["ScExistentialRight", "∃R"],
+  ["ScNegationLeft", "¬L"],
+  ["ScNegationRight", "¬R"],
+] as const)();
 
 /**
  * シーケントを Unicode テキストとしてフォーマットする。

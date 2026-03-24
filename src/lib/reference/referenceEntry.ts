@@ -205,11 +205,38 @@ export function getLocalizedParagraphs(
   return paragraphs[locale];
 }
 
+/**
+ * カテゴリID → メタデータのルックアップMap。
+ * categoryMetasから構築。全ReferenceCategory値について定義済み。
+ */
+const categoryMetaByIdMap: ReadonlyMap<
+  ReferenceCategory,
+  ReferenceCategoryMeta
+> = new Map(categoryMetas.map((m) => [m.id, m]));
+
 /** カテゴリIDからカテゴリメタデータを検索する */
 export function findCategoryMeta(
   category: ReferenceCategory,
 ): ReferenceCategoryMeta | undefined {
-  return categoryMetas.find((m) => m.id === category);
+  return categoryMetaByIdMap.get(category);
+}
+
+/**
+ * カテゴリIDからカテゴリメタデータを取得する（保証付き）。
+ * categoryMetasは全カテゴリを網羅しているため、有効なReferenceCategoryに対して必ず結果を返す。
+ */
+export function getCategoryMeta(
+  category: ReferenceCategory,
+): ReferenceCategoryMeta {
+  const meta = categoryMetaByIdMap.get(category);
+  /* v8 ignore start -- categoryMetaByIdMapは全ReferenceCategory値で初期化済み */
+  if (meta === undefined) {
+    throw new Error(
+      `Category meta not found for "${category satisfies string}". This should never happen.`,
+    );
+  }
+  /* v8 ignore stop */
+  return meta;
 }
 
 /** カテゴリでフィルタリングする */
