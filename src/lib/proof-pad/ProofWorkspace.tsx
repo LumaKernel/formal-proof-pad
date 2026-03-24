@@ -1247,7 +1247,9 @@ export const ProofWorkspace = forwardRef<
 
   // ドラッグ中ノードID追跡（エッジ簡略化用）
   // refで管理: workspaceの変更でconnectionElements useMemoが再計算される際にref値を参照
+  // isDraggingAny stateはドラッグ終了時に再レンダーをトリガーし、simplified解除を保証する
   const draggingNodeIdsRef = useRef<ReadonlySet<string>>(new Set());
+  const [isDraggingAny, setIsDraggingAny] = useState(false);
 
   // ノードコンテキストメニュー
   const [nodeMenuState, setNodeMenuState] =
@@ -1521,8 +1523,10 @@ export const ProofWorkspace = forwardRef<
   );
 
   // ドラッグ終了: draggingNodeIdsRefをクリアしてからエッジスクロール終了を通知
+  // setIsDraggingAny(false) で再レンダーをトリガーし、simplified接続線をベジェ曲線に戻す
   const handleNodeDragEnd = useCallback(() => {
     draggingNodeIdsRef.current = new Set();
+    setIsDraggingAny(false);
     notifyDragEnd();
   }, [notifyDragEnd]);
 
@@ -4831,6 +4835,7 @@ export const ProofWorkspace = forwardRef<
         } else {
           draggingNodeIdsRef.current = new Set([nodeId]);
         }
+        setIsDraggingAny(true);
       }
 
       // マルチセレクションドラッグ: 選択ノードが2つ以上かつドラッグ対象が選択に含まれる場合
@@ -5090,9 +5095,11 @@ export const ProofWorkspace = forwardRef<
           ) : undefined;
 
         // ドラッグ中ノードに接続するエッジは直線表示（パフォーマンス最適化）
+        // isDraggingAny はドラッグ終了時のuseMemo再計算トリガー用
         const isDragSimplified =
-          draggingNodeIdsRef.current.has(conn.fromNodeId) ||
-          draggingNodeIdsRef.current.has(conn.toNodeId);
+          isDraggingAny &&
+          (draggingNodeIdsRef.current.has(conn.fromNodeId) ||
+            draggingNodeIdsRef.current.has(conn.toNodeId));
 
         return (
           <PortConnection
@@ -5143,6 +5150,7 @@ export const ProofWorkspace = forwardRef<
       handleConnectionContextMenu,
       handleEdgeBadgeClick,
       testId,
+      isDraggingAny,
     ],
   );
 
