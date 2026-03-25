@@ -14,6 +14,8 @@ export { FormulaEditor } from "./FormulaEditor";
 export type { FormulaEditorProps } from "./FormulaEditor";
 export { TermEditor } from "./TermEditor";
 export type { TermEditorProps } from "./TermEditor";
+export { BaseExpandedEditor } from "./BaseExpandedEditor";
+export type { BaseExpandedEditorProps } from "./BaseExpandedEditor";
 export { FormulaExpandedEditor } from "./FormulaExpandedEditor";
 export type { FormulaExpandedEditorProps } from "./FormulaExpandedEditor";
 export { TermExpandedEditor } from "./TermExpandedEditor";
