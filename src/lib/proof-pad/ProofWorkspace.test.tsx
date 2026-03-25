@@ -3657,16 +3657,12 @@ describe("ProofWorkspace", () => {
       expect(screen.queryByTestId("workspace-subst-add-entry")).toBeNull();
 
       // click-to-edit: 表示モードをクリックして編集モードに入る
-      await user.click(
-        screen.getByTestId("workspace-subst-value-0-display"),
-      );
+      await user.click(screen.getByTestId("workspace-subst-value-0-display"));
       await user.type(
         screen.getByTestId("workspace-subst-value-0-input-input"),
         "alpha",
       );
-      await user.click(
-        screen.getByTestId("workspace-subst-value-1-display"),
-      );
+      await user.click(screen.getByTestId("workspace-subst-value-1-display"));
       await user.type(
         screen.getByTestId("workspace-subst-value-1-input-input"),
         "beta",
@@ -3792,14 +3788,10 @@ describe("ProofWorkspace", () => {
       expect(metaVarLabel1).toHaveTextContent("τ");
 
       // click-to-edit: 表示モードをクリックして編集モードに入り、placeholderを確認
-      await user.click(
-        screen.getByTestId("workspace-subst-value-0-display"),
-      );
+      await user.click(screen.getByTestId("workspace-subst-value-0-display"));
       const input0 = screen.getByTestId("workspace-subst-value-0-input-input");
       expect(input0).toHaveAttribute("placeholder", "Enter formula");
-      await user.click(
-        screen.getByTestId("workspace-subst-value-1-display"),
-      );
+      await user.click(screen.getByTestId("workspace-subst-value-1-display"));
       const input1 = screen.getByTestId("workspace-subst-value-1-input-input");
       expect(input1).toHaveAttribute("placeholder", "Enter term");
     });
