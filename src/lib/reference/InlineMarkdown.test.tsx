@@ -134,10 +134,7 @@ describe("InlineMarkdown", () => {
   it("リファレンスリンクのクリックでonNavigateが呼ばれる", () => {
     const onNavigate = vi.fn();
     const { container } = render(
-      <InlineMarkdown
-        text="see [[ref:rule-mp|MP]]"
-        onNavigate={onNavigate}
-      />,
+      <InlineMarkdown text="see [[ref:rule-mp|MP]]" onNavigate={onNavigate} />,
     );
     const link = container.querySelector("a[data-ref-id='rule-mp']");
     expect(link).not.toBeNull();
@@ -146,9 +143,7 @@ describe("InlineMarkdown", () => {
   });
 
   it("onNavigateが未指定でもリンクをクリックしてもエラーにならない", () => {
-    const { container } = render(
-      <InlineMarkdown text="[[ref:rule-mp|MP]]" />,
-    );
+    const { container } = render(<InlineMarkdown text="[[ref:rule-mp|MP]]" />);
     const link = container.querySelector("a[data-ref-id='rule-mp']");
     expect(link).not.toBeNull();
     // onNavigateなしでクリックしてもエラーにならない
@@ -158,10 +153,7 @@ describe("InlineMarkdown", () => {
   it("リファレンスリンクのキーボード操作でonNavigateが呼ばれる", () => {
     const onNavigate = vi.fn();
     const { container } = render(
-      <InlineMarkdown
-        text="[[ref:axiom-a1|A1]]"
-        onNavigate={onNavigate}
-      />,
+      <InlineMarkdown text="[[ref:axiom-a1|A1]]" onNavigate={onNavigate} />,
     );
     const link = container.querySelector("a[data-ref-id='axiom-a1']");
     expect(link).not.toBeNull();
