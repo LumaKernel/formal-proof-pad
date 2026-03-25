@@ -161,7 +161,7 @@ const guideFirstQuestWalkthrough: ReferenceEntry = {
     en: [
       'This guide presents a step-by-step derivation of <b>$\\varphi \\to \\varphi$</b> (the identity principle). Although "$\\varphi$ implies $\\varphi$" is semantically trivial, in a formal proof system nothing can be taken for granted. The formula must be derived from axioms using only the permitted inference rules.',
 
-      "<b>The Setup</b>\nOpen quest prop-01 from the quest catalog. The workspace displays a goal: <b>$\\varphi \\to \\varphi$</b>. The Łukasiewicz axiom system provides three axioms and one inference rule:\n• <b>A1 (K):</b> $\\varphi \\to (\\psi \\to \\varphi)$\n• <b>A2 (S):</b> ($\\varphi \\to (\\psi \\to \\chi)) \\to ((\\varphi \\to \\psi) \\to (\\varphi \\to \\chi)$)\n• <b>A3:</b> ($\\lnot \\varphi \\to \\lnot \\psi) \\to (\\psi \\to \\varphi$)\n• <b>MP (Modus Ponens):</b> From $\\varphi \\to \\psi$ and $\\varphi$, derive $\\psi$",
+      "<b>The Setup</b>\nOpen quest prop-01 from the quest catalog. The workspace displays a goal: <b>$\\varphi \\to \\varphi$</b>. The [[ref:system-lukasiewicz|Łukasiewicz]] axiom system provides three axioms and one inference rule:\n• <b>[[ref:axiom-a1|A1]] (K):</b> $\\varphi \\to (\\psi \\to \\varphi)$\n• <b>[[ref:axiom-a2|A2]] (S):</b> ($\\varphi \\to (\\psi \\to \\chi)) \\to ((\\varphi \\to \\psi) \\to (\\varphi \\to \\chi)$)\n• <b>[[ref:axiom-a3|A3]]:</b> ($\\lnot \\varphi \\to \\lnot \\psi) \\to (\\psi \\to \\varphi$)\n• <b>[[ref:rule-mp|MP]] (Modus Ponens):</b> From $\\varphi \\to \\psi$ and $\\varphi$, derive $\\psi$",
 
       "<b>The Strategy</b>\nThe goal is to derive $\\varphi \\to \\varphi$ from these axioms. There is no direct axiom for identity. The key observation is that <b>A2 (the S axiom) distributes implication</b>: given $\\varphi \\to (\\psi \\to \\chi)$ and $\\varphi \\to \\psi$, one can derive $\\varphi \\to \\chi$. By choosing appropriate substitutions for $\\psi$ and $\\chi$, the conclusion becomes $\\varphi \\to \\varphi$.",
 
@@ -182,7 +182,7 @@ const guideFirstQuestWalkthrough: ReferenceEntry = {
     ja: [
       "本ガイドでは、最初のクエスト「<b>$\\varphi \\to \\varphi$</b>（恒等律）の証明」を段階的に解説する。「$\\varphi$ならば$\\varphi$」は意味論的には自明であるが、形式証明体系においては何も前提とできない。許された推論規則のみを用いて、公理から導出する必要がある。",
 
-      "<b>準備</b>\nクエストカタログからprop-01を開く。ワークスペースにゴール「<b>$\\varphi \\to \\varphi$</b>」が表示される。Łukasiewicz公理体系では以下の3つの公理と1つの推論規則が利用可能である：\n• <b>A1 (K)：</b> $\\varphi \\to (\\psi \\to \\varphi)$\n• <b>A2 (S)：</b> ($\\varphi \\to (\\psi \\to \\chi)) \\to ((\\varphi \\to \\psi) \\to (\\varphi \\to \\chi)$)\n• <b>A3：</b> ($\\lnot \\varphi \\to \\lnot \\psi) \\to (\\psi \\to \\varphi$)\n• <b>MP (Modus Ponens)：</b> $\\varphi \\to \\psi$ と $\\varphi$ から $\\psi$ を導出",
+      "<b>準備</b>\nクエストカタログからprop-01を開く。ワークスペースにゴール「<b>$\\varphi \\to \\varphi$</b>」が表示される。[[ref:system-lukasiewicz|Łukasiewicz]]公理体系では以下の3つの公理と1つの推論規則が利用可能である：\n• <b>[[ref:axiom-a1|A1]] (K)：</b> $\\varphi \\to (\\psi \\to \\varphi)$\n• <b>[[ref:axiom-a2|A2]] (S)：</b> ($\\varphi \\to (\\psi \\to \\chi)) \\to ((\\varphi \\to \\psi) \\to (\\varphi \\to \\chi)$)\n• <b>[[ref:axiom-a3|A3]]：</b> ($\\lnot \\varphi \\to \\lnot \\psi) \\to (\\psi \\to \\varphi$)\n• <b>[[ref:rule-mp|MP]] (Modus Ponens)：</b> $\\varphi \\to \\psi$ と $\\varphi$ から $\\psi$ を導出",
 
       "<b>戦略</b>\n目標はこれらの公理から$\\varphi \\to \\varphi$を導出することである。恒等律に直接対応する公理は存在しない。鍵となる観察は、<b>A2（S公理）が含意を分配する</b>という点である：$\\varphi \\to (\\psi \\to \\chi)$ と $\\varphi \\to \\psi$ から $\\varphi \\to \\chi$ を導出できる。$\\psi$と$\\chi$に適切な代入を選択すれば、結論を$\\varphi \\to \\varphi$とすることができる。",
 
@@ -265,9 +265,9 @@ const guideIntroToPropositionalLogic: ReferenceEntry = {
 
       "<b>Proofs in the Axiomatic System</b>\nA <b>formal proof</b> (or derivation) is a finite sequence of formulas where each formula is either:\n1. An instance of an axiom schema, or\n2. Derived from two earlier formulas by Modus Ponens.\n\nThe last formula in the sequence is the <b>theorem</b> being proved. For example, the proof of $\\varphi \\to \\varphi$ (identity) uses two instances of A1 and one instance of A2, connected by two applications of MP.",
 
-      "<b>Soundness and Completeness</b>\nThe axiomatic approach is connected to truth tables by two fundamental theorems:\n• <b>Soundness:</b> Every theorem derivable from the axioms is a tautology. (Proofs only produce truths.)\n• <b>Completeness (Gödel, 1930):</b> Every tautology is derivable from the axioms. (Every truth can be proved.)\n\nTogether, these mean that the syntactic (proof-based) and semantic (truth-table-based) notions of validity coincide for propositional logic. This is a remarkable fact — the axioms capture exactly the tautologies, no more and no less.",
+      "<b>Soundness and Completeness</b>\nThe axiomatic approach is connected to truth tables by two fundamental theorems:\n• <b>[[ref:concept-soundness|Soundness]]:</b> Every theorem derivable from the axioms is a tautology. (Proofs only produce truths.)\n• <b>[[ref:concept-completeness|Completeness]] (Gödel, 1930):</b> Every tautology is derivable from the axioms. (Every truth can be proved.)\n\nTogether, these mean that the syntactic (proof-based) and semantic (truth-table-based) notions of validity coincide for propositional logic. This is a remarkable fact — the axioms capture exactly the tautologies, no more and no less.",
 
-      "<b>Practice and Next Steps</b>\nThe most effective way to develop intuition for propositional logic proofs is through the quest system. The prop-01 through prop-10 quests cover fundamental patterns including the identity principle ($\\varphi \\to \\varphi$), weakening, syllogism, and contraposition. With practice, it becomes apparent that seemingly distinct proofs share common structures — the formal system makes these patterns explicit.\n\nFor further study, the references on the Deduction Theorem (which enables dramatic simplification of proofs), the relationship between classical and intuitionistic logic, and the Curry-Howard correspondence (connecting proofs to programs) are recommended.",
+      "<b>Practice and Next Steps</b>\nThe most effective way to develop intuition for propositional logic proofs is through the quest system. The prop-01 through prop-10 quests cover fundamental patterns including the identity principle ($\\varphi \\to \\varphi$), weakening, syllogism, and contraposition. With practice, it becomes apparent that seemingly distinct proofs share common structures — the formal system makes these patterns explicit.\n\nFor further study, the references on the [[ref:concept-deduction-theorem|Deduction Theorem]] (which enables dramatic simplification of proofs), the relationship between [[ref:system-classical|classical]] and [[ref:system-intuitionistic|intuitionistic]] logic, and the [[ref:concept-curry-howard|Curry-Howard correspondence]] (connecting proofs to programs) are recommended.",
     ],
     ja: [
       "<b>命題論理とは？</b>\n命題論理は、複合的な文の真偽がその構成部分の真偽にどのように依存するかを研究する分野です。<b>命題</b>とは、真か偽のいずれかである文のことです — 例えば「雨が降っている」や「2 + 2 = 4」。命題論理はこれらの文の内部構造を分析しません。<b>論理結合子</b>を使ってそれらがどのように組み合わされるかだけを考えます。",
@@ -286,9 +286,9 @@ const guideIntroToPropositionalLogic: ReferenceEntry = {
 
       "<b>公理体系での証明</b>\n<b>形式証明</b>（導出）とは、各論理式が以下のいずれかである有限の論理式列です：\n1. 公理スキーマのインスタンス、または\n2. それ以前の2つの論理式からModus Ponensによって導出されたもの。\n\n列の最後の論理式が証明される<b>定理</b>です。例えば、$\\varphi \\to \\varphi$（恒等律）の証明は、A1の2つのインスタンスとA2の1つのインスタンスを、2回のMP適用で結合しています。",
 
-      "<b>健全性と完全性</b>\n公理的アプローチと真理値表は、2つの基本定理で結びつけられています：\n• <b>健全性：</b> 公理から導出可能なすべての定理はトートロジーである。（証明は真理のみを生み出す。）\n• <b>完全性（ゲーデル、1930年）：</b> すべてのトートロジーは公理から導出可能である。（すべての真理は証明できる。）\n\nこれらを合わせると、命題論理において構文論的（証明に基づく）妥当性と意味論的（真理値表に基づく）妥当性の概念が一致することがわかります。これは注目に値する事実です — 公理はトートロジーを過不足なく正確に捉えています。",
+      "<b>健全性と完全性</b>\n公理的アプローチと真理値表は、2つの基本定理で結びつけられています：\n• <b>[[ref:concept-soundness|健全性]]：</b> 公理から導出可能なすべての定理はトートロジーである。（証明は真理のみを生み出す。）\n• <b>[[ref:concept-completeness|完全性]]（ゲーデル、1930年）：</b> すべてのトートロジーは公理から導出可能である。（すべての真理は証明できる。）\n\nこれらを合わせると、命題論理において構文論的（証明に基づく）妥当性と意味論的（真理値表に基づく）妥当性の概念が一致することがわかります。これは注目に値する事実です — 公理はトートロジーを過不足なく正確に捉えています。",
 
-      "<b>実践と次のステップ</b>\n命題論理の証明に対する直観を養う最善の方法は、クエストを通じた実践である。prop-01からprop-10のクエストが、恒等律（$\\varphi \\to \\varphi$）、弱化、三段論法、対偶などの基本的パターンを扱っている。進展するにつれ、一見異なる証明が共通の構造を持つことが明らかになる — 形式体系はこれらのパターンを明示的に提示する。\n\nより深い探求のためには、演繹定理（証明の劇的な簡略化を可能にする）、古典論理と直観主義論理の関係、Curry-Howard対応（証明とプログラムの対応関係）に関するリファレンスも参照されたい。",
+      "<b>実践と次のステップ</b>\n命題論理の証明に対する直観を養う最善の方法は、クエストを通じた実践である。prop-01からprop-10のクエストが、恒等律（$\\varphi \\to \\varphi$）、弱化、三段論法、対偶などの基本的パターンを扱っている。進展するにつれ、一見異なる証明が共通の構造を持つことが明らかになる — 形式体系はこれらのパターンを明示的に提示する。\n\nより深い探求のためには、[[ref:concept-deduction-theorem|演繹定理]]（証明の劇的な簡略化を可能にする）、[[ref:system-classical|古典論理]]と[[ref:system-intuitionistic|直観主義論理]]の関係、[[ref:concept-curry-howard|Curry-Howard対応]]（証明とプログラムの対応関係）に関するリファレンスも参照されたい。",
     ],
   },
   relatedEntryIds: [
@@ -536,7 +536,7 @@ const guideIntroPredicateLogic: ReferenceEntry = {
 
       "<b>From Propositional to Predicate Quests</b>\nIn the quests labeled <code>pred-01</code> through <code>pred-06</code>, you will apply these tools to construct proofs in predicate logic. The patterns you learned in propositional logic — using the deduction theorem, hypothetical syllogism, and contraposition — still apply. The new challenge is handling quantifiers and substitution correctly.\nA typical proof begins by instantiating a universally quantified axiom (via A4), then manipulating the result with propositional reasoning and MP, and finally generalizing (via Gen and A5) when the goal involves $\\forall$.",
 
-      "<b>A Glimpse Ahead</b>\nPredicate logic is the standard language of modern mathematics. Every mathematical theory — arithmetic, group theory, set theory — is formulated as a set of axioms in first-order predicate logic. Mastering the Hilbert-style axiom system for predicate logic gives you the foundation for understanding <b>Gödel's completeness theorem</b> (every valid formula is provable), the <b>compactness theorem</b>, and other fundamental results in mathematical logic.",
+      "<b>A Glimpse Ahead</b>\nPredicate logic is the standard language of modern mathematics. Every mathematical theory — arithmetic, group theory, set theory — is formulated as a set of axioms in first-order predicate logic. Mastering the Hilbert-style axiom system for predicate logic gives you the foundation for understanding <b>[[ref:concept-completeness|Gödel's completeness theorem]]</b> (every valid formula is provable), the <b>[[ref:concept-compactness|compactness theorem]]</b>, and other fundamental results in mathematical logic.",
     ],
     ja: [
       "<b>命題から述語へ</b>\n命題論理では、抽象的な命題 $\\varphi$、$\\psi$、$\\chi$ と論理結合子（$\\to$、$\\lnot$、$\\land$、$\\lor$）を扱います。これは推論の多くのパターンを捉えるのに十分強力ですが、「すべての自然数には後者がある」や「100より大きい素数が存在する」といった文は表現できません。これらを扱うためには<b>述語論理</b>（<b>一階述語論理</b>とも呼ばれる）が必要です。",
@@ -557,7 +557,7 @@ const guideIntroPredicateLogic: ReferenceEntry = {
 
       "<b>命題論理から述語論理のクエストへ</b>\nラベル <code>pred-01</code> から <code>pred-06</code> のクエストでは、これらのツールを使って述語論理の証明を構築します。命題論理で学んだパターン — 演繹定理、仮言三段論法、対偶の利用 — は引き続き適用されます。新たな挑戦は量化子と代入を正しく扱うことです。\n典型的な証明は、全称量化された公理をインスタンス化し（A4経由）、その結果を命題推論とMPで操作し、最後にゴールが $\\forall$ を含む場合に一般化（GenとA5経由）するところから始まります。",
 
-      "<b>先の展望</b>\n述語論理は現代数学の標準言語です。あらゆる数学理論 — 算術、群論、集合論 — は一階述語論理の公理の集合として定式化されます。述語論理のHilbert系公理体系を習得することは、<b>Gödelの完全性定理</b>（妥当な論理式はすべて証明可能）、<b>コンパクト性定理</b>、および数理論理学の他の基本的な結果を理解するための基礎となります。",
+      "<b>先の展望</b>\n述語論理は現代数学の標準言語です。あらゆる数学理論 — 算術、群論、集合論 — は一階述語論理の公理の集合として定式化されます。述語論理のHilbert系公理体系を習得することは、<b>[[ref:concept-completeness|Gödelの完全性定理]]</b>（妥当な論理式はすべて証明可能）、<b>[[ref:concept-compactness|コンパクト性定理]]</b>、および数理論理学の他の基本的な結果を理解するための基礎となります。",
     ],
   },
   relatedEntryIds: [
@@ -846,13 +846,13 @@ const axiomA3: ReferenceEntry = {
   },
   body: {
     en: [
-      "Axiom A3 is the <b>contraposition axiom</b> used in the Łukasiewicz system. It states that if $\\lnot \\varphi$ implies $\\lnot \\psi$, then $\\psi$ implies $\\varphi$.",
-      "This axiom captures the essence of classical logic. In the presence of A1 and A2, A3 is equivalent to: the law of excluded middle ($\\varphi \\lor \\lnot \\varphi$), double negation elimination ($\\lnot \\lnot \\varphi \\to \\varphi$), Peirce's law ($((\\varphi \\to \\psi) \\to \\varphi) \\to \\varphi$), and Mendelson's M3.",
+      "Axiom A3 is the <b>contraposition axiom</b> used in the [[ref:system-lukasiewicz|Łukasiewicz]] system. It states that if $\\lnot \\varphi$ implies $\\lnot \\psi$, then $\\psi$ implies $\\varphi$.",
+      "This axiom captures the essence of [[ref:system-classical|classical logic]]. In the presence of [[ref:axiom-a1|A1]] and [[ref:axiom-a2|A2]], A3 is equivalent to: the law of excluded middle ($\\varphi \\lor \\lnot \\varphi$), double negation elimination ($\\lnot \\lnot \\varphi \\to \\varphi$), Peirce's law ($((\\varphi \\to \\psi) \\to \\varphi) \\to \\varphi$), and [[ref:system-mendelson|Mendelson]]'s M3.",
       "In systems without A3 (using only A1, A2, and MP), you get the <b>positive implicational calculus</b>, which is weaker than classical logic.",
     ],
     ja: [
-      "公理A3はŁukasiewicz体系で使用される<b>対偶公理</b>です。$\\lnot \\varphi$が$\\lnot \\psi$を含意するなら、$\\psi$は$\\varphi$を含意することを述べます。",
-      "この公理は古典論理の本質を捉えます。A1とA2の存在下で、A3は以下と同値です: 排中律（$\\varphi \\lor \\lnot \\varphi$）、二重否定除去（$\\lnot \\lnot \\varphi \\to \\varphi$）、Peirceの法則（$((\\varphi \\to \\psi) \\to \\varphi) \\to \\varphi$）、MendelsonのM3。",
+      "公理A3は[[ref:system-lukasiewicz|Łukasiewicz]]体系で使用される<b>対偶公理</b>です。$\\lnot \\varphi$が$\\lnot \\psi$を含意するなら、$\\psi$は$\\varphi$を含意することを述べます。",
+      "この公理は[[ref:system-classical|古典論理]]の本質を捉えます。[[ref:axiom-a1|A1]]と[[ref:axiom-a2|A2]]の存在下で、A3は以下と同値です: 排中律（$\\varphi \\lor \\lnot \\varphi$）、二重否定除去（$\\lnot \\lnot \\varphi \\to \\varphi$）、Peirceの法則（$((\\varphi \\to \\psi) \\to \\varphi) \\to \\varphi$）、[[ref:system-mendelson|Mendelson]]のM3。",
       "A3がない体系（A1, A2, MPのみ）は<b>正含意計算</b>となり、古典論理より弱い体系になります。",
     ],
   },
@@ -1001,13 +1001,13 @@ const axiomDne: ReferenceEntry = {
   body: {
     en: [
       "<b>Double negation elimination</b> (DNE) states that if it is not the case that $\\varphi$ is not true, then $\\varphi$ is true.",
-      "DNE is the key axiom that distinguishes classical logic from intuitionistic logic. Adding DNE to intuitionistic logic yields classical logic.",
+      "DNE is the key axiom that distinguishes [[ref:system-classical|classical logic]] from [[ref:system-intuitionistic|intuitionistic logic]]. Adding DNE to intuitionistic logic yields classical logic.",
       "DNE is equivalent to the law of excluded middle ($\\varphi \\lor \\lnot \\varphi$) and Peirce's law ($((\\varphi \\to \\psi) \\to \\varphi) \\to \\varphi$) in the presence of the other axioms.",
       "In the Łukasiewicz system, $\\lnot \\lnot \\varphi \\to \\varphi$ can be derived from A1, A2, A3, and MP, but the proof takes over a dozen steps — illustrating why Hilbert systems are verbose in practice.",
     ],
     ja: [
       "<b>二重否定除去</b> (DNE) は、$\\varphi$が真でないということがない（$\\lnot \\lnot \\varphi$）なら、$\\varphi$は真であることを述べます。",
-      "DNEは古典論理と直観主義論理を区別する核心的な公理です。直観主義論理にDNEを加えると古典論理になります。",
+      "DNEは[[ref:system-classical|古典論理]]と[[ref:system-intuitionistic|直観主義論理]]を区別する核心的な公理です。直観主義論理にDNEを加えると古典論理になります。",
       "DNEは他の公理の存在下で、排中律（$\\varphi \\lor \\lnot \\varphi$）やPeirceの法則（$((\\varphi \\to \\psi) \\to \\varphi) \\to \\varphi$）と同値です。",
       "Łukasiewicz体系では、$\\lnot \\lnot \\varphi \\to \\varphi$ はA1, A2, A3, MPから導出可能ですが、十数ステップを要します。Hilbert系が実践的に冗長である理由を示しています。",
     ],
@@ -1955,14 +1955,14 @@ const ruleNdOverview: ReferenceEntry = {
   body: {
     en: [
       "<b>Natural deduction</b> (ND) is a proof system introduced by Gentzen (1935) where each logical connective has <i>introduction</i> rules (how to prove it) and <i>elimination</i> rules (how to use it).",
-      "Three variants are supported: <b>NM</b> (minimal logic, no explosion or DNE), <b>NJ</b> (intuitionistic logic, adds EFQ), and <b>NK</b> (classical logic, adds DNE). NM ⊂ NJ ⊂ NK in terms of provable theorems.",
-      "Unlike Hilbert systems (which use only MP), natural deduction allows <i>assuming</i> a hypothesis and later <i>discharging</i> it — e.g., to prove $\\varphi \\to \\psi$, assume $\\varphi$ and derive $\\psi$.",
+      "Three variants are supported: <b>NM</b> ([[ref:system-minimal|minimal logic]], no explosion or DNE), <b>NJ</b> ([[ref:system-intuitionistic|intuitionistic logic]], adds EFQ), and <b>NK</b> ([[ref:system-classical|classical logic]], adds DNE). NM ⊂ NJ ⊂ NK in terms of provable theorems.",
+      "Unlike Hilbert systems (which use only [[ref:rule-mp|MP]]), natural deduction allows <i>assuming</i> a hypothesis and later <i>discharging</i> it — e.g., to prove $\\varphi \\to \\psi$, assume $\\varphi$ and derive $\\psi$.",
       "This application's implementation follows Bekki (戸次大介)『数理論理学』Chapter 8.",
     ],
     ja: [
       "<b>自然演繹</b> (ND) はGentzen (1935) が導入した証明体系で、各論理結合子に<i>導入規則</i>（どう証明するか）と<i>除去規則</i>（どう使うか）があります。",
-      "3つの変種をサポートします: <b>NM</b>（最小論理、爆発律もDNEもなし）、<b>NJ</b>（直観主義論理、EFQを追加）、<b>NK</b>（古典論理、DNEを追加）。証明可能な定理の範囲は NM ⊂ NJ ⊂ NK です。",
-      "Hilbert系（MPのみ使用）と異なり、自然演繹では仮定を<i>仮定</i>して後で<i>解除</i>することができます — 例えば、$\\varphi \\to \\psi$ を証明するには、$\\varphi$を仮定して$\\psi$を導出します。",
+      "3つの変種をサポートします: <b>NM</b>（[[ref:system-minimal|最小論理]]、爆発律もDNEもなし）、<b>NJ</b>（[[ref:system-intuitionistic|直観主義論理]]、EFQを追加）、<b>NK</b>（[[ref:system-classical|古典論理]]、DNEを追加）。証明可能な定理の範囲は NM ⊂ NJ ⊂ NK です。",
+      "Hilbert系（[[ref:rule-mp|MP]]のみ使用）と異なり、自然演繹では仮定を<i>仮定</i>して後で<i>解除</i>することができます — 例えば、$\\varphi \\to \\psi$ を証明するには、$\\varphi$を仮定して$\\psi$を導出します。",
       "本アプリケーションの実装は戸次大介『数理論理学』第8章に基づいています。",
     ],
   },
@@ -2031,13 +2031,13 @@ const ruleNdImplication: ReferenceEntry = {
   body: {
     en: [
       "<b>Implication Introduction ($\\to$I)</b>: Assume $\\varphi$, derive $\\psi$, then discharge the assumption to conclude $\\varphi \\to \\psi$. This is the core mechanism of natural deduction — hypothetical reasoning.",
-      "<b>Implication Elimination ($\\to$E)</b>: From $\\varphi$ and $\\varphi \\to \\psi$, derive $\\psi$. This is exactly Modus Ponens (MP).",
-      "$\\to$I is the rule that most distinguishes natural deduction from Hilbert systems: instead of needing the deduction theorem as a metatheorem, it is built directly into the proof system.",
+      "<b>Implication Elimination ($\\to$E)</b>: From $\\varphi$ and $\\varphi \\to \\psi$, derive $\\psi$. This is exactly [[ref:rule-mp|Modus Ponens]] (MP).",
+      "$\\to$I is the rule that most distinguishes natural deduction from Hilbert systems: instead of needing the [[ref:concept-deduction-theorem|deduction theorem]] as a metatheorem, it is built directly into the proof system.",
     ],
     ja: [
       "<b>含意導入 ($\\to$I)</b>: $\\varphi$を仮定し、$\\psi$を導出し、その仮定を解除して$\\varphi \\to \\psi$を結論します。これは自然演繹の核心的メカニズム — 仮説的推論です。",
-      "<b>含意除去 ($\\to$E)</b>: $\\varphi$と$\\varphi \\to \\psi$から$\\psi$を導出します。これはモーダスポネンス(MP)そのものです。",
-      "$\\to$Iは自然演繹をHilbert系から最も区別する規則です: 演繹定理をメタ定理として必要とする代わりに、証明体系に直接組み込まれています。",
+      "<b>含意除去 ($\\to$E)</b>: $\\varphi$と$\\varphi \\to \\psi$から$\\psi$を導出します。これは[[ref:rule-mp|Modus Ponens]](MP)そのものです。",
+      "$\\to$Iは自然演繹をHilbert系から最も区別する規則です: [[ref:concept-deduction-theorem|演繹定理]]をメタ定理として必要とする代わりに、証明体系に直接組み込まれています。",
     ],
   },
   formalNotation:
@@ -2229,16 +2229,16 @@ const ruleScOverview: ReferenceEntry = {
   },
   body: {
     en: [
-      "<b>Sequent calculus</b> (SC) is a proof system introduced by Gentzen (1935) alongside natural deduction. Proofs manipulate <i>sequents</i> of the form Γ ⇒ Δ, meaning 'from the multiset of assumptions Γ, at least one formula in Δ holds.'",
-      "Each logical connective has a <b>left rule</b> (how it behaves as an assumption) and a <b>right rule</b> (how it behaves as a conclusion). Structural rules (weakening, contraction, exchange) control the shape of sequents.",
-      "Three variants are supported: <b>LM</b> (minimal logic, right side exactly 1 formula), <b>LJ</b> (intuitionistic logic, right side at most 1 formula), and <b>LK</b> (classical logic, unrestricted right side).",
-      "The <b>cut elimination theorem</b> (Gentzen's Hauptsatz) proves that the cut rule can always be eliminated, yielding proofs in a canonical form — a fundamental result in proof theory.",
+      "<b>Sequent calculus</b> (SC) is a proof system introduced by Gentzen (1935) alongside [[ref:rule-nd-overview|natural deduction]]. Proofs manipulate <i>sequents</i> of the form Γ ⇒ Δ, meaning 'from the multiset of assumptions Γ, at least one formula in Δ holds.'",
+      "Each logical connective has a <b>left rule</b> (how it behaves as an assumption) and a <b>right rule</b> (how it behaves as a conclusion). [[ref:rule-sc-structural|Structural rules]] (weakening, contraction, exchange) control the shape of sequents.",
+      "Three variants are supported: <b>LM</b> ([[ref:system-minimal|minimal logic]], right side exactly 1 formula), <b>LJ</b> ([[ref:system-intuitionistic|intuitionistic logic]], right side at most 1 formula), and <b>LK</b> ([[ref:system-classical|classical logic]], unrestricted right side).",
+      "The <b>[[ref:concept-cut-elimination|cut elimination theorem]]</b> (Gentzen's Hauptsatz) proves that the cut rule can always be eliminated, yielding proofs in a canonical form — a fundamental result in proof theory.",
     ],
     ja: [
-      "<b>シーケント計算</b> (SC) はGentzen (1935) が自然演繹とともに導入した証明体系です。<i>シーケント</i> Γ ⇒ Δ を操作します。意味は「仮定の多重集合Γから、Δの論理式の少なくとも1つが成り立つ」です。",
-      "各論理結合子に<b>左規則</b>（仮定としてどう振る舞うか）と<b>右規則</b>（結論としてどう振る舞うか）があります。構造規則（弱化、縮約、交換）がシーケントの形を制御します。",
-      "3つの変種をサポートします: <b>LM</b>（最小論理、右辺はちょうど1つの論理式）、<b>LJ</b>（直観主義論理、右辺は高々1つ）、<b>LK</b>（古典論理、右辺の制約なし）。",
-      "<b>カット除去定理</b> (Gentzenの基本定理, Hauptsatz) は、カット規則が常に除去可能であることを証明し、正規形の証明が得られます — 証明論における基本的な結果です。",
+      "<b>シーケント計算</b> (SC) はGentzen (1935) が[[ref:rule-nd-overview|自然演繹]]とともに導入した証明体系です。<i>シーケント</i> Γ ⇒ Δ を操作します。意味は「仮定の多重集合Γから、Δの論理式の少なくとも1つが成り立つ」です。",
+      "各論理結合子に<b>左規則</b>（仮定としてどう振る舞うか）と<b>右規則</b>（結論としてどう振る舞うか）があります。[[ref:rule-sc-structural|構造規則]]（弱化、縮約、交換）がシーケントの形を制御します。",
+      "3つの変種をサポートします: <b>LM</b>（[[ref:system-minimal|最小論理]]、右辺はちょうど1つの論理式）、<b>LJ</b>（[[ref:system-intuitionistic|直観主義論理]]、右辺は高々1つ）、<b>LK</b>（[[ref:system-classical|古典論理]]、右辺の制約なし）。",
+      "<b>[[ref:concept-cut-elimination|カット除去定理]]</b> (Gentzenの基本定理, Hauptsatz) は、カット規則が常に除去可能であることを証明し、正規形の証明が得られます — 証明論における基本的な結果です。",
     ],
   },
   relatedEntryIds: [
@@ -2684,14 +2684,14 @@ const systemMinimal: ReferenceEntry = {
       "It has no negation axioms: neither <b>ex falso quodlibet</b> (EFQ: $\\varphi \\to (\\lnot \\varphi \\to \\psi)$) nor <b>double negation elimination</b> (DNE: $\\lnot \\lnot \\varphi \\to \\varphi$) holds. Negation $\\lnot \\varphi$ is simply an abbreviation for $\\varphi \\to \\bot$ (or not treated specially at all).",
       "Minimal logic is the common core of all the logic systems in this application: <b>Minimal ⊂ Intuitionistic ⊂ Classical</b>. Any theorem of minimal logic is automatically a theorem of all stronger systems.",
       "In natural deduction, minimal logic corresponds to the system <b>NM</b>: it has introduction and elimination rules for $\\to , \\land , \\lor$, and weakening, but lacks EFQ and DNE. In sequent calculus, it corresponds to <b>LM</b>.",
-      "Despite its weakness, minimal logic is computationally significant. Via the Curry-Howard correspondence, proofs in minimal logic correspond to simply-typed lambda calculus terms, making it the logical foundation of functional programming.",
+      "Despite its weakness, minimal logic is computationally significant. Via the [[ref:concept-curry-howard|Curry-Howard correspondence]], proofs in minimal logic correspond to simply-typed lambda calculus terms, making it the logical foundation of functional programming.",
     ],
     ja: [
       "<b>最小論理</b>（<i>ヨハンソンの最小論理</i>とも呼ばれ、Ingebrigt Johansson, 1936年に由来）は、公理A1 (K)、A2 (S)と推論規則モーダスポネンスのみを使用します。含意のみに限定した場合は<i>正含意計算</i>と呼ばれます。",
       "否定公理を持ちません: <b>爆発律</b> (EFQ: $\\varphi \\to (\\lnot \\varphi \\to \\psi)$) も<b>二重否定除去</b> (DNE: $\\lnot \\lnot \\varphi \\to \\varphi$) も成り立ちません。否定$\\lnot \\varphi$は単に$\\varphi \\to \\bot$の省略形（あるいは特別扱いしない）です。",
       "最小論理は本アプリケーションのすべての論理体系の共通核です: <b>最小論理 ⊂ 直観主義 ⊂ 古典</b>。最小論理の定理はすべての強い体系でも自動的に定理です。",
       "自然演繹では最小論理はシステム<b>NM</b>に対応します: $\\to , \\land , \\lor$の導入規則・除去規則と弱化を持ちますが、EFQとDNEを欠きます。シーケント計算では<b>LM</b>に対応します。",
-      "弱い体系にもかかわらず、最小論理は計算論的に重要です。Curry-Howard対応を通じて、最小論理の証明は単純型付きラムダ計算の項に対応し、関数型プログラミングの論理的基盤となっています。",
+      "弱い体系にもかかわらず、最小論理は計算論的に重要です。[[ref:concept-curry-howard|Curry-Howard対応]]を通じて、最小論理の証明は単純型付きラムダ計算の項に対応し、関数型プログラミングの論理的基盤となっています。",
     ],
   },
   relatedEntryIds: [
@@ -2769,7 +2769,7 @@ const systemIntuitionistic: ReferenceEntry = {
       "It does <b>not</b> have the law of excluded middle ($\\varphi \\lor \\lnot \\varphi$) or double negation elimination ($\\lnot \\lnot \\varphi \\to \\varphi$). A proof of $\\varphi$ requires constructive evidence — you cannot simply show that $\\lnot \\varphi$ leads to a contradiction.",
       "In natural deduction, intuitionistic logic corresponds to <b>NJ</b> (NM + EFQ). In sequent calculus, it corresponds to <b>LJ</b> (right side of sequents has at most one formula). In this application, the Hilbert-style variant uses A1, A2, EFQ, and MP.",
       "Intuitionistic logic is the foundation of <b>constructive mathematics</b> and the <b>BHK interpretation</b> (Brouwer-Heyting-Kolmogorov): a proof of $\\varphi \\to \\psi$ is a function transforming proofs of $\\varphi$ into proofs of $\\psi$; a proof of $\\varphi \\land \\psi$ is a pair of proofs; a proof of $\\varphi \\lor \\psi$ specifies which disjunct holds and provides its proof.",
-      "Via the <b>Curry-Howard correspondence</b>, intuitionistic proofs correspond to programs in typed lambda calculi. This connection is the basis of proof assistants like Coq, Agda, and Lean.",
+      "Via the <b>[[ref:concept-curry-howard|Curry-Howard correspondence]]</b>, intuitionistic proofs correspond to programs in typed lambda calculi. This connection is the basis of proof assistants like Coq, Agda, and Lean.",
       "<b>Heyting Arithmetic</b> (HA) is the intuitionistic variant of Peano Arithmetic: it uses A1, A2, EFQ (instead of A3/M3/DNE) as the propositional base, combined with predicate logic and PA axioms. HA is available as a preset in this application.",
     ],
     ja: [
@@ -2777,7 +2777,7 @@ const systemIntuitionistic: ReferenceEntry = {
       "排中律（$\\varphi \\lor \\lnot \\varphi$）や二重否定除去（$\\lnot \\lnot \\varphi \\to \\varphi$）は成り立ち<b>ません</b>。$\\varphi$の証明には構成的な証拠が必要です — $\\lnot \\varphi$が矛盾を導くことを示すだけでは不十分です。",
       "自然演繹では直観主義論理はシステム<b>NJ</b> (NM + EFQ)に対応します。シーケント計算では<b>LJ</b>（シーケントの右辺が高々1つの論理式）に対応します。本アプリケーションのHilbert系では A1, A2, EFQ, MP を使用します。",
       "直観主義論理は<b>構成的数学</b>と<b>BHK解釈</b> (Brouwer-Heyting-Kolmogorov)の基礎です: $\\varphi \\to \\psi$の証明は$\\varphi$の証明を$\\psi$の証明に変換する関数; $\\varphi \\land \\psi$の証明は証明の対; $\\varphi \\lor \\psi$の証明はどちらの選言肢が成り立つか指定しその証明を与えます。",
-      "<b>Curry-Howard対応</b>を通じて、直観主義の証明は型付きラムダ計算のプログラムに対応します。この対応関係はCoq, Agda, Leanなどの証明支援系の基礎です。",
+      "<b>[[ref:concept-curry-howard|Curry-Howard対応]]</b>を通じて、直観主義の証明は型付きラムダ計算のプログラムに対応します。この対応関係はCoq, Agda, Leanなどの証明支援系の基礎です。",
       "<b>ヘイティング算術</b> (HA) はペアノ算術の直観主義版です: 命題論理基盤としてA1, A2, EFQ (A3/M3/DNEではなく) を使用し、述語論理とPA公理を組み合わせます。HAは本アプリケーションでプリセットとして利用可能です。",
     ],
   },
@@ -3335,15 +3335,15 @@ const conceptGlivenko: ReferenceEntry = {
       "<b>Glivenko's Theorem</b> (1929) establishes a precise relationship between classical and intuitionistic propositional logic. It states that a propositional formula $\\varphi$ is provable in classical logic (LK) if and only if its double negation $\\lnot \\lnot \\varphi$ is provable in intuitionistic logic (LJ). This holds even when hypotheses Γ are present: Γ $\\vdash$_LK $\\varphi \\iff$ Γ $\\vdash$_LJ $\\lnot \\lnot \\varphi$.",
       '<b>Proof outline:</b> The right-to-left direction (⟸) follows from the fact that intuitionistic logic is a subsystem of classical logic, and DNE ($\\lnot \\lnot \\varphi \\to \\varphi$) holds classically. For the left-to-right direction (⟹), one shows that for every classical axiom and inference rule, the double-negation translation preserves derivability in intuitionistic logic. The key insight is that $\\lnot \\lnot$ acts as a "modality" that absorbs classical reasoning.',
       '<b>Significance:</b> Glivenko\'s theorem shows that classical and intuitionistic logic are "not so far apart" for propositional logic — every classical theorem has an intuitionistic counterpart under double negation. This is a foundational result in the study of the relationship between constructive and classical mathematics.',
-      "<b>Limitation to propositional logic:</b> Glivenko's theorem in its original form applies only to propositional logic. For predicate logic, a more refined translation is needed. Kuroda's negative translation (inserting $\\lnot \\lnot$ after each $\\forall$) provides the predicate-logic generalization.",
-      '<b>Connection to other results:</b> Glivenko\'s theorem is closely related to the Kuroda translation and the Gödel-Gentzen negative translation. These translations systematically embed classical logic into intuitionistic logic, demonstrating that classical reasoning can always be "interpreted" constructively via double negation.',
+      "<b>Limitation to propositional logic:</b> Glivenko's theorem in its original form applies only to propositional logic. For predicate logic, a more refined translation is needed. [[ref:concept-kuroda-translation|Kuroda's negative translation]] (inserting $\\lnot \\lnot$ after each $\\forall$) provides the predicate-logic generalization.",
+      '<b>Connection to other results:</b> Glivenko\'s theorem is closely related to the [[ref:concept-kuroda-translation|Kuroda translation]] and the Gödel-Gentzen negative translation. These translations systematically embed classical logic into intuitionistic logic, demonstrating that classical reasoning can always be "interpreted" constructively via double negation.',
     ],
     ja: [
       "<b>グリヴェンコの定理</b> (1929) は、古典命題論理と直観主義命題論理の間の正確な関係を確立するものです。命題論理式 $\\varphi$ が古典論理 (LK) で証明可能であることと、その二重否定 $\\lnot \\lnot \\varphi$ が直観主義論理 (LJ) で証明可能であることは同値です。仮説 Γ がある場合にも成立します: Γ $\\vdash$_LK $\\varphi \\iff$ Γ $\\vdash$_LJ $\\lnot \\lnot \\varphi$。",
       "<b>証明の概略:</b> 右から左の方向 (⟸) は、直観主義論理が古典論理の部分体系であり、古典論理では DNE ($\\lnot \\lnot \\varphi \\to \\varphi$) が成り立つことから従います。左から右の方向 (⟹) では、古典論理の各公理と推論規則について、二重否定翻訳が直観主義論理での導出可能性を保存することを示します。鍵となる洞察は、$\\lnot \\lnot$ が古典的推論を吸収する「モダリティ」として機能することです。",
       "<b>意義:</b> グリヴェンコの定理は、命題論理に関しては古典論理と直観主義論理が「それほど離れていない」ことを示します — すべての古典的定理は、二重否定の下で直観主義的な対応物を持ちます。これは、構成的数学と古典的数学の関係の研究における基礎的な結果です。",
-      "<b>命題論理への限定:</b> グリヴェンコの定理は、元の形では命題論理にのみ適用されます。述語論理に対しては、より精緻な翻訳が必要です。黒田の否定翻訳（各 $\\forall$ の直後に $\\lnot \\lnot$ を挿入する）が、述語論理への一般化を提供します。",
-      "<b>他の結果との関連:</b> グリヴェンコの定理は、黒田翻訳やゲーデル・ゲンツェンの否定翻訳と密接に関連しています。これらの翻訳は、古典論理を直観主義論理に体系的に埋め込むものであり、古典的推論が二重否定を通じて常に構成的に「解釈」できることを示しています。",
+      "<b>命題論理への限定:</b> グリヴェンコの定理は、元の形では命題論理にのみ適用されます。述語論理に対しては、より精緻な翻訳が必要です。[[ref:concept-kuroda-translation|黒田の否定翻訳]]（各 $\\forall$ の直後に $\\lnot \\lnot$ を挿入する）が、述語論理への一般化を提供します。",
+      "<b>他の結果との関連:</b> グリヴェンコの定理は、[[ref:concept-kuroda-translation|黒田翻訳]]やゲーデル・ゲンツェンの否定翻訳と密接に関連しています。これらの翻訳は、古典論理を直観主義論理に体系的に埋め込むものであり、古典的推論が二重否定を通じて常に構成的に「解釈」できることを示しています。",
     ],
   },
   formalNotation:
@@ -3413,7 +3413,7 @@ const conceptKurodaTranslation: ReferenceEntry = {
   },
   body: {
     en: [
-      "<b>Kuroda's negative translation</b> (1951) extends Glivenko's theorem from propositional logic to first-order predicate logic. While Glivenko showed that $\\vdash$_LK $\\varphi \\iff \\vdash$_LJ $\\lnot \\lnot \\varphi$ for propositional formulas, simply prefixing $\\lnot \\lnot$ does not work for predicate logic. Kuroda's key insight is that inserting $\\lnot \\lnot$ immediately after each universal quantifier ($\\forall$) is sufficient to bridge the gap.",
+      "<b>Kuroda's negative translation</b> (1951) extends [[ref:concept-glivenko|Glivenko's theorem]] from propositional logic to first-order predicate logic. While Glivenko showed that $\\vdash$_LK $\\varphi \\iff \\vdash$_LJ $\\lnot \\lnot \\varphi$ for propositional formulas, simply prefixing $\\lnot \\lnot$ does not work for predicate logic. Kuroda's key insight is that inserting $\\lnot \\lnot$ immediately after each universal quantifier ($\\forall$) is sufficient to bridge the gap.",
       "<b>Definition:</b> The Kuroda transform $\\varphi$<i> of a formula $\\varphi$ is defined recursively: (1) Atomic formulas are unchanged: P(t₁,...,tₙ)</i> = P(t₁,...,tₙ). (2) Propositional connectives distribute to subformulas: ($\\lnot \\varphi$)<i> = $\\lnot (\\varphi$</i>), ($\\varphi \\to \\psi$)<i> = $\\varphi$</i> $\\to \\psi$<i>, ($\\varphi \\land \\psi$)</i> = $\\varphi$<i> $\\land \\psi$</i>, ($\\varphi \\lor \\psi$)<i> = $\\varphi$</i> $\\lor \\psi$<i>. (3) The universal quantifier gets a $\\lnot \\lnot$ insertion: ($\\forall x. \\varphi$)</i> = $\\forall x. \\lnot \\lnot (\\varphi$<i>). (4) The existential quantifier just recurses: ($\\exists x. \\varphi$)</i> = $\\exists x.(\\varphi$*).",
       "<b>Main theorem:</b> For any first-order formula $\\varphi , \\vdash$_LK $\\varphi$ if and only if $\\vdash$_LJ $\\lnot \\lnot \\varphi$*. This extends Glivenko's result to the full first-order predicate logic, using the Kuroda transform to handle the universal quantifier.",
       "<b>Why simple $\\lnot \\lnot$ prefix fails for predicate logic:</b> The formula $\\forall$x(F(x) $\\lor \\lnot$F(x)) is provable in classical logic (LK), but $\\lnot \\lnot \\forall$x(F(x) $\\lor \\lnot$F(x)) is not provable in intuitionistic logic (LJ). The universal quantifier interacts non-trivially with excluded middle, and Kuroda's insertion of $\\lnot \\lnot$ after each $\\forall$ precisely neutralizes this interaction.",
@@ -3421,7 +3421,7 @@ const conceptKurodaTranslation: ReferenceEntry = {
       "<b>Significance:</b> Kuroda's translation reveals that the gap between classical and intuitionistic predicate logic resides specifically in the universal quantifier. Classical reasoning about \"for all x\" implicitly uses excluded middle at each instance, and Kuroda's $\\lnot \\lnot$ after $\\forall$ neutralizes precisely this. The result is foundational for proof theory, establishing that classical systems (LK, NK, HK) are equivalent to their minimal logic counterparts plus the DNE rule.",
     ],
     ja: [
-      "<b>黒田の否定翻訳</b> (1951) は、グリヴェンコの定理を命題論理から一階述語論理に拡張するものです。グリヴェンコは命題論理式について $\\vdash$_LK $\\varphi \\iff \\vdash$_LJ $\\lnot \\lnot \\varphi$ を示しましたが、述語論理では単に $\\lnot \\lnot$ を前置するだけでは不十分です。黒田の鍵となる洞察は、各全称量化子 ($\\forall$) の直後に $\\lnot \\lnot$ を挿入するだけで十分であるということです。",
+      "<b>黒田の否定翻訳</b> (1951) は、[[ref:concept-glivenko|グリヴェンコの定理]]を命題論理から一階述語論理に拡張するものです。グリヴェンコは命題論理式について $\\vdash$_LK $\\varphi \\iff \\vdash$_LJ $\\lnot \\lnot \\varphi$ を示しましたが、述語論理では単に $\\lnot \\lnot$ を前置するだけでは不十分です。黒田の鍵となる洞察は、各全称量化子 ($\\forall$) の直後に $\\lnot \\lnot$ を挿入するだけで十分であるということです。",
       "<b>定義:</b> 論理式 $\\varphi$ の黒田変換 $\\varphi$<i> は再帰的に定義されます: (1) 原子論理式は変更なし: P(t₁,...,tₙ)</i> = P(t₁,...,tₙ)。(2) 命題結合子は部分論理式に分配: ($\\lnot \\varphi$)<i> = $\\lnot (\\varphi$</i>)、($\\varphi \\to \\psi$)<i> = $\\varphi$</i> $\\to \\psi$<i>、($\\varphi \\land \\psi$)</i> = $\\varphi$<i> $\\land \\psi$</i>、($\\varphi \\lor \\psi$)<i> = $\\varphi$</i> $\\lor \\psi$<i>。(3) 全称量化子に $\\lnot \\lnot$ を挿入: ($\\forall x. \\varphi$)</i> = $\\forall x. \\lnot \\lnot (\\varphi$<i>)。(4) 存在量化子は再帰のみ: ($\\exists x. \\varphi$)</i> = $\\exists x.(\\varphi$*)。",
       "<b>主定理:</b> 任意の一階論理式 $\\varphi$ について、$\\vdash$_LK $\\varphi$ であることと $\\vdash$_LJ $\\lnot \\lnot \\varphi$* であることは同値です。これは黒田変換を用いて全称量化子を処理することで、グリヴェンコの結果を一階述語論理全体に拡張するものです。",
       "<b>述語論理で単純な $\\lnot \\lnot$ 前置が失敗する理由:</b> 論理式 $\\forall$x(F(x) $\\lor \\lnot$F(x)) は古典論理 (LK) で証明可能ですが、$\\lnot \\lnot \\forall$x(F(x) $\\lor \\lnot$F(x)) は直観主義論理 (LJ) では証明できません。全称量化子は排中律と非自明に相互作用し、黒田の各 $\\forall$ の直後への $\\lnot \\lnot$ 挿入がまさにこの相互作用を中和します。",
@@ -3618,7 +3618,7 @@ const conceptSoundness: ReferenceEntry = {
       `<b>Proof strategy: preserving satisfiability.</b> The standard proof of soundness proceeds by induction on the derivation. For tableau-style sequent calculus (TAB), the key lemma (bekki Lemma 13.7) shows that each inference rule preserves satisfiability upward: if the conclusion sequent Γ ⇒ has a satisfying interpretation, then at least one premise also has a satisfying interpretation. Since axioms (basic sequents) $\\lnot \\varphi , \\varphi$, Γ ⇒ are clearly unsatisfiable, any completed derivation starting from provable sequents reaches only unsatisfiable leaves, guaranteeing the root is valid.`,
       `<b>Soundness for specific systems.</b> (1) <b>TAB</b> (Theorem 13.10): Γ $\\vdash$_TAB Δ ⟹ Γ $\\models$ Δ. Proved by contraposition — if Γ ⊭ Δ, then $\\lnot$Δ, Γ is satisfiable, and the satisfiability lemma shows Γ ⊬_TAB Δ. (2) <b>LK</b> (Theorem 13.24): Γ $\\vdash$_LK Δ ⟹ Γ $\\models$ Δ. Proved similarly via a soundness lemma for LK rules (Lemma 13.25). By the equivalence of proof systems (HK = NK = LK = TAB), soundness extends to all classical proof systems.`,
       `<b>Consequences of soundness.</b> Soundness has important corollaries: (1) <b>Consistency:</b> If a system is sound, it cannot prove a contradiction ($\\bot$), since $\\bot$ has no satisfying interpretation. (2) <b>Semantic cut elimination:</b> From LK soundness, for any LK derivation of S, there exists an LK-CUT derivation of S. This gives a completely different proof of cut elimination via semantics rather than syntactic transformation (bekki Section 13.6). (3) <b>Trustworthiness:</b> Soundness justifies using the proof system as a reliable tool for establishing truths about mathematical structures.`,
-      `<b>Soundness vs. completeness.</b> Soundness ($\\vdash$ ⟹ $\\models$) and completeness ($\\models$ ⟹ $\\vdash$) are dual properties. Together they establish that provability and semantic validity coincide: $\\vdash \\iff \\models$. While soundness is generally straightforward to prove (induction on derivations), completeness is significantly harder and historically deeper — Gödel's completeness theorem (1930) established it for first-order logic. Soundness says the system is safe; completeness says the system is sufficient.`,
+      `<b>Soundness vs. completeness.</b> Soundness ($\\vdash$ ⟹ $\\models$) and [[ref:concept-completeness|completeness]] ($\\models$ ⟹ $\\vdash$) are dual properties. Together they establish that provability and semantic validity coincide: $\\vdash \\iff \\models$. While soundness is generally straightforward to prove (induction on derivations), completeness is significantly harder and historically deeper — Gödel's completeness theorem (1930) established it for first-order logic. Soundness says the system is safe; completeness says the system is sufficient.`,
     ],
     ja: [
       `<b>健全性の意味。</b> 健全性定理は、証明体系 K で証明可能な論理式（またはシーケント）が意味論的に妥当であること — すなわち、すべての解釈のもとで真であること — を述べます。形式的に: Γ $\\vdash$_K Δ ならば Γ $\\models$ Δ。言い換えれば、証明体系は決して「嘘をつかない」: 偽であるものを証明することはできません。これは、証明体系が信頼できるための基本的な要件です。`,
@@ -3626,7 +3626,7 @@ const conceptSoundness: ReferenceEntry = {
       `<b>証明戦略: 充足可能性の保存。</b> 健全性の標準的な証明は、導出に関する帰納法で進みます。タブロー式シーケント計算 (TAB) では、鍵となる補題（戸次 補題13.7）が、各推論規則が充足可能性を上方に保存することを示します: 結論のシーケント Γ ⇒ に充足する解釈があるならば、少なくとも1つの前提にも充足する解釈があります。公理（基本式）$\\lnot \\varphi , \\varphi$, Γ ⇒ は明らかに充足不能なので、証明可能なシーケントから始まる完成した導出は充足不能な葉のみに到達し、根が妥当であることが保証されます。`,
       `<b>各体系の健全性。</b> (1) <b>TAB</b>（定理13.10）: Γ $\\vdash$_TAB Δ ⟹ Γ $\\models$ Δ。対偶による証明 — Γ ⊭ Δ ならば $\\lnot$Δ, Γ は充足可能であり、充足可能性補題により Γ ⊬_TAB Δ。(2) <b>LK</b>（定理13.24）: Γ $\\vdash$_LK Δ ⟹ Γ $\\models$ Δ。LK 規則に対する健全性補題（補題13.25）を用いて同様に証明されます。証明体系の等価性（HK = NK = LK = TAB）により、健全性はすべての古典論理の証明体系に拡張されます。`,
       `<b>健全性の帰結。</b> 健全性には重要な系があります: (1) <b>無矛盾性:</b> 体系が健全であれば、矛盾（$\\bot$）を証明できません。$\\bot$ には充足する解釈が存在しないからです。(2) <b>意味論的カット除去:</b> LK の健全性から、任意の LK 導出のシーケント S に対して LK-CUT の導出が存在します。これは構文的変換ではなく意味論を介したカット除去の全く異なる証明を与えます（戸次 13.6節）。(3) <b>信頼性:</b> 健全性は、証明体系を数学的構造に関する真理を確立するための信頼できるツールとして使うことを正当化します。`,
-      `<b>健全性と完全性。</b> 健全性（$\\vdash$ ⟹ $\\models$）と完全性（$\\models$ ⟹ $\\vdash$）は双対的な性質です。これらを合わせると、証明可能性と意味論的妥当性が一致することが確立されます: $\\vdash \\iff \\models$。健全性の証明は一般に比較的容易（導出に関する帰納法）ですが、完全性の証明はかなり困難で歴史的にも深い結果です — ゲーデルの完全性定理（1930年）が一階論理に対してこれを確立しました。健全性は体系が安全であることを、完全性は体系が十分であることを述べます。`,
+      `<b>健全性と完全性。</b> 健全性（$\\vdash$ ⟹ $\\models$）と[[ref:concept-completeness|完全性]]（$\\models$ ⟹ $\\vdash$）は双対的な性質です。これらを合わせると、証明可能性と意味論的妥当性が一致することが確立されます: $\\vdash \\iff \\models$。健全性の証明は一般に比較的容易（導出に関する帰納法）ですが、完全性の証明はかなり困難で歴史的にも深い結果です — ゲーデルの完全性定理（1930年）が一階論理に対してこれを確立しました。健全性は体系が安全であることを、完全性は体系が十分であることを述べます。`,
     ],
   },
   formalNotation:
@@ -3700,20 +3700,20 @@ const conceptCompleteness: ReferenceEntry = {
   },
   body: {
     en: [
-      `<b>What completeness means.</b> The completeness theorem states that if a formula (or sequent) is semantically valid, then it is provable in the proof system K. Formally: if Γ $\\models$ Δ, then Γ $\\vdash$_K Δ (bekki Definition 13.2). In other words, the proof system has no "gaps": every semantic truth can be captured by a formal derivation. Together with soundness ($\\vdash$ ⟹ $\\models$), completeness establishes the equivalence $\\vdash \\iff \\models$, meaning the syntactic notion of provability perfectly matches the semantic notion of validity.`,
+      `<b>What completeness means.</b> The completeness theorem states that if a formula (or sequent) is semantically valid, then it is provable in the proof system K. Formally: if Γ $\\models$ Δ, then Γ $\\vdash$_K Δ (bekki Definition 13.2). In other words, the proof system has no "gaps": every semantic truth can be captured by a formal derivation. Together with [[ref:concept-soundness|soundness]] ($\\vdash$ ⟹ $\\models$), completeness establishes the equivalence $\\vdash \\iff \\models$, meaning the syntactic notion of provability perfectly matches the semantic notion of validity.`,
       `<b>Two forms of completeness.</b> Completeness comes in two variants: (1) <b>(Weak) completeness</b> (Theorem 13.13): $\\models \\varphi$ ⟹ $\\vdash$_TAB $\\varphi$ — if a sentence is valid (true in all interpretations), it is provable. (2) <b>Strong completeness</b> (Theorem 13.14): Γ $\\models$ Δ ⟹ Γ $\\vdash$_TAB Δ — if Δ is a semantic consequence of Γ, then Δ is derivable from Γ. Strong completeness subsumes weak completeness (take Γ = ∅). Both forms hold for classical first-order logic.`,
       `<b>Henkin's theorem: the key ingredient.</b> The proof of completeness relies on Henkin's theorem (Theorem 13.12): if Γ ⊬_TAB, then Γ is satisfiable in a countable domain. The contrapositive gives completeness. The proof constructs a <i>full</i> (充満) sequence (Definition 13.17) — a maximally expanded sequence of formulas where every TAB rule's requirements are met — and then extracts an <i>induced Herbrand interpretation</i> (Definition 13.19) from this full sequence, which serves as a countable model.`,
       `<b>Full sequences and induced interpretations.</b> A full sequence Γ̂ (Definition 13.17) satisfies the condition that for every formula that is a principal formula of a TAB rule, the corresponding requirements of that rule are met within Γ̂. Given an unprovable Γ, Lemma 13.18 constructs such a full Γ̂ ⊇ Γ with Γ̂ ⊬_TAB by systematically enumerating all formulas and extending Γ step by step. The induced interpretation F_M from this full sequence (Definition 13.19) assigns truth values based on membership in the sequence, and Lemma 13.20 shows this interpretation satisfies every formula in Γ̂.`,
       `<b>Gödel's completeness theorem.</b> The completeness of first-order logic was first proved by Kurt Gödel in 1930 (his doctoral dissertation). From Theorem 13.13 and TAB soundness, one obtains $\\models \\varphi \\iff \\vdash$_TAB $\\varphi$ — this is Gödel's completeness theorem (bekki p.285, footnote). By the equivalence of proof systems (HK = NK = LK = TAB), completeness extends to all formulations of classical first-order logic.`,
-      `<b>Significance and related results.</b> Completeness has profound consequences: (1) It guarantees that the proof system is <i>sufficient</i> — no valid inference escapes it. (2) Combined with soundness, it shows the proof system is equivalent to the semantics (Chapter 5). (3) It underlies the Löwenheim–Skolem theorem (every satisfiable set has a countable model) and the compactness theorem (a set is satisfiable iff every finite subset is). Note: Gödel's completeness theorem should not be confused with Gödel's <i>incompleteness</i> theorems, which concern the limitations of formal systems for arithmetic.`,
+      `<b>Significance and related results.</b> Completeness has profound consequences: (1) It guarantees that the proof system is <i>sufficient</i> — no valid inference escapes it. (2) Combined with soundness, it shows the proof system is equivalent to the semantics (Chapter 5). (3) It underlies the [[ref:concept-lowenheim-skolem|Löwenheim–Skolem theorem]] (every satisfiable set has a countable model) and the [[ref:concept-compactness|compactness theorem]] (a set is satisfiable iff every finite subset is). Note: Gödel's completeness theorem should not be confused with Gödel's <i>incompleteness</i> theorems, which concern the limitations of formal systems for arithmetic.`,
     ],
     ja: [
-      `<b>完全性の意味。</b> 完全性定理は、意味論的に妥当な論理式（またはシーケント）が証明体系 K で証明可能であることを述べます。形式的に: Γ $\\models$ Δ ならば Γ $\\vdash$_K Δ（戸次 定義13.2）。言い換えれば、証明体系に「漏れ」はない: すべての意味論的真理は形式的な導出で捉えることができます。健全性（$\\vdash$ ⟹ $\\models$）と合わせて、完全性は $\\vdash \\iff \\models$ という等価性を確立し、証明可能性という構文的概念と妥当性という意味論的概念が完全に一致することを意味します。`,
+      `<b>完全性の意味。</b> 完全性定理は、意味論的に妥当な論理式（またはシーケント）が証明体系 K で証明可能であることを述べます。形式的に: Γ $\\models$ Δ ならば Γ $\\vdash$_K Δ（戸次 定義13.2）。言い換えれば、証明体系に「漏れ」はない: すべての意味論的真理は形式的な導出で捉えることができます。[[ref:concept-soundness|健全性]]（$\\vdash$ ⟹ $\\models$）と合わせて、完全性は $\\vdash \\iff \\models$ という等価性を確立し、証明可能性という構文的概念と妥当性という意味論的概念が完全に一致することを意味します。`,
       `<b>完全性の二つの形式。</b> 完全性には二つのバリエーションがあります: (1) <b>（弱い）完全性定理</b>（定理13.13）: $\\models \\varphi$ ⟹ $\\vdash$_TAB $\\varphi$ — 恒真な文（すべての解釈で真）は証明可能である。(2) <b>強い完全性定理</b>（定理13.14）: Γ $\\models$ Δ ⟹ Γ $\\vdash$_TAB Δ — Δ が Γ の意味論的帰結ならば、Δ は Γ から導出可能である。強い完全性は弱い完全性を包含します（Γ = ∅ とすればよい）。両形式とも古典一階論理で成立します。`,
       `<b>ヘンキンの定理: 鍵となる成分。</b> 完全性の証明はヘンキンの定理（定理13.12）に依拠します: Γ ⊬_TAB ならば、Γ は可算領域で充足可能です。この対偶が完全性を与えます。証明は <i>充満</i> した列（定義13.17）— TAB の各規則の要請がすべて満たされた、極大的に拡張された論理式の列 — を構成し、この充満した列から <i>導出された解釈</i>（エルブラン解釈）（定義13.19）を取り出します。これが可算モデルとして機能します。`,
       `<b>充満した列と導出された解釈。</b> 充満した列 Γ̂（定義13.17）は、TAB 規則の主論理式であるすべての論理式について、その規則の対応する要請が Γ̂ 内で満たされるという条件を満足します。証明不能な Γ が与えられたとき、補題13.18 はすべての論理式を体系的に列挙し、Γ を段階的に拡張することで、Γ̂ ⊇ Γ かつ Γ̂ ⊬_TAB である充満した列を構成します。この充満した列からの導出された解釈 F_M（定義13.19）は列への所属に基づいて真理値を割り当て、補題13.20 はこの解釈が Γ̂ 内のすべての論理式を充足することを示します。`,
       `<b>ゲーデルの完全性定理。</b> 一階論理の完全性は、1930年にクルト・ゲーデルによって初めて証明されました（博士論文）。定理13.13 と TAB の健全性から、$\\models \\varphi \\iff \\vdash$_TAB $\\varphi$ が得られます — これがゲーデルの完全性定理です（戸次 p.285, 脚注）。証明体系の等価性（HK = NK = LK = TAB）により、完全性は古典一階論理のすべての定式化に拡張されます。`,
-      `<b>意義と関連する結果。</b> 完全性には深い帰結があります: (1) 証明体系が <i>十分</i> であること — 妥当な推論は一つも漏れない — を保証します。(2) 健全性と合わせて、証明体系が意味論（第5章）と等価であることを示します。(3) レーヴェンハイム・スコーレムの定理（充足可能な集合は可算モデルを持つ）やコンパクト性定理（集合が充足可能 $\\iff$ すべての有限部分集合が充足可能）の基礎となります。注意: ゲーデルの完全性定理はゲーデルの <i>不完全性</i> 定理と混同してはなりません。後者は算術の形式体系の限界に関するものです。`,
+      `<b>意義と関連する結果。</b> 完全性には深い帰結があります: (1) 証明体系が <i>十分</i> であること — 妥当な推論は一つも漏れない — を保証します。(2) 健全性と合わせて、証明体系が意味論（第5章）と等価であることを示します。(3) [[ref:concept-lowenheim-skolem|レーヴェンハイム・スコーレムの定理]]（充足可能な集合は可算モデルを持つ）や[[ref:concept-compactness|コンパクト性定理]]（集合が充足可能 $\\iff$ すべての有限部分集合が充足可能）の基礎となります。注意: ゲーデルの完全性定理はゲーデルの <i>不完全性</i> 定理と混同してはなりません。後者は算術の形式体系の限界に関するものです。`,
     ],
   },
   formalNotation:
@@ -5625,7 +5625,7 @@ const conceptNdVariants: ReferenceEntry = {
       "<b>NJ (Intuitionistic Logic)</b>: Adds <b>EFQ</b> (ex falso quodlibet, $\\bot \\to \\varphi$) to NM. From a contradiction, any proposition follows. This matches the Brouwer–Heyting–Kolmogorov interpretation where a proof of $\\bot$ (an impossibility) can be transformed into a proof of anything.",
       "<b>NK (Classical Logic)</b>: Adds <b>DNE</b> (double negation elimination, $\\lnot\\lnot\\varphi \\to \\varphi$) to NJ. This recovers full classical reasoning, including the law of excluded middle ($\\varphi \\lor \\lnot\\varphi$) and proof by contradiction.",
       "The choice of variant determines which theorems are provable. For example, $\\lnot\\lnot(\\varphi \\lor \\lnot\\varphi)$ is provable in NJ but $\\varphi \\lor \\lnot\\varphi$ itself requires NK. In NM, even $\\lnot\\varphi \\to (\\varphi \\to \\psi)$ is not provable.",
-      "By the Curry–Howard correspondence, NM corresponds to simply typed lambda calculus, NJ to lambda calculus with the empty type, and NK to lambda calculus with continuations (call/cc).",
+      "By the [[ref:concept-curry-howard|Curry–Howard correspondence]], NM corresponds to simply typed lambda calculus, NJ to lambda calculus with the empty type, and NK to lambda calculus with continuations (call/cc).",
     ],
     ja: [
       "自然演繹体系は、否定に関するどの規則を含むかによって3つの変種に分類されます。<b>NM</b>（最小論理）、<b>NJ</b>（直観主義論理）、<b>NK</b>（古典論理）は厳密な階層を成します：NM $\\subset$ NJ $\\subset$ NK。",
@@ -5633,7 +5633,7 @@ const conceptNdVariants: ReferenceEntry = {
       "<b>NJ（直観主義論理）</b>：NMに<b>EFQ</b>（爆発律、$\\bot \\to \\varphi$）を追加します。矛盾から任意の命題が導けます。これはBrouwer–Heyting–Kolmogorov解釈に対応し、$\\bot$の証明（不可能性）は任意の命題の証明に変換できます。",
       "<b>NK（古典論理）</b>：NJに<b>DNE</b>（二重否定除去、$\\lnot\\lnot\\varphi \\to \\varphi$）を追加します。排中律（$\\varphi \\lor \\lnot\\varphi$）や背理法を含む完全な古典的推論が可能になります。",
       "変種の選択は証明可能な定理を決定します。例えば、$\\lnot\\lnot(\\varphi \\lor \\lnot\\varphi)$ はNJで証明可能ですが、$\\varphi \\lor \\lnot\\varphi$ 自体はNKが必要です。NMでは $\\lnot\\varphi \\to (\\varphi \\to \\psi)$ すら証明できません。",
-      "Curry–Howard対応により、NMは単純型付きラムダ計算に、NJは空型を持つラムダ計算に、NKは継続（call/cc）を持つラムダ計算に対応します。",
+      "[[ref:concept-curry-howard|Curry–Howard対応]]により、NMは単純型付きラムダ計算に、NJは空型を持つラムダ計算に、NKは継続（call/cc）を持つラムダ計算に対応します。",
     ],
   },
   formalNotation: [
@@ -6747,7 +6747,7 @@ const conceptNormalizationReduction: ReferenceEntry = {
     en: [
       "In natural deduction, a <b>detour</b> occurs when an introduction rule is immediately followed by the corresponding elimination rule — for example, introducing $\\varphi \\land \\psi$ with $\\land$I and then immediately extracting $\\varphi$ with $\\land$E. Such detours can always be simplified away.",
       "A proof in <b>normal form</b> is one with no detours. The <b>normalization theorem</b> (Prawitz, 1965) states that every natural deduction proof can be transformed into a normal form. The transformation process — called <b>proof reduction</b> — eliminates introduction-elimination pairs.",
-      "The reduction rules correspond to $\\beta$-reduction in the typed lambda calculus via the Curry-Howard correspondence. $\\to$I followed by $\\to$E reduces like $(\\lambda x. M)\\, N \\to M[N/x]$. $\\land$I followed by $\\land$E reduces like $\\pi_1(M, N) \\to M$.",
+      "The reduction rules correspond to $\\beta$-reduction in the typed lambda calculus via the [[ref:concept-curry-howard|Curry-Howard correspondence]]. $\\to$I followed by $\\to$E reduces like $(\\lambda x. M)\\, N \\to M[N/x]$. $\\land$I followed by $\\land$E reduces like $\\pi_1(M, N) \\to M$.",
       "Normalization in ND corresponds to <b>cut elimination</b> in SC. A cut in SC is analogous to a detour in ND: both introduce a formula only to immediately use and discard it. Gentzen's cut elimination and Prawitz's normalization are two views of the same phenomenon.",
       "Normal proofs have the <b>subformula property</b>: every formula in the proof is a subformula of the conclusion or of an open assumption. This parallels the subformula property of cut-free sequent proofs.",
       "In practice, normalization can dramatically increase proof size — the blowup can be non-elementary (a tower of exponentials). This is why mathematicians naturally use non-normal proofs (with lemmas/detours) and why the cut rule is practically useful despite being theoretically eliminable.",
@@ -6755,7 +6755,7 @@ const conceptNormalizationReduction: ReferenceEntry = {
     ja: [
       "自然演繹では、導入規則の直後に対応する除去規則が続くとき<b>迂回</b>（detour）が発生します——例えば$\\land$Iで$\\varphi \\land \\psi$を導入し、直後に$\\land$Eで$\\varphi$を取り出す場合。このような迂回は常に簡約で除去できます。",
       "<b>正規形</b>の証明は迂回のない証明です。<b>正規化定理</b>（Prawitz, 1965）は、すべての自然演繹の証明が正規形に変換可能であることを述べます。変換過程は<b>証明簡約</b>と呼ばれ、導入-除去の対を除去します。",
-      "簡約規則はCurry-Howard対応を通じて型付きラムダ計算の$\\beta$簡約に対応します。$\\to$Iの後に$\\to$Eは$(\\lambda x. M)\\, N \\to M[N/x]$のように簡約されます。$\\land$Iの後に$\\land$Eは$\\pi_1(M, N) \\to M$のように簡約されます。",
+      "簡約規則は[[ref:concept-curry-howard|Curry-Howard対応]]を通じて型付きラムダ計算の$\\beta$簡約に対応します。$\\to$Iの後に$\\to$Eは$(\\lambda x. M)\\, N \\to M[N/x]$のように簡約されます。$\\land$Iの後に$\\land$Eは$\\pi_1(M, N) \\to M$のように簡約されます。",
       "NDの正規化はSCの<b>カット除去</b>に対応します。SCのカットはNDの迂回に類似します：どちらも論理式を導入し直ちに使用して破棄します。Gentzenのカット除去とPrawitzの正規化は同じ現象の2つの見方です。",
       "正規形の証明は<b>部分式性質</b>を持ちます：証明のすべての論理式は結論または未放出仮定の部分式です。カットなしシーケント証明の部分式性質と並行します。",
       "実際には、正規化は証明サイズを劇的に増大させえます——非初等的な（指数の塔のような）爆発が起こりえます。数学者が自然に非正規形の証明（補題/迂回付き）を使い、カット規則が理論的に除去可能であるにもかかわらず実践的に有用である理由です。",
