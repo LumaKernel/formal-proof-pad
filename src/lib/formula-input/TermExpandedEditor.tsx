@@ -17,6 +17,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+import { createPortal } from "react-dom";
 import type { Term } from "../logic-core/term";
 import type { FormulaTokenKind } from "../logic-lang/formulaHighlight";
 import { tokenizeDslInput } from "../logic-lang/formulaHighlight";
@@ -308,7 +309,7 @@ export function TermExpandedEditor({
   const currentTextareaStyle =
     parseState.status === "error" ? textareaErrorStyle : textareaBaseStyle;
 
-  return (
+  return createPortal(
     <div
       style={overlayStyle}
       onClick={handleOverlayClick}
@@ -466,7 +467,8 @@ export function TermExpandedEditor({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

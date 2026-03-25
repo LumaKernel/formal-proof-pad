@@ -9,6 +9,7 @@
 
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { FormulaListEditor } from "./FormulaListEditor";
 import { SequentPreview } from "./SequentPreview";
 import { splitSequentToLists, composeSequentText } from "./sequentEditorLogic";
@@ -213,7 +214,7 @@ export function SequentExpandedEditor({
     setSuccedents(formulas);
   }, []);
 
-  return (
+  return createPortal(
     <div
       style={overlayStyle}
       onClick={handleOverlayClick}
@@ -330,6 +331,7 @@ export function SequentExpandedEditor({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
