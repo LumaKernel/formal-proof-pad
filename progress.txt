@@ -17964,3 +17964,20 @@
   - click-to-editテストパターン: displayモードのtestId(-display)をクリック→editモードのtestId(-edit)を確認→input(-input-input)を操作
   - fireEvent.keyDown(banner, { key: "Escape" })はバナー自体のonKeyDownハンドラをテストする正しい方法
 ---
+
+## 2026-03-25 06:40 - [a11y] WCAG AAコントラスト比改善＋a11y検査基盤整備
+- `@storybook/addon-a11y` は既に設定済みだったため、`preview.ts` の `a11y.test` を `"error"` に切り替えてテスト実行
+- 285テストがa11y違反で失敗 → コントラスト比不足を中心に大量修正
+- globals.css: CSS変数改善 (--ui-muted-foreground, --color-syntax-subscript, --color-badge-text, --color-quest-rating-none-text)
+- 新CSS変数追加: --color-text-tertiary, --color-warning-text
+- 46ファイルでハードコード色修正: #888→#666, #999→#666, #718096→#4a5568, #999999→#767676
+- エラー/成功/警告テキスト色を --color-*-text 系に統一 (error, success, warning)
+- FormulaInput, TermInput に ariaLabel prop追加
+- 修正後も285テスト失敗が残り、`a11y.test: "todo"` に戻す（深いコンポーネントの色、ボタン上の白文字等）
+- カバレッジ: Stmts 99.96%, Branch 99.58%, Funcs 90.48%, Lines 99.98% (変化なし)
+- **今後のイテレーションへの学び:**
+  - --color-error は装飾用、--color-error-text がテキスト用。success/warningも同様
+  - ハードコードの色フォールバック値はCSS変数の実際の値と一致させること
+  - a11y違反の大半はコントラスト比不足。ボタン上の白文字など構造的な問題も多い
+  - `a11y.test: "error"` 有効化には残り約285テストの違反解消が必要
+---
