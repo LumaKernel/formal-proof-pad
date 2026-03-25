@@ -16,12 +16,15 @@
  *
  * @param notebookCount - 現在のノートブック数
  * @param hasEverHadNotebooks - セッション中にノートが1つ以上存在したことがあるか
+ * @param hasNavigatedInSession - セッション中に他のタブに遷移したことがあるか
  * @returns ランディングページを表示すべきかどうか
  */
 export function shouldShowLandingPage(
   notebookCount: number,
   hasEverHadNotebooks: boolean,
+  hasNavigatedInSession: boolean,
 ): boolean {
+  if (hasNavigatedInSession) return false;
   return notebookCount === 0 && !hasEverHadNotebooks;
 }
 

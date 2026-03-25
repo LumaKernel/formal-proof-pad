@@ -6,21 +6,33 @@ import {
 } from "./landingPageLogic";
 
 describe("shouldShowLandingPage", () => {
-  it("ノートブック0件 + セッション中にノートなし → ランディング表示", () => {
-    expect(shouldShowLandingPage(0, false)).toBe(true);
+  it("ノートブック0件 + セッション中にノートなし + 未遷移 → ランディング表示", () => {
+    expect(shouldShowLandingPage(0, false, false)).toBe(true);
   });
 
   it("ノートブック1件以上 → ランディング非表示", () => {
-    expect(shouldShowLandingPage(1, false)).toBe(false);
-    expect(shouldShowLandingPage(5, false)).toBe(false);
+    expect(shouldShowLandingPage(1, false, false)).toBe(false);
+    expect(shouldShowLandingPage(5, false, false)).toBe(false);
   });
 
   it("ノートブック0件 + セッション中にノートあった → ランディング非表示", () => {
-    expect(shouldShowLandingPage(0, true)).toBe(false);
+    expect(shouldShowLandingPage(0, true, false)).toBe(false);
   });
 
   it("ノートブック1件以上 + セッション中にノートあった → ランディング非表示", () => {
-    expect(shouldShowLandingPage(3, true)).toBe(false);
+    expect(shouldShowLandingPage(3, true, false)).toBe(false);
+  });
+
+  it("セッション中にタブ遷移済み → ノート0件でもランディング非表示", () => {
+    expect(shouldShowLandingPage(0, false, true)).toBe(false);
+  });
+
+  it("セッション中にタブ遷移済み + ノートあった → ランディング非表示", () => {
+    expect(shouldShowLandingPage(0, true, true)).toBe(false);
+  });
+
+  it("セッション中にタブ遷移済み + ノート1件以上 → ランディング非表示", () => {
+    expect(shouldShowLandingPage(3, false, true)).toBe(false);
   });
 });
 

@@ -94,6 +94,9 @@ export type HubContentProps = {
 
 const getNow = (): number => getCurrentTimestamp();
 
+/** sessionStorage key: セッション中にタブ遷移したか */
+const SESSION_NAV_KEY = "hasNavigatedInSession";
+
 /** next-intl の翻訳から ThemeToggleLabels を構築するフック */
 function useThemeLabelsFromIntl(): ThemeToggleLabels {
   const t = useTranslations("Workspace");
@@ -276,6 +279,11 @@ function HubInner({ initialTab }: HubContentProps) {
 
   const handleTabChange = useCallback(
     (newTab: HubTab) => {
+      try {
+        sessionStorage.setItem(SESSION_NAV_KEY, "1");
+      } catch {
+        // sessionStorage unavailable — silently ignore
+      }
       const path = tabToPath[newTab];
       router.push(path);
     },
@@ -332,10 +340,28 @@ function HubInner({ initialTab }: HubContentProps) {
     setHasEverHadNotebooks(nextHasEver);
   }
 
+  // セッション中にタブ遷移したかを sessionStorage で追跡
+  // （リロードでリセットされる。notebooks以外のタブに来た＝遷移済み）
+  const [hasNavigatedInSession] = useState(() => {
+    try {
+      if (initialTab !== "notebooks") {
+        sessionStorage.setItem(SESSION_NAV_KEY, "1");
+        return true;
+      }
+      return sessionStorage.getItem(SESSION_NAV_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+
   // ランディングページはnotebooksタブ（ルート/）でのみ表示
   const showLanding =
     tab === "notebooks" &&
-    shouldShowLandingPage(listItems.length, hasEverHadNotebooks);
+    shouldShowLandingPage(
+      listItems.length,
+      hasEverHadNotebooks,
+      hasNavigatedInSession,
+    );
 
   // Build recommended quests for landing page (localized)
   const recommendedQuests = useMemo(
