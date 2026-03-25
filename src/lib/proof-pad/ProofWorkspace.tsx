@@ -4010,7 +4010,7 @@ export const ProofWorkspace = forwardRef<
         setWorkspace(ws);
       },
       applyLayout: () => {
-        const ws = applyTreeLayout(workspaceRef.current, "bottom-to-top");
+        const ws = applyTreeLayout(workspaceRef.current, "top-to-bottom");
         workspaceRef.current = ws;
         setWorkspace(ws);
       },

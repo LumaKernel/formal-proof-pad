@@ -288,7 +288,7 @@ function ScriptEditorWithWorkspace() {
         setWorkspace(ws);
       },
       applyLayout: () => {
-        const ws = applyTreeLayout(workspaceRef.current, "bottom-to-top");
+        const ws = applyTreeLayout(workspaceRef.current, "top-to-bottom");
         setWorkspace(ws);
       },
       clearWorkspace: () => {

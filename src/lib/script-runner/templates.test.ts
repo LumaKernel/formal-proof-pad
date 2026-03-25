@@ -1222,7 +1222,7 @@ describe("テンプレート統合テスト（ステートフルハンドラ）"
         ws = updateNodeRole(ws, nodeId, "axiom");
       },
       applyLayout: () => {
-        ws = applyTreeLayout(ws, "bottom-to-top");
+        ws = applyTreeLayout(ws, "top-to-bottom");
       },
       clearWorkspace: () => {
         ws = createEmptyWorkspace(ds);
