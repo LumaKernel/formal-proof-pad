@@ -13,6 +13,7 @@ import { UiButton } from "../../components/ui";
 import katex from "katex";
 import type { Locale, ReferenceEntry } from "./referenceEntry";
 import { buildModalData } from "./referenceUILogic";
+import { BodyContent } from "./BodyContent";
 import { InlineMarkdown } from "./InlineMarkdown";
 import {
   buildReferenceViewerUrl,
@@ -355,9 +356,12 @@ export function ReferenceModal({
 
           {/* 本文パラグラフ */}
           {data.bodyParagraphs.map((paragraph, i) => (
-            <p key={`p-${String(i) satisfies string}`} style={paragraphStyle}>
-              <InlineMarkdown text={paragraph} onNavigate={onNavigate} />
-            </p>
+            <BodyContent
+              key={`p-${String(i) satisfies string}`}
+              text={paragraph}
+              paragraphStyle={paragraphStyle}
+              onNavigate={onNavigate}
+            />
           ))}
 
           {/* 関連エントリ */}

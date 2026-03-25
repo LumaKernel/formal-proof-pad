@@ -197,6 +197,102 @@ export function parseInlineMarkdown(text: string): readonly InlineElement[] {
   return result;
 }
 
+// --- ブロックレベルコンテンツパース ---
+
+/**
+ * ブロックレベル要素の型。
+ * 段落テキスト、順序なしリスト、順序ありリストのいずれか。
+ *
+ * 変更時は referenceUILogic.test.ts（parseBlockContent）も同期すること。
+ */
+export type BlockElement =
+  | { readonly type: "paragraph"; readonly text: string }
+  | { readonly type: "unordered-list"; readonly items: readonly string[] }
+  | {
+      readonly type: "ordered-list";
+      readonly items: readonly string[];
+      /** trueの場合、アイテム内容に番号が埋め込まれており、ol自身の番号は不要 */
+      readonly numberedByContent: boolean;
+    };
+
+/**
+ * 段落テキストをブロックレベル要素に分解する。
+ *
+ * `\n•` で始まる行を `<ul>` のリストアイテムとして、
+ * `\n<b>N.</b>` や `\nN. ` で始まる行を `<ol>` のリストアイテムとして検出する。
+ * リスト前のテキストは段落として返す。
+ *
+ * 変更時は referenceUILogic.test.ts（parseBlockContent）も同期すること。
+ */
+export function parseBlockContent(paragraph: string): readonly BlockElement[] {
+  const lines = paragraph.split("\n");
+  const result: BlockElement[] = [];
+  let currentListType: "unordered-list" | "ordered-list" | undefined;
+  let currentItems: string[] = [];
+  let currentNumberedByContent = false;
+
+  const flushList = (): void => {
+    if (currentListType !== undefined && currentItems.length > 0) {
+      if (currentListType === "ordered-list") {
+        result.push({
+          type: "ordered-list",
+          items: currentItems,
+          numberedByContent: currentNumberedByContent,
+        });
+      } else {
+        result.push({ type: currentListType, items: currentItems });
+      }
+      currentItems = [];
+      currentListType = undefined;
+      currentNumberedByContent = false;
+    }
+  };
+
+  for (const line of lines) {
+    // • で始まる行 → unordered list item
+    if (line.startsWith("• ") || line === "•") {
+      if (currentListType !== "unordered-list") {
+        flushList();
+        currentListType = "unordered-list";
+      }
+      currentItems.push(line.slice(2));
+      continue;
+    }
+
+    // <b>N.</b> で始まる行 → ordered list item（番号付きヘッダ、番号埋め込み）
+    const boldNumberMatch = /^<b>(\d+)\.\s*/.exec(line);
+    if (boldNumberMatch !== null) {
+      if (currentListType !== "ordered-list") {
+        flushList();
+        currentListType = "ordered-list";
+        currentNumberedByContent = true;
+      }
+      currentItems.push(line);
+      continue;
+    }
+
+    // N. で始まる行 → ordered list item（プレーンな番号付きリスト）
+    const plainNumberMatch = /^(\d+)\.\s+/.exec(line);
+    if (plainNumberMatch !== null) {
+      if (currentListType !== "ordered-list") {
+        flushList();
+        currentListType = "ordered-list";
+      }
+      currentItems.push(line.slice(plainNumberMatch[0].length));
+      continue;
+    }
+
+    // 通常のテキスト行
+    flushList();
+    if (line.length > 0) {
+      result.push({ type: "paragraph", text: line });
+    }
+  }
+
+  flushList();
+  return result;
+}
+
 // --- ポップオーバー用データ ---
 
 /** ポップオーバー表示用のデータ */

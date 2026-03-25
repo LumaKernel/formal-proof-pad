@@ -3,6 +3,7 @@ import type { BibliographyEntry, ReferenceEntry } from "./referenceEntry";
 import {
   buildModalData,
   buildPopoverData,
+  parseBlockContent,
   parseInlineMarkdown,
 } from "./referenceUILogic";
 
@@ -452,6 +453,123 @@ describe("parseInlineMarkdown", () => {
     expect(result).toEqual([
       { type: "cite-link", citeKey: "godel1930", content: "godel1930" },
     ]);
+  });
+});
+
+// --- parseBlockContent ---
+
+describe("parseBlockContent", () => {
+  it("リスト記法のないテキストは段落として返す", () => {
+    const result = parseBlockContent("Hello world");
+    expect(result).toEqual([{ type: "paragraph", text: "Hello world" }]);
+  });
+
+  it("• で始まる行を順序なしリストとして返す", () => {
+    const result = parseBlockContent(
+      "In a formal proof system:\n• Every statement is well-formed\n• Every inference follows a rule\n• Every assumption is stated",
+    );
+    expect(result).toEqual([
+      { type: "paragraph", text: "In a formal proof system:" },
+      {
+        type: "unordered-list",
+        items: [
+          "Every statement is well-formed",
+          "Every inference follows a rule",
+          "Every assumption is stated",
+        ],
+      },
+    ]);
+  });
+
+  it("<b>N.</b> で始まる行を順序ありリストとして返す（numberedByContent: true）", () => {
+    const result = parseBlockContent(
+      "Several reasons:\n<b>1. Certainty:</b> No error.\n<b>2. Verification:</b> Automatic.",
+    );
+    expect(result).toEqual([
+      { type: "paragraph", text: "Several reasons:" },
+      {
+        type: "ordered-list",
+        numberedByContent: true,
+        items: [
+          "<b>1. Certainty:</b> No error.",
+          "<b>2. Verification:</b> Automatic.",
+        ],
+      },
+    ]);
+  });
+
+  it("N. で始まるプレーンな番号付きリストを順序ありリストとして返す（numberedByContent: false）", () => {
+    const result = parseBlockContent(
+      "Steps:\n1. Right-click on canvas\n2. Select option\n3. Confirm",
+    );
+    expect(result).toEqual([
+      { type: "paragraph", text: "Steps:" },
+      {
+        type: "ordered-list",
+        numberedByContent: false,
+        items: ["Right-click on canvas", "Select option", "Confirm"],
+      },
+    ]);
+  });
+
+  it("リストの後にテキストが続く場合は段落として返す", () => {
+    const result = parseBlockContent(
+      "List:\n• Item A\n• Item B\n\nHover over any node.",
+    );
+    expect(result).toEqual([
+      { type: "paragraph", text: "List:" },
+      { type: "unordered-list", items: ["Item A", "Item B"] },
+      { type: "paragraph", text: "Hover over any node." },
+    ]);
+  });
+
+  it("改行のみの段落はスキップされる", () => {
+    const result = parseBlockContent("First\n\nSecond");
+    expect(result).toEqual([
+      { type: "paragraph", text: "First" },
+      { type: "paragraph", text: "Second" },
+    ]);
+  });
+
+  it("リスト種類が途中で切り替わる場合は別のリストとして返す", () => {
+    const result = parseBlockContent(
+      "• Bullet A\n• Bullet B\n1. Number one\n2. Number two",
+    );
+    expect(result).toEqual([
+      { type: "unordered-list", items: ["Bullet A", "Bullet B"] },
+      {
+        type: "ordered-list",
+        numberedByContent: false,
+        items: ["Number one", "Number two"],
+      },
+    ]);
+  });
+
+  it("リストのみの段落（導入テキストなし）を処理する", () => {
+    const result = parseBlockContent(
+      "• Start simple\n• Use the palette\n• Organize your tree",
+    );
+    expect(result).toEqual([
+      {
+        type: "unordered-list",
+        items: ["Start simple", "Use the palette", "Organize your tree"],
+      },
+    ]);
+  });
+
+  it("実際のコンテンツパターン: guide-what-is-formal-proof の番号付きリスト", () => {
+    const input =
+      "Why formalize proofs? Several reasons:\n<b>1. Absolute certainty:</b> No error.\n<b>2. Computer verification:</b> Automatic.\n<b>3. Foundation:</b> First principles.\n<b>4. Patterns:</b> Revealed.";
+    const result = parseBlockContent(input);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({
+      type: "paragraph",
+      text: "Why formalize proofs? Several reasons:",
+    });
+    expect(result[1]?.type).toBe("ordered-list");
+    if (result[1]?.type === "ordered-list") {
+      expect(result[1].items).toHaveLength(4);
+    }
   });
 });
 

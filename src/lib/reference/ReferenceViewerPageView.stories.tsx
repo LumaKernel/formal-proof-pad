@@ -261,6 +261,48 @@ export const WithBibliography: Story = {
   },
 };
 
+/** リスト（ul/ol）を含むコンテンツのストーリー */
+export const WithListContent: Story = {
+  args: {
+    entry: {
+      ...sampleEntry,
+      body: {
+        en: [
+          "In a formal proof system:\n• Every statement is a well-formed formula\n• Every inference follows an explicit rule\n• The proof can be mechanically verified",
+          "Why formalize proofs? Several reasons:\n<b>1. Certainty:</b> No room for error.\n<b>2. Verification:</b> Proofs can be checked automatically.\n<b>3. Foundation:</b> Understanding first principles.",
+          "To add a formula node:\n1. Right-click on the canvas\n2. Select 'Add Formula Schema'\n3. Type your formula\n4. Press Enter to confirm",
+        ],
+        ja: [
+          "形式証明体系では：\n• すべての文は整形式である\n• すべての推論は明示的な規則に従う\n• 証明は機械的に検証できる",
+          "なぜ形式化するのか：\n<b>1. 確実性：</b>誤りの余地がない。\n<b>2. 検証：</b>自動チェック可能。\n<b>3. 基礎：</b>第一原理から理解。",
+          "論理式ノードを追加するには：\n1. キャンバス上で右クリック\n2. 「論理式スキーマを追加」を選択\n3. 論理式を入力\n4. Enterキーで確定",
+        ],
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const viewer = canvas.getByTestId("ref-viewer");
+
+    // 順序なしリスト（ul）が描画されていること
+    const uls = viewer.querySelectorAll("ul");
+    await expect(uls.length).toBeGreaterThanOrEqual(1);
+
+    // 順序ありリスト（ol）が描画されていること
+    const ols = viewer.querySelectorAll("ol");
+    await expect(ols.length).toBeGreaterThanOrEqual(1);
+
+    // リストアイテムが存在すること
+    const lis = viewer.querySelectorAll("li");
+    await expect(lis.length).toBeGreaterThanOrEqual(6);
+
+    // テキスト内容の確認
+    await expect(viewer).toHaveTextContent("well-formed formula");
+    await expect(viewer).toHaveTextContent("Certainty");
+    await expect(viewer).toHaveTextContent("Right-click on the canvas");
+  },
+};
+
 // --- NotFound ストーリー ---
 
 export const NotFound: Story = {

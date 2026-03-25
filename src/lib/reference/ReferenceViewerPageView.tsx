@@ -16,6 +16,7 @@ import type {
   Locale,
   ReferenceEntry,
 } from "./referenceEntry";
+import { BodyContent } from "./BodyContent";
 import { InlineMarkdown } from "./InlineMarkdown";
 import {
   buildViewerPageData,
@@ -417,18 +418,18 @@ function ViewerContent({
 
       {/* 本文パラグラフ */}
       {data.bodyParagraphs.map((paragraph, i) => (
-        <p key={`p-${String(i) satisfies string}`} style={paragraphStyle}>
-          <InlineMarkdown
-            text={paragraph}
-            onNavigate={onNavigate}
-            onCiteClick={(citeKey) => {
-              const el = document.getElementById(
-                `cite-${citeKey satisfies string}`,
-              );
-              el?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }}
-          />
-        </p>
+        <BodyContent
+          key={`p-${String(i) satisfies string}`}
+          text={paragraph}
+          paragraphStyle={paragraphStyle}
+          onNavigate={onNavigate}
+          onCiteClick={(citeKey) => {
+            const el = document.getElementById(
+              `cite-${citeKey satisfies string}`,
+            );
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+        />
       ))}
 
       {/* 関連エントリ */}
