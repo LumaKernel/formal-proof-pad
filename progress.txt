@@ -18065,3 +18065,26 @@
   - bibliographyRegistryはreferenceContent.tsで一元管理。エントリのbibliographyKeysで参照
   - ESLintルール no-explicit-return-is: .filter()のtype predicateも省略必須（TS 5.5で自動推論）
 ---
+
+## 2026-03-25 - [reference] ul/olブロックレベルレンダリング
+- 実装した内容:
+  - referenceContent.ts の10エントリに含まれるリストパターン（•, <b>N.</b>, N.）を特定
+  - referenceUILogic.ts に parseBlockContent 関数を追加（段落テキストをブロック要素に分解）
+  - BodyContent.tsx コンポーネントを新規作成（<p>, <ul>, <ol> を適切にレンダリング）
+  - ReferenceViewerPageView.tsx と ReferenceModal.tsx の body レンダリングを BodyContent に置換
+  - numberedByContent フラグで <b>N.</b> パターンの ol は list-style:none（番号埋め込み済み）
+- 変更したファイル:
+  - src/lib/reference/referenceUILogic.ts（parseBlockContent, BlockElement型追加）
+  - src/lib/reference/referenceUILogic.test.ts（9テスト追加）
+  - src/lib/reference/BodyContent.tsx（新規）
+  - src/lib/reference/BodyContent.test.tsx（新規、6テスト）
+  - src/lib/reference/ReferenceViewerPageView.tsx（BodyContent使用）
+  - src/lib/reference/ReferenceViewerPageView.stories.tsx（WithListContent追加）
+  - src/lib/reference/ReferenceModal.tsx（BodyContent使用）
+  - src/lib/reference/referenceContent.ts（TODOマーク追加→除去）
+- カバレッジ: BodyContent 100%, 全体 Stmts 99.94% / Branch 99.5%（ベースラインと同等）
+- **今後のイテレーションへの学び:**
+  - JSX文字列属性（text="...\n..."）では \n はリテラル文字列になる。テストでは text={"...\n..."} を使う
+  - ブロックレベルのパースは InlineMarkdown とは別の関心事。BodyContent を分離して InlineMarkdown は変更不要にした
+  - referenceContent.ts の body テキストは \n 区切りで複数行を1パラグラフに含むため、ブロックレベル分解が必要
+---
