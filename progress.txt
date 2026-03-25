@@ -109,6 +109,32 @@
 
 ---
 
+## 2026-03-25 - [script-runner] addGoalスクリプトAPIを削除
+
+- ベースライン: Stmts 99.96%, Branch 99.58%, Funcs 90.49%, Lines 99.98%
+- **結果: Stmts 99.96% (±0), Branch 99.58% (±0), Funcs 90.50% (+0.01%), Lines 99.98% (±0)**
+- 実装内容:
+  - `workspaceBridge.ts` から `addGoal` 関連コード（handler型, createAddGoalFn, bridges配列, API docs）を削除
+  - `builtin-api-typedefs.txt` から `addGoal` 宣言を削除
+  - `templates.ts` の4テンプレートから `addGoal()` 呼び出しを削除
+  - `ProofWorkspace.tsx` と `ScriptEditorComponent.stories.tsx` のスクリプトハンドラから削除
+  - テスト修正: workspaceBridge.test.ts, templates.test.ts, hilbertProofBridge.test.ts
+- 変更ファイル:
+  - src/lib/script-runner/workspaceBridge.ts
+  - src/lib/script-runner/workspaceBridge.test.ts
+  - src/lib/script-runner/builtin-api-typedefs.txt
+  - src/lib/script-runner/templates.ts
+  - src/lib/script-runner/templates.test.ts
+  - src/lib/script-runner/hilbertProofBridge.test.ts
+  - src/lib/proof-pad/ProofWorkspace.tsx
+  - src/components/ScriptEditor/ScriptEditorComponent.stories.tsx
+- **今後のイテレーションへの学び:**
+  - addGoal関数自体はworkspaceState.tsに残す（Storybook等で直接利用）。削除対象はスクリプトサンドボックスAPIのみ
+  - WorkspaceCommandHandler型の変更はモック作成箇所すべてに影響する（3テストファイル）
+  - bridges配列の長さテストは忘れやすい
+
+---
+
 ## 2026-03-25 - [proof-pad] スクリプトAPI applyLayout()の証明木配置方向を修正
 
 - ベースライン: Stmts 99.96%, Branch 99.58%, Funcs 90.49%, Lines 99.98%
