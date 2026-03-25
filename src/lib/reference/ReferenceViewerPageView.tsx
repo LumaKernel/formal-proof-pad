@@ -8,7 +8,7 @@
  * 変更時は ReferenceViewerPageView.test.tsx, ReferenceViewerPageView.stories.tsx も同期すること。
  */
 
-import { useCallback, useMemo, type CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { UiButton } from "../../components/ui";
 import katex from "katex";
 import type {
