@@ -18204,3 +18204,15 @@
   - rAFスロットルではboolean flagパターン（rafPendingRef）を使うと、同期モックでもテストが正しく動作する
   - useEffectでref更新する必要あり（ESLint react-hooks/refsルール）
 ---
+
+## 2026-03-26 - a11y
+- WCAG AAカラーコントラスト修正＋Storybook a11yエラーモード有効化
+- 変更ファイル: globals.css, proofNodeUI.ts, inferenceEdgeLabelLogic.ts, ProofWorkspace.tsx, FormulaEditor.tsx, TermEditor.tsx, uiStyleLogic.ts, TabRulePalette.tsx, ScRulePalette.tsx, AtRulePalette.tsx, 20+ infinite-canvas stories, 4 reference components, notebook components, preview.ts, 4 story files with per-story a11y overrides
+- カバレッジ: Stmts 99.93%, Branch 99.44%, Funcs 90.51%, Lines 99.95%
+- **今後のイテレーションへの学び:**
+  - Storybook a11y.config.rules はストーリーレベルで設定するとグローバル設定を置換する（マージではない）。per-story overrideにはグローバルdisableルールも再記述が必要
+  - CSS変数のフォールバック色が実際のCSS変数定義値と一致していないとaxe-coreの判定に影響する。フォールバック値はglobals.cssと同期必須
+  - 色が背景としても文字としても使われる「デュアルコンテキスト色」は、WCAG AA（4.5:1）を両方の文脈で満たす中間値を選ぶ必要がある
+  - Monaco editorや::placeholder色はaxeで誤検出されやすい。per-story disableが現実的
+  - axe計算: rgba alpha blendの結果はブラウザ計算と一致しないことがある。明示的に計算して確認すべき
+---

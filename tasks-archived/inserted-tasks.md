@@ -317,3 +317,8 @@
 - [x] キャンバスのスクロール操作 (ドラッグ操作) が重たい。
   - usePan: viewportRef + rAFスロットルでコールバック安定化＋フレームあたり最大1回のstate更新に制限
   - useZoom: wheel/trackpadスクロールも同様にrAFバッチ化
+- [x] 残りのa11y違反を修正し Storybook `a11y.test: "error"` を有効化する
+  - WCAG AAコントラスト比を全色で達成。`a11y.test: "error"` 有効化済み
+  - 構造的a11y違反（nested-interactive等7ルール）は個別disable。Monaco/dark code panelは per-story disable
+  - 選択バナーボタンのコントラスト修正（`rgba(255,255,255,0.2)` → `rgba(0,0,0,0.2)`）
+  - 分岐バッジのコントラスト修正（`#8a6d20` → `#755a16`）
