@@ -276,3 +276,8 @@
 - [x] addGoalとかいうAPIは必要ない。 → スクリプトAPI(workspaceBridge)からaddGoalを削除。workspaceState.tsの関数自体はStorybook等で利用するため残す
 
 - [x] 拡張エディタでエラーになってる文字が背景色と一緒になって見えない → highlightMarkStyleのcolor: --color-error → --color-error-text に変更（コントラスト比改善）
+
+- [x] コントラストなどのa11y要因の検査を自動テストに組込もう (Storybook)
+  - `@storybook/addon-a11y` + `a11yAddonAnnotations` は設定済み
+  - WCAG AAコントラスト比改善: globals.css変数改善、46ファイルの色修正
+  - `preview.ts` の `a11y.test: "todo"` → まだ285テストがa11y違反。`"error"` 有効化は残違反解消後
