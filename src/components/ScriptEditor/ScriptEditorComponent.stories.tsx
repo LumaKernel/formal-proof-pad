@@ -13,7 +13,6 @@ import {
   removeNode,
   applyMPAndConnect,
   applyTreeLayout,
-  addGoal,
 } from "@/lib/proof-pad/workspaceState";
 import type { WorkspaceState } from "@/lib/proof-pad/workspaceState";
 import type { WorkspaceCommandHandler } from "@/lib/script-runner";
@@ -275,10 +274,6 @@ function ScriptEditorWithWorkspace() {
         setWorkspace(result.workspace);
         return result.mpNodeId;
       },
-      addGoal: (formulaText: string) => {
-        const ws = addGoal(workspaceRef.current, formulaText);
-        setWorkspace(ws);
-      },
       removeNode: (nodeId: string) => {
         const ws = removeNode(workspaceRef.current, nodeId);
         setWorkspace(ws);
@@ -347,9 +342,6 @@ setNodeRoleAxiom(n2);
 
 // MP適用: phi と phi -> (psi -> phi) から psi -> phi を導出
 var n3 = connectMP(n2, n1);
-
-// ゴール設定
-addGoal("psi -> phi");
 
 // 自動レイアウト
 applyLayout();

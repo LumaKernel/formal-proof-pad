@@ -64,8 +64,6 @@ export interface WorkspaceCommandHandler {
   readonly getNodes: () => readonly WorkspaceNodeInfo[];
   /** MP 適用でノードを接続。結論ノードの ID を返す。失敗時は throw */
   readonly connectMP: (antecedentId: string, conditionalId: string) => string;
-  /** ゴール式を設定する */
-  readonly addGoal: (formulaText: string) => void;
   /** ノードを削除する */
   readonly removeNode: (nodeId: string) => void;
   /** ノードの役割を公理に設定する */
@@ -165,17 +163,6 @@ const createConnectMPFn =
       );
     }
     return handler.connectMP(antecedentId, conditionalId);
-  };
-
-const createAddGoalFn =
-  (handler: WorkspaceCommandHandler) =>
-  (formulaText: unknown): unknown => {
-    if (typeof formulaText !== "string") {
-      const t = typeof formulaText satisfies string;
-      throw new Error(`addGoal: expected string, got ${t satisfies string}`);
-    }
-    handler.addGoal(formulaText);
-    return undefined;
   };
 
 const createRemoveNodeFn =
@@ -391,7 +378,6 @@ const createDisplayScProofFn =
  * - setNodeFormula(nodeId, formulaText)
  * - getNodes() → WorkspaceNodeInfo[]
  * - connectMP(antecedentId, conditionalId) → nodeId
- * - addGoal(formulaText)
  * - removeNode(nodeId)
  * - setNodeRoleAxiom(nodeId)
  * - applyLayout()
@@ -407,7 +393,6 @@ export const createWorkspaceBridges = (
   { name: "setNodeFormula", fn: createSetNodeFormulaFn(handler) },
   { name: "getNodes", fn: createGetNodesFn(handler) },
   { name: "connectMP", fn: createConnectMPFn(handler) },
-  { name: "addGoal", fn: createAddGoalFn(handler) },
   { name: "removeNode", fn: createRemoveNodeFn(handler) },
   { name: "setNodeRoleAxiom", fn: createSetNodeRoleAxiomFn(handler) },
   { name: "applyLayout", fn: createApplyLayoutFn(handler) },
@@ -452,11 +437,6 @@ export const WORKSPACE_BRIDGE_API_DEFS: readonly ProofBridgeApiDef[] = [
     signature: "(antecedentId: string, conditionalId: string) => string",
     description:
       "Modus Ponens で2つのノードを接続し、結論ノードを作成する。結論ノードIDを返す。",
-  },
-  {
-    name: "addGoal",
-    signature: "(formulaText: string) => void",
-    description: "ワークスペースにゴール（証明すべき目標）を追加する。",
   },
   {
     name: "removeNode",

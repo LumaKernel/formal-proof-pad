@@ -17,7 +17,6 @@ import {
   updateNodeRole,
   updateNodeFormulaText,
   applyMPAndConnect,
-  addGoal,
   applyTreeLayout,
   removeNode,
 } from "../proof-pad/workspaceState";
@@ -117,7 +116,6 @@ describe("テンプレート実行テスト", () => {
     setNodeFormula: vi.fn(),
     getNodes: vi.fn().mockReturnValue([]),
     connectMP: vi.fn().mockReturnValue("node-2"),
-    addGoal: vi.fn(),
     removeNode: vi.fn(),
     setNodeRoleAxiom: vi.fn(),
     applyLayout: vi.fn(),
@@ -257,8 +255,6 @@ describe("テンプレート実行テスト", () => {
     expect(handler.setNodeRoleAxiom).toHaveBeenCalledTimes(3);
     // MP接続が2回されること
     expect(handler.connectMP).toHaveBeenCalledTimes(2);
-    // ゴール設定されること
-    expect(handler.addGoal).toHaveBeenCalledWith("φ → φ");
     // レイアウトが適用されること
     expect(handler.applyLayout).toHaveBeenCalled();
     // コンソール出力の確認
@@ -1212,9 +1208,6 @@ describe("テンプレート統合テスト（ステートフルハンドラ）"
         ws = result.workspace;
         return result.mpNodeId;
       },
-      addGoal: (formulaText: string) => {
-        ws = addGoal(ws, formulaText);
-      },
       removeNode: (nodeId: string) => {
         ws = removeNode(ws, nodeId);
       },
@@ -1340,9 +1333,6 @@ describe("テンプレート統合テスト（ステートフルハンドラ）"
     // ワークスペースに5ノードが存在すること（公理3 + MP結論2）
     const ws = getWorkspace();
     expect(ws.nodes.length).toBe(5);
-
-    // ゴールが設定されていること
-    expect(ws.goals.length).toBe(1);
 
     // コンソール出力確認
     expect(consoleLogs.some((l) => l.includes("Q.E.D."))).toBe(true);

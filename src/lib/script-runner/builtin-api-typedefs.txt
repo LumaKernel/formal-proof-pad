@@ -198,9 +198,6 @@ declare function getNodes(): Array<{
 /** Modus Ponens で2つのノードを接続し、結論ノードを作成する。結論ノードIDを返す。 */
 declare function connectMP(antecedentId: string, conditionalId: string): string;
 
-/** ワークスペースにゴール（証明すべき目標）を追加する。 */
-declare function addGoal(formulaText: string): void;
-
 /** 指定ノードをワークスペースから削除する。 */
 declare function removeNode(nodeId: string): void;
 

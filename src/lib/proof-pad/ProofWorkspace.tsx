@@ -177,7 +177,6 @@ import {
   applyAtRuleAndConnect,
   applyScRuleAndConnect,
   importProofFromCollection,
-  addGoal,
   updateNodeRole,
 } from "./workspaceState";
 import {
@@ -3993,11 +3992,6 @@ export const ProofWorkspace = forwardRef<
         workspaceRef.current = result.workspace;
         setWorkspace(result.workspace);
         return result.mpNodeId;
-      },
-      addGoal: (formulaText: string) => {
-        const ws = addGoal(workspaceRef.current, formulaText);
-        workspaceRef.current = ws;
-        setWorkspace(ws);
       },
       removeNode: (nodeId: string) => {
         const ws = removeNode(workspaceRef.current, nodeId);

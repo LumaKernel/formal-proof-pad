@@ -318,8 +318,7 @@ console.log("   公理判定: " + (id4._tag === "Ok" ? id4.axiomName : "ERROR"))
 var node5 = connectMP(node4, node3);
 console.log("5. " + formatFormula(parseFormula("φ → φ")) + "  [MP 4,3]");
 
-// ゴール設定とレイアウト適用
-addGoal("φ → φ");
+// レイアウト適用
 applyLayout();
 
 console.log("");
@@ -1213,7 +1212,6 @@ console.log("MP(3,1): ψ");
 var nodeChi = connectMP(nodePsi, nodeHyp2);
 console.log("MP(4,2): χ");
 
-addGoal("χ");
 applyLayout();
 
 console.log("");
@@ -1288,7 +1286,6 @@ console.log("");
 clearWorkspace();
 var n1 = addNode("φ");
 setNodeRoleAxiom(n1);
-addGoal("φ");
 applyLayout();
 
 console.log("仮定付き証明: φ ⊢ φ");
@@ -1320,7 +1317,6 @@ setNodeRoleAxiom(h3);
 var r1 = connectMP(h3, h1);
 // MP: ψ, ψ→χ ⊢ χ
 var r2 = connectMP(r1, h2);
-addGoal("χ");
 applyLayout();
 
 console.log("仮定付き証明: φ→ψ, ψ→χ, φ ⊢ χ");

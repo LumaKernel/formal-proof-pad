@@ -119,7 +119,6 @@ describe("createHilbertProofBridges", () => {
     setNodeFormula: vi.fn(),
     getNodes: vi.fn().mockReturnValue([]),
     connectMP: vi.fn().mockReturnValue("node-2"),
-    addGoal: vi.fn(),
     removeNode: vi.fn(),
     setNodeRoleAxiom: vi.fn(),
     applyLayout: vi.fn(),

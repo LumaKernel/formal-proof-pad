@@ -18,7 +18,6 @@ const createMockHandler = (): WorkspaceCommandHandler => ({
       { id: "node-1", formulaText: "phi", label: "Axiom", x: 0, y: 0 },
     ]),
   connectMP: vi.fn().mockReturnValue("node-2"),
-  addGoal: vi.fn(),
   removeNode: vi.fn(),
   setNodeRoleAxiom: vi.fn(),
   applyLayout: vi.fn(),
@@ -111,13 +110,12 @@ describe("createWorkspaceBridges", () => {
   it("ブリッジ関数一覧を返す", () => {
     const handler = createMockHandler();
     const bridges = createWorkspaceBridges(handler);
-    expect(bridges.length).toBe(16);
+    expect(bridges.length).toBe(15);
     const names = bridges.map((b) => b.name);
     expect(names).toContain("addNode");
     expect(names).toContain("setNodeFormula");
     expect(names).toContain("getNodes");
     expect(names).toContain("connectMP");
-    expect(names).toContain("addGoal");
     expect(names).toContain("removeNode");
     expect(names).toContain("setNodeRoleAxiom");
     expect(names).toContain("applyLayout");
@@ -200,21 +198,6 @@ describe("connectMP ブリッジ", () => {
     const msg = runCodeError(`connectMP("node-1", 2)`, handler);
     expect(msg).toContain("connectMP");
     expect(msg).toContain("conditionalId");
-  });
-});
-
-describe("addGoal ブリッジ", () => {
-  it("ゴール式を設定する", () => {
-    const handler = createMockHandler();
-    runCode(`addGoal("phi -> phi")`, handler);
-    expect(handler.addGoal).toHaveBeenCalledWith("phi -> phi");
-  });
-
-  it("文字列以外を渡すとエラー", () => {
-    const handler = createMockHandler();
-    const msg = runCodeError(`addGoal(true)`, handler);
-    expect(msg).toContain("addGoal");
-    expect(msg).toContain("string");
   });
 });
 
