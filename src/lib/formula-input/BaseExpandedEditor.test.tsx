@@ -194,9 +194,7 @@ describe("BaseExpandedEditor - 構文ヘルプ", () => {
       </BaseExpandedEditor>,
     );
 
-    expect(
-      screen.queryByTestId("base-syntax-help"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("base-syntax-help")).not.toBeInTheDocument();
   });
 
   it("ヘルプボタンクリックでonOpenSyntaxHelpが呼ばれる", () => {
