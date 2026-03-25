@@ -22,14 +22,14 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "1",
     position: { x: 50, y: 50 },
     label: "φ → ψ",
-    color: "#4a90d9",
+    color: "#2e6da3",
     size: { width: 120, height: 40 },
   },
   {
     id: "2",
     position: { x: 300, y: 50 },
     label: "ψ → χ",
-    color: "#d94a4a",
+    color: "#b53d3d",
     size: { width: 120, height: 40 },
   },
 ];

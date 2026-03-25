@@ -170,7 +170,7 @@ describe("getNodeClassificationStyle", () => {
 
   it("note classification uses note stripe color", () => {
     const style = getNodeClassificationStyle("note");
-    expect(style.stripeColor).toBe("var(--color-node-note, #a0a0a0)");
+    expect(style.stripeColor).toBe("var(--color-node-note, #707070)");
   });
 });
 

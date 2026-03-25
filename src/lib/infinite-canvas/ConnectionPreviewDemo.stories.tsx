@@ -39,21 +39,21 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "node-a",
     position: { x: 80, y: 100 },
     label: "Node A",
-    color: "#4a90d9",
+    color: "#2e6da3",
     ports: DEFAULT_PORTS,
   },
   {
     id: "node-b",
     position: { x: 350, y: 100 },
     label: "Node B",
-    color: "#d9944a",
+    color: "#855a2a",
     ports: DEFAULT_PORTS,
   },
   {
     id: "node-c",
     position: { x: 200, y: 280 },
     label: "Node C",
-    color: "#4ad94a",
+    color: "#267026",
     ports: DEFAULT_PORTS,
   },
 ];
@@ -315,14 +315,14 @@ function ConnectionPreviewDemo() {
                 color={
                   isSnappedTarget === true
                     ? previewState?.isValid === true
-                      ? "#3b82f6"
+                      ? "#2563a8"
                       : "#ef4444"
                     : "#fff"
                 }
                 borderColor={
                   isSnappedTarget === true
                     ? previewState?.isValid === true
-                      ? "#3b82f6"
+                      ? "#2563a8"
                       : "#ef4444"
                     : "#666"
                 }

@@ -34,21 +34,21 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     position: { x: 100, y: 100 },
     size: { width: 120, height: 50 },
     label: "Item A",
-    color: "#4a90d9",
+    color: "#2e6da3",
   },
   {
     id: "b",
     position: { x: 350, y: 100 },
     size: { width: 120, height: 50 },
     label: "Item B",
-    color: "#d94a4a",
+    color: "#b53d3d",
   },
   {
     id: "c",
     position: { x: 220, y: 280 },
     size: { width: 120, height: 50 },
     label: "Item C",
-    color: "#4ad94a",
+    color: "#267026",
   },
 ];
 
@@ -264,7 +264,7 @@ function ObjectSnapDemo() {
               setSnapEnabled((prev) => !prev);
             }}
             style={{
-              background: snapEnabled ? "#4caf50" : "#f44336",
+              background: snapEnabled ? "#357a38" : "#c63030",
               color: "#fff",
               border: "none",
               borderRadius: 4,

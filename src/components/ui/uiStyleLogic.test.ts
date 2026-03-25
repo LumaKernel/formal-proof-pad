@@ -11,7 +11,7 @@ import {
 describe("getButtonTypeStyles", () => {
   it("returns danger primary light styles", () => {
     const s = getButtonTypeStyles("primary", true, false);
-    expect(s.backgroundColor).toBe("#e06060");
+    expect(s.backgroundColor).toBe("#c05050");
     expect(s.color).toBe("#ffffff");
   });
 
@@ -46,7 +46,7 @@ describe("getButtonTypeStyles", () => {
   it("returns link light styles", () => {
     const s = getButtonTypeStyles("link", false, false);
     expect(s.backgroundColor).toBe("transparent");
-    expect(s.color).toBe("#1677ff");
+    expect(s.color).toBe("#0f5fbf");
     expect(s.padding).toBe(0);
   });
 
@@ -128,7 +128,7 @@ describe("getMenuItemStyle", () => {
 
   it("returns danger light styles", () => {
     const s = getMenuItemStyle(true, false);
-    expect(s.color).toBe("#e06060");
+    expect(s.color).toBe("#c05050");
   });
 
   it("returns danger dark styles", () => {

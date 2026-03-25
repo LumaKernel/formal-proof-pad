@@ -20,13 +20,13 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "snap",
     position: { x: 100, y: 100 },
     label: "Snap to Grid",
-    color: "#4a90d9",
+    color: "#2e6da3",
   },
   {
     id: "free",
     position: { x: 300, y: 200 },
     label: "Free Move",
-    color: "#d94a4a",
+    color: "#b53d3d",
   },
 ];
 
@@ -122,7 +122,7 @@ function GridSnapDemo() {
               setSnapEnabled((prev) => !prev);
             }}
             style={{
-              background: snapEnabled ? "#4caf50" : "#f44336",
+              background: snapEnabled ? "#357a38" : "#c63030",
               color: "#fff",
               border: "none",
               borderRadius: 4,

@@ -68,10 +68,10 @@ export interface ProofNodeStyle {
  * globals.css の --color-node-* と同期すること。
  */
 const NODE_COLORS = {
-  axiom: { varName: "--color-node-axiom", fallback: "#5b8bd9" },
-  derived: { varName: "--color-node-derived", fallback: "#e6a84d" },
-  conclusion: { varName: "--color-node-conclusion", fallback: "#4ad97a" },
-  note: { varName: "--color-node-note", fallback: "#a0a0a0" },
+  axiom: { varName: "--color-node-axiom", fallback: "#4a73b5" },
+  derived: { varName: "--color-node-derived", fallback: "#855a2a" },
+  conclusion: { varName: "--color-node-conclusion", fallback: "#2a8048" },
+  note: { varName: "--color-node-note", fallback: "#707070" },
   script: { varName: "--color-node-script", fallback: "#9b59b6" },
 } as const;
 

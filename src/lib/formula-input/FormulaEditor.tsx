@@ -91,7 +91,7 @@ const displayContainerHoverStyle: CSSProperties = {
 
 /* v8 ignore start -- style constant */
 const placeholderStyle: CSSProperties = {
-  color: "#a0aec0",
+  color: "#636d7c",
   fontStyle: "italic",
 };
 /* v8 ignore stop */

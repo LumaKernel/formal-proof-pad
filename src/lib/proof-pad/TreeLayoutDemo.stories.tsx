@@ -112,7 +112,7 @@ function TreeLayoutDemoComponent() {
             padding: "6px 16px",
             borderRadius: 6,
             border: "none",
-            background: "#3b82f6",
+            background: "#2563a8",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,

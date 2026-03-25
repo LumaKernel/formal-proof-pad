@@ -20,13 +20,13 @@ const INITIAL_NODES: readonly NodeData[] = [
     id: "center",
     position: { x: 300, y: 250 },
     label: "Drag me to edges!",
-    color: "#4a90d9",
+    color: "#2e6da3",
   },
   {
     id: "top-left",
     position: { x: -200, y: -200 },
     label: "Far Top-Left",
-    color: "#d9944a",
+    color: "#855a2a",
   },
   {
     id: "bottom-right",

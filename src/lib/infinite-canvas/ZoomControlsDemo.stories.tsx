@@ -22,7 +22,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     id: "node1",
     position: { x: 50, y: 50 },
     label: "Alpha",
-    color: "#4a90d9",
+    color: "#2e6da3",
     width: 100,
     height: 40,
   },
@@ -30,7 +30,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     id: "node2",
     position: { x: 300, y: 100 },
     label: "Beta",
-    color: "#d9944a",
+    color: "#855a2a",
     width: 100,
     height: 40,
   },
@@ -146,7 +146,7 @@ function ZoomControlsTopRight() {
           <div
             style={{
               padding: "10px 16px",
-              background: "#4a90d9",
+              background: "#2e6da3",
               color: "#fff",
               borderRadius: 8,
               fontFamily: "var(--font-ui)",
@@ -386,7 +386,7 @@ function ZoomToSelectionDemo() {
                 whiteSpace: "nowrap",
                 userSelect: "none",
                 outline: selectedIds.has(node.id)
-                  ? "3px solid #3b82f6"
+                  ? "3px solid #2563a8"
                   : "none",
                 outlineOffset: "2px",
               }}

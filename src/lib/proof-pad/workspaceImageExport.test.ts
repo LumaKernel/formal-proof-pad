@@ -260,8 +260,8 @@ describe("generateExportSVG", () => {
 
     // 各種ストライプ色（CSS変数のfallback）がSVGに含まれる
     // derived は computed: 接続のないノードは axiom ストライプ、接続があるノードは derived ストライプ
-    expect(svg).toContain("#5b8bd9"); // axiom stripe（ルートノード）
-    expect(svg).toContain("#e6a84d"); // derived stripe（接続先ノード: MP, Gen, Goal）
+    expect(svg).toContain("#4a73b5"); // axiom stripe（ルートノード）
+    expect(svg).toContain("#855a2a"); // derived stripe（接続先ノード: MP, Gen, Goal）
 
     // 各種ラベル
     expect(svg).toContain("Axiom");

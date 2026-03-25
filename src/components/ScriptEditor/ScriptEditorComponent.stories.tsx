@@ -23,6 +23,25 @@ const meta = {
   args: {
     height: "300px",
   },
+  parameters: {
+    a11y: {
+      config: {
+        rules: [
+          // Monaco editor uses its own dark theme colors that axe cannot evaluate
+          // (CSS variable backgrounds resolve to white in axe context).
+          { id: "color-contrast", enabled: false },
+          // --- Inherited global disables (story rules replace, not merge) ---
+          { id: "nested-interactive", enabled: false },
+          { id: "aria-required-parent", enabled: false },
+          { id: "aria-required-children", enabled: false },
+          { id: "select-name", enabled: false },
+          { id: "label", enabled: false },
+          { id: "aria-input-field-name", enabled: false },
+          { id: "label-title-only", enabled: false },
+        ],
+      },
+    },
+  },
 } satisfies Meta<typeof ScriptEditorComponent>;
 
 export default meta;

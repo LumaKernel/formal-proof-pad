@@ -31,7 +31,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "a",
     position: { x: 50, y: 120 },
     label: "Node A",
-    color: "#4a90d9",
+    color: "#2e6da3",
     width: 90 + ITEM_PADDING_X,
     height: 20 + ITEM_PADDING_Y,
   },
@@ -39,7 +39,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "b",
     position: { x: 350, y: 50 },
     label: "Node B",
-    color: "#d94a4a",
+    color: "#b53d3d",
     width: 88 + ITEM_PADDING_X,
     height: 20 + ITEM_PADDING_Y,
   },
@@ -47,16 +47,16 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "c",
     position: { x: 350, y: 250 },
     label: "Node C",
-    color: "#4ad94a",
+    color: "#267026",
     width: 88 + ITEM_PADDING_X,
     height: 20 + ITEM_PADDING_Y,
   },
 ];
 
 const INITIAL_CONNECTIONS: readonly ConnectionData[] = [
-  { id: "ab", fromId: "a", toId: "b", color: "#4a90d9" },
-  { id: "ac", fromId: "a", toId: "c", color: "#4ad94a" },
-  { id: "bc", fromId: "b", toId: "c", color: "#d94a4a" },
+  { id: "ab", fromId: "a", toId: "b", color: "#2e6da3" },
+  { id: "ac", fromId: "a", toId: "c", color: "#267026" },
+  { id: "bc", fromId: "b", toId: "c", color: "#b53d3d" },
 ];
 
 function findItem(

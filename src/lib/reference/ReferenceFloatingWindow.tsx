@@ -162,7 +162,7 @@ const relatedItemWrapperStyle: CSSProperties = {
 const externalLinkStyle: CSSProperties = {
   display: "block",
   fontSize: "var(--font-size-xs, 11px)",
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   textDecoration: "none",
   padding: "3px 0",
 };
@@ -216,7 +216,7 @@ const navButtonLabelStyle: CSSProperties = {
 };
 
 const navButtonTitleStyle: CSSProperties = {
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   fontSize: "var(--font-size-xs, 11px)",
   overflow: "hidden",
   textOverflow: "ellipsis",

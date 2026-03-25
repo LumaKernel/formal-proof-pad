@@ -110,7 +110,7 @@ const formulaStyle: CSSProperties = {
 const detailButtonStyle: CSSProperties = {
   display: "inline-block",
   fontSize: "var(--font-size-xs, 11px)",
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   background: "none",
   border: "none",
   cursor: "pointer",
@@ -129,7 +129,7 @@ const popoverFooterStyle: CSSProperties = {
 const openInNewTabLinkStyle: CSSProperties = {
   display: "inline-block",
   fontSize: "var(--font-size-xs, 11px)",
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   textDecoration: "none",
   padding: "4px 0 0",
 };

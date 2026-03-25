@@ -206,7 +206,7 @@ const hilbertBadgeStyle: Readonly<CSSProperties> = {
 const ndBadgeStyle: Readonly<CSSProperties> = {
   ...deductionStyleBadgeBaseStyle,
   background: "var(--color-warning-light, #fff3e0)",
-  color: "var(--color-warning, #e65100)",
+  color: "var(--color-warning, #b84000)",
 };
 
 /** プリセットをカテゴリごとにグルーピング（静的データなのでモジュールレベルで計算） */

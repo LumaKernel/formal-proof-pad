@@ -83,7 +83,7 @@ const breadcrumbStyle: CSSProperties = {
 };
 
 const breadcrumbLinkStyle: CSSProperties = {
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   textDecoration: "none",
   cursor: "pointer",
   background: "none",
@@ -164,7 +164,7 @@ const relatedItemWrapperStyle: CSSProperties = {
 const externalLinkStyle: CSSProperties = {
   display: "block",
   fontSize: "var(--font-size-sm, 13px)",
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   textDecoration: "none",
   padding: "6px 0",
 };
@@ -200,7 +200,7 @@ const notFoundTitleStyle: CSSProperties = {
 
 const backLinkStyle: CSSProperties = {
   fontSize: "var(--font-size-sm, 13px)",
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   textDecoration: "none",
 };
 
@@ -265,7 +265,7 @@ const navLabelStyle: CSSProperties = {
 
 const navTitleStyle: CSSProperties = {
   fontSize: "var(--font-size-sm, 13px)",
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   fontFamily: "var(--font-ui)",
 };
 

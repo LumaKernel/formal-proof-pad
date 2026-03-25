@@ -27,7 +27,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     id: "axiom-k",
     position: { x: 80, y: 80 },
     label: "Axiom K",
-    color: "#4a90d9",
+    color: "#2e6da3",
     menuActions: [
       { id: "edit", label: "Edit Formula" },
       { id: "details", label: "View Details" },
@@ -38,7 +38,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     id: "axiom-s",
     position: { x: 350, y: 80 },
     label: "Axiom S",
-    color: "#d94a4a",
+    color: "#b53d3d",
     menuActions: [
       { id: "edit", label: "Edit Formula" },
       { id: "duplicate", label: "Duplicate" },
@@ -49,7 +49,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     id: "mp-result",
     position: { x: 200, y: 250 },
     label: "MP Result",
-    color: "#4ad94a",
+    color: "#267026",
     menuActions: [
       { id: "details", label: "View Details" },
       { id: "verify", label: "Verify Step" },

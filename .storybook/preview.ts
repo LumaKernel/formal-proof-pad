@@ -204,10 +204,21 @@ const preview: Preview = {
     },
 
     a11y: {
-      // 'todo' - show a11y violations in the test UI only (current: many violations remain)
-      // 'error' - fail CI on a11y violations (goal: enable once remaining violations fixed)
-      // 'off' - skip a11y checks entirely
-      test: "todo",
+      // Enforce a11y as error. Rules not yet fixed are disabled below.
+      // When fixing a rule, remove it from the disabled list.
+      test: "error",
+      config: {
+        rules: [
+          // --- Not yet fixed (structural changes needed) ---
+          { id: "nested-interactive", enabled: false },
+          { id: "aria-required-parent", enabled: false },
+          { id: "aria-required-children", enabled: false },
+          { id: "select-name", enabled: false },
+          { id: "label", enabled: false },
+          { id: "aria-input-field-name", enabled: false },
+          { id: "label-title-only", enabled: false },
+        ],
+      },
     },
   },
 };

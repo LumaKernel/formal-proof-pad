@@ -19,7 +19,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "a",
     position: { x: 100, y: 100 },
     label: "Node A",
-    color: "#4a90d9",
+    color: "#2e6da3",
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "duplicate", label: "Duplicate" },
@@ -30,7 +30,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "b",
     position: { x: 350, y: 100 },
     label: "Node B",
-    color: "#d94a4a",
+    color: "#b53d3d",
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "info", label: "Info" },
@@ -41,7 +41,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "c",
     position: { x: 200, y: 280 },
     label: "Node C",
-    color: "#4ad94a",
+    color: "#267026",
     menuItems: [
       { id: "rename", label: "Rename" },
       { id: "delete", label: "Delete" },

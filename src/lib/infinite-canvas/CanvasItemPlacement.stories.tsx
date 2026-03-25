@@ -13,9 +13,9 @@ interface ItemData {
 }
 
 const INITIAL_ITEMS: readonly ItemData[] = [
-  { id: "1", position: { x: 100, y: 100 }, label: "Node A", color: "#4a90d9" },
-  { id: "2", position: { x: 300, y: 200 }, label: "Node B", color: "#d94a4a" },
-  { id: "3", position: { x: 200, y: 350 }, label: "Node C", color: "#4ad94a" },
+  { id: "1", position: { x: 100, y: 100 }, label: "Node A", color: "#2e6da3" },
+  { id: "2", position: { x: 300, y: 200 }, label: "Node B", color: "#b53d3d" },
+  { id: "3", position: { x: 200, y: 350 }, label: "Node C", color: "#267026" },
 ];
 
 function CanvasItemPlacementDemo() {

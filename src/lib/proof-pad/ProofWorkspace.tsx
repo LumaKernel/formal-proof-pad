@@ -620,7 +620,7 @@ const moreMenuItemStyle: CSSProperties = {
 
 const mpButtonStyle = {
   padding: "4px 12px",
-  background: "var(--color-mp-button, #d9944a)",
+  background: "var(--color-mp-button, #855a2a)",
   color: "var(--color-node-text, #fff)",
   border: "1px solid var(--color-node-border, rgba(255,255,255,0.3))",
   borderRadius: 6,
@@ -888,7 +888,7 @@ const selectionBannerStyle = {
 
 const selectionActionButtonStyle = {
   padding: "2px 8px",
-  background: "rgba(255,255,255,0.2)",
+  background: "rgba(0,0,0,0.2)",
   color: "var(--color-node-text, #fff)",
   border: "1px solid var(--color-node-border, rgba(255,255,255,0.3))",
   borderRadius: 4,
@@ -5290,9 +5290,9 @@ export const ProofWorkspace = forwardRef<
 
       // アウトラインスタイルの決定
       const outlineStyle = isPreSelectedNode
-        ? `3px solid var(--color-mp-button, #d9944a)`
+        ? `3px solid var(--color-mp-button, #855a2a)`
         : isMPCompatible
-          ? `2px solid var(--color-mp-button, #d9944a)`
+          ? `2px solid var(--color-mp-button, #855a2a)`
           : isMergeLeader
             ? `3px solid ${mergeHighlightColor satisfies string}`
             : isMergeTarget
@@ -7712,7 +7712,7 @@ export const ProofWorkspace = forwardRef<
                   padding: "6px 16px",
                   borderRadius: 6,
                   border: "none",
-                  background: "var(--color-node-note, #a0a0a0)",
+                  background: "var(--color-node-note, #707070)",
                   color: "#fff",
                   cursor: "pointer",
                   fontWeight: 600,

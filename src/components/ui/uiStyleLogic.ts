@@ -31,9 +31,9 @@ export function getButtonTypeStyles(
 ): CSSProperties {
   if (danger && type === "primary") {
     return {
-      backgroundColor: isDark ? "#ff6b6b" : "#e06060",
+      backgroundColor: isDark ? "#ff6b6b" : "#c05050",
       color: "#ffffff",
-      borderColor: isDark ? "#ff6b6b" : "#e06060",
+      borderColor: isDark ? "#ff6b6b" : "#c05050",
     };
   }
   if (type === "primary") {
@@ -53,7 +53,7 @@ export function getButtonTypeStyles(
   if (type === "link") {
     return {
       backgroundColor: "transparent",
-      color: isDark ? "#6eb5ff" : "#1677ff",
+      color: isDark ? "#6eb5ff" : "#0f5fbf",
       border: "none",
       padding: 0,
     };
@@ -149,7 +149,7 @@ export function getMenuItemStyle(
     color: danger
       ? isDark
         ? "#ff6b6b"
-        : "#e06060"
+        : "#c05050"
       : isDark
         ? "#e0e0e0"
         : "#171717",

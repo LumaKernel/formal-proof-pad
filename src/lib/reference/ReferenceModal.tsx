@@ -152,7 +152,7 @@ const relatedItemWrapperStyle: CSSProperties = {
 const externalLinkStyle: CSSProperties = {
   display: "block",
   fontSize: "var(--font-size-sm, 13px)",
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   textDecoration: "none",
   padding: "4px 0",
 };
@@ -204,7 +204,7 @@ const modalNavLabelStyle: CSSProperties = {
 
 const modalNavTitleStyle: CSSProperties = {
   fontSize: "var(--font-size-sm, 13px)",
-  color: "var(--color-node-axiom, #5b8bd9)",
+  color: "var(--color-node-axiom, #4a73b5)",
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",

@@ -40,7 +40,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     width: 120,
     height: 40,
     label: "Axiom K",
-    color: "#4a90d9",
+    color: "#2e6da3",
   },
   {
     id: "axiom-s",
@@ -48,7 +48,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     width: 120,
     height: 40,
     label: "Axiom S",
-    color: "#d94a4a",
+    color: "#b53d3d",
   },
   {
     id: "mp-result",
@@ -56,7 +56,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     width: 120,
     height: 40,
     label: "MP Result",
-    color: "#4ad94a",
+    color: "#267026",
   },
 ];
 

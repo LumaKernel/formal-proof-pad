@@ -38,7 +38,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     width: 180,
     height: 50,
     label: "(φ→(ψ→χ))→((φ→ψ)→(φ→χ))",
-    color: "#4a90d9",
+    color: "#2e6da3",
   },
   {
     id: "premise-b",
@@ -46,7 +46,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     width: 140,
     height: 50,
     label: "φ→((φ→φ)→φ)",
-    color: "#d94a4a",
+    color: "#b53d3d",
   },
   {
     id: "conclusion",
@@ -54,7 +54,7 @@ const INITIAL_NODES: readonly NodeData[] = [
     width: 160,
     height: 50,
     label: "(φ→(φ→φ))→(φ→φ)",
-    color: "#4ad94a",
+    color: "#267026",
   },
 ];
 
@@ -132,7 +132,7 @@ function SubstitutionPanel({
             marginBottom: 2,
           }}
         >
-          <span style={{ color: "#4a90d9", fontStyle: "italic" }}>
+          <span style={{ color: "#2e6da3", fontStyle: "italic" }}>
             {sub.variable}
           </span>
           <span style={{ color: "#666" }}>:=</span>

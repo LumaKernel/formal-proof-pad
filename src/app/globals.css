@@ -49,7 +49,7 @@
   --ui-muted-foreground: #6e6e6e;
   --ui-accent: #f5f5f5;
   --ui-accent-foreground: #171717;
-  --ui-destructive: #ef4444;
+  --ui-destructive: #d63636;
   --ui-destructive-foreground: #fafafa;
   --ui-border: #e5e5e5;
   --ui-input: #e5e5e5;
@@ -62,7 +62,7 @@
   /* Text */
   --color-text-primary: #171717;
   --color-text-secondary: #666666;
-  --color-text-tertiary: #767676;
+  --color-text-tertiary: #636363;
 
   /* Border */
   --color-border: #e2e8f0;
@@ -86,16 +86,16 @@
   --color-button-secondary-border: #ebebeb;
 
   /* Semantic: Success / Error / Warning */
-  --color-success: #2ecc71;
+  --color-success: #17703e;
   --color-success-bg: rgba(60, 255, 60, 0.25);
   --color-success-text: #155724;
-  --color-error: #e06060;
+  --color-error: #c05050;
   --color-error-bg: rgba(255, 60, 60, 0.25);
   --color-error-text: #991b1b;
   --color-info-bg: #cce5ff;
   --color-info-text: #004085;
-  --color-warning: #d9944a;
-  --color-warning-hover: #b5752e;
+  --color-warning: #855a2a;
+  --color-warning-hover: #7d5528;
   --color-warning-text: #7b5800;
   --color-warning-bg: rgba(255, 215, 0, 0.3);
   --color-warning-border: rgba(255, 215, 0, 0.5);
@@ -110,6 +110,17 @@
   --color-badge-bg: #e8eaf0;
   --color-badge-text: #4a5568;
 
+  /* Inference Edge Badge Colors (white text on colored bg — WCAG AA 4.5:1) */
+  --color-badge-nd: #0770b8;
+  --color-badge-tab: #d63031;
+  --color-badge-at: #c0377e;
+  --color-badge-sc: #1a7a43;
+  --color-badge-mp: #6c5ce7;
+  --color-badge-gen: #007a62;
+  --color-badge-simp: #80672e;
+  --color-badge-subconn: #3e6a96;
+  --color-badge-subst: #b2543f;
+
   /* Minimap */
   --color-minimap-bg: rgba(255, 255, 255, 0.9);
   --color-minimap-border: rgba(0, 0, 0, 0.15);
@@ -117,11 +128,11 @@
   --color-minimap-viewport: rgba(59, 130, 246, 0.15);
   --color-minimap-viewport-border: rgba(59, 130, 246, 0.6);
 
-  /* Proof Node Colors (category accent) */
-  --color-node-axiom: #5b8bd9;
-  --color-node-mp: #d9944a;
+  /* Proof Node Colors (category accent — used as stripe color & text on white) */
+  --color-node-axiom: #4a73b5;
+  --color-node-mp: #855a2a;
   --color-node-gen: #9b59b6;
-  --color-node-conclusion: #4ad97a;
+  --color-node-conclusion: #2a8048;
 
   /* Proof Node Card Style */
   --color-node-card-bg: #fffdf8;
@@ -140,10 +151,10 @@
   --color-edge-conclusion: #7ae0a3;
 
   /* Proof Workspace UI */
-  --color-mp-button: #d9944a;
-  --color-mp-button-active: #b5752e;
-  --color-mp-button-shadow: rgba(217, 148, 74, 0.5);
-  --color-mp-banner: rgba(217, 148, 74, 0.95);
+  --color-mp-button: #855a2a;
+  --color-mp-button-active: #7d5528;
+  --color-mp-button-shadow: rgba(158, 108, 54, 0.5);
+  --color-mp-banner: rgba(158, 108, 54, 0.95);
   --color-gen-button: #9b59b6;
   --color-gen-button-active: #7d3c98;
   --color-gen-button-shadow: rgba(155, 89, 182, 0.5);
@@ -153,8 +164,8 @@
   --color-proof-complete-text: #1a7a3a;
   --color-proof-complete-bg: rgba(255, 253, 248, 0.95);
   --color-proof-complete-shadow: rgba(46, 204, 113, 0.2);
-  --color-proof-complete-axiom-border: #d9944a;
-  --color-proof-complete-axiom-text: #8a5a1e;
+  --color-proof-complete-axiom-border: #855a2a;
+  --color-proof-complete-axiom-text: #6b4518;
   --color-proof-complete-axiom-bg: rgba(255, 253, 248, 0.95);
   --color-proof-complete-axiom-shadow: rgba(217, 148, 74, 0.2);
 
@@ -185,9 +196,9 @@
 
   /* Notebook Badge */
   --color-badge-free-bg: rgba(76, 175, 80, 0.12);
-  --color-badge-free-text: #2e7d32;
+  --color-badge-free-text: #236123;
   --color-badge-quest-bg: rgba(230, 81, 0, 0.1);
-  --color-badge-quest-text: #e65100;
+  --color-badge-quest-text: #b84000;
 
   /* Notebook Action Button */
   --color-notebook-action-bg: rgba(255, 253, 248, 0.9);
@@ -205,34 +216,34 @@
   --color-quest-card-hover-bg: rgba(252, 249, 243, 0.98);
   --color-quest-chapter-bg: rgba(252, 249, 243, 0.96);
   --color-quest-chapter-border: rgba(180, 160, 130, 0.2);
-  --color-quest-chapter-number: #8b7355;
+  --color-quest-chapter-number: #6b5840;
   --color-quest-chapter-rule: rgba(180, 160, 130, 0.25);
   --color-quest-filter-bg: rgba(255, 253, 248, 0.9);
   --color-quest-filter-border: rgba(180, 160, 130, 0.3);
-  --color-quest-filter-active-bg: #5b7a9e;
-  --color-quest-filter-active-border: #5b7a9e;
+  --color-quest-filter-active-bg: #476180;
+  --color-quest-filter-active-border: #476180;
   --color-quest-filter-hover-bg: rgba(245, 240, 230, 0.95);
   --color-quest-progress-bar-bg: rgba(180, 160, 130, 0.15);
-  --color-quest-progress-bar-fill: #5b7a9e;
+  --color-quest-progress-bar-fill: #476180;
   --color-quest-star-filled: #d4a03c;
   --color-quest-star-empty: rgba(180, 160, 130, 0.3);
   --color-quest-rating-perfect-bg: rgba(212, 160, 60, 0.12);
-  --color-quest-rating-perfect-text: #8b6914;
+  --color-quest-rating-perfect-text: #6b5010;
   --color-quest-rating-good-bg: rgba(76, 175, 80, 0.12);
-  --color-quest-rating-good-text: #2e7d32;
+  --color-quest-rating-good-text: #236123;
   --color-quest-rating-clear-bg: rgba(91, 122, 158, 0.12);
-  --color-quest-rating-clear-text: #5b7a9e;
+  --color-quest-rating-clear-text: #476180;
   --color-quest-rating-none-bg: rgba(180, 160, 130, 0.1);
-  --color-quest-rating-none-text: #999;
-  --color-quest-start-bg: #5b7a9e;
-  --color-quest-start-hover-bg: #4a6580;
+  --color-quest-rating-none-text: #5c5c5c;
+  --color-quest-start-bg: #476180;
+  --color-quest-start-hover-bg: #3a5068;
   --color-quest-difficulty-bg: rgba(180, 160, 130, 0.12);
-  --color-quest-difficulty-text: #8b7355;
+  --color-quest-difficulty-text: #6b5840;
   --color-quest-empty-bg: rgba(252, 249, 243, 0.96);
   --color-quest-notebook-badge-bg: #e8eaf6;
   --color-quest-notebook-badge-text: #3949ab;
   --color-quest-reference-badge-bg: #e8f5e9;
-  --color-quest-reference-badge-text: #2e7d32;
+  --color-quest-reference-badge-text: #236123;
 
   /* Formula Syntax Highlight */
   --color-syntax-connective: #7b3fa0;

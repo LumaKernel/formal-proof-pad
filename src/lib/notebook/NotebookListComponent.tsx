@@ -272,7 +272,7 @@ function QuestProgressBadge({
       }
     : {
         backgroundColor: "var(--color-quest-progress-partial-bg, #fff3e0)",
-        color: "var(--color-quest-progress-partial-text, #e65100)",
+        color: "var(--color-quest-progress-partial-text, #b84000)",
       };
   return (
     <span

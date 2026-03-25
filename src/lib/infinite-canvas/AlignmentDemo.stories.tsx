@@ -26,28 +26,28 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "1",
     position: { x: 50, y: 50 },
     label: "Item A",
-    color: "#4a90d9",
+    color: "#2e6da3",
     size: { width: 120, height: 40 },
   },
   {
     id: "2",
     position: { x: 250, y: 120 },
     label: "Item B",
-    color: "#d94a4a",
+    color: "#b53d3d",
     size: { width: 80, height: 60 },
   },
   {
     id: "3",
     position: { x: 150, y: 280 },
     label: "Item C",
-    color: "#4ad94a",
+    color: "#267026",
     size: { width: 100, height: 50 },
   },
   {
     id: "4",
     position: { x: 400, y: 200 },
     label: "Item D",
-    color: "#d9a54a",
+    color: "#876228",
     size: { width: 90, height: 45 },
   },
 ];
@@ -151,7 +151,7 @@ function AlignmentDemoComponent() {
   }, []);
 
   const btnStyle = (disabled: boolean): React.CSSProperties => ({
-    background: disabled ? "#555" : "#3b82f6",
+    background: disabled ? "#555" : "#2563a8",
     color: "#fff",
     border: "none",
     borderRadius: 4,

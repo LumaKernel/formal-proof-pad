@@ -17,19 +17,19 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "1",
     position: { x: 100, y: 100 },
     label: "Drag me A",
-    color: "#4a90d9",
+    color: "#2e6da3",
   },
   {
     id: "2",
     position: { x: 300, y: 200 },
     label: "Drag me B",
-    color: "#d94a4a",
+    color: "#b53d3d",
   },
   {
     id: "3",
     position: { x: 200, y: 350 },
     label: "Drag me C",
-    color: "#4ad94a",
+    color: "#267026",
   },
 ];
 

@@ -72,11 +72,11 @@ const CONCLUSION_PORTS: readonly ConnectorPort[] = [
 
 // --- Proof data for φ→φ ---
 
-const AXIOM_COLOR = "#5b8bd9";
-const MP_COLOR = "#d9944a";
+const AXIOM_COLOR = "#4a73b5";
+const MP_COLOR = "#855a2a";
 const GEN_COLOR = "#9b59b6";
 const SUBSTITUTION_COLOR = "#3498db";
-const CONCLUSION_COLOR = "#4ad97a";
+const CONCLUSION_COLOR = "#267040";
 
 function makeNode(
   id: string,

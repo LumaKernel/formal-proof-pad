@@ -37,14 +37,14 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "axiom",
     position: { x: 80, y: 60 },
     label: "Axiom K",
-    color: "#4a90d9",
+    color: "#2e6da3",
     ports: DEFAULT_PORTS,
   },
   {
     id: "mp",
     position: { x: 350, y: 130 },
     label: "Modus Ponens",
-    color: "#d9944a",
+    color: "#855a2a",
     ports: [
       { id: "premise-1", edge: "left", position: 0.35 },
       { id: "premise-2", edge: "left", position: 0.65 },
@@ -57,7 +57,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "result",
     position: { x: 620, y: 130 },
     label: "Result",
-    color: "#4ad94a",
+    color: "#267026",
     ports: DEFAULT_PORTS,
   },
 ];
@@ -69,7 +69,7 @@ const INITIAL_CONNECTIONS: readonly ConnectionData[] = [
     fromPortId: "right",
     toItemId: "mp",
     toPortId: "premise-1",
-    color: "#4a90d9",
+    color: "#2e6da3",
   },
   {
     id: "mp-to-result",
@@ -77,7 +77,7 @@ const INITIAL_CONNECTIONS: readonly ConnectionData[] = [
     fromPortId: "conclusion",
     toItemId: "result",
     toPortId: "left",
-    color: "#4ad94a",
+    color: "#267026",
   },
 ];
 

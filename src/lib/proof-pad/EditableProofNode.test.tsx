@@ -98,9 +98,9 @@ describe("EditableProofNode", () => {
 
     it("全種別でカテゴリ色の左辺ストライプが適用される", () => {
       const stripeColors: Record<ProofNodeKind, string> = {
-        axiom: "var(--color-node-axiom, #5b8bd9)",
-        conclusion: "var(--color-node-conclusion, #4ad97a)",
-        note: "var(--color-node-note, #a0a0a0)",
+        axiom: "var(--color-node-axiom, #4a73b5)",
+        conclusion: "var(--color-node-conclusion, #2a8048)",
+        note: "var(--color-node-note, #707070)",
         script: "var(--color-node-script, #9b59b6)",
       };
       for (const kind of ["axiom", "conclusion", "note"] as const) {

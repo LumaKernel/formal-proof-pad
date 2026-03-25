@@ -36,17 +36,17 @@ export function computeNodeLabelFromEdges(
 
 // --- ラベルバッジ色 ---
 
-/** ND推論規則のデフォルトバッジ色 */
-const ND_BADGE_COLOR = "var(--color-badge-nd, #0984e3)";
+/** ND推論規則のデフォルトバッジ色 (WCAG AA 4.5:1 on white text) */
+const ND_BADGE_COLOR = "var(--color-badge-nd, #0770b8)";
 
 /** TAB推論規則のデフォルトバッジ色 */
 const TAB_BADGE_COLOR = "var(--color-badge-tab, #d63031)";
 
-/** AT推論規則のデフォルトバッジ色 */
-const AT_BADGE_COLOR = "var(--color-badge-at, #e84393)";
+/** AT推論規則のデフォルトバッジ色 (WCAG AA 4.5:1 on white text) */
+const AT_BADGE_COLOR = "var(--color-badge-at, #c0377e)";
 
-/** SC推論規則のデフォルトバッジ色 */
-const SC_BADGE_COLOR = "var(--color-badge-sc, #27ae60)";
+/** SC推論規則のデフォルトバッジ色 (WCAG AA 4.5:1 on white text) */
+const SC_BADGE_COLOR = "var(--color-badge-sc, #1a7a43)";
 
 /** 推論規則の種別に応じたバッジ背景色 */
 export function getInferenceEdgeBadgeColor(edge: InferenceEdge): string {
@@ -63,12 +63,12 @@ export function getInferenceEdgeBadgeColor(edge: InferenceEdge): string {
     return ND_BADGE_COLOR;
   }
   if (edge._tag === "mp") return "var(--color-badge-mp, #6c5ce7)";
-  if (edge._tag === "gen") return "var(--color-badge-gen, #00b894)";
-  if (edge._tag === "simplification") return "var(--color-badge-simp, #fdcb6e)";
+  if (edge._tag === "gen") return "var(--color-badge-gen, #007a62)";
+  if (edge._tag === "simplification") return "var(--color-badge-simp, #80672e)";
   if (edge._tag === "substitution-connection")
-    return "var(--color-badge-subconn, #74b9ff)";
+    return "var(--color-badge-subconn, #3e6a96)";
   // fall-through: TypeScript narrows to "substitution"
-  return "var(--color-badge-subst, #e17055)";
+  return "var(--color-badge-subst, #b2543f)";
 }
 
 // --- 前提ロール判定 ---

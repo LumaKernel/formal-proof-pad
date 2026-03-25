@@ -28,7 +28,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "input",
     position: { x: 50, y: 150 },
     label: "Input",
-    color: "#4a90d9",
+    color: "#2e6da3",
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "duplicate", label: "Duplicate" },
@@ -38,7 +38,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "process",
     position: { x: 300, y: 80 },
     label: "Process",
-    color: "#d9944a",
+    color: "#855a2a",
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "configure", label: "Configure" },
@@ -59,7 +59,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
     id: "output",
     position: { x: 570, y: 150 },
     label: "Output",
-    color: "#4ad94a",
+    color: "#267026",
     menuItems: [
       { id: "edit", label: "Edit" },
       { id: "delete", label: "Delete" },
@@ -68,7 +68,7 @@ const INITIAL_ITEMS: readonly ItemData[] = [
 ];
 
 const INITIAL_CONNECTIONS: readonly ConnectionData[] = [
-  { id: "input-process", fromId: "input", toId: "process", color: "#4a90d9" },
+  { id: "input-process", fromId: "input", toId: "process", color: "#2e6da3" },
   {
     id: "input-validate",
     fromId: "input",
@@ -79,7 +79,7 @@ const INITIAL_CONNECTIONS: readonly ConnectionData[] = [
     id: "process-output",
     fromId: "process",
     toId: "output",
-    color: "#d9944a",
+    color: "#855a2a",
   },
   {
     id: "validate-output",
