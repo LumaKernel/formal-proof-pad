@@ -18162,3 +18162,22 @@
   - loading.tsx は Server Component なので CSS変数は使えるが React hookは使えない
   - ローカルのvitest実行はStorybook browserテストを含むと非常に長い。CIに委ねるのが現実的
 ---
+
+## 2026-03-26 - [proof-collection] コレクション保存後にパネル自動表示＋ハイライト
+
+- 「Save to Collection」実行後、コレクションパネルが自動的に開き、保存したエントリがハイライト表示される機能を実装
+- ハイライトは3秒後に自動消去（useRef + setTimeout）
+- scrollIntoViewで保存エントリまで自動スクロール（jsdom互換のoptional chaining）
+- カバレッジ: Stmts 99.94%, Branch 99.48%, Funcs 90.49%, Lines 99.96%（ほぼ変化なし）
+- 変更ファイル:
+  - src/lib/proof-pad/ProofWorkspace.tsx（保存後パネル開く+ハイライトstate管理）
+  - src/lib/proof-collection/ProofCollectionPanel.tsx（highlightedEntryId prop、スタイル、scrollIntoView）
+  - src/app/workspace/[id]/WorkspaceContent.tsx（addProofEntry戻り値を返す）
+  - src/app/workspace/[id]/WorkspacePageView.tsx（型定義更新）
+  - src/lib/proof-collection/ProofCollectionPanel.test.tsx（ハイライトテスト2件追加）
+- スクリーンショット: .screenshots/collection-save-highlight.png, .screenshots/collection-save-highlight-2.png
+- **今後のイテレーションへの学び:**
+  - jsdom環境ではscrollIntoViewが未実装。optional chainingで回避
+  - highlight系UIは3秒タイムアウト+useRefでtimer管理がシンプルなパターン
+  - コールバックの戻り値型変更は型を辿ることで全体への影響を安全に伝搬できる
+---

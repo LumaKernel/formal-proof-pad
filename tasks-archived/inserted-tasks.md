@@ -312,3 +312,5 @@
 - [x] ページは基本的に移動した状態のスケルトン的な状態で待機するようにしよう (体験的に)。まずは瞬時に移動がしっかり起こるように。
   - [x] タブ切り替え: (hub) route group + usePathname() でHubContent再マウント防止
   - [x] ノートを開く、模範解答を開く、など — loading.tsx + dynamic() loading prop でスケルトン表示
+- [x] コレクションに保存、をしたら、コレクションウィンドウが開いて、対象の保存したばかりのものが詳細表示されている状態にせよ。
+  - onSaveProofToCollection戻り値をProofEntryIdに変更、保存後にパネル自動表示＋3秒ハイライト＋scrollIntoView
