@@ -3656,10 +3656,16 @@ describe("ProofWorkspace", () => {
       // No Add/Remove buttons exist
       expect(screen.queryByTestId("workspace-subst-add-entry")).toBeNull();
 
-      // forceEditMode: 入力欄は最初から編集モード（クリック不要）
+      // click-to-edit: 表示モードをクリックして編集モードに入る
+      await user.click(
+        screen.getByTestId("workspace-subst-value-0-display"),
+      );
       await user.type(
         screen.getByTestId("workspace-subst-value-0-input-input"),
         "alpha",
+      );
+      await user.click(
+        screen.getByTestId("workspace-subst-value-1-display"),
       );
       await user.type(
         screen.getByTestId("workspace-subst-value-1-input-input"),
@@ -3700,8 +3706,9 @@ describe("ProofWorkspace", () => {
         screen.getByTestId("workspace-subst-prompt-banner"),
       ).toBeInTheDocument();
 
-      // forceEditMode: 入力欄は最初から編集モード（Escapeでバナーが閉じる）
-      await user.keyboard("{Escape}");
+      // click-to-edit: 表示モードの要素にフォーカスしてEscapeで閉じる
+      const banner = screen.getByTestId("workspace-subst-prompt-banner");
+      fireEvent.keyDown(banner, { key: "Escape" });
 
       // Banner should disappear
       await waitFor(() => {
@@ -3784,9 +3791,15 @@ describe("ProofWorkspace", () => {
       const metaVarLabel1 = screen.getByTestId("workspace-subst-metavar-1");
       expect(metaVarLabel1).toHaveTextContent("τ");
 
-      // forceEditMode: 入力欄は最初から編集モード。placeholderはinput要素のattributeで確認
+      // click-to-edit: 表示モードをクリックして編集モードに入り、placeholderを確認
+      await user.click(
+        screen.getByTestId("workspace-subst-value-0-display"),
+      );
       const input0 = screen.getByTestId("workspace-subst-value-0-input-input");
       expect(input0).toHaveAttribute("placeholder", "Enter formula");
+      await user.click(
+        screen.getByTestId("workspace-subst-value-1-display"),
+      );
       const input1 = screen.getByTestId("workspace-subst-value-1-input-input");
       expect(input1).toHaveAttribute("placeholder", "Enter term");
     });
