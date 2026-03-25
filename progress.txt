@@ -18102,3 +18102,17 @@
   - SequentExpandedEditorはbodyのgap値が16（他は12）なので、bodyGap propで対応
   - Phase 2(ParseState統一型)とPhase 3(z-index一元管理)は残タスク
 ---
+
+## 2026-03-26 - proof-pad: 公理パレット畳む/展開機能
+- 実装した内容: AxiomPaletteにcollapse/expand機能を追加（GoalPanelと同パターン）
+- 変更したファイル:
+  - src/lib/proof-pad/AxiomPalette.tsx（collapsed状態、toggleButtonStyle、collapseButton追加）
+  - src/lib/proof-pad/AxiomPalette.test.tsx（8テスト追加、計24テスト）
+  - src/lib/proof-pad/AxiomPalette.stories.tsx（新規作成: Default + CollapseAndExpand）
+  - src/lib/proof-pad/ProofWorkspace.tsx（wasDraggedRef渡し追加）
+- カバレッジ: Stmts 99.94%, Branch 99.49%, Funcs 90.50%, Lines 99.96%（Branch -0.01% v8 artifact、Funcs +0.02%）
+- **今後のイテレーションへの学び:**
+  - GoalPanelのcollapse実装パターン（collapsed状態 + toggleButtonStyle + wasDraggedRef + handleCollapsedClick）は他のパネルにも再利用可能
+  - task-processing.mdのprettier問題は毎回CI前にチェックすべき
+  - AxiomPalette.stories.tsxは今回初めて作成。useProofMessagesはProviderなしでdefaultProofMessagesを返す
+---

@@ -303,3 +303,8 @@
 
 - [x] まず論理式入力モーダルはどうなってる？散乱してない？それぞれで特殊化ばかりしてない？ちゃんと整理して、共通化するプランをしっかりたてて進めよ。
   - Phase 1完了: BaseExpandedEditor抽出、expandedEditorStyles/renderHighlightedText共有化。3エディタをリファクタ。Phase 2(ParseState統一)/Phase 3(z-index一元管理)は今後。
+
+- [x] 公理一覧ウィンドウも畳む、動かすことがそれぞれできるようにしよう。
+  - ドラッグ移動は既に実装済み。畳む（collapse）機能を追加。GoalPanelのパターンを踏襲。
+  - AxiomPaletteにcollapsed状態、toggleButtonStyle、collapseButton、wasDraggedRef連携を追加
+  - テスト8件追加、ストーリー2件（Default + CollapseAndExpand）を新規作成
