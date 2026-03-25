@@ -18014,3 +18014,14 @@
   - InlineMarkdown の onNavigate は Optional prop。未指定でも `onNavigate?.(id)` でエラーにならない
   - ReferenceFloatingWindow と ReferenceBrowserComponent は別物。FloatingWindow はフルコンテンツ表示、BrowserComponent はカードリスト
 ---
+
+## 2026-03-25 - [reference] 残りドキュメントにインラインリンクを追加
+- referenceContent.ts の16エントリに `[[ref:id|text]]` リンクを網羅的に追加
+- 対象エントリ: guide-first-quest-walkthrough, guide-intro-propositional-logic, guide-intro-predicate-logic, axiom-a3, axiom-dne, rule-nd-overview, rule-nd-implication, rule-sc-overview, concept-soundness, concept-completeness, concept-glivenko, concept-kuroda-translation, system-minimal, system-intuitionistic, concept-nd-variants, concept-normalization-reduction
+- リンク先: system-lukasiewicz, axiom-a1/a2/a3, rule-mp, concept-deduction-theorem, concept-soundness, concept-completeness, concept-compactness, concept-lowenheim-skolem, concept-curry-howard, concept-cut-elimination, concept-kuroda-translation, concept-glivenko, system-classical, system-intuitionistic, system-minimal, rule-nd-overview, rule-sc-structural
+- カバレッジ: テスト追加なし（データのみ変更、パーサー・レンダラーは前回テスト済み）
+- **今後のイテレーションへの学び:**
+  - referenceContent.ts はシングルクォートとバッククォートが混在。Edit時に文字列のクォート種に注意
+  - 同一概念でも en/ja 両方の body を更新する必要がある。片方だけ変更しないこと
+  - リンクは過剰に入れすぎない。同一段落内での2回目以降の同じ用語へのリンクは不要
+---
