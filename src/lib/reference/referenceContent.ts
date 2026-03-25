@@ -88,7 +88,7 @@ const guideBasicOperations: ReferenceEntry = {
 
       "<b>1. Opening the Workspace</b>\nFrom the home page, selecting any quest opens the proof workspace. A new empty workspace can also be created from the 'New Workspace' button. The workspace consists of a canvas for building proof trees, along with panels for goals, axioms, and other tools.",
 
-      "<b>2. Understanding the Interface</b>\nThe workspace has several key components:\n• <b>Canvas:</b> The main area where you build your proof tree\n• <b>Goal Panel:</b> Shows what you need to prove (right side)\n• <b>Axiom Palette:</b> Available axioms and rules you can use (bottom)\n• <b>Context Menu:</b> Right-click on the canvas to add nodes",
+      "<b>2. Understanding the Interface</b>\nThe workspace has several key components:\n• <b>Canvas:</b> The main area where you build your proof tree\n• <b>Goal Panel:</b> Shows what you need to prove (right side)\n• <b>Axiom Palette:</b> Available axioms and rules you can use (left side)\n• <b>Context Menu:</b> Right-click on the canvas to add nodes",
 
       "<b>3. Adding Nodes</b>\nTo add a formula node:\n1. Right-click on the empty canvas\n2. Select 'Add Formula Schema' from the context menu\n3. Type your formula using the formula editor\n4. Press Enter or click outside to confirm\n\nYou can use keyboard shortcuts like <code>phi</code> for $\\varphi$, <code>psi</code> for $\\psi$, and <code>-></code> for $\\to$.",
 
@@ -98,9 +98,9 @@ const guideBasicOperations: ReferenceEntry = {
 
       "<b>6. Checking Your Proof</b>\nThe system automatically validates your proof:\n• <b>Green nodes:</b> Valid and correctly connected\n• <b>Red nodes:</b> Have errors that need fixing\n• <b>Yellow nodes:</b> Warnings or incomplete connections\n\nHover over any node to see detailed validation messages.",
 
-      "<b>7. Saving and Loading</b>\nYour work is automatically saved locally in your browser. You can:\n• Export your proof as JSON or image\n• Import previously saved proofs\n• Share your proof via a generated link",
+      "<b>7. Saving and Loading</b>\nYour work is automatically saved locally in your browser. You can:\n• Export your proof as JSON, SVG, or PNG via the menu (⋮) button\n• Import previously saved proofs from JSON",
 
-      "<b>8. Tips for Success</b>\n• Start with simple quests and gradually move to complex ones\n• Use the axiom palette to quickly find relevant rules\n• Organize your proof tree from top (premises) to bottom (conclusion)\n• Reference the documentation (?) for detailed explanations of axioms and rules\n• Try the keyboard shortcuts: press <code>?</code> to see the full list",
+      "<b>8. Tips for Success</b>\n• Start with simple quests and gradually move to complex ones\n• Use the axiom palette to quickly find relevant rules\n• Organize your proof tree from top (premises) to bottom (conclusion)\n• Use Ctrl/Cmd+Z to undo mistakes and experiment freely\n• Use Ctrl/Cmd+Shift+L to auto-layout your proof tree",
 
       "With these operations, one can begin constructing formal proofs. The first quest in the Propositional Logic section provides an opportunity to practice these procedures.",
     ],
@@ -109,7 +109,7 @@ const guideBasicOperations: ReferenceEntry = {
 
       "<b>1. ワークスペースを開く</b>\nホームページから任意のクエストを選択すると、証明ワークスペースが開く。「新規ワークスペース」ボタンから空のワークスペースを作成することも可能である。ワークスペースは、証明ツリーを構築するキャンバスと、ゴール、公理、その他のツールのパネルで構成される。",
 
-      "<b>2. インターフェースの理解</b>\nワークスペースには以下の主要コンポーネントがあります：\n• <b>キャンバス：</b>証明ツリーを構築するメインエリア\n• <b>ゴールパネル：</b>証明すべき内容を表示（右側）\n• <b>公理パレット：</b>使用できる公理と規則（下部）\n• <b>コンテキストメニュー：</b>キャンバス上で右クリックしてノードを追加",
+      "<b>2. インターフェースの理解</b>\nワークスペースには以下の主要コンポーネントがあります：\n• <b>キャンバス：</b>証明ツリーを構築するメインエリア\n• <b>ゴールパネル：</b>証明すべき内容を表示（右側）\n• <b>公理パレット：</b>使用できる公理と規則（左側）\n• <b>コンテキストメニュー：</b>キャンバス上で右クリックしてノードを追加",
 
       "<b>3. ノードの追加</b>\n論理式ノードを追加するには：\n1. 空のキャンバス上で右クリック\n2. コンテキストメニューから「論理式スキーマを追加」を選択\n3. 論理式エディタで論理式を入力\n4. Enterキーを押すか、外側をクリックして確定\n\nキーボードショートカット：<code>phi</code>で$\\varphi$、<code>psi</code>で$\\psi$、<code>-></code>で$\\to$が入力できます。",
 
@@ -119,9 +119,9 @@ const guideBasicOperations: ReferenceEntry = {
 
       "<b>6. 証明のチェック</b>\nシステムは自動的に証明を検証します：\n• <b>緑色のノード：</b>有効で正しく接続されている\n• <b>赤色のノード：</b>修正が必要なエラーがある\n• <b>黄色のノード：</b>警告または不完全な接続\n\nノードにカーソルを合わせると詳細な検証メッセージが表示されます。",
 
-      "<b>7. 保存と読み込み</b>\n作業内容はブラウザにローカルで自動保存されます。以下が可能です：\n• 証明をJSONや画像としてエクスポート\n• 以前に保存した証明をインポート\n• 生成されたリンクで証明を共有",
+      "<b>7. 保存と読み込み</b>\n作業内容はブラウザにローカルで自動保存されます。以下が可能です：\n• メニュー（⋮）ボタンからJSON・SVG・PNGとしてエクスポート\n• JSONから以前に保存した証明をインポート",
 
-      "<b>8. 成功のためのヒント</b>\n• 簡単なクエストから始めて、徐々に複雑なものへ進む\n• 公理パレットを使って関連する規則を素早く見つける\n• 証明ツリーを上（前提）から下（結論）へ整理する\n• 公理と規則の詳細な説明はドキュメント（?）を参照\n• キーボードショートカットを試す：<code>?</code>で全リストを表示",
+      "<b>8. 成功のためのヒント</b>\n• 簡単なクエストから始めて、徐々に複雑なものへ進む\n• 公理パレットを使って関連する規則を素早く見つける\n• 証明ツリーを上（前提）から下（結論）へ整理する\n• Ctrl/Cmd+Zで失敗を元に戻し、自由に実験する\n• Ctrl/Cmd+Shift+Lで証明ツリーを自動整列",
 
       "以上の操作を習得すれば、形式証明の構築を開始できる。命題論理セクションの最初のクエストが、これらの手順を練習する機会を提供する。",
     ],
@@ -161,7 +161,7 @@ const guideFirstQuestWalkthrough: ReferenceEntry = {
     en: [
       'This guide presents a step-by-step derivation of <b>$\\varphi \\to \\varphi$</b> (the identity principle). Although "$\\varphi$ implies $\\varphi$" is semantically trivial, in a formal proof system nothing can be taken for granted. The formula must be derived from axioms using only the permitted inference rules.',
 
-      "<b>The Setup</b>\nOpen quest prop-01 from the quest catalog. The workspace displays a goal: <b>$\\varphi \\to \\varphi$</b>. The [[ref:system-lukasiewicz|Łukasiewicz]] axiom system provides three axioms and one inference rule:\n• <b>[[ref:axiom-a1|A1]] (K):</b> $\\varphi \\to (\\psi \\to \\varphi)$\n• <b>[[ref:axiom-a2|A2]] (S):</b> ($\\varphi \\to (\\psi \\to \\chi)) \\to ((\\varphi \\to \\psi) \\to (\\varphi \\to \\chi)$)\n• <b>[[ref:axiom-a3|A3]]:</b> ($\\lnot \\varphi \\to \\lnot \\psi) \\to (\\psi \\to \\varphi$)\n• <b>[[ref:rule-mp|MP]] (Modus Ponens):</b> From $\\varphi \\to \\psi$ and $\\varphi$, derive $\\psi$",
+      "<b>The Setup</b>\nOpen quest prop-01 from the quest catalog. The workspace displays a goal: <b>$\\varphi \\to \\varphi$</b>. The [[ref:system-lukasiewicz|Łukasiewicz]] axiom system provides the following axioms and one inference rule (the palette also shows definition axioms ∧-Def and ∨-Def, but they are not needed for this proof):\n• <b>[[ref:axiom-a1|A1]] (K):</b> $\\varphi \\to (\\psi \\to \\varphi)$\n• <b>[[ref:axiom-a2|A2]] (S):</b> ($\\varphi \\to (\\psi \\to \\chi)) \\to ((\\varphi \\to \\psi) \\to (\\varphi \\to \\chi)$)\n• <b>[[ref:axiom-a3|A3]]:</b> ($\\lnot \\varphi \\to \\lnot \\psi) \\to (\\psi \\to \\varphi$)\n• <b>[[ref:rule-mp|MP]] (Modus Ponens):</b> From $\\varphi \\to \\psi$ and $\\varphi$, derive $\\psi$",
 
       "<b>The Strategy</b>\nThe goal is to derive $\\varphi \\to \\varphi$ from these axioms. There is no direct axiom for identity. The key observation is that <b>A2 (the S axiom) distributes implication</b>: given $\\varphi \\to (\\psi \\to \\chi)$ and $\\varphi \\to \\psi$, one can derive $\\varphi \\to \\chi$. By choosing appropriate substitutions for $\\psi$ and $\\chi$, the conclusion becomes $\\varphi \\to \\varphi$.",
 
@@ -182,7 +182,7 @@ const guideFirstQuestWalkthrough: ReferenceEntry = {
     ja: [
       "本ガイドでは、最初のクエスト「<b>$\\varphi \\to \\varphi$</b>（恒等律）の証明」を段階的に解説する。「$\\varphi$ならば$\\varphi$」は意味論的には自明であるが、形式証明体系においては何も前提とできない。許された推論規則のみを用いて、公理から導出する必要がある。",
 
-      "<b>準備</b>\nクエストカタログからprop-01を開く。ワークスペースにゴール「<b>$\\varphi \\to \\varphi$</b>」が表示される。[[ref:system-lukasiewicz|Łukasiewicz]]公理体系では以下の3つの公理と1つの推論規則が利用可能である：\n• <b>[[ref:axiom-a1|A1]] (K)：</b> $\\varphi \\to (\\psi \\to \\varphi)$\n• <b>[[ref:axiom-a2|A2]] (S)：</b> ($\\varphi \\to (\\psi \\to \\chi)) \\to ((\\varphi \\to \\psi) \\to (\\varphi \\to \\chi)$)\n• <b>[[ref:axiom-a3|A3]]：</b> ($\\lnot \\varphi \\to \\lnot \\psi) \\to (\\psi \\to \\varphi$)\n• <b>[[ref:rule-mp|MP]] (Modus Ponens)：</b> $\\varphi \\to \\psi$ と $\\varphi$ から $\\psi$ を導出",
+      "<b>準備</b>\nクエストカタログからprop-01を開く。ワークスペースにゴール「<b>$\\varphi \\to \\varphi$</b>」が表示される。[[ref:system-lukasiewicz|Łukasiewicz]]公理体系では以下の公理と1つの推論規則が利用可能である（パレットには定義公理∧-Defと∨-Defも表示されるが、この証明では使わない）：\n• <b>[[ref:axiom-a1|A1]] (K)：</b> $\\varphi \\to (\\psi \\to \\varphi)$\n• <b>[[ref:axiom-a2|A2]] (S)：</b> ($\\varphi \\to (\\psi \\to \\chi)) \\to ((\\varphi \\to \\psi) \\to (\\varphi \\to \\chi)$)\n• <b>[[ref:axiom-a3|A3]]：</b> ($\\lnot \\varphi \\to \\lnot \\psi) \\to (\\psi \\to \\varphi$)\n• <b>[[ref:rule-mp|MP]] (Modus Ponens)：</b> $\\varphi \\to \\psi$ と $\\varphi$ から $\\psi$ を導出",
 
       "<b>戦略</b>\n目標はこれらの公理から$\\varphi \\to \\varphi$を導出することである。恒等律に直接対応する公理は存在しない。鍵となる観察は、<b>A2（S公理）が含意を分配する</b>という点である：$\\varphi \\to (\\psi \\to \\chi)$ と $\\varphi \\to \\psi$ から $\\varphi \\to \\chi$ を導出できる。$\\psi$と$\\chi$に適切な代入を選択すれば、結論を$\\varphi \\to \\varphi$とすることができる。",
 
@@ -5542,7 +5542,7 @@ const guideIntroNaturalDeduction: ReferenceEntry = {
       "<b>Example: proving $\\varphi \\to \\varphi$.</b> Assume $\\varphi$ (as a temporary assumption). We have $\\varphi$ as a conclusion. Apply $\\to$-introduction to obtain $\\varphi \\to \\varphi$, discharging the assumption. In a Hilbert system, this same proof requires multiple steps using axioms A1 and A2.",
       "<b>Comparison with Hilbert systems.</b> Hilbert systems are axiom-rich and rule-poor (many axiom schemas, few inference rules). Natural deduction is the opposite: axiom-poor and rule-rich (few or no axiom schemas, many inference rules — one pair per connective). Natural deduction proofs are often shorter and closer to informal mathematical reasoning.",
       "<b>Three variants.</b> There are three main variants of natural deduction, differing in how they handle classical reasoning: <b>NM</b> (minimal logic — no negation rules beyond $\\lnot$-introduction), <b>NJ</b> (intuitionistic — adds <i>ex falso quodlibet</i>: from $\\bot$, conclude anything), and <b>NK</b> (classical — adds double negation elimination: from $\\lnot\\lnot\\varphi$, conclude $\\varphi$).",
-      "<b>Connective rules summary.</b> For each connective: $\\to$ (implication introduction/elimination), $\\land$ (conjunction introduction/elimination-left/elimination-right), $\\lor$ (disjunction introduction-left/introduction-right/elimination), $\\lnot$ (negation introduction/elimination), $\\forall$ (universal introduction/elimination), $\\exists$ (existential introduction/elimination).",
+      "<b>Connective rules summary.</b> For each connective: $\\to$ (implication introduction/elimination), $\\land$ (conjunction introduction/elimination-left/elimination-right), $\\lor$ (disjunction introduction-left/introduction-right/elimination), $\\forall$ (universal introduction/elimination), $\\exists$ (existential introduction/elimination). Negation is handled through implication and $\\bot$: $\\lnot\\varphi$ is treated as $\\varphi \\to \\bot$, with EFQ (NJ) and DNE (NK) as additional rules. A weakening rule is also available.",
       "<b>Natural deduction in this application.</b> This application supports natural deduction proofs as tree-structured workspaces. Each node in the tree corresponds to a formula, and edges represent the application of inference rules. Assumptions are explicitly tracked, and the system verifies that all rules are correctly applied.",
     ],
     ja: [
@@ -5554,7 +5554,7 @@ const guideIntroNaturalDeduction: ReferenceEntry = {
       "<b>例：$\\varphi \\to \\varphi$の証明。</b>$\\varphi$を一時的な仮定として導入します。$\\varphi$が結論として得られます。$\\to$導入を適用して$\\varphi \\to \\varphi$を得、仮定を放出します。Hilbert系では、同じ証明に公理A1とA2を使う複数のステップが必要です。",
       "<b>Hilbert系との比較。</b>Hilbert系は公理が多く規則が少ない（多数の公理スキーマ、少数の推論規則）。自然演繹はその逆で：公理が少なく規則が多い（公理スキーマがほぼなく、多数の推論規則 — 各結合子に1組）。自然演繹の証明はしばしば短く、非形式的な数学的推論に近いものです。",
       "<b>3つの変種。</b>自然演繹には古典的推論の扱い方が異なる3つの主要な変種があります：<b>NM</b>（最小論理 — $\\lnot$導入以外の否定規則なし）、<b>NJ</b>（直観主義 — <i>爆発律</i>を追加：$\\bot$から何でも結論できる）、<b>NK</b>（古典 — 二重否定除去を追加：$\\lnot\\lnot\\varphi$から$\\varphi$を結論できる）。",
-      "<b>結合子規則の概要。</b>各結合子に対して：$\\to$（含意の導入/除去）、$\\land$（連言の導入/左除去/右除去）、$\\lor$（選言の左導入/右導入/除去）、$\\lnot$（否定の導入/除去）、$\\forall$（全称の導入/除去）、$\\exists$（存在の導入/除去）。",
+      "<b>結合子規則の概要。</b>各結合子に対して：$\\to$（含意の導入/除去）、$\\land$（連言の導入/左除去/右除去）、$\\lor$（選言の左導入/右導入/除去）、$\\forall$（全称の導入/除去）、$\\exists$（存在の導入/除去）。否定は含意と$\\bot$を通じて処理される：$\\lnot\\varphi$は$\\varphi \\to \\bot$として扱われ、EFQ（NJ）やDNE（NK）が追加規則として提供される。弱化規則も利用可能。",
       "<b>本アプリケーションにおける自然演繹。</b>本アプリケーションは木構造のワークスペースとして自然演繹の証明をサポートします。木の各ノードは論理式に対応し、辺は推論規則の適用を表します。仮定は明示的に追跡され、システムがすべての規則が正しく適用されていることを検証します。",
     ],
   },
