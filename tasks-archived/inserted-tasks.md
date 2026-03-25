@@ -265,3 +265,5 @@
     - 3e7192bで追加された`#ffffff`ハードコードをCSS変数に修正
 - [x] 代入モーダル系を開いてるときに、対象のノードがどれか分からない。じわっと光らせるなどして分かりやすくせよ。
   - `edgeBadgeEditState.conclusionNodeId`に一致するノードに`highlighted`propを渡し、CSS `node-highlight-pulse`アニメーションでpulse glow表示
+- [x] 代入モーダル系の各論理式入力の拡張エディタは小さく開きすぎる。拡張なのだから、他と同様により画面いっぱい使って大きく開くべきである
+  - createPortal(jsx, document.body) で isolation:isolate の制約を回避。FormulaExpandedEditor, TermExpandedEditor, SequentExpandedEditor の3つに適用

@@ -17851,3 +17851,31 @@
   - `greekLetterNames` のMap(Latin→Greek)は全23文字を網羅しており、逆引きで未定義になるケースは実際にはない
   - UIテスト(EdgeParameterPopover.test.tsx)も純粋ロジック変更の影響を受けるので、ロジック変更時は必ずUIテストも確認
 ---
+
+## 2026-03-25 - formula-input portal修正 + ダークモード/ハイライト
+- 代入モーダル系の拡張エディタが小さく開く問題を修正
+  - FormulaExpandedEditor, TermExpandedEditor, SequentExpandedEditor に createPortal(jsx, document.body) を追加
+  - InfiniteCanvasの isolation:isolate が position:fixed の containing block を制約していた問題を回避
+- SequentExpandedEditor.stories.tsx を portal 対応に修正
+  - within(canvasElement) → within(canvasElement.ownerDocument.body) に変更（portal先の要素を正しく検索）
+  - closed-state の検索は引き続き within(canvasElement) で行う（ポータル外のラッパー内コンテンツ）
+- CompletionPopup, EdgeParameterPopover, ProofWorkspace のハードコード色をCSS変数に修正（ダークモード対応）
+- EditableProofNode に highlighted prop + node-highlight-pulse アニメーション追加
+- 変更ファイル:
+  - src/lib/formula-input/FormulaExpandedEditor.tsx
+  - src/lib/formula-input/TermExpandedEditor.tsx
+  - src/lib/formula-input/SequentExpandedEditor.tsx
+  - src/lib/formula-input/SequentExpandedEditor.stories.tsx
+  - src/lib/formula-input/CompletionPopup.tsx
+  - src/lib/proof-pad/EdgeParameterPopover.tsx
+  - src/lib/proof-pad/ProofWorkspace.tsx
+  - src/lib/proof-pad/EditableProofNode.tsx
+  - src/lib/proof-pad/EditableProofNode.test.tsx
+  - src/lib/proof-pad/EditableProofNode.stories.tsx
+  - src/app/globals.css
+- カバレッジ: Stmts 99.97%, Branch 99.6%, Funcs 90.51%, Lines 99.98% (変化なし)
+- **今後のイテレーションへの学び:**
+  - createPortal を使う場合、Storybook play関数は within(canvasElement.ownerDocument.body) でクエリする必要がある
+  - FormulaExpandedEditor/TermExpandedEditor のストーリーは既にこのパターンを使用していた（先行実装）
+  - SequentExpandedEditor は後から追加されたためこのパターンが適用されていなかった
+---
