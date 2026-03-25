@@ -274,3 +274,5 @@
 - [x] applyLayout() はノードツリーの配置を上下逆にしてしまっていそう。 → スクリプトAPI applyLayout() が "bottom-to-top" をハードコードしていた。"top-to-bottom" に修正
 
 - [x] addGoalとかいうAPIは必要ない。 → スクリプトAPI(workspaceBridge)からaddGoalを削除。workspaceState.tsの関数自体はStorybook等で利用するため残す
+
+- [x] 拡張エディタでエラーになってる文字が背景色と一緒になって見えない → highlightMarkStyleのcolor: --color-error → --color-error-text に変更（コントラスト比改善）

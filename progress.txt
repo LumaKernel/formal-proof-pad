@@ -109,6 +109,27 @@
 
 ---
 
+## 2026-03-25 - [formula-input] エラーハイライト文字色のコントラスト改善
+
+- ベースライン: Stmts 99.96%, Branch 99.58%, Funcs 90.50%, Lines 99.98%
+- **結果: カバレッジ変化なし（CSS変数変更のみ）**
+- 実装内容:
+  - `highlightMarkStyle` の `color` を `--color-error` → `--color-error-text` に変更
+  - ライトモード: `#e06060` → `#991b1b`（コントラスト比 2.1:1 → 5.6:1）
+  - ダークモード: `#ff6b6b` → `#fca5a5`
+  - TermInput.tsx のハードコード色もCSS変数に統一
+- 変更ファイル:
+  - src/lib/formula-input/FormulaExpandedEditor.tsx
+  - src/lib/formula-input/TermExpandedEditor.tsx
+  - src/lib/formula-input/FormulaInput.tsx
+  - src/lib/formula-input/TermInput.tsx
+- **今後のイテレーションへの学び:**
+  - エラーハイライトの `color` と `backgroundColor` が同系色になる場合、`--color-error-text` を使うべき
+  - TermInput.tsx はハードコード色が残っている箇所がある（他にもあるかも）
+  - `--color-error` はボーダー/アンダーライン用、`--color-error-text` はテキスト用と使い分ける
+
+---
+
 ## 2026-03-25 - [script-runner] addGoalスクリプトAPIを削除
 
 - ベースライン: Stmts 99.96%, Branch 99.58%, Funcs 90.49%, Lines 99.98%
