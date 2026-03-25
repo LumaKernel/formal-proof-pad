@@ -263,3 +263,5 @@
   - CompletionPopup.tsx, EdgeParameterPopover.tsx, ProofWorkspace.tsx のハードコード色をCSS変数(`--color-surface`, `--color-border`等)に置換
   - [x] 白背景にして、って言ったタスクのときを契機にだいぶ悪化してそう。ちょっとそのときの変更確認して、場合によっては適切に戻して
     - 3e7192bで追加された`#ffffff`ハードコードをCSS変数に修正
+- [x] 代入モーダル系を開いてるときに、対象のノードがどれか分からない。じわっと光らせるなどして分かりやすくせよ。
+  - `edgeBadgeEditState.conclusionNodeId`に一致するノードに`highlighted`propを渡し、CSS `node-highlight-pulse`アニメーションでpulse glow表示
