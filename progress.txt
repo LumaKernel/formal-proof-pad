@@ -18088,3 +18088,17 @@
   - ブロックレベルのパースは InlineMarkdown とは別の関心事。BodyContent を分離して InlineMarkdown は変更不要にした
   - referenceContent.ts の body テキストは \n 区切りで複数行を1パラグラフに含むため、ブロックレベル分解が必要
 ---
+
+## 2026-03-25 - formula-input BaseExpandedEditor抽出
+- BaseExpandedEditor: モーダルシェル（overlay, header, close logic）を共通化
+- expandedEditorStyles.ts: textarea/highlight/preview/errorスタイルを共有モジュールに
+- renderHighlightedText.tsx: エラーハイライトレンダリング関数を共有モジュールに
+- FormulaExpandedEditor/TermExpandedEditor/SequentExpandedEditorをBaseExpandedEditorで書き直し
+- 新規: BaseExpandedEditor.tsx, BaseExpandedEditor.test.tsx(14テスト), expandedEditorStyles.ts, renderHighlightedText.tsx
+- 変更: FormulaExpandedEditor.tsx(551→237行), TermExpandedEditor.tsx(547→233行), SequentExpandedEditor.tsx(338→181行), index.ts
+- カバレッジ: Stmts 99.94%, Branch 99.5%, Funcs 90.48%, Lines 99.96% (変化なし)
+- **今後のイテレーションへの学び:**
+  - FormulaExpandedEditorとTermExpandedEditorはほぼ同一。tokenKindToVarマップも重複しているが、これはFormula/Term固有のpreview差異と一緒に残した
+  - SequentExpandedEditorはbodyのgap値が16（他は12）なので、bodyGap propで対応
+  - Phase 2(ParseState統一型)とPhase 3(z-index一元管理)は残タスク
+---
