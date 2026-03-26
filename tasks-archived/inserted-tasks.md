@@ -329,3 +329,7 @@
 - [x] スクリプトライブラリの カット除去 段階{n} はすべて eliminateCutsWithSteps のような組込みで実装済みのものを使うべきではなく、露出させるべき。 → formulaDepth, rightRank, leftRank, mixRank, removeAllOccurrences, removeFirstOccurrence, containsFormula, countOccurrences, getScChildren の9関数をブリッジに追加。段階3-6のテンプレートを個別API利用に書き換え
 - [x] カット除去など一部のクエストは、デフォルトの状態を持てるようにしてもよいだろう。（`QuestInitialState` 型 + `createQuestWorkspace` の `initialState` パラメータとして実装済み）
   - [x] ということは、ゴールの各論理式は使っていい規則を持つという構造にしなければいけないね（`WorkspaceGoal.allowedRuleIds` として既に実装済み）
+- [x] カットされる前の証明が既になされていて、それに対してカット除去を行う、ということをすればカット除去を重点的に学べるだろう
+  - [x] このとき、ゴールは使っていい規則としてカットを持たない、というようにすれば、クリアにならない状態で開始できるだろう → `disallowedScRuleIds` で実現
+  - [x] 基盤: `QuestInitialState` + `createQuestWorkspace(initialState)` で事前配置済みワークスペースからクエスト開始可能
+  - [x] 実際のカット除去クエストを作成する → sc-cer-01（推移律のカット付き証明→カットなし再証明）

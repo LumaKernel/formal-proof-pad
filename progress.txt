@@ -18311,3 +18311,19 @@
   - 禁止リスト（disallowed）は許可リスト（allowed）とは逆のセマンティクス。undefined=制限なし は同じ
   - `isScInferenceEdge` でSCエッジを型ガードしてから `edge.ruleId` にアクセス
 ---
+
+## 2026-03-26 - カット除去実践クエスト作成
+- 実装した内容:
+  - sc-cer-01: カット除去実践クエスト「推移律」を追加
+  - initialState で10ノード＋10エッジのカット付き証明を事前配置
+  - disallowedScRuleIds: ["cut"] でカット禁止ゴール
+  - 英語翻訳を questTranslationsEn.ts に追加
+- 変更したファイル:
+  - src/lib/quest/builtinQuests.ts（クエスト定義追加）
+  - src/lib/quest/questTranslationsEn.ts（英語翻訳追加）
+- **今後のイテレーションへの学び:**
+  - SC初期状態構築は手動で複雑。ノードのformulaTextはシーケント表記（例: "phi -> psi, phi ⇒ psi"）
+  - ScBranchingEdge の leftConclusionText/rightConclusionText は前提ノードのシーケントテキスト
+  - CUT規則は genuineに2つの補題を合成する場合にのみ有用。単純な証明ではcutを自然に使うケースが少ない
+  - 推移律（transitivity）はカットの最も典型的な使用例（中間式ψで2つの含意を合成）
+---
