@@ -327,3 +327,5 @@
   - [x] そして、置換は常に消えなくていい。ユーザーが自分で整理操作をすることで消す(消せるときは)というふうにすればよい → `resolveFormulaSubstitution` 呼び出しを削除、ゴール判定は `equivalentFormula` に変更
   - [x] Simplify Formula操作も用意してあげよう。 (Simplifyで繋がったノードが作られる) → simplifyFormulaLogic.ts + workspaceState.ts + ProofWorkspace.tsx に実装。コンテキストメニューから実行可能
 - [x] スクリプトライブラリの カット除去 段階{n} はすべて eliminateCutsWithSteps のような組込みで実装済みのものを使うべきではなく、露出させるべき。 → formulaDepth, rightRank, leftRank, mixRank, removeAllOccurrences, removeFirstOccurrence, containsFormula, countOccurrences, getScChildren の9関数をブリッジに追加。段階3-6のテンプレートを個別API利用に書き換え
+- [x] カット除去など一部のクエストは、デフォルトの状態を持てるようにしてもよいだろう。（`QuestInitialState` 型 + `createQuestWorkspace` の `initialState` パラメータとして実装済み）
+  - [x] ということは、ゴールの各論理式は使っていい規則を持つという構造にしなければいけないね（`WorkspaceGoal.allowedRuleIds` として既に実装済み）

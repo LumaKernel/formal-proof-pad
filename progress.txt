@@ -18262,3 +18262,26 @@
   - ブリッジ関数追加後は必ず `npx prettier --write` を実行（CIのLintステップでprettierチェックが走る）
   - cutElimination.tsの関数はほぼすべてexport済みなので、ブリッジ層はラッパー追加のみで済む
 ---
+
+## 2026-03-26T09:36Z - [quest] QuestInitialState 基盤追加
+- 実装した内容:
+  - `QuestInitialState` 型を `workspaceState.ts` に追加（nodes, connections, inferenceEdges）
+  - `createQuestWorkspace` に `initialState` オプショナルパラメータを追加
+  - `QuestDefinition.initialState` フィールドを追加
+  - `QuestStartParams`, `CreateQuestNotebookParams` に `initialState` を貫通
+  - `questNotebookIntegration.ts` の `startQuestAndCreateNotebook` で `initialState` を伝搬
+  - テスト6件追加（ノード配置、nextNodeId算出、エッジ配置、接続配置、非node-NパターンID）
+- 変更したファイル:
+  - src/lib/proof-pad/workspaceState.ts（型定義+関数拡張）
+  - src/lib/proof-pad/workspaceState.test.ts（テスト追加）
+  - src/lib/proof-pad/index.ts（エクスポート追加）
+  - src/lib/quest/questDefinition.ts（initialStateフィールド追加）
+  - src/lib/quest/questStartLogic.ts（パラメータ伝搬）
+  - src/lib/notebook/notebookState.ts（パラメータ伝搬）
+  - src/lib/quest/questNotebookIntegration.ts（パラメータ伝搬）
+- カバレッジ: Stmts 99.9%, Branch 99.37%, Funcs 90.45%, Lines 99.9%（Branch -0.01% はV8集約の既知のクイーク）
+- **今後のイテレーションへの学び:**
+  - QuestInitialState の nextNodeId は node-N パターンのIDから自動算出される
+  - allowedRuleIds は WorkspaceGoal に既に実装済みだったため、新規の型追加は不要だった
+  - パラメータ貫通パターン: QuestDefinition → QuestStartParams → CreateQuestNotebookParams → createQuestWorkspace
+---
