@@ -109,6 +109,30 @@
 
 ---
 
+## 2026-03-26 - [subst] FormulaSubstitution表記の自動解決を停止
+
+- ベースライン: Stmts 99.94%, Branch 99.49%, Funcs 90.49%, Lines 99.96%
+- **結果: Stmts 99.93% (-0.01%), Branch 99.44% (-0.05%), Funcs 90.61% (+0.12%), Lines 99.95% (-0.01%)**
+  - Stmts/Branch/Linesの微減はV8カバレッジ集計の揺れ（既知のquirk）の範囲内
+- 実装内容:
+  - `substitutionApplicationLogic.ts` から `resolveFormulaSubstitution` の自動呼び出しを削除
+  - `goalCheckLogic.ts` の数式比較を `equalFormula` → `equivalentFormula` に変更（normalizeFormula経由で正規化比較）
+  - リグレッションテスト追加: A4公理 φ:=φ→φ で [τ/x] 表記が保持されること、P(x)[a/x] が自動解決されないこと
+  - goalCheckテスト追加: FormulaSubstitution付きノード (P(x)[a/x]) がゴール (P(a)) と一致すること
+  - proof-pad CLAUDE.md を更新
+- 変更ファイル:
+  - src/lib/proof-pad/substitutionApplicationLogic.ts（resolveFormulaSubstitution呼び出し削除）
+  - src/lib/proof-pad/goalCheckLogic.ts（equivalentFormulaに変更）
+  - src/lib/proof-pad/substitutionApplicationLogic.test.ts（リグレッションテスト2件追加）
+  - src/lib/proof-pad/goalCheckLogic.test.ts（FormulaSubstitutionテスト1件追加）
+  - src/lib/proof-pad/CLAUDE.md
+- **今後のイテレーションへの学び:**
+  - `resolveFormulaSubstitution` はメタ変数を含む式で意図しない置換消去を起こす。`normalizeFormula` はメタ変数をチェックして安全に処理する
+  - `equivalentFormula` は `normalizeFormula` 経由で比較するため、FormulaSubstitutionノードが残っていてもゴール判定が正しく動く
+  - 残タスク: Simplify Formula操作の追加（ユーザーが明示的にFormulaSubstitutionを解決する手段）
+
+---
+
 ## 2026-03-26 - [hub] タブ切り替えの瞬時遷移（HubContent再マウント防止）
 
 - ベースライン: Stmts 99.94%, Branch 99.49%, Funcs 90.49%, Lines 99.96%
