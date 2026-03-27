@@ -177,9 +177,9 @@ export const EmptyLukasiewicz: Story = {
       expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
     });
 
-    // 追加されたノードにA1の式が含まれることを確認
+    // 追加されたノードにA1の式が含まれることを確認（右結合で最小括弧化: φ → ψ → φ）
     await expect(canvas.getByTestId("proof-node-node-1")).toHaveTextContent(
-      "φ → (ψ → φ)",
+      "φ → ψ → φ",
     );
   },
 };
