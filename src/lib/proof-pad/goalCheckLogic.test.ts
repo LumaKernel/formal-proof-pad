@@ -108,6 +108,44 @@ describe("goalCheckLogic", () => {
       const result = parseNodeFormula("⇒ -> ->");
       expect(result).toBeUndefined();
     });
+
+    it("parses AT signed formula F:φ (extracts formula part)", () => {
+      const result = parseNodeFormula("F:phi \\/ ~phi");
+      expect(result).toBeDefined();
+      expect(result!._tag).toBe("Disjunction");
+    });
+
+    it("parses AT signed formula T:φ (extracts formula part)", () => {
+      const result = parseNodeFormula("T:phi -> psi");
+      expect(result).toBeDefined();
+      expect(result!._tag).toBe("Implication");
+    });
+
+    it("returns undefined for AT signed formula with invalid formula part", () => {
+      const result = parseNodeFormula("F:-> ->");
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined for too-short AT prefix", () => {
+      const result = parseNodeFormula("F:");
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("checkGoal - AT signed formula matching", () => {
+    it("matches AT signed formula node F:φ to plain goal formula", () => {
+      const goals = [makeGoal("goal-1", "phi \\/ ~phi")];
+      const nodes = [makeNode("node-1", "F:phi \\/ ~phi")];
+      const result = checkGoal(goals, nodes);
+      expect(result._tag).toBe("GoalAllAchieved");
+    });
+
+    it("matches AT signed formula node T:φ to plain goal formula", () => {
+      const goals = [makeGoal("goal-1", "phi -> psi")];
+      const nodes = [makeNode("node-1", "T:phi -> psi")];
+      const result = checkGoal(goals, nodes);
+      expect(result._tag).toBe("GoalAllAchieved");
+    });
   });
 
   describe("checkGoal - SC sequent matching", () => {

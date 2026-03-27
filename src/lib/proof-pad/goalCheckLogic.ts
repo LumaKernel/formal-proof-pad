@@ -81,7 +81,9 @@ export function parseGoalFormula(goalText: string): Formula | undefined {
  * ノードのformulaTextからFormulaを抽出する。
  *
  * 1. まず直接パースを試みる（通常の論理式）
- * 2. 失敗した場合、シーケントテキスト（"Γ ⇒ Δ" 形式）として解析し、
+ * 2. 失敗した場合、AT署名付き論理式（"T:φ" / "F:φ" 形式）として解析し、
+ *    符号を除去した論理式部分を返す（ATのゴール判定: ルートF:φの枝が全閉→φが定理）
+ * 3. 失敗した場合、シーケントテキスト（"Γ ⇒ Δ" 形式）として解析し、
  *    前件が空で後件が1つの場合にその論理式を返す（SC/TABの定理表現）
  */
 export function parseNodeFormula(formulaText: string): Formula | undefined {
@@ -91,6 +93,18 @@ export function parseNodeFormula(formulaText: string): Formula | undefined {
   // 直接パースを試みる
   const directResult = parseString(trimmed);
   if (Either.isRight(directResult)) return directResult.right;
+
+  // AT署名付き論理式として解析（"T:φ" / "F:φ"）
+  if (
+    trimmed.length >= 3 &&
+    (trimmed.startsWith("T:") || trimmed.startsWith("F:"))
+  ) {
+    const formulaPart = trimmed.slice(2).trim();
+    if (formulaPart !== "") {
+      const signedResult = parseString(formulaPart);
+      if (Either.isRight(signedResult)) return signedResult.right;
+    }
+  }
 
   // シーケントテキストとして解析
   if (trimmed.includes("⇒")) {
