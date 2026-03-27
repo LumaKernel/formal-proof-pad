@@ -168,15 +168,15 @@ export function checkGoal(
     }
 
     // キャンバス上のどこかのノードの式がゴール式と一致するか
-    // inferenceEdges/system が指定されていて、かつ体系に公理がある場合のみ
-    // スタンドアロンノードの公理検証を行う。
-    // 非Hilbert系（emptyLogicSystem）では公理がないため検証をスキップする。
+    // inferenceEdges が指定されていれば、孤立ノード（推論エッジに未参加）をスキップする。
+    // Hilbert系では公理テンプレートに一致する孤立ノードのみ許可。
+    // SC/TAB/ND/AT系では孤立ノードは一律スキップ（推論エッジに参加していないと達成扱いしない）。
     const hasAxiomSystem =
       system !== undefined &&
       (system.propositionalAxioms.size > 0 ||
         system.predicateLogic ||
         (system.theoryAxioms?.length ?? 0) > 0);
-    const doStandaloneCheck = inferenceEdges !== undefined && hasAxiomSystem;
+    const doStandaloneCheck = inferenceEdges !== undefined;
     let matchingNodeId: string | undefined;
     for (const node of nodes) {
       if (node.formulaText.trim() === "") continue;
@@ -193,7 +193,10 @@ export function checkGoal(
               e.conclusionNodeId === node.id ||
               getInferenceEdgePremiseNodeIds(e).includes(node.id),
           );
-          if (!isConnected && !isRecognizedAxiom(nodeFormula, system)) {
+          if (
+            !isConnected &&
+            !(hasAxiomSystem && isRecognizedAxiom(nodeFormula, system))
+          ) {
             continue;
           }
         }

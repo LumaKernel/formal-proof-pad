@@ -425,4 +425,100 @@ describe("goalCheckLogic", () => {
       expect(result._tag).toBe("GoalAllAchieved");
     });
   });
+
+  describe("checkGoal - SC/TAB standalone check (non-Hilbert systems)", () => {
+    // SC/TAB系はemptyLogicSystem（公理なし）だが、孤立ノードは拒否すべき
+    const emptySystem: LogicSystem = {
+      name: "Empty (non-Hilbert)",
+      propositionalAxioms: new Set(),
+      predicateLogic: false,
+      equalityLogic: false,
+      generalization: false,
+    };
+
+    it("rejects standalone sequent node in SC mode (no inference edges)", () => {
+      // SC クエスト: ゴール式を持つシーケントノードを置くだけではゴール達成にならない
+      const goals = [makeGoal("goal-1", "phi -> phi")];
+      const nodes = [makeNode("node-1", "⇒ phi → phi")];
+      const result = checkGoal(goals, nodes, [], emptySystem);
+      expect(result._tag).toBe("GoalPartiallyAchieved");
+      if (result._tag === "GoalPartiallyAchieved") {
+        expect(result.achievedCount).toBe(0);
+      }
+    });
+
+    it("rejects standalone plain formula node in SC mode", () => {
+      // SC モードで平文の論理式ノードを置いただけではゴール達成にならない
+      const goals = [makeGoal("goal-1", "phi -> phi")];
+      const nodes = [makeNode("node-1", "phi -> phi")];
+      const result = checkGoal(goals, nodes, [], emptySystem);
+      expect(result._tag).toBe("GoalPartiallyAchieved");
+      if (result._tag === "GoalPartiallyAchieved") {
+        expect(result.achievedCount).toBe(0);
+      }
+    });
+
+    it("accepts node connected as conclusion of SC rule", () => {
+      // SC 規則（→R）の結論として接続されたノードはゴール達成になる
+      const goals = [makeGoal("goal-1", "phi -> phi")];
+      const nodes = [
+        makeNode("root", "⇒ phi → phi"),
+        makeNode("premise", "phi ⇒ phi"),
+      ];
+      const edges: readonly InferenceEdge[] = [
+        {
+          _tag: "sc-single",
+          ruleId: "implication-right",
+          conclusionNodeId: "root",
+          premiseNodeId: "premise",
+          principalPosition: 0,
+        },
+      ];
+      const result = checkGoal(goals, nodes, edges, emptySystem);
+      expect(result._tag).toBe("GoalAllAchieved");
+      if (result._tag === "GoalAllAchieved") {
+        expect(result.achievedGoals[0]!.matchingNodeId).toBe("root");
+      }
+    });
+
+    it("accepts node connected as premise of SC rule", () => {
+      // SC 規則の前提として参加しているノードもゴール達成に使える
+      const goals = [makeGoal("goal-1", "phi -> phi")];
+      const nodes = [
+        makeNode("root", "⇒ phi → phi"),
+        makeNode("premise", "phi ⇒ phi"),
+      ];
+      // root が結論、premise が前提
+      const edges: readonly InferenceEdge[] = [
+        {
+          _tag: "sc-single",
+          ruleId: "implication-right",
+          conclusionNodeId: "root",
+          premiseNodeId: "premise",
+          principalPosition: 0,
+        },
+      ];
+      // ゴールが root のフォーミュラにマッチ → root は結論として接続 → 達成
+      const result = checkGoal(goals, nodes, edges, emptySystem);
+      expect(result._tag).toBe("GoalAllAchieved");
+    });
+
+    it("rejects standalone node even with other connected nodes present", () => {
+      // 接続されたノードがあっても、ゴールにマッチするのが孤立ノードなら不達成
+      const goals = [makeGoal("goal-1", "phi -> phi")];
+      const nodes = [
+        makeNode("standalone", "phi -> phi"), // 孤立: ゴールにマッチするが未接続
+        makeNode("connected", "psi"), // 接続済みだがゴールにマッチしない
+      ];
+      const edges: readonly InferenceEdge[] = [
+        {
+          _tag: "sc-axiom",
+          ruleId: "identity",
+          conclusionNodeId: "connected",
+        },
+      ];
+      const result = checkGoal(goals, nodes, edges, emptySystem);
+      expect(result._tag).toBe("GoalPartiallyAchieved");
+    });
+  });
 });
