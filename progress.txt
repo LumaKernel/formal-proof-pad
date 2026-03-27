@@ -110,6 +110,30 @@
 
 ---
 
+## 2026-03-27 - [storybook] play関数強化タスクの列挙・分解
+
+- ベースライン: Stmts 99.82%, Branch 99.17%, Funcs 90.45%, Lines 99.81%
+- **結果: Stmts 99.82%, Branch 99.17%, Funcs 90.47%, Lines 99.81%**（コード変更なし、変動なし）
+- 実装内容:
+  - 全78ストーリーファイルを調査し、play関数がexpectのみ（ユーザーインタラクションなし）の27ファイルを特定
+  - display-only（7件スキップ）とinteractive（20件対象）に分類
+  - `tasks/play-function-enhancement.md` に47タスクとして4カテゴリに分解:
+    - WS: WorkspacePageView 24件（基本操作、体系別、クエスト完了、FullFlow完全証明化、UI導線確認）
+    - PP: proof-pad デモ 5件（証明ワークスペースインタラクション）
+    - IC: InfiniteCanvas 11件（キーボードショートカット、選択、スナップ等）
+    - スキップ: display-only 7件（formula-input, truth-table, 一部proof-pad表示コンポーネント）
+  - inserted-tasks.md の該当サブタスクを完了マーク
+- 変更ファイル:
+  - tasks/play-function-enhancement.md（新規作成）
+  - tasks/inserted-tasks.md（サブタスク完了）
+  - task-processing.md（タスク記録→クリア）
+- **今後のイテレーションへの学び:**
+  - SC/TAB/ATのFullFlowストーリーは現在スタンドアロンノード未達成確認のみ。規則適用UIの導線確認が先決
+  - InfiniteCanvasのドラッグ/パン/ズームはpointerイベントベースでplay関数テストが困難。ボタン/キーボードショートカット経由でテスト可能な部分に注力すべき
+  - ConnectorPorts/ProofTree ストーリーは既にジオメトリ検証が十分で強化不要
+
+---
+
 ## 2026-03-27 - [reference] クエスト言及コンポーネント `<quest:id>` タグ追加
 
 - ベースライン: Stmts 99.87%, Branch 99.29%, Funcs 90.48%, Lines 99.87%
