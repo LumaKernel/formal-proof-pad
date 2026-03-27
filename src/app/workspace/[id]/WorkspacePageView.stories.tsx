@@ -753,6 +753,19 @@ export const EmptyNaturalDeduction: Story = {
     expect(
       canvas.queryByTestId("workspace-axiom-palette"),
     ).not.toBeInTheDocument();
+
+    // --- 「+ Add Assumption」クリック→ノード追加 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-nd-rule-palette-add-assumption"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // 追加されたノードが仮定ノードであることを確認
+    await expect(canvas.getByTestId("proof-node-node-1")).toHaveTextContent(
+      "Assumption",
+    );
   },
 };
 
