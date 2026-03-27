@@ -110,6 +110,27 @@
 
 ---
 
+## 2026-03-27 - [proof-pad] AT at-01 FullFlow/FromHub ストーリーを証明完成フローに拡張
+
+- ベースライン: Stmts 99.82%, Branch 99.17%, Funcs 90.48%, Lines 99.81%
+- **結果: Stmts 99.82%, Branch 99.16%, Funcs 90.57%, Lines 99.81%**（Branch微減はv8マージクセ、Funcs向上）
+- 実装内容:
+  - `QuestCompleteAt01FullFlow`: スタンドアロン未達成確認のみ → α規則(F∨)+α規則(F¬)+closure適用→ゴール達成の完全証明フローに拡張
+  - `QuestCompleteAt01FromHub`: 同様にHub→ワークスペース→証明完成フローに拡張
+  - `goalCheckLogic.ts`: `parseNodeFormula` にAT署名付き論理式（`T:φ`/`F:φ`）サポートを追加。符号を除去して論理式部分を抽出
+  - `goalCheckLogic.test.ts`: AT署名付き論理式のパース・ゴール判定テスト6件追加
+- 変更ファイル:
+  - src/app/workspace/[id]/WorkspacePageView.stories.tsx
+  - src/lib/proof-pad/goalCheckLogic.ts
+  - src/lib/proof-pad/goalCheckLogic.test.ts
+  - tasks/play-function-enhancement.md（PLAY-WS-21, PLAY-WS-22完了マーク）
+- **今後のイテレーションへの学び:**
+  - AT規則適用UIフロー: パレットクリック→バナー表示→ノードクリック→適用完了（α/β規則はモーダルなし、closureは2ノードクリック）
+  - ATのゴール判定には `parseNodeFormula` でのAT署名付き論理式サポートが必要だった。SC/TABはシーケント形式の解析があったが、ATは未対応だった
+  - FullFlowストーリーはSC/TAB/AT全て完了（PLAY-WS-19〜22）。次はPLAY-WS-01〜18の基本操作テスト
+
+---
+
 ## 2026-03-27 - [storybook] TAB tab-01 FullFlow/FromHub ストーリーを証明完成フローに拡張
 
 - ベースライン: Stmts 99.82%, Branch 99.17%, Funcs 90.45%, Lines 99.81%
