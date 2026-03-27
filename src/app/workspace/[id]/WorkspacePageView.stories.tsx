@@ -444,13 +444,37 @@ export const GroupTheoryWorkspace: Story = {
         initialNotebookName="Group Theory"
         onBack={fn()}
         onGoalAchieved={fn()}
+        workspaceTestId="workspace"
       />
     );
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    // ヘッダー確認
     await expect(canvas.getByText("Group Theory")).toBeInTheDocument();
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+
+    // 公理パレットが表示される
+    await expect(
+      canvas.getByTestId("workspace-axiom-palette"),
+    ).toBeInTheDocument();
+
+    // 既存のG1, G2ノードが表示される
+    await expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    await expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument();
+
+    // 群論固有公理G3Lがパレットに存在することを確認
+    await expect(
+      canvas.getByTestId("workspace-axiom-palette-item-G3L"),
+    ).toBeInTheDocument();
+
+    // --- 公理パレットからG3L（左逆元）をクリック→ノード追加 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-G3L"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-3")).toBeInTheDocument();
+    });
   },
 };
 
