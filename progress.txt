@@ -109,6 +109,30 @@
 
 ---
 
+## 2026-03-27 - [goal-check] SC/TAB/AT系スタンドアロンノードのゴール達成防止
+
+- ベースライン: Stmts 99.9%, Branch 99.37%, Funcs 90.5%, Lines 99.9%
+- **結果: Stmts 99.9%, Branch 99.37%, Funcs 90.5%, Lines 99.9%**（変動なし）
+- 実装内容:
+  - `goalCheckLogic.ts`: `doStandaloneCheck`を`inferenceEdges`が渡されれば常に有効化（以前はHilbert公理系のみ）
+  - SC/TAB/ND/AT系で孤立ノード（推論エッジに未参加）はゴール達成に使えないように修正
+  - Hilbert公理テンプレートチェックは`hasAxiomSystem`の場合のみ適用するよう分離
+  - `goalCheckLogic.test.ts`: SC系スタンドアロンチェックのテスト4件追加
+  - `WorkspacePageView.stories.tsx`: SC/TAB/AT各FullFlow+FromHub+ModelAnswerストーリーを「スタンドアロンノード未達成」テストに更新（計7件）
+- 変更ファイル:
+  - src/lib/proof-pad/goalCheckLogic.ts（ロジック修正）
+  - src/lib/proof-pad/goalCheckLogic.test.ts（テスト追加）
+  - src/app/workspace/[id]/WorkspacePageView.stories.tsx（ストーリー更新）
+  - tasks/inserted-tasks.md（タスク完了）
+  - task-processing.md（調査結果記録→クリア）
+- **今後のイテレーションへの学び:**
+  - `extractLogicSystem`がSC/TAB/ND/AT系で`emptyLogicSystem`を返すため、以前は`hasAxiomSystem=false`→スタンドアロンチェック無効だった
+  - AT模範解答はまだaxiomプレースホルダー。リッチ化されたらQuestCompleteAt01ストーリーの期待値を更新する必要がある
+  - SC模範解答はsc-root+sc-ruleで正しく構築済み（推論エッジあり）。ゴールチェック修正後も通過する
+  - 将来的に証明木の完全性チェック（全葉が公理）を導入すれば、部分証明でのゴール達成も防げる
+
+---
+
 ## 2026-03-26 - [script] Effect.tsサンドボックス事前ロード調査
 
 - ベースライン: Stmts 99.9%, Branch 99.37%, Funcs 90.5%, Lines 99.9%
