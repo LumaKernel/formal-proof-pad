@@ -285,14 +285,39 @@ export const EmptyPredicateLogic: Story = {
       initialNotebookName="Predicate Logic Notebook"
       onBack={fn()}
       onGoalAchieved={fn()}
+      workspaceTestId="workspace"
     />
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    // ヘッダーにノートブック名が表示される
     await expect(
       canvas.getByText("Predicate Logic Notebook"),
     ).toBeInTheDocument();
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+
+    // 公理パレットが表示される
+    await expect(
+      canvas.getByTestId("workspace-axiom-palette"),
+    ).toBeInTheDocument();
+
+    // 述語論理固有の公理A4がパレットに存在することを確認
+    await expect(
+      canvas.getByTestId("workspace-axiom-palette-item-A4"),
+    ).toBeInTheDocument();
+
+    // --- 公理パレットからA4をクリック→ノード追加 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A4"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // 追加されたノードにA4の式が含まれることを確認
+    await expect(canvas.getByTestId("proof-node-node-1")).toHaveTextContent(
+      "(∀x.φ) → φ[τ/x]",
+    );
   },
 };
 
