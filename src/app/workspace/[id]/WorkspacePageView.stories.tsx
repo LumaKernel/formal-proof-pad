@@ -804,6 +804,19 @@ export const EmptySequentCalculus: Story = {
     expect(
       canvas.queryByTestId("workspace-axiom-palette"),
     ).not.toBeInTheDocument();
+
+    // --- 「+ Add Sequent」クリック→ノード追加 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-sc-rule-palette-add-sequent"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // 追加されたノードがシーケントノードであることを確認
+    await expect(canvas.getByTestId("proof-node-node-1")).toHaveTextContent(
+      "Sequent",
+    );
   },
 };
 
@@ -842,6 +855,19 @@ export const EmptyTableauCalculus: Story = {
     expect(
       canvas.queryByTestId("workspace-axiom-palette"),
     ).not.toBeInTheDocument();
+
+    // --- 「+ Add Sequent」クリック→ノード追加 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-tab-rule-palette-add-sequent"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
+
+    // 追加されたノードがシーケントノードであることを確認
+    await expect(canvas.getByTestId("proof-node-node-1")).toHaveTextContent(
+      "Sequent",
+    );
   },
 };
 
@@ -880,6 +906,14 @@ export const EmptyAnalyticTableau: Story = {
     expect(
       canvas.queryByTestId("workspace-axiom-palette"),
     ).not.toBeInTheDocument();
+
+    // --- 「+ Add Formula」クリック→ノード追加 ---
+    await userEvent.click(
+      canvas.getByTestId("workspace-at-rule-palette-add-formula"),
+    );
+    await waitFor(() => {
+      expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    });
   },
 };
 
