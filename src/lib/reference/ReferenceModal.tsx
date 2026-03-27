@@ -361,6 +361,7 @@ export function ReferenceModal({
               text={paragraph}
               paragraphStyle={paragraphStyle}
               onNavigate={onNavigate}
+              onQuestNavigate={onStartQuest}
             />
           ))}
 

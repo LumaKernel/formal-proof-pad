@@ -480,6 +480,64 @@ describe("parseInlineMarkdown", () => {
       { type: "ref-link", refId: "axiom-a1", content: "axiom-a1" },
     ]);
   });
+
+  // --- クエストリンク (<quest:id>) ---
+
+  it("self-closingクエストリンク(<quest:id />)をパースする", () => {
+    const result = parseInlineMarkdown("open <quest:prop-01 /> now");
+    expect(result).toEqual([
+      { type: "text", content: "open " },
+      { type: "quest-link", questId: "prop-01", content: "prop-01" },
+      { type: "text", content: " now" },
+    ]);
+  });
+
+  it("テキスト付きクエストリンク(<quest:id>text</quest>)をパースする", () => {
+    const result = parseInlineMarkdown(
+      "try <quest:pred-01>pred-01</quest> next",
+    );
+    expect(result).toEqual([
+      { type: "text", content: "try " },
+      { type: "quest-link", questId: "pred-01", content: "pred-01" },
+      { type: "text", content: " next" },
+    ]);
+  });
+
+  it("複数のクエストリンクをパースする", () => {
+    const result = parseInlineMarkdown(
+      "<quest:pred-01>pred-01</quest> through <quest:pred-06>pred-06</quest>",
+    );
+    expect(result).toEqual([
+      { type: "quest-link", questId: "pred-01", content: "pred-01" },
+      { type: "text", content: " through " },
+      { type: "quest-link", questId: "pred-06", content: "pred-06" },
+    ]);
+  });
+
+  it("閉じタグなしの<quest:id>はテキストとして扱う", () => {
+    const result = parseInlineMarkdown("see <quest:prop-01>broken text");
+    expect(result).toEqual([
+      { type: "text", content: "see <quest:prop-01>broken text" },
+    ]);
+  });
+
+  it("<quest:id>の空コンテンツはidをフォールバックとする", () => {
+    const result = parseInlineMarkdown("<quest:prop-01></quest>");
+    expect(result).toEqual([
+      { type: "quest-link", questId: "prop-01", content: "prop-01" },
+    ]);
+  });
+
+  it("クエストリンクとリファレンスリンクの混在をパースする", () => {
+    const result = parseInlineMarkdown(
+      "<ref:rule-mp>MP</ref> in <quest:prop-01 />",
+    );
+    expect(result).toEqual([
+      { type: "ref-link", refId: "rule-mp", content: "MP" },
+      { type: "text", content: " in " },
+      { type: "quest-link", questId: "prop-01", content: "prop-01" },
+    ]);
+  });
 });
 
 // --- parseBlockContent ---

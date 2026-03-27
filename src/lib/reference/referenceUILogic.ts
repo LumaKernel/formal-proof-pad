@@ -42,6 +42,11 @@ export type InlineElement =
       readonly type: "cite-link";
       readonly citeKey: string;
       readonly content: string;
+    }
+  | {
+      readonly type: "quest-link";
+      readonly questId: string;
+      readonly content: string;
     };
 
 /** サポートするHTMLタグとInlineElement typeの対応（ref-linkは別構文のため含まない） */
@@ -85,7 +90,7 @@ function parseSubscriptsInText(content: string): readonly InlineElement[] {
 
 /**
  * インラインHTMLタグおよびインライン数式をパースする。
- * <b>, <i>, <code>, <ref:id>, <cite:key>, $math$, _subscript をサポート。
+ * <b>, <i>, <code>, <ref:id>, <cite:key>, <quest:id>, $math$, _subscript をサポート。
  * ネストはサポートしない（フラットなインライン要素のみ）。
  * bold/italic内のref/cite/mathはレンダリング層（renderContentWithInline）で処理。
  *
@@ -99,11 +104,50 @@ export function parseInlineMarkdown(text: string): readonly InlineElement[] {
   // <ref:id>text</ref> はテキスト指定あり
   // <cite:key>text</cite> は参考文献リンク
   const tokenRegex =
-    /<(b|i|code)>|\$([^$]+?)\$|<ref:([a-z0-9-]+)\s*\/>|<ref:([a-z0-9-]+)>|<cite:([a-z0-9-]+)>/g;
+    /<(b|i|code)>|\$([^$]+?)\$|<ref:([a-z0-9-]+)\s*\/>|<ref:([a-z0-9-]+)>|<cite:([a-z0-9-]+)>|<quest:([a-z0-9-]+)\s*\/>|<quest:([a-z0-9-]+)>/g;
   let lastIndex = 0;
 
   let match: RegExpExecArray | null;
   while ((match = tokenRegex.exec(text)) !== null) {
+    // <quest:id>text</quest> クエストリンク（開きタグ）マッチ
+    if (match[7] !== undefined) {
+      const closeTag = "</quest>";
+      const closeIndex = text.indexOf(closeTag, match.index + match[0].length);
+      if (closeIndex === -1) continue;
+      if (match.index > lastIndex) {
+        rawElements.push({
+          type: "text",
+          content: text.slice(lastIndex, match.index),
+        });
+      }
+      const content = text.slice(match.index + match[0].length, closeIndex);
+      rawElements.push({
+        type: "quest-link",
+        questId: match[7],
+        content: content.length > 0 ? content : match[7],
+      });
+      lastIndex = closeIndex + closeTag.length;
+      tokenRegex.lastIndex = lastIndex;
+      continue;
+    }
+
+    // <quest:id /> self-closing クエストリンク
+    if (match[6] !== undefined) {
+      if (match.index > lastIndex) {
+        rawElements.push({
+          type: "text",
+          content: text.slice(lastIndex, match.index),
+        });
+      }
+      rawElements.push({
+        type: "quest-link",
+        questId: match[6],
+        content: match[6],
+      });
+      lastIndex = match.index + match[0].length;
+      continue;
+    }
+
     // <cite:key>text</cite> 参考文献リンクマッチ
     if (match[5] !== undefined) {
       const closeTag = "</cite>";

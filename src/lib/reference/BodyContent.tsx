@@ -23,6 +23,8 @@ export interface BodyContentProps {
   readonly onNavigate?: InlineMarkdownProps["onNavigate"];
   /** InlineMarkdown へ透過する参考文献リンクコールバック */
   readonly onCiteClick?: InlineMarkdownProps["onCiteClick"];
+  /** InlineMarkdown へ透過するクエストリンクコールバック */
+  readonly onQuestNavigate?: InlineMarkdownProps["onQuestNavigate"];
 }
 
 /** リストアイテムのスタイル */
@@ -42,6 +44,7 @@ export function BodyContent({
   listStyle,
   onNavigate,
   onCiteClick,
+  onQuestNavigate,
 }: BodyContentProps) {
   const blocks = useMemo(() => parseBlockContent(text), [text]);
 
@@ -57,6 +60,7 @@ export function BodyContent({
                 text={block.text}
                 onNavigate={onNavigate}
                 onCiteClick={onCiteClick}
+                onQuestNavigate={onQuestNavigate}
               />
             </p>
           );

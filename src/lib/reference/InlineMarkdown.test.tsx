@@ -328,4 +328,78 @@ describe("InlineMarkdown", () => {
     fireEvent.keyDown(link!, { key: " " });
     expect(onCiteClick).toHaveBeenCalledWith("bekki2012");
   });
+
+  // --- クエストリンク ---
+
+  it("<quest:id />をリンクとして表示する", () => {
+    const { container } = render(
+      <InlineMarkdown text="open <quest:prop-01 /> now" />,
+    );
+    const link = container.querySelector("a[data-quest-id='prop-01']");
+    expect(link).not.toBeNull();
+    expect(link?.textContent).toBe("prop-01");
+  });
+
+  it("<quest:id>text</quest>をカスタムテキストのリンクとして表示する", () => {
+    const { container } = render(
+      <InlineMarkdown text="try <quest:pred-01>pred-01</quest> next" />,
+    );
+    const link = container.querySelector("a[data-quest-id='pred-01']");
+    expect(link).not.toBeNull();
+    expect(link?.textContent).toBe("pred-01");
+  });
+
+  it("クエストリンクのクリックでonQuestNavigateが呼ばれる", () => {
+    const onQuestNavigate = vi.fn();
+    const { container } = render(
+      <InlineMarkdown
+        text="try <quest:prop-01>prop-01</quest>"
+        onQuestNavigate={onQuestNavigate}
+      />,
+    );
+    const link = container.querySelector("a[data-quest-id='prop-01']");
+    expect(link).not.toBeNull();
+    fireEvent.click(link!);
+    expect(onQuestNavigate).toHaveBeenCalledWith("prop-01");
+  });
+
+  it("クエストリンクのキーボード操作でonQuestNavigateが呼ばれる", () => {
+    const onQuestNavigate = vi.fn();
+    const { container } = render(
+      <InlineMarkdown
+        text="<quest:pred-01>pred-01</quest>"
+        onQuestNavigate={onQuestNavigate}
+      />,
+    );
+    const link = container.querySelector("a[data-quest-id='pred-01']");
+    expect(link).not.toBeNull();
+    fireEvent.keyDown(link!, { key: "Enter" });
+    expect(onQuestNavigate).toHaveBeenCalledWith("pred-01");
+  });
+
+  it("onQuestNavigateが未指定でもクリックしてもエラーにならない", () => {
+    const { container } = render(
+      <InlineMarkdown text="<quest:prop-01 />" />,
+    );
+    const link = container.querySelector("a[data-quest-id='prop-01']");
+    expect(link).not.toBeNull();
+    fireEvent.click(link!);
+  });
+
+  it("<b>内の<quest:id>text</quest>をリンクとして表示する", () => {
+    const onQuestNavigate = vi.fn();
+    const { container } = render(
+      <InlineMarkdown
+        text="<b>try <quest:prop-01>prop-01</quest></b>"
+        onQuestNavigate={onQuestNavigate}
+      />,
+    );
+    const strong = container.querySelector("strong");
+    expect(strong).not.toBeNull();
+    const link = strong?.querySelector("a[data-quest-id='prop-01']");
+    expect(link).not.toBeNull();
+    expect(link?.textContent).toBe("prop-01");
+    fireEvent.click(link!);
+    expect(onQuestNavigate).toHaveBeenCalledWith("prop-01");
+  });
 });

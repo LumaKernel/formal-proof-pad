@@ -429,6 +429,7 @@ function ViewerContent({
             );
             el?.scrollIntoView({ behavior: "smooth", block: "center" });
           }}
+          onQuestNavigate={onStartQuest}
         />
       ))}
 

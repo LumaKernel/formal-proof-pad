@@ -18,6 +18,8 @@ export interface InlineMarkdownProps {
   readonly onNavigate?: (entryId: string) => void;
   /** 参考文献リンククリック時のコールバック */
   readonly onCiteClick?: (citeKey: string) => void;
+  /** クエストリンククリック時のコールバック */
+  readonly onQuestNavigate?: (questId: string) => void;
 }
 
 /** KaTeX でインライン数式をHTMLに変換する（純粋関数） */
@@ -40,18 +42,20 @@ function renderContentWithInline(
   keyPrefix: string,
   onNavigate?: (entryId: string) => void,
   onCiteClick?: (citeKey: string) => void,
+  onQuestNavigate?: (questId: string) => void,
 ): React.ReactNode {
-  // $...$, <ref:...>, <cite:...> のいずれも含まない場合はテキストそのまま
+  // $...$, <ref:...>, <cite:...>, <quest:...> のいずれも含まない場合はテキストそのまま
   if (
     !content.includes("$") &&
     !content.includes("<ref:") &&
-    !content.includes("<cite:")
+    !content.includes("<cite:") &&
+    !content.includes("<quest:")
   ) {
     return content;
   }
-  // $...$, <ref:id />, <ref:id>text</ref>, <cite:key>text</cite> で分割
+  // $...$, <ref:id />, <ref:id>text</ref>, <cite:key>text</cite>, <quest:id />, <quest:id>text</quest> で分割
   const inlineTokenRegex =
-    /(\$[^$]+?\$|<ref:[a-z0-9-]+\s*\/>|<ref:[a-z0-9-]+>[^<]*<\/ref>|<cite:[a-z0-9-]+>[^<]*<\/cite>)/g;
+    /(\$[^$]+?\$|<ref:[a-z0-9-]+\s*\/>|<ref:[a-z0-9-]+>[^<]*<\/ref>|<cite:[a-z0-9-]+>[^<]*<\/cite>|<quest:[a-z0-9-]+\s*\/>|<quest:[a-z0-9-]+>[^<]*<\/quest>)/g;
   const parts = content.split(inlineTokenRegex);
   if (parts.length === 1) {
     return content;
@@ -59,6 +63,8 @@ function renderContentWithInline(
   const refSelfCloseRegex = /^<ref:([a-z0-9-]+)\s*\/>$/;
   const refOpenRegex = /^<ref:([a-z0-9-]+)>([^<]*)<\/ref>$/;
   const citeRegex = /^<cite:([a-z0-9-]+)>([^<]*)<\/cite>$/;
+  const questSelfCloseRegex = /^<quest:([a-z0-9-]+)\s*\/>$/;
+  const questOpenRegex = /^<quest:([a-z0-9-]+)>([^<]*)<\/quest>$/;
   return parts.map((part, j) => {
     const pk = `${keyPrefix satisfies string}-i${String(j) satisfies string}`;
     // $...$ 数式
@@ -153,6 +159,60 @@ function renderContentWithInline(
         </a>
       );
     }
+    // <quest:id /> self-closing
+    const questSelfMatch = questSelfCloseRegex.exec(part);
+    if (questSelfMatch !== null) {
+      const questId = questSelfMatch[1];
+      return (
+        <a
+          key={pk}
+          role="button"
+          tabIndex={0}
+          style={questLinkStyle}
+          data-quest-id={questId}
+          onClick={(e) => {
+            e.preventDefault();
+            onQuestNavigate?.(questId);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onQuestNavigate?.(questId);
+            }
+          }}
+        >
+          {questId}
+        </a>
+      );
+    }
+    // <quest:id>text</quest>
+    const questOpenMatch = questOpenRegex.exec(part);
+    if (questOpenMatch !== null) {
+      const questId = questOpenMatch[1];
+      const questContent =
+        questOpenMatch[2].length > 0 ? questOpenMatch[2] : questId;
+      return (
+        <a
+          key={pk}
+          role="button"
+          tabIndex={0}
+          style={questLinkStyle}
+          data-quest-id={questId}
+          onClick={(e) => {
+            e.preventDefault();
+            onQuestNavigate?.(questId);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onQuestNavigate?.(questId);
+            }
+          }}
+        >
+          {questContent}
+        </a>
+      );
+    }
     return part === "" ? null : part;
   });
 }
@@ -176,10 +236,22 @@ const citeLinkStyle: React.CSSProperties = {
   lineHeight: 1,
 };
 
+/** クエストリンクのスタイル */
+const questLinkStyle: React.CSSProperties = {
+  color: "var(--color-link, #0066cc)",
+  cursor: "pointer",
+  textDecoration: "underline",
+  textDecorationStyle: "solid",
+  textUnderlineOffset: "2px",
+  fontFamily: "monospace",
+  fontSize: "0.9em",
+};
+
 export function InlineMarkdown({
   text,
   onNavigate,
   onCiteClick,
+  onQuestNavigate,
 }: InlineMarkdownProps) {
   const elements = useMemo(() => parseInlineMarkdown(text), [text]);
 
@@ -195,6 +267,7 @@ export function InlineMarkdown({
                 key,
                 onNavigate,
                 onCiteClick,
+                onQuestNavigate,
               )}
             </strong>
           );
@@ -207,6 +280,7 @@ export function InlineMarkdown({
                 key,
                 onNavigate,
                 onCiteClick,
+                onQuestNavigate,
               )}
             </em>
           );
@@ -272,9 +346,38 @@ export function InlineMarkdown({
             </a>
           );
         }
+        if (el.type === "quest-link") {
+          return (
+            <a
+              key={key}
+              role="button"
+              tabIndex={0}
+              style={questLinkStyle}
+              data-quest-id={el.questId}
+              onClick={(e) => {
+                e.preventDefault();
+                onQuestNavigate?.(el.questId);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onQuestNavigate?.(el.questId);
+                }
+              }}
+            >
+              {el.content}
+            </a>
+          );
+        }
         return (
           <span key={key}>
-            {renderContentWithInline(el.content, key, onNavigate, onCiteClick)}
+            {renderContentWithInline(
+              el.content,
+              key,
+              onNavigate,
+              onCiteClick,
+              onQuestNavigate,
+            )}
           </span>
         );
       })}

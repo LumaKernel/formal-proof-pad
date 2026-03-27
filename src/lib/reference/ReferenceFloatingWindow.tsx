@@ -534,7 +534,11 @@ export function ReferenceFloatingWindow({
           {/* 本文パラグラフ */}
           {data.bodyParagraphs.map((paragraph, i) => (
             <p key={`p-${String(i) satisfies string}`} style={paragraphStyle}>
-              <InlineMarkdown text={paragraph} onNavigate={onNavigate} />
+              <InlineMarkdown
+                text={paragraph}
+                onNavigate={onNavigate}
+                onQuestNavigate={onStartQuest}
+              />
             </p>
           ))}
 
