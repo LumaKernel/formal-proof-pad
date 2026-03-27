@@ -391,13 +391,38 @@ export const WithProofTree: Story = {
         initialNotebookName="Proof Tree Demo"
         onBack={fn()}
         onGoalAchieved={fn()}
+        workspaceTestId="workspace"
       />
     );
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    // ヘッダー確認
     await expect(canvas.getByText("Proof Tree Demo")).toBeInTheDocument();
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+
+    // 3つのノードが表示される
+    await expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    await expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument();
+    await expect(canvas.getByTestId("proof-node-node-3")).toBeInTheDocument();
+
+    // A1ノードの式確認
+    await expect(canvas.getByTestId("proof-node-node-1")).toHaveTextContent(
+      "φ → ψ → φ",
+    );
+
+    // MP結論ノードの式確認（ψ → φ）
+    await expect(canvas.getByTestId("proof-node-node-3")).toHaveTextContent(
+      "ψ → φ",
+    );
+
+    // MP結論ノードが「DERIVED」であることを確認
+    await expect(canvas.getByTestId("proof-node-node-3")).toHaveTextContent(
+      "DERIVED",
+    );
+
+    // ノードをクリックして選択状態にする
+    await userEvent.click(canvas.getByTestId("proof-node-node-3"));
   },
 };
 
