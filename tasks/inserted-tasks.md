@@ -1,5 +1,7 @@
 # 差し込みタスク
 
+- [ ] mdレンダーは https://github.com/hashicorp/next-mdx-remote への置き換えを検討しよう
+    - これを利用すれば、mdのレンダーでやろうとせず、カスタムのコンポーネントを入れて、しかもそれらをrscにするということが可能になる
 - [x] シーケント計算にて 恒等律 (Identity) などで `phi->phi` の公理を追加するだけで、`phi->phi`が達成されてしまう。
   - 根本原因: `goalCheckLogic.ts`でSC/TAB/ND/AT系のスタンドアロンノードチェックがスキップされていた
   - 修正: `doStandaloneCheck`を`inferenceEdges`が渡されれば常に有効化。孤立ノードは推論エッジに参加しない限りゴール達成に使えない
@@ -7,8 +9,8 @@
   - [x] これが成功しないべきというストーリー追加 → SC/TAB/AT各FullFlow+FromHubストーリーを「未達成」テストに更新
   - [ ] これは `phi => phi` から `=> phi->phi` を作るんじゃないの？そもそも模範解答もすべて修正が必要なのではないか
     - → 模範解答は結論→前提方向で構築しており正しい。修正不要。ただし残タスクとして`phi => phi` + `=> phi -> phi` の自明なケースの検討は可能
-- [-] /reference/guide-hilbert-proof-method
+- [x] /reference/guide-hilbert-proof-method
   - [x] `[[ref:axiom-a1|A1]]` みたいなのがそのまま見えてしまっている → bold/italic内のネスト対応で修正済み（renderContentWithInline）
-  - [ ] 他のドキュメントにも同様。強調された用語ら。そもそも、refもコンポーネント形式で書くで統一できるならしよう。 (現在の形式は禁止する)
+  - [x] refもコンポーネント形式で統一 → `<ref:id>text</ref>` / `<cite:key>text</cite>` タグ形式に全104箇所変換。旧`[[ref:...]]`形式廃止
 - [ ] `ラベル pred-01 から pred-06 のクエストでは` ← ドキュメント内でクエストへのこのような言及を見かけるが、これでは分からない
   - 専用の言及コンポーネントなどを作成し、RSCなどとして、クエストへの言及として専用のレンダリングをするのがよいだろう。

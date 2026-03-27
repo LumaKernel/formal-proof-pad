@@ -18393,3 +18393,26 @@
   - bold/italic内で新しいインライン構文を追加する場合は `renderContentWithInline` の正規表現にもパターン追加が必要
   - `[[ref:...]]`と`[[cite:...]]`は`referenceContent.ts`のbody内で広く使用されている。特にbold内のref-linkパターンはguide系エントリで頻出
 ---
+
+## 2026-03-27T03:20Z - [reference] [[ref:]]/[[cite:]]をタグ形式に統一
+- 実装した内容:
+  - `[[ref:id|text]]` → `<ref:id>text</ref>` 形式に変換（58箇所）
+  - `[[cite:key|text]]` → `<cite:key>text</cite>` 形式に変換（137箇所）
+  - `<ref:id />` self-closing形式も追加（表示テキスト=id）
+  - パーサー（parseInlineMarkdown）を新形式に対応
+  - レンダラー（renderContentWithInline）を新形式に対応
+  - 全テスト・ストーリーを新形式に更新
+  - エッジケーステスト追加（閉じタグなし、空コンテンツ）
+- 変更したファイル:
+  - src/lib/reference/referenceUILogic.ts（パーサー更新）
+  - src/lib/reference/InlineMarkdown.tsx（レンダラー更新）
+  - src/lib/reference/referenceContent.ts（全コンテンツ変換）
+  - src/lib/reference/referenceUILogic.test.ts（テスト更新+追加）
+  - src/lib/reference/InlineMarkdown.test.tsx（テスト更新）
+  - src/lib/reference/ReferenceViewerPageView.stories.tsx（ストーリー更新）
+- カバレッジ: Stmts 99.87%, Branch 99.29%, Funcs 90.48%, Lines 99.87%（referenceUILogic.ts 100%）
+- **今後のイテレーションへの学び:**
+  - `<ref id="...">` 形式は文字列リテラルのクォートと衝突する。`<ref:id>` コロン区切り形式なら属性クォート不要
+  - sed一括変換はクォート問題を引き起こしやすい。変換後にコンパイルエラーがないか確認必須
+  - 新タグ形式の閉じタグなしケース（`<ref:id>broken`）はテキストとしてフォールバック。既存`<b>`と同じ設計
+---
