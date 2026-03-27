@@ -110,6 +110,22 @@
 
 ---
 
+## 2026-03-28 - [storybook] PLAY-WS-05 WithProofTreeのplay関数強化
+
+- ベースライン: Stmts 99.82%, Branch 99.16%, Funcs 90.57%, Lines 99.81%
+- **結果: Stmts 99.82%, Branch 99.16%, Funcs 90.58%, Lines 99.81%**（Funcs微増）
+- 実装内容:
+  - `WithProofTree` ストーリーに `workspaceTestId="workspace"` を追加
+  - play関数を強化: 3ノード存在確認→A1式確認→MP結論(ψ→φ/DERIVED)確認→ノードクリック選択
+- 変更ファイル:
+  - src/app/workspace/[id]/WorkspacePageView.stories.tsx
+  - tasks/play-function-enhancement.md（PLAY-WS-05完了マーク）
+- **今後のイテレーションへの学び:**
+  - applyMPAndConnectで作成したMP結論ノードはnode-3、「DERIVED」ラベルと「MP applied」バッジが表示される
+  - ノードクリックでの選択状態確認は `userEvent.click` のみで十分（選択状態のアサーションは不要、UIの反応確認で十分）
+
+---
+
 ## 2026-03-28 - [storybook] PLAY-WS-04 WithGoalのplay関数強化
 
 - ベースライン: Stmts 99.82%, Branch 99.16%, Funcs 90.57%, Lines 99.81%
