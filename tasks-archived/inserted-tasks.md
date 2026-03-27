@@ -353,3 +353,4 @@
   - 検討済み・現状維持。理由: 現パーサーは純粋関数・テスト済み・十分な機能。3600行のコンテンツ移行コスト大。多言語段落対応がMDXと相性悪い。RSCの恩恵薄い（参照UIはインタラクティブでClient Component向き）
 - [x] これは `phi => phi` から `=> phi->phi` を作るんじゃないの？そもそも模範解答もすべて修正が必要なのではないか
   - 調査済み。模範解答は結論→前提方向で構築しており正しい。修正不要
+- [x] const-map を v1.2.0に更新する。バグは解消されているので、return with return typeが適合する場所は置き換える。 → workspaceBridge.ts の scTagToRuleName を makeConstMapWithReturnType<string> に変更

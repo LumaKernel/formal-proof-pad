@@ -18466,3 +18466,18 @@
   - MDX系ライブラリへの移行はコンテンツがTS string配列として格納されている限りメリットが薄い。.mdxファイルベースに移行する場合のみ再検討
 
 ---
+
+## 2026-03-27 - [deps] const-map v1.2.0更新
+
+- ベースライン: Stmts 99.82%, Branch 99.17%, Funcs 90.47%, Lines 99.81%
+- **結果: Stmts 99.82%, Branch 99.17%, Funcs 90.47%, Lines 99.81%**（変動なし）
+- 実装内容:
+  - `@luma/const-map` を ^1.1.0 → ^1.2.0 に更新
+  - `workspaceBridge.ts`: `makeConstMap` → `makeConstMapWithReturnType<string>()` に変更（IDE補完・型安全性向上）
+- 変更ファイル:
+  - package.json, package-lock.json
+  - src/lib/script-runner/workspaceBridge.ts
+- **今後のイテレーションへの学び:**
+  - `makeConstMapWithReturnType<R>()` は v1.2.0 でバグ修正済み。値の型を明示指定でき、IDEの補完が効く
+  - 現在 const-map の使用箇所は workspaceBridge.ts の1箇所のみ。新たな exhaustive map lookup が必要になった場合に活用可能
+---
