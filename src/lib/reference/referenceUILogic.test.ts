@@ -320,10 +320,10 @@ describe("parseInlineMarkdown", () => {
     expect(result).toEqual([{ type: "text", content: "text $$ more" }]);
   });
 
-  // --- リファレンスリンク ([[ref:id]]) ---
+  // --- リファレンスリンク (<ref:id />) ---
 
-  it("リファレンスリンク([[ref:id]])をパースする", () => {
-    const result = parseInlineMarkdown("see [[ref:rule-mp]] for details");
+  it("リファレンスリンク(<ref:id />)をパースする", () => {
+    const result = parseInlineMarkdown("see <ref:rule-mp /> for details");
     expect(result).toEqual([
       { type: "text", content: "see " },
       { type: "ref-link", refId: "rule-mp", content: "rule-mp" },
@@ -331,9 +331,9 @@ describe("parseInlineMarkdown", () => {
     ]);
   });
 
-  it("表示テキスト付きリファレンスリンク([[ref:id|text]])をパースする", () => {
+  it("表示テキスト付きリファレンスリンク(<ref:id>text</ref>)をパースする", () => {
     const result = parseInlineMarkdown(
-      "see [[ref:rule-mp|Modus Ponens]] for details",
+      "see <ref:rule-mp>Modus Ponens</ref> for details",
     );
     expect(result).toEqual([
       { type: "text", content: "see " },
@@ -344,7 +344,7 @@ describe("parseInlineMarkdown", () => {
 
   it("複数のリファレンスリンクをパースする", () => {
     const result = parseInlineMarkdown(
-      "[[ref:axiom-a1|A1]] and [[ref:axiom-a2|A2]]",
+      "<ref:axiom-a1>A1</ref> and <ref:axiom-a2>A2</ref>",
     );
     expect(result).toEqual([
       { type: "ref-link", refId: "axiom-a1", content: "A1" },
@@ -355,7 +355,7 @@ describe("parseInlineMarkdown", () => {
 
   it("リファレンスリンクとHTMLタグの混在をパースする", () => {
     const result = parseInlineMarkdown(
-      "<b>Important:</b> see [[ref:rule-mp|MP]]",
+      "<b>Important:</b> see <ref:rule-mp>MP</ref>",
     );
     expect(result).toEqual([
       { type: "bold", content: "Important:" },
@@ -366,7 +366,7 @@ describe("parseInlineMarkdown", () => {
 
   it("リファレンスリンクと数式の混在をパースする", () => {
     const result = parseInlineMarkdown(
-      "$\\varphi$ is used in [[ref:axiom-a1]]",
+      "$\\varphi$ is used in <ref:axiom-a1 />",
     );
     expect(result).toEqual([
       { type: "math", content: "\\varphi" },
@@ -376,7 +376,7 @@ describe("parseInlineMarkdown", () => {
   });
 
   it("リファレンスリンクのみの文字列をパースする", () => {
-    const result = parseInlineMarkdown("[[ref:guide-what-is-formal-proof]]");
+    const result = parseInlineMarkdown("<ref:guide-what-is-formal-proof />");
     expect(result).toEqual([
       {
         type: "ref-link",
@@ -388,7 +388,7 @@ describe("parseInlineMarkdown", () => {
 
   it("日本語表示テキスト付きリファレンスリンクをパースする", () => {
     const result = parseInlineMarkdown(
-      "[[ref:rule-mp|モーダスポネンス]]を適用する",
+      "<ref:rule-mp>モーダスポネンス</ref>を適用する",
     );
     expect(result).toEqual([
       { type: "ref-link", refId: "rule-mp", content: "モーダスポネンス" },
@@ -396,10 +396,12 @@ describe("parseInlineMarkdown", () => {
     ]);
   });
 
-  // --- 参考文献リンク ([[cite:key]]) ---
+  // --- 参考文献リンク (<cite:key></cite>) ---
 
-  it("参考文献リンク([[cite:key]])をパースする", () => {
-    const result = parseInlineMarkdown("see [[cite:bekki2012]] for details");
+  it("参考文献リンク(<cite:key></cite>)をパースする", () => {
+    const result = parseInlineMarkdown(
+      "see <cite:bekki2012></cite> for details",
+    );
     expect(result).toEqual([
       { type: "text", content: "see " },
       { type: "cite-link", citeKey: "bekki2012", content: "bekki2012" },
@@ -407,9 +409,9 @@ describe("parseInlineMarkdown", () => {
     ]);
   });
 
-  it("表示テキスト付き参考文献リンク([[cite:key|text]])をパースする", () => {
+  it("表示テキスト付き参考文献リンク(<cite:key>text</cite>)をパースする", () => {
     const result = parseInlineMarkdown(
-      "follows [[cite:bekki2012|Bekki, Ch. 8]].",
+      "follows <cite:bekki2012>Bekki, Ch. 8</cite>.",
     );
     expect(result).toEqual([
       { type: "text", content: "follows " },
@@ -424,7 +426,7 @@ describe("parseInlineMarkdown", () => {
 
   it("複数の参考文献リンクをパースする", () => {
     const result = parseInlineMarkdown(
-      "[[cite:bekki2012|Bekki]] and [[cite:gentzen1935|Gentzen, 1935]]",
+      "<cite:bekki2012>Bekki</cite> and <cite:gentzen1935>Gentzen, 1935</cite>",
     );
     expect(result).toEqual([
       { type: "cite-link", citeKey: "bekki2012", content: "Bekki" },
@@ -439,7 +441,7 @@ describe("parseInlineMarkdown", () => {
 
   it("参考文献リンクとリファレンスリンクの混在をパースする", () => {
     const result = parseInlineMarkdown(
-      "[[ref:rule-mp|MP]] in [[cite:bekki2012|Bekki]]",
+      "<ref:rule-mp>MP</ref> in <cite:bekki2012>Bekki</cite>",
     );
     expect(result).toEqual([
       { type: "ref-link", refId: "rule-mp", content: "MP" },
@@ -449,7 +451,7 @@ describe("parseInlineMarkdown", () => {
   });
 
   it("参考文献リンクのみの文字列をパースする", () => {
-    const result = parseInlineMarkdown("[[cite:godel1930]]");
+    const result = parseInlineMarkdown("<cite:godel1930></cite>");
     expect(result).toEqual([
       { type: "cite-link", citeKey: "godel1930", content: "godel1930" },
     ]);

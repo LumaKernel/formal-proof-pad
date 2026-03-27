@@ -238,10 +238,10 @@ export const WithBibliography: Story = {
       ...sampleEntry,
       body: {
         en: [
-          "This follows [[cite:bekki2012|Bekki, Ch. 8]]. See also [[cite:gentzen1935|Gentzen, 1935]].",
+          "This follows <cite:bekki2012>Bekki, Ch. 8</cite>. See also <cite:gentzen1935>Gentzen, 1935</cite>.",
         ],
         ja: [
-          "これは[[cite:bekki2012|Bekki, 第8章]]に基づいています。[[cite:gentzen1935|Gentzen, 1935]]も参照。",
+          "これは<cite:bekki2012>Bekki, 第8章</cite>に基づいています。<cite:gentzen1935>Gentzen, 1935</cite>も参照。",
         ],
       },
       bibliographyKeys: ["bekki2012", "gentzen1935"],
@@ -303,17 +303,17 @@ export const WithListContent: Story = {
   },
 };
 
-/** bold内に[[ref:...]]を含むコンテンツのストーリー（ネストされたインライン要素） */
+/** bold内に<ref:...>を含むコンテンツのストーリー（ネストされたインライン要素） */
 export const WithNestedRefInBold: Story = {
   args: {
     entry: {
       ...sampleEntry,
       body: {
         en: [
-          "Recall the axiom schemas:\n• <b>[[ref:axiom-a1|A1]] (K):</b> $\\varphi \\to (\\psi \\to \\varphi)$ — weakening axiom\n• <b>[[ref:axiom-a2|A2]] (S):</b> distribution axiom",
+          "Recall the axiom schemas:\n• <b><ref:axiom-a1>A1</ref> (K):</b> $\\varphi \\to (\\psi \\to \\varphi)$ — weakening axiom\n• <b><ref:axiom-a2>A2</ref> (S):</b> distribution axiom",
         ],
         ja: [
-          "公理スキーマ：\n• <b>[[ref:axiom-a1|A1]]（K）：</b> $\\varphi \\to (\\psi \\to \\varphi)$ — 弱化公理\n• <b>[[ref:axiom-a2|A2]]（S）：</b> 分配公理",
+          "公理スキーマ：\n• <b><ref:axiom-a1>A1</ref>（K）：</b> $\\varphi \\to (\\psi \\to \\varphi)$ — 弱化公理\n• <b><ref:axiom-a2>A2</ref>（S）：</b> 分配公理",
         ],
       },
     },
@@ -322,8 +322,8 @@ export const WithNestedRefInBold: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const viewer = canvas.getByTestId("ref-viewer");
-    // bold内のref-linkが正しくレンダリングされている（生の[[ref:...]]が表示されていない）
-    expect(viewer.textContent).not.toContain("[[ref:");
+    // bold内のref-linkが正しくレンダリングされている（生の<ref:...>が表示されていない）
+    expect(viewer.textContent).not.toContain("<ref:");
     // ref-linkがstrong内にある
     const refA1 = viewer.querySelector("strong a[data-ref-id='axiom-a1']");
     await expect(refA1).not.toBeNull();

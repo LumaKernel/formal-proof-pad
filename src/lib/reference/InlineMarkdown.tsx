@@ -30,7 +30,7 @@ function renderMathToHtml(tex: string): string {
 }
 
 /**
- * テキスト中の $...$, [[ref:...]], [[cite:...]] をReact要素に変換する。
+ * テキスト中の $...$, <ref:id>, <cite:key> をReact要素に変換する。
  * bold/italic/text要素の内部でインライン要素を使えるようにするためのヘルパー。
  *
  * 変更時は InlineMarkdown.test.tsx も同期すること。
@@ -41,23 +41,24 @@ function renderContentWithInline(
   onNavigate?: (entryId: string) => void,
   onCiteClick?: (citeKey: string) => void,
 ): React.ReactNode {
-  // $...$, [[ref:...]], [[cite:...]] のいずれも含まない場合はテキストそのまま
+  // $...$, <ref:...>, <cite:...> のいずれも含まない場合はテキストそのまま
   if (
     !content.includes("$") &&
-    !content.includes("[[ref:") &&
-    !content.includes("[[cite:")
+    !content.includes("<ref:") &&
+    !content.includes("<cite:")
   ) {
     return content;
   }
-  // $...$, [[ref:id|text]], [[cite:key|text]] で分割（キャプチャグループで区切り文字も保持）
+  // $...$, <ref:id />, <ref:id>text</ref>, <cite:key>text</cite> で分割
   const inlineTokenRegex =
-    /(\$[^$]+?\$|\[\[ref:[a-z0-9-]+(?:\|[^\]]+)?\]\]|\[\[cite:[a-z0-9-]+(?:\|[^\]]+)?\]\])/g;
+    /(\$[^$]+?\$|<ref:[a-z0-9-]+\s*\/>|<ref:[a-z0-9-]+>[^<]*<\/ref>|<cite:[a-z0-9-]+>[^<]*<\/cite>)/g;
   const parts = content.split(inlineTokenRegex);
   if (parts.length === 1) {
     return content;
   }
-  const refLinkRegex = /^\[\[ref:([a-z0-9-]+)(?:\|([^\]]+))?\]\]$/;
-  const citeLinkRegex = /^\[\[cite:([a-z0-9-]+)(?:\|([^\]]+))?\]\]$/;
+  const refSelfCloseRegex = /^<ref:([a-z0-9-]+)\s*\/>$/;
+  const refOpenRegex = /^<ref:([a-z0-9-]+)>([^<]*)<\/ref>$/;
+  const citeRegex = /^<cite:([a-z0-9-]+)>([^<]*)<\/cite>$/;
   return parts.map((part, j) => {
     const pk = `${keyPrefix satisfies string}-i${String(j) satisfies string}`;
     // $...$ 数式
@@ -70,11 +71,11 @@ function renderContentWithInline(
         />
       );
     }
-    // [[ref:id]] or [[ref:id|text]]
-    const refMatch = refLinkRegex.exec(part);
-    if (refMatch !== null) {
-      const refId = refMatch[1];
-      const refContent = refMatch[2] ?? refId;
+    // <ref:id /> self-closing
+    const refSelfMatch = refSelfCloseRegex.exec(part);
+    if (refSelfMatch !== null) {
+      const refId = refSelfMatch[1];
+      const refContent = refId;
       return (
         <a
           key={pk}
@@ -97,11 +98,38 @@ function renderContentWithInline(
         </a>
       );
     }
-    // [[cite:key]] or [[cite:key|text]]
-    const citeMatch = citeLinkRegex.exec(part);
+    // <ref:id>text</ref>
+    const refOpenMatch = refOpenRegex.exec(part);
+    if (refOpenMatch !== null) {
+      const refId = refOpenMatch[1];
+      const refContent = refOpenMatch[2].length > 0 ? refOpenMatch[2] : refId;
+      return (
+        <a
+          key={pk}
+          role="button"
+          tabIndex={0}
+          style={refLinkStyle}
+          data-ref-id={refId}
+          onClick={(e) => {
+            e.preventDefault();
+            onNavigate?.(refId);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onNavigate?.(refId);
+            }
+          }}
+        >
+          {refContent}
+        </a>
+      );
+    }
+    // <cite:key>text</cite>
+    const citeMatch = citeRegex.exec(part);
     if (citeMatch !== null) {
       const citeKey = citeMatch[1];
-      const citeContent = citeMatch[2] ?? citeKey;
+      const citeContent = citeMatch[2].length > 0 ? citeMatch[2] : citeKey;
       return (
         <a
           key={pk}

@@ -113,18 +113,18 @@ describe("InlineMarkdown", () => {
 
   // --- リファレンスリンク ---
 
-  it("[[ref:id]]をリンクとして表示する", () => {
+  it("<ref:id />をリンクとして表示する", () => {
     const { container } = render(
-      <InlineMarkdown text="see [[ref:rule-mp]] here" />,
+      <InlineMarkdown text="see <ref:rule-mp /> here" />,
     );
     const link = container.querySelector("a[data-ref-id='rule-mp']");
     expect(link).not.toBeNull();
     expect(link?.textContent).toBe("rule-mp");
   });
 
-  it("[[ref:id|text]]をカスタムテキストのリンクとして表示する", () => {
+  it("<ref:id>text</ref>をカスタムテキストのリンクとして表示する", () => {
     const { container } = render(
-      <InlineMarkdown text="see [[ref:rule-mp|Modus Ponens]] here" />,
+      <InlineMarkdown text="see <ref:rule-mp>Modus Ponens</ref> here" />,
     );
     const link = container.querySelector("a[data-ref-id='rule-mp']");
     expect(link).not.toBeNull();
@@ -134,7 +134,10 @@ describe("InlineMarkdown", () => {
   it("リファレンスリンクのクリックでonNavigateが呼ばれる", () => {
     const onNavigate = vi.fn();
     const { container } = render(
-      <InlineMarkdown text="see [[ref:rule-mp|MP]]" onNavigate={onNavigate} />,
+      <InlineMarkdown
+        text="see <ref:rule-mp>MP</ref>"
+        onNavigate={onNavigate}
+      />,
     );
     const link = container.querySelector("a[data-ref-id='rule-mp']");
     expect(link).not.toBeNull();
@@ -143,7 +146,9 @@ describe("InlineMarkdown", () => {
   });
 
   it("onNavigateが未指定でもリンクをクリックしてもエラーにならない", () => {
-    const { container } = render(<InlineMarkdown text="[[ref:rule-mp|MP]]" />);
+    const { container } = render(
+      <InlineMarkdown text="<ref:rule-mp>MP</ref>" />,
+    );
     const link = container.querySelector("a[data-ref-id='rule-mp']");
     expect(link).not.toBeNull();
     // onNavigateなしでクリックしてもエラーにならない
@@ -153,7 +158,7 @@ describe("InlineMarkdown", () => {
   it("リファレンスリンクのキーボード操作でonNavigateが呼ばれる", () => {
     const onNavigate = vi.fn();
     const { container } = render(
-      <InlineMarkdown text="[[ref:axiom-a1|A1]]" onNavigate={onNavigate} />,
+      <InlineMarkdown text="<ref:axiom-a1>A1</ref>" onNavigate={onNavigate} />,
     );
     const link = container.querySelector("a[data-ref-id='axiom-a1']");
     expect(link).not.toBeNull();
@@ -163,9 +168,9 @@ describe("InlineMarkdown", () => {
 
   // --- 参考文献リンク ---
 
-  it("[[cite:key|text]]を上付きリンクとして表示する", () => {
+  it("<cite:key>text</cite>を上付きリンクとして表示する", () => {
     const { container } = render(
-      <InlineMarkdown text="follows [[cite:bekki2012|Bekki, Ch. 8]]." />,
+      <InlineMarkdown text="follows <cite:bekki2012>Bekki, Ch. 8</cite>." />,
     );
     const link = container.querySelector("a[data-cite-key='bekki2012']");
     expect(link).not.toBeNull();
@@ -177,7 +182,7 @@ describe("InlineMarkdown", () => {
     const onCiteClick = vi.fn();
     const { container } = render(
       <InlineMarkdown
-        text="[[cite:bekki2012|Bekki]]"
+        text="<cite:bekki2012>Bekki</cite>"
         onCiteClick={onCiteClick}
       />,
     );
@@ -191,7 +196,7 @@ describe("InlineMarkdown", () => {
     const onCiteClick = vi.fn();
     const { container } = render(
       <InlineMarkdown
-        text="[[cite:godel1930|Gödel]]"
+        text="<cite:godel1930>Gödel</cite>"
         onCiteClick={onCiteClick}
       />,
     );
@@ -203,7 +208,7 @@ describe("InlineMarkdown", () => {
 
   it("onCiteClickが未指定でもクリックしてもエラーにならない", () => {
     const { container } = render(
-      <InlineMarkdown text="[[cite:bekki2012|Bekki]]" />,
+      <InlineMarkdown text="<cite:bekki2012>Bekki</cite>" />,
     );
     const link = container.querySelector("a[data-cite-key='bekki2012']");
     expect(link).not.toBeNull();
@@ -212,11 +217,11 @@ describe("InlineMarkdown", () => {
 
   // --- bold/italic内のネストされたインライン要素 ---
 
-  it("<b>内の[[ref:id|text]]をリンクとして表示する", () => {
+  it("<b>内の<ref:id>text</ref>をリンクとして表示する", () => {
     const onNavigate = vi.fn();
     const { container } = render(
       <InlineMarkdown
-        text="<b>[[ref:axiom-a1|A1]] (K):</b> description"
+        text="<b><ref:axiom-a1>A1</ref> (K):</b> description"
         onNavigate={onNavigate}
       />,
     );
@@ -232,11 +237,11 @@ describe("InlineMarkdown", () => {
     expect(onNavigate).toHaveBeenCalledWith("axiom-a1");
   });
 
-  it("<i>内の[[ref:id|text]]をリンクとして表示する", () => {
+  it("<i>内の<ref:id>text</ref>をリンクとして表示する", () => {
     const onNavigate = vi.fn();
     const { container } = render(
       <InlineMarkdown
-        text="<i>see [[ref:rule-mp|Modus Ponens]]</i>"
+        text="<i>see <ref:rule-mp>Modus Ponens</ref></i>"
         onNavigate={onNavigate}
       />,
     );
@@ -249,11 +254,11 @@ describe("InlineMarkdown", () => {
     expect(onNavigate).toHaveBeenCalledWith("rule-mp");
   });
 
-  it("<b>内の[[cite:key|text]]を参考文献リンクとして表示する", () => {
+  it("<b>内の<cite:key>text</cite>を参考文献リンクとして表示する", () => {
     const onCiteClick = vi.fn();
     const { container } = render(
       <InlineMarkdown
-        text="<b>Reference [[cite:bekki2012|Bekki, Ch. 8]]</b>"
+        text="<b>Reference <cite:bekki2012>Bekki, Ch. 8</cite></b>"
         onCiteClick={onCiteClick}
       />,
     );
@@ -266,9 +271,9 @@ describe("InlineMarkdown", () => {
     expect(onCiteClick).toHaveBeenCalledWith("bekki2012");
   });
 
-  it("<b>内の[[ref:id]]（テキスト省略）をidで表示する", () => {
+  it("<b>内の<ref:id />（テキスト省略）をidで表示する", () => {
     const { container } = render(
-      <InlineMarkdown text="<b>see [[ref:axiom-a2]]</b>" />,
+      <InlineMarkdown text="<b>see <ref:axiom-a2 /></b>" />,
     );
     const strong = container.querySelector("strong");
     expect(strong).not.toBeNull();
@@ -281,7 +286,7 @@ describe("InlineMarkdown", () => {
     const onNavigate = vi.fn();
     const { container } = render(
       <InlineMarkdown
-        text="<b>[[ref:axiom-a1|A1]]:</b> $\\varphi \\to (\\psi \\to \\varphi)$"
+        text="<b><ref:axiom-a1>A1</ref>:</b> $\\varphi \\to (\\psi \\to \\varphi)$"
         onNavigate={onNavigate}
       />,
     );
@@ -300,7 +305,7 @@ describe("InlineMarkdown", () => {
     const onNavigate = vi.fn();
     const { container } = render(
       <InlineMarkdown
-        text="<b>[[ref:axiom-a1|A1]]</b>"
+        text="<b><ref:axiom-a1>A1</ref></b>"
         onNavigate={onNavigate}
       />,
     );
@@ -314,7 +319,7 @@ describe("InlineMarkdown", () => {
     const onCiteClick = vi.fn();
     const { container } = render(
       <InlineMarkdown
-        text="<b>[[cite:bekki2012|Bekki]]</b>"
+        text="<b><cite:bekki2012>Bekki</cite></b>"
         onCiteClick={onCiteClick}
       />,
     );

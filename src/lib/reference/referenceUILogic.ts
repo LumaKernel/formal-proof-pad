@@ -85,42 +85,70 @@ function parseSubscriptsInText(content: string): readonly InlineElement[] {
 
 /**
  * インラインHTMLタグおよびインライン数式をパースする。
- * <b>bold</b>, <i>italic</i>, <code>code</code>, $math$, _subscript をサポート。
+ * <b>, <i>, <code>, <ref:id>, <cite:key>, $math$, _subscript をサポート。
  * ネストはサポートしない（フラットなインライン要素のみ）。
+ * bold/italic内のref/cite/mathはレンダリング層（renderContentWithInline）で処理。
  *
  * 変更時は referenceUILogic.test.ts（parseInlineMarkdown）も同期すること。
  */
 export function parseInlineMarkdown(text: string): readonly InlineElement[] {
   const rawElements: InlineElement[] = [];
-  // HTMLタグ、$...$、[[ref:id]] / [[ref:id|text]]、[[cite:key]] / [[cite:key|text]] にマッチする正規表現
-  // $...$ は非貪欲マッチで、$ の直後が空白でないものにマッチ
-  // [[ref:id]] は id のみ（タイトルは呼び出し側で解決）
-  // [[ref:id|text]] は表示テキスト指定あり
-  // [[cite:key]] は参考文献リンク（key のみ or 表示テキスト指定）
+  // HTMLタグ、$...$、<ref:id />、<ref:id>text</ref>、<cite:key>text</cite> にマッチ
+  // $...$ は非貪欲マッチ
+  // <ref:id /> は self-closing（表示テキスト=id）
+  // <ref:id>text</ref> はテキスト指定あり
+  // <cite:key>text</cite> は参考文献リンク
   const tokenRegex =
-    /<(b|i|code)>|\$([^$]+?)\$|\[\[ref:([a-z0-9-]+)(?:\|([^\]]+))?\]\]|\[\[cite:([a-z0-9-]+)(?:\|([^\]]+))?\]\]/g;
+    /<(b|i|code)>|\$([^$]+?)\$|<ref:([a-z0-9-]+)\s*\/>|<ref:([a-z0-9-]+)>|<cite:([a-z0-9-]+)>/g;
   let lastIndex = 0;
 
   let match: RegExpExecArray | null;
   while ((match = tokenRegex.exec(text)) !== null) {
-    // [[cite:key]] or [[cite:key|text]] 参考文献リンクマッチ
+    // <cite:key>text</cite> 参考文献リンクマッチ
     if (match[5] !== undefined) {
+      const closeTag = "</cite>";
+      const closeIndex = text.indexOf(closeTag, match.index + match[0].length);
+      if (closeIndex === -1) continue;
       if (match.index > lastIndex) {
         rawElements.push({
           type: "text",
           content: text.slice(lastIndex, match.index),
         });
       }
+      const content = text.slice(match.index + match[0].length, closeIndex);
       rawElements.push({
         type: "cite-link",
         citeKey: match[5],
-        content: match[6] ?? match[5],
+        content: content.length > 0 ? content : match[5],
       });
-      lastIndex = match.index + match[0].length;
+      lastIndex = closeIndex + closeTag.length;
+      tokenRegex.lastIndex = lastIndex;
       continue;
     }
 
-    // [[ref:id]] or [[ref:id|text]] リファレンスリンクマッチ
+    // <ref:id>text</ref> リファレンスリンク（開きタグ）マッチ
+    if (match[4] !== undefined) {
+      const closeTag = "</ref>";
+      const closeIndex = text.indexOf(closeTag, match.index + match[0].length);
+      if (closeIndex === -1) continue;
+      if (match.index > lastIndex) {
+        rawElements.push({
+          type: "text",
+          content: text.slice(lastIndex, match.index),
+        });
+      }
+      const content = text.slice(match.index + match[0].length, closeIndex);
+      rawElements.push({
+        type: "ref-link",
+        refId: match[4],
+        content: content.length > 0 ? content : match[4],
+      });
+      lastIndex = closeIndex + closeTag.length;
+      tokenRegex.lastIndex = lastIndex;
+      continue;
+    }
+
+    // <ref:id /> self-closing リファレンスリンク
     if (match[3] !== undefined) {
       if (match.index > lastIndex) {
         rawElements.push({
@@ -131,7 +159,7 @@ export function parseInlineMarkdown(text: string): readonly InlineElement[] {
       rawElements.push({
         type: "ref-link",
         refId: match[3],
-        content: match[4] ?? match[3],
+        content: match[3],
       });
       lastIndex = match.index + match[0].length;
       continue;
@@ -139,7 +167,6 @@ export function parseInlineMarkdown(text: string): readonly InlineElement[] {
 
     // $...$ 数式マッチ
     if (match[2] !== undefined) {
-      // $の前のテキスト
       if (match.index > lastIndex) {
         rawElements.push({
           type: "text",
@@ -151,17 +178,15 @@ export function parseInlineMarkdown(text: string): readonly InlineElement[] {
       continue;
     }
 
-    // HTMLタグマッチ
+    // HTMLタグマッチ (b, i, code)
     const tagName = match[1];
     const closeTag = `</${tagName satisfies string}>`;
     const closeIndex = text.indexOf(closeTag, match.index + match[0].length);
 
     if (closeIndex === -1) {
-      // 閉じタグがない場合はテキストとして扱う
       continue;
     }
 
-    // 開きタグ前のテキスト
     if (match.index > lastIndex) {
       rawElements.push({
         type: "text",
