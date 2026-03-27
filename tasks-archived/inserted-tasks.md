@@ -337,3 +337,15 @@
   - JS-Interpreter は ES5 のみ対応。Effect.ts の直接ロードは不可能
   - 推奨: ブリッジ関数拡充（Option系等）＋ ES5ユーティリティプリロード（eitherMap等）
   - 長期: サンドボックスエンジンをQuickJS等に置き換えれば直接ロード可能
+- [x] シーケント計算にて 恒等律 (Identity) などで `phi->phi` の公理を追加するだけで、`phi->phi`が達成されてしまう。
+  - 根本原因: `goalCheckLogic.ts`でSC/TAB/ND/AT系のスタンドアロンノードチェックがスキップされていた
+  - 修正: `doStandaloneCheck`を`inferenceEdges`が渡されれば常に有効化。孤立ノードは推論エッジに参加しない限りゴール達成に使えない
+  - [x] 構造をどう持つか比較検討 → 案A（推論エッジ接続必須）を採用。将来的に案B（証明木完全性チェック）に拡張可能
+  - [x] これが成功しないべきというストーリー追加 → SC/TAB/AT各FullFlow+FromHubストーリーを「未達成」テストに更新
+- [x] /reference/guide-hilbert-proof-method
+  - [x] `[[ref:axiom-a1|A1]]` みたいなのがそのまま見えてしまっている → bold/italic内のネスト対応で修正済み（renderContentWithInline）
+  - [x] refもコンポーネント形式で統一 → `<ref:id>text</ref>` / `<cite:key>text</cite>` タグ形式に全104箇所変換。旧`[[ref:...]]`形式廃止
+- [x] `ラベル pred-01 から pred-06 のクエストでは` ← ドキュメント内でクエストへのこのような言及を見かけるが、これでは分からない
+  - `<quest:id>` / `<quest:id>text</quest>` タグ形式でInlineMarkdown内にクエストリンクを追加。ref/citeと同パターン
+  - `onQuestNavigate` コールバックでクエスト画面へのナビゲーションが可能
+  - referenceContent.ts の既存 `<code>pred-01</code>` / 平文 `prop-01` を `<quest:>` タグに変換済み
