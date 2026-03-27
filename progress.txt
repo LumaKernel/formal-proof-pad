@@ -18446,3 +18446,23 @@
   - sed一括変換はクォート問題を引き起こしやすい。変換後にコンパイルエラーがないか確認必須
   - 新タグ形式の閉じタグなしケース（`<ref:id>broken`）はテキストとしてフォールバック。既存`<b>`と同じ設計
 ---
+
+## 2026-03-27 - [inserted-tasks] next-mdx-remote 検討 + phi=>phi 模範解答確認
+
+- ベースライン: Stmts 99.82%, Branch 99.17%, Funcs 90.45%, Lines 99.81%
+- **結果: 変更なし（調査タスクのみ）**
+- 実施内容:
+  - next-mdx-remote への置き換え検討: 現状維持の結論
+    - 現パーサーは純粋関数・テスト済み・十分な機能
+    - 3600行のコンテンツ移行コストが大きい
+    - 多言語段落対応(`{ en: string[], ja: string[] }`)がMDXと相性悪い
+    - RSCの恩恵薄い（参照UIはインタラクティブでClient Component向き）
+  - `phi => phi` 模範解答: 既に調査済み・修正不要を確認してクローズ
+- 変更ファイル:
+  - tasks/inserted-tasks.md（2タスク完了→クリア）
+  - tasks-archived/inserted-tasks.md（アーカイブ追記）
+- **今後のイテレーションへの学び:**
+  - 現在のmdレンダリングは自作regex (referenceUILogic.ts) + React (InlineMarkdown.tsx, BodyContent.tsx) の3層構成。カスタムタグ追加はregex+parser+renderer+testの4ステップで十分簡潔
+  - MDX系ライブラリへの移行はコンテンツがTS string配列として格納されている限りメリットが薄い。.mdxファイルベースに移行する場合のみ再検討
+
+---

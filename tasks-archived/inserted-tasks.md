@@ -349,3 +349,7 @@
   - `<quest:id>` / `<quest:id>text</quest>` タグ形式でInlineMarkdown内にクエストリンクを追加。ref/citeと同パターン
   - `onQuestNavigate` コールバックでクエスト画面へのナビゲーションが可能
   - referenceContent.ts の既存 `<code>pred-01</code>` / 平文 `prop-01` を `<quest:>` タグに変換済み
+- [x] mdレンダーは https://github.com/hashicorp/next-mdx-remote への置き換えを検討しよう
+  - 検討済み・現状維持。理由: 現パーサーは純粋関数・テスト済み・十分な機能。3600行のコンテンツ移行コスト大。多言語段落対応がMDXと相性悪い。RSCの恩恵薄い（参照UIはインタラクティブでClient Component向き）
+- [x] これは `phi => phi` から `=> phi->phi` を作るんじゃないの？そもそも模範解答もすべて修正が必要なのではないか
+  - 調査済み。模範解答は結論→前提方向で構築しており正しい。修正不要
