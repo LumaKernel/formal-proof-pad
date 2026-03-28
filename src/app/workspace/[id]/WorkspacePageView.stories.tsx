@@ -1718,12 +1718,34 @@ export const QuestCompletePeano01ModelAnswer: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+
+    // --- 完了バナー確認 ---
+    await expect(
+      canvas.getByTestId("workspace-proof-complete-banner"),
+    ).toBeInTheDocument();
+
+    // 体系バッジ
     await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
       "Peano Arithmetic",
     );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toHaveTextContent("1 / 1");
     await expect(goalPanel).toHaveTextContent("Proved!");
+
+    // --- ノード確認（1ノード: PA1 0≠後者） ---
+    await expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+
+    // --- エッジなし（1ノードのみの証明） ---
+
+    // --- 公理パレットから PA2 (Sの単射性) を追加するインタラクション ---
+    const pa2Button = canvas.getByRole("button", { name: /PA2/ });
+    await expect(pa2Button).toBeInTheDocument();
+    await userEvent.click(pa2Button);
+
+    // 新しいノードが追加されたことを確認
+    await waitFor(() =>
+      expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument(),
+    );
   },
 };
 
