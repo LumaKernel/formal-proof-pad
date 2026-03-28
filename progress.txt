@@ -110,6 +110,25 @@
 
 ---
 
+## 2026-03-29 - [proof-pad] PLAY-PP-01 ScAutoProofDemoのplay関数強化
+
+- ベースライン: Stmts 99.82%, Branch 99.16%, Funcs 90.58%, Lines 99.81%
+- **結果: Stmts 99.82%, Branch 99.16%, Funcs 90.58%, Lines 99.81%**（変動なし）
+- 実装内容:
+  - ScAutoProofDemo AutoProofIdentityストーリーのplay関数を強化
+  - 完了バナー確認、SCルールパレット確認、ゴールパネル(1/1 Proved!)確認
+  - Add Sequentクリック→パレット存在確認、Identity規則クリック（規則選択モード）
+- 変更ファイル:
+  - src/lib/proof-pad/ScAutoProofDemo.stories.tsx
+  - tasks/play-function-enhancement.md（PLAY-PP-01完了マーク）
+- スクリーンショット: .screenshots/play-pp-01-after.png
+- **今後のイテレーションへの学び:**
+  - proof-padデモストーリーはProofWorkspace直接使用（WorkspacePageViewなし）。zoom-fit-buttonは存在するがculling回避に不十分な場合あり
+  - SCモデルアンサーワークスペースではノードがビューポート外に配置されcullingされる。パレット操作・ゴールパネル確認のインタラクションが安定した代替手段
+  - workspace-goal-panelはProofWorkspace内に存在し、testId="${testId}-goal-panel"でアクセス可能
+
+---
+
 ## 2026-03-29 - [storybook] PLAY-WS-15 QuestCompleteProp42ModelAnswerのplay関数強化
 
 - ベースライン: Stmts 99.82%, Branch 99.16%, Funcs 90.57%, Lines 99.81%
