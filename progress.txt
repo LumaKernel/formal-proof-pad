@@ -18695,3 +18695,18 @@
   - `allowSequentText=true` でFormulaEditorが `⇒` 含むテキストのparse error時も離脱を許可
   - `userEvent.type` はUnicode文字 `⇒` を問題なく入力できる
 ---
+
+## 2026-03-29 - PLAY-WS-11/12/13 クエスト完了ストーリーplay関数強化
+- 実装した内容: QuestCompleteTab01/Sc01/At01の3ストーリーにインタラクションテスト追加
+  - Tab01: 体系バッジ、ゴールパネル(1/1, Proved!)、完了バナー、タブロー証明木パネル
+  - Sc01: 体系バッジ、ゴールパネル(1/1, Proved!)、完了バナー、SCルールパレット
+  - At01: 体系バッジ、ゴールパネル、完了バナー(waitForで非同期対応)、AT証明木パネル
+- 変更したファイル: WorkspacePageView.stories.tsx, tasks/play-function-enhancement.md
+- スクリーンショット: .screenshots/quest-complete-tab01-play-2.png, .screenshots/quest-complete-sc01-play.png, .screenshots/quest-complete-at01-pass.png
+- **今後のイテレーションへの学び:**
+  - CSS text-transform: uppercase はDOMテキストに影響しない。getByTextはDOMテキストを参照する。testIdベースのクエリを使うこと
+  - ScProofTreePanelはcut elimination stepper内でのみ表示。SC体系の確認にはsc-rule-paletteを使う
+  - AT模範解答のgoalCheckResultとgoalPanelDataに不整合がある（バナーは表示されるがゴールパネルは0/1）— 別途修正が必要
+  - Storybook HMRで前のストーリーの状態がリークすることがある。テスト結果の確認はフルリロード後に行うこと
+  - waitForを使えば非同期ゴールチェックの完了を待てる
+---
