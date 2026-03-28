@@ -110,6 +110,24 @@
 
 ---
 
+## 2026-03-29 - [storybook] PLAY-WS-15 QuestCompleteProp42ModelAnswerのplay関数強化
+
+- ベースライン: Stmts 99.82%, Branch 99.16%, Funcs 90.57%, Lines 99.81%
+- **結果: Stmts 99.82%, Branch 99.16%, Funcs 90.57%, Lines 99.81%**（変動なし）
+- 実装内容:
+  - prop-42(A2の前方適用): 4ノード＋エッジバッジ3つの完全確認
+  - 100%ズームでrole-badge/axiom-nameも確認可能（culling問題なし）
+  - エッジバッジクリック→コンテキストメニュー表示確認
+- 変更ファイル:
+  - src/app/workspace/[id]/WorkspacePageView.stories.tsx
+  - tasks/play-function-enhancement.md（PLAY-WS-15完了マーク）
+- スクリーンショット: .screenshots/play-ws-15-after.png
+- **今後のイテレーションへの学び:**
+  - ノード数が少ない模範解答(prop-42: 4ノード)は100%ズームでcullingされず、role-badge等の詳細確認が可能
+  - play関数からのuserEvent.click()はCanvasItem（ノード）のonClickでは選択バナーが表示されない。エッジバッジクリックのインタラクションが安定した代替手段
+
+---
+
 ## 2026-03-29 - [storybook] PLAY-WS-14 QuestCompleteProp01ModelAnswerのplay関数強化
 
 - ベースライン: Stmts 99.82%, Branch 99.16%, Funcs 90.57%, Lines 99.81%
