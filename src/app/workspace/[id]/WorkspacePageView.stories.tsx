@@ -1590,12 +1590,40 @@ export const QuestCompleteEq01ModelAnswer: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace-page")).toBeInTheDocument();
+
+    // --- 完了バナー確認 ---
+    await expect(
+      canvas.getByTestId("workspace-proof-complete-banner"),
+    ).toBeInTheDocument();
+
+    // 体系バッジ
     await expect(canvas.getByTestId("workspace-system")).toHaveTextContent(
       "Predicate Logic with Equality",
     );
     const goalPanel = canvas.getByTestId("workspace-goal-panel");
     await expect(goalPanel).toHaveTextContent("1 / 1");
     await expect(goalPanel).toHaveTextContent("Proved!");
+
+    // --- ノード確認（1ノード: E1 Refl、100%ズームで詳細表示） ---
+    await expect(canvas.getByTestId("proof-node-node-1")).toBeInTheDocument();
+    await expect(
+      canvas.getByTestId("proof-node-node-1-axiom-name"),
+    ).toHaveTextContent("E1 (Refl)");
+    await expect(
+      canvas.getByTestId("proof-node-node-1-role-badge"),
+    ).toHaveTextContent("AXIOM");
+
+    // --- エッジなし（1ノードのみの証明） ---
+
+    // --- 公理パレットから E2 (Sym) を追加するインタラクション ---
+    const e2Button = canvas.getByRole("button", { name: /E2 \(Sym\)/ });
+    await expect(e2Button).toBeInTheDocument();
+    await userEvent.click(e2Button);
+
+    // 新しいノードが追加されたことを確認
+    await waitFor(() =>
+      expect(canvas.getByTestId("proof-node-node-2")).toBeInTheDocument(),
+    );
   },
 };
 
