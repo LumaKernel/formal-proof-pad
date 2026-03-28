@@ -9,7 +9,7 @@
 
 import { useState, useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, within } from "storybook/test";
+import { expect, within, userEvent } from "storybook/test";
 import { ProofWorkspace } from "./ProofWorkspace";
 import type { WorkspaceState } from "./workspaceState";
 import {
@@ -94,6 +94,26 @@ export const SmallProof: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
     await assertNoParseErrors(canvasElement);
+
+    // 証明完了バナー
+    await expect(
+      canvas.getByTestId("workspace-proof-complete-banner"),
+    ).toBeInTheDocument();
+
+    // ゴールパネルが「Proved!」状態
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+
+    // 公理パレットが表示される
+    await expect(
+      canvas.getByTestId("workspace-axiom-palette"),
+    ).toBeInTheDocument();
+
+    // A1公理をクリック→ノード追加
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A1"),
+    );
   },
 };
 
@@ -104,6 +124,26 @@ export const MediumProof: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
     await assertNoParseErrors(canvasElement);
+
+    // 証明完了バナー
+    await expect(
+      canvas.getByTestId("workspace-proof-complete-banner"),
+    ).toBeInTheDocument();
+
+    // ゴールパネルが「Proved!」状態
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+
+    // 公理パレットが表示される
+    await expect(
+      canvas.getByTestId("workspace-axiom-palette"),
+    ).toBeInTheDocument();
+
+    // A2公理をクリック→ノード追加
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A2"),
+    );
   },
 };
 
@@ -114,5 +154,25 @@ export const LargeProof: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
     await assertNoParseErrors(canvasElement);
+
+    // 証明完了バナー
+    await expect(
+      canvas.getByTestId("workspace-proof-complete-banner"),
+    ).toBeInTheDocument();
+
+    // ゴールパネルが「Proved!」状態
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+
+    // 公理パレットが表示される
+    await expect(
+      canvas.getByTestId("workspace-axiom-palette"),
+    ).toBeInTheDocument();
+
+    // A1公理をクリック→ノード追加
+    await userEvent.click(
+      canvas.getByTestId("workspace-axiom-palette-item-A1"),
+    );
   },
 };
