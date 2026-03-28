@@ -8,7 +8,7 @@
 
 import { useState, useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, within } from "storybook/test";
+import { expect, within, userEvent } from "storybook/test";
 import { ProofWorkspace } from "./ProofWorkspace";
 import type { WorkspaceState } from "./workspaceState";
 import {
@@ -91,5 +91,35 @@ export const AutoProofIdentity: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByTestId("workspace")).toBeInTheDocument();
     await assertNoParseErrors(canvasElement);
+
+    // 証明完了バナーが表示される
+    await expect(
+      canvas.getByTestId("workspace-proof-complete-banner"),
+    ).toBeInTheDocument();
+
+    // SCルールパレットが表示される
+    const palette = canvas.getByTestId("workspace-sc-rule-palette");
+    await expect(palette).toBeInTheDocument();
+
+    // ゴールパネルが「Proved!」状態
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "1 / 1",
+    );
+    await expect(canvas.getByTestId("workspace-goal-panel")).toHaveTextContent(
+      "Proved!",
+    );
+
+    // SCルールパレットから「+ Add Sequent」をクリック→新規ノード追加
+    await userEvent.click(
+      canvas.getByTestId("workspace-sc-rule-palette-add-sequent"),
+    );
+
+    // ゴールパネルが更新される（ノード追加後もパレットは存在）
+    await expect(palette).toBeInTheDocument();
+
+    // identity規則をクリック（規則選択モードに入る）
+    await userEvent.click(
+      canvas.getByTestId("workspace-sc-rule-palette-rule-identity"),
+    );
   },
 };
