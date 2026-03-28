@@ -18788,3 +18788,12 @@
 - **今後のイテレーションへの学び:**
   - WS-16/17/18は全て同パターン（1ノード・エッジなし）で効率的に完了。モデルアンサーストーリーWS-14〜18全完了
 ---
+
+## 2026-03-29 - PLAY-WS-24 警告バナー閉じるボタン追加
+- WorkspacePageView.tsx: questVersionWarning バナーに dismiss ボタン追加（ローカルstate管理）
+- WorkspacePageView.stories.tsx: WithQuestVersionWarning play関数をインタラクションテストに強化（閉じるボタンクリック→バナー非表示確認）
+- カバレッジ変化なし: Stmts 99.82% | Branch 99.16% | Funcs 90.58% | Lines 99.81%
+- **今後のイテレーションへの学び:**
+  - 警告バナーのようなシンプルなUIでも dismiss 機能を追加することで play 関数のインタラクションテストが可能になる
+  - Prettier フォーマットエラーは CI で検出されるため、ローカルで `npx prettier --write` してからコミットすると効率的
+---
